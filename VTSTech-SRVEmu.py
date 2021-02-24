@@ -1,12 +1,13 @@
-#BACKUP-2021-02-23 12:45:12 PM
-import socket, sys, codecs, time, os, string, random, time, hashlib, array, math
+#BACKUP-2021-02-24 5:02:28 AM
+import codecs, os, sys, socket, struct, select, time, string, random, hashlib, array, math
+from pythonping import ping
 from _thread import *
 
 GameSocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.51"
+BUILD="0.1-ALPHA R0.52"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
@@ -45,7 +46,7 @@ clientPASS=''
 clientUSER=''
 
 pad = codecs.decode('00000000000000','hex_codec')
-pad2 = codecs.decode('000000','hex_codec')
+pad2 = codecs.decode('00000038','hex_codec')
 oddByte = codecs.decode('00','hex_codec')
 x0A = codecs.decode('0A','hex_codec')
 x00 = codecs.decode('00','hex_codec')
@@ -138,6 +139,20 @@ def parse_data(data):
 		elif (tmp[x].decode('latin1')[:9] == "PERSONAS"):
 			clientPERS = tmp[x].decode('latin1')[10:]				
 
+#Thx No23
+def create_packet(cmd, subcmd, payload):
+    payload += '\0'
+    size = len(payload)
+    return struct.pack(">4s4sL%ds" % size, bytearray(cmd, 'ascii'), bytearray(subcmd, 'ascii'), size + 12, bytearray(payload, 'ascii'))
+#Thx No23
+def cmd_news(payload):
+    p = 'TOSAC_URL=http://www.vts-tech.org/test.txt\n'
+    p+= 'NEWS_URL=http://www.vts-tech.org/test.txt\n'
+    p+= 'BUDDY_SERVER=192.168.0.228\n'
+    p+= 'BUDDY_PORT=7777\n'
+    packet = create_packet('news', 'new7', p)
+    return packet
+        
 def reply_skey():
 	oddByte = codecs.decode('99','hex_codec')
 	replyTmp=b'skey'+pad
@@ -145,9 +160,9 @@ def reply_skey():
 	#skeyStr="PLATFORM=PS2"
 	#reply=skeyStr.encode('ascii')+x0A
 	skeyStr="SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7"
-	reply=skeyStr.encode('ascii')+codecs.decode('0A6E6577736E6577300000000D00','hex_codec') #repeat me 0A6E6577736E6577370000000d00
-	#oddByte=len(codecs.decode(replyTmp+reply,'latin1'))+1
-	oddByte=51
+	reply=skeyStr.encode('ascii')+codecs.decode('0A00','hex_codec') #repeat me 0A6E6577736E6577370000000d00
+	oddByte=len(codecs.decode(replyTmp+reply,'latin1'))+1
+	#oddByte=51
 	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
 	reply=replyTmp+oddByte+reply
 	SKEYSENT=1
@@ -272,17 +287,17 @@ def reply_news():
 	global reply
 	replyTmp=b'newsnew7'+pad2
 	newsStr="BUDDY_SERVER=192.168.0.228"
-	reply=x00+newsStr.encode('ascii')+x0A   
+	reply=newsStr.encode('ascii')+x0A   
 	newsStr="BUDDY_PORT=7777"
 	reply+=newsStr.encode('ascii')+x0A        	
 	#newsStr="TOSAC_URL=http://ps2lobby02.beta.ea.com/test.txt"
 	#reply+=newsStr.encode('ascii')+x0A
 	#newsStr="NEWS_URL=http://www.vts-tech.org/test.txt"
-	reply+=codecs.decode('0A00','hex_codec')
+	reply+=codecs.decode('00','hex_codec')
 	oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
 	#print("DEBUG: "+str(oddByte))
 	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-	reply=replyTmp+oddByte+reply
+	reply=replyTmp+reply
 	#reply = codecs.decode('6e6577736e6577370000005e436f6f6c206e6577732068657265210a506c656173652c206d6f64696679206e6577732e747874206f6e20746865207365727665720a0a2f5c5f2f5c0a283d27205f2720290a282c20282229202822290a00','hex_codec') #news reply
 	print("Debug: news sent")	
 	return reply
@@ -330,13 +345,13 @@ def reply_who():
 	return reply
 	
 def reply_ping(data):
-	global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent
+	global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad
 	print("Ping Recv: "+str(ping_cnt)+" Ping Sent: "+str(ping_sent))
 	#reply = codecs.decode('7e706e67000000','hex_codec')+codecs.decode('{0:x}'.format(int(ping_cnt+16)),'hex_codec')+codecs.decode('0000000C','hex_codec')
 	oddByte = codecs.decode('00','hex_codec')          
 	replyTmp = b'~png'+pad
-	reply = b'REF=2021.02.23 12:57:16\n'
-	reply += b'TIME=20\n'+x00
+	reply = b'REF=2021.2.23-12:57:16\n'
+	reply += b'TIME=2\n'+x00
 	oddByte=len(codecs.decode(reply,'latin1'))+12
 	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
 	reply=replyTmp+oddByte+reply
@@ -384,16 +399,16 @@ def build_reply(data):
 	       	maskStr="MASK="+str(random.randint(1000,9999))+"f3f70ecb1757cd7001b9a7a"+str(random.randint(1000,9999))	        
 	       	replyTmp=msgType+pad
 	       	reply=SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
-	       	reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x00
+	       	reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00
 	       	oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
 	       	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
 	       	reply=replyTmp+oddByte+SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
-	       	reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x00
-        	time.sleep(1)
+	       	reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00      	
+        	time.sleep(1)        	
         	print("REPLY: "+reply.decode('latin1'))
         if (msgType == b'addr'):
         	time.sleep(1)
-        	reply = reply_skey()
+        	#reply = reply_skey()
         if (msgType == b'skey'):
         	#oddByte hex 28
         	tmp = data.split(codecs.decode('0A','hex_codec'))
@@ -513,7 +528,7 @@ def build_reply(data):
         	print("REPLY: "+reply.decode('latin1'))
         	time.sleep(1)
         if (msgType == b'news'):
-        	reply = reply_news()
+        	reply = cmd_news()
         	print("REPLY: "+reply.decode('latin1'))
         	time.sleep(1)
         if (msgType == b'gsea'):
@@ -530,31 +545,28 @@ def build_reply(data):
         	ping_start=time.time()
         	curr_time=time.time()
         	#png start x16(22)
-        	time.sleep(2)
        		if (ping_cnt>=1):
        			ping_cnt+=1
        		else:
        			ping_cnt=1       		
+       		time.sleep(2)
        		reply = reply_ping(data)     		
-       		time.sleep(0.2)
        		print("REPLY: "+reply.decode('latin1'))	
        	return reply
     
 def threaded_client(connection):
     #connection.send(str.encode('Welcome to the Server\n'))
-    global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent
-    connection.settimeout(120)
+    global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, icmp
+    connection.settimeout(240)
     while True:        
         curr_time=time.time()
-       
         tmp = connection.recv(4)
         msgType = tmp[:4]
         print("RECV: "+str(msgType))
-
         if (msgType == b'NAME'):
         	msgSize = 3
         	connection.recv(int(msgSize))
-        	reply = reply_news()
+        	reply = cmd_news('NAME=7')
         	#connection.sendall((reply))
         elif (msgType == b'TIME'):
         	msgSize = 4
@@ -570,6 +582,7 @@ def threaded_client(connection):
         connection.sendall((reply))
 
         if (msgType == b'uatr'):
+        	time.sleep(10)
         	reply = reply_ping(data)
         	connection.sendall((reply))        	
 
@@ -582,8 +595,8 @@ def threaded_client(connection):
             print("! end of data ... let's wait for some...")
             for x in range(0,60):
             	time.sleep(2)
-    connection.close()
-	
+    #connection.close()
+   	
 while True:
 		CLIENT, ADDRESS = GameSocket.accept()
 		print('Player Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
@@ -595,7 +608,6 @@ while True:
 		start_new_thread(threaded_client, (CLIENT, ))
 		THREADCOUNT += 1
 		print('Thread Number: ' + str(THREADCOUNT))    
-    
 GameSocket.close()
 LISTENERSocket.close()
 LISTENERSocket.listen(1)
