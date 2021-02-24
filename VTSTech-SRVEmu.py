@@ -1,13 +1,14 @@
-#BACKUP-2021-02-24 5:02:28 AM
+#BACKUP-2021-02-24 6:14:51 AM
 import codecs, os, sys, socket, struct, select, time, string, random, hashlib, array, math
 from pythonping import ping
 from _thread import *
 
 GameSocket = socket.socket()
+BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.52"
+BUILD="0.1-ALPHA R0.53"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
@@ -17,10 +18,12 @@ PORT_BO3U_PS2 = 21801	#ps2burnout05.ea.com:21801
 PORT_BO3R_PS2 = 21840 #ps2lobby02.beta.ea.com:21840
 PORT_BOP_PS3 = 21870  #ps3burnout08.ea.com:21870
 LISTENER = 10901
+BUDDY_PORT = 7777
 THREADCOUNT = 0
 EMU_MODE = "nfsu"
 SKEYREPLY = b''
 SKEYSENT=0
+authsent=0
 SKEY = ''
 z=0
 a=''
@@ -96,12 +99,14 @@ for x in range(0,TOTALARGS,1):
 		GameSocket.bind((SERVER_IP, int(sys.argv[x+1])))
 		print("Now running in Custom Game Mode\n")   
 LISTENERSocket.bind((SERVER_IP, LISTENER))
+BuddySocket.bind((SERVER_IP, BUDDY_PORT))
 
 print('Waiting for connections.. ')
 reply=b''
 
 GameSocket.listen(5)
 LISTENERSocket.listen(1)
+BuddySocket.listen(1)
 
 def parse_data(data):
 	tmp = data.split(codecs.decode('0A','hex_codec'))
@@ -222,7 +227,7 @@ def reply_acct(data):
 def reply_auth(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
 	global clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent
 	reply=b''
 	authStr="TOS=1"
 	reply=authStr.encode('ascii')+x0A
@@ -252,6 +257,9 @@ def reply_auth(data):
 	#authStr="DEFPER=1"
 	#reply+=authStr.encode('ascii')+x0A        			
 	reply+=codecs.decode('0A00','hex_codec')
+	print("AUTHSENT: ",authsent)
+	if authsent >=3:
+		reply=b''
 	return reply
 
 	if (clientVERS == '"ps2/1.1001-Oct 15 2003"'):
@@ -372,7 +380,7 @@ def build_reply(data):
         global SKEYREPLY, SKEY
         global clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
         global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize
-        global ping_cnt,ping_start,curr_time,ping_time,ping_sent
+        global ping_cnt,ping_start,curr_time,ping_time,ping_sent,authsent
         #if (msgType == b'@tic'):
         	#oddByte hex 17
         	#print("\n--\n"+data.hex()+"\n--")
@@ -455,14 +463,16 @@ def build_reply(data):
         	#reply = codecs.decode('73656c65000000000000004347414D45533D310A524F4F4D533D310A55534552533D310A4D455347533D310A52414E4B533D300A4D4F52453D310A534C4F54533D340A00','hex_codec') #sele reply
         	print("REPLY: "+reply.decode('latin1')) 
         	time.sleep(2)     	
-        if (msgType == b'auth'):					
-        	replyTmp=b'auth'+pad
+        if ((msgType == b'auth') | (msgType == b'AUTH')):
+        	authsent=authsent+1					
+        	replyTmp=msgType+pad
         	parse_data(data)
         	reply = reply_auth(data)
-        	oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
-        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        	reply=replyTmp+oddByte+reply
-        	print("REPLY: "+reply.decode('latin1'))
+        	if len(reply) > 1:
+        		oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
+        		oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+        		reply=replyTmp+oddByte+reply
+        		print("REPLY: "+reply.decode('latin1'))
         	time.sleep(2)
         if (msgType == b'acct'):
         	replyTmp=b'acct'+pad
@@ -608,7 +618,14 @@ while True:
 		start_new_thread(threaded_client, (CLIENT, ))
 		THREADCOUNT += 1
 		print('Thread Number: ' + str(THREADCOUNT))    
+		CLIENT, ADDRESS = BuddySocket.accept()
+		print('Buddy Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
+		start_new_thread(threaded_client, (CLIENT, ))
+		THREADCOUNT += 1
+		print('Thread Number: ' + str(THREADCOUNT))    
 GameSocket.close()
 LISTENERSocket.close()
+BuddySocket.close()
 LISTENERSocket.listen(1)
 GameSocket.listen(1)
+BuddySocket.listen(1)
