@@ -8,7 +8,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.55"
+BUILD="0.1-ALPHA R0.56"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
@@ -66,47 +66,50 @@ def usage():
 	print("-p 12345 Run in Custom Game Mode on this TCP Port")
 	quit()
 	
+def bind():
+	global GameSocket, BuddySocket, LISTENERSocket, SERVER_IP, PORT_NFSU_PS2, PORT_BO3U_PS2, PORT_BO3R_PS2, PORT_BO3P_PS2, PORT_BOP_PS3, TOTALARGS
+	for x in range(0,TOTALARGS,1):
+		if (TOTALARGS >= 4):	
+			print("Too many arguments! Check command line.")
+			usage()
+		elif (TOTALARGS==1):
+			usage()
+		elif (sys.argv[x] == "-nfsu"):
+			EMU_MODE = "nfsu"
+			GameSocket.bind((SERVER_IP, PORT_NFSU_PS2))
+			print("Now running in Need for Speed: Underground Mode\n")
+		elif (sys.argv[x] == "-bo3r"):
+			EMU_MODE = "bo3r"
+			print("IP: "+SERVER_IP+" Port: "+str(PORT_BO3U_PS2))
+			GameSocket.bind((SERVER_IP, PORT_BO3R_PS2))
+			print("Now running in Burnout 3 Review Copy Mode\n")
+		elif (sys.argv[x] == "-bo3u"):
+			EMU_MODE = "bo3u"
+			GameSocket.bind((SERVER_IP, PORT_BO3U_PS2))
+			print("Now running in Burnout 3 NTSC Retail Mode\n")
+		elif (sys.argv[x] == "-bo3p"):
+			EMU_MODE = "bo3p"
+			GameSocket.bind((SERVER_IP, PORT_BO3P_PS2))
+			print("Now running in Burnout 3 PAL Retail Mode\n")
+		elif (sys.argv[x] == "-bop"):
+			EMU_MODE = "bop"
+			GameSocket.bind((SERVER_IP, PORT_BOP_PS3))
+			print("Now running in Burnout Paradise Mode\n")   
+		elif (sys.argv[x] == "-p"):
+			EMU_MODE = "custom"
+			GameSocket.bind((SERVER_IP, int(sys.argv[x+1])))
+			print("Now running in Custom Game Mode\n")   
+	LISTENERSocket.bind((SERVER_IP, LISTENER))
+	BuddySocket.bind((SERVER_IP, BUDDY_PORT))
+	LISTENERSocket.listen(1)
+	GameSocket.listen(1)
+	BuddySocket.listen(1)
+	print("Bind complete.\n")
+
 print("VTSTech-SRVEmu v"+BUILD+"\nGitHub: https://github.com/Veritas83/VTSTech-SRVEmu\nContributors: No23\n")
-
-for x in range(0,TOTALARGS,1):
-	if (TOTALARGS >= 4):	
-		print("Too many arguments! Check command line.")
-		usage()
-	elif (TOTALARGS==1):
-		usage()
-	elif (sys.argv[x] == "-nfsu"):
-		EMU_MODE = "nfsu"
-		GameSocket.bind((SERVER_IP, PORT_NFSU_PS2))
-		print("Now running in Need for Speed: Underground Mode\n")
-	elif (sys.argv[x] == "-bo3r"):
-		EMU_MODE = "bo3r"
-		GameSocket.bind((SERVER_IP, PORT_BO3R_PS2))
-		print("Now running in Burnout 3 Review Copy Mode\n")
-	elif (sys.argv[x] == "-bo3u"):
-		EMU_MODE = "bo3u"
-		GameSocket.bind((SERVER_IP, PORT_BO3U_PS2))
-		print("Now running in Burnout 3 NTSC Retail Mode\n")
-	elif (sys.argv[x] == "-bo3p"):
-		EMU_MODE = "bo3p"
-		GameSocket.bind((SERVER_IP, PORT_BO3P_PS2))
-		print("Now running in Burnout 3 PAL Retail Mode\n")
-	elif (sys.argv[x] == "-bop"):
-		EMU_MODE = "bop"
-		GameSocket.bind((SERVER_IP, PORT_BOP_PS3))
-		print("Now running in Burnout Paradise Mode\n")   
-	elif (sys.argv[x] == "-p"):
-		EMU_MODE = "custom"
-		GameSocket.bind((SERVER_IP, int(sys.argv[x+1])))
-		print("Now running in Custom Game Mode\n")   
-LISTENERSocket.bind((SERVER_IP, LISTENER))
-BuddySocket.bind((SERVER_IP, BUDDY_PORT))
-
+bind()
 print('Waiting for connections.. ')
 reply=b''
-
-GameSocket.listen(5)
-LISTENERSocket.listen(1)
-BuddySocket.listen(1)
 
 def parse_data(data):
 	tmp = data.split(codecs.decode('0A','hex_codec'))
@@ -163,10 +166,22 @@ def cmd_news(payload):
 	    #p+= 'BUDDY_PORT=7777\n'
 	    packet = create_packet('news', 'new7', p)
     else:
-	    p = 'VTSTECH.IS.REVIVING.GAMES\n'
-	    p+= 'NEWS_URL=http://www.vts-tech.org/test.txt\n'
-	    #p+= 'BUDDY_SERVER=192.168.0.228\n'
-	    #p+= 'BUDDY_PORT=7777\n'
+	    p = 'VTSTech-SRVEmu v'+BUILD+'\n'
+	    p+= '===================\n'
+	    p+= 'Written by Veritas Technical Solutions www.VTS-Tech.org\n'
+	    p+= 'GitHub: https://github.com/Veritas83/VTSTech-SRVEmu\n\n'
+	    p+= 'Changelog:\n'
+	    p+= 'v0.56:\n'
+	    p+= 'News command implemented (new1)\n'
+	    p+= 'Now includes changelog\n'
+	    p+= 'v0.55:\n'
+	    p+= 'CPER Command Implemented\n'
+	    p+= 'v0.54:\n'
+	    p+= '+rom reply\n'
+	    p+= 'remove quotes on sviw\n'
+	    p+= 'no longer starting ~png conversation\n'
+	    p+= 'v0.53:\n'
+	    p+= 'Added Buddy Server socket\n'
 	    packet = create_packet('news', 'new1', p)
     return packet
         
@@ -650,7 +665,12 @@ def threaded_client(connection):
     connection.settimeout(240)
     while True:        
         curr_time=time.time()
-        tmp = connection.recv(4)
+        try:
+        	tmp = connection.recv(4)
+        except:
+        	print("Exception_RECV\n")
+        	connection.shutdown(socket.SHUT_WR)
+        	bind()
         msgType = tmp[:4]
         print("RECV: "+str(msgType))
         if (msgType == b'NAME'):
@@ -677,9 +697,14 @@ def threaded_client(connection):
         	connection.sendall((reply)) 
         	
         if (msgType == b'uatr'):
-        	time.sleep(10)
+        	time.sleep(1)
         	reply = reply_uatr()
-        	connection.sendall((reply))
+        	try:
+        		connection.sendall((reply))
+        	except:
+        		print("Exception_UATR\n")
+        		connection.shutdown(socket.SHUT_WR)
+        		bind()
 
         #if ((curr_time - ping_start) > 29):
         #	reply = reply_ping(data) 
@@ -707,10 +732,4 @@ while True:
 		print('Buddy Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
 		start_new_thread(threaded_client, (CLIENT, ))
 		THREADCOUNT += 1
-		print('Thread Number: ' + str(THREADCOUNT))    
-GameSocket.close()
-LISTENERSocket.close()
-BuddySocket.close()
-LISTENERSocket.listen(1)
-GameSocket.listen(1)
-BuddySocket.listen(1)
+		print('Thread Number: ' + str(THREADCOUNT))
