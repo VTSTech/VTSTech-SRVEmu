@@ -1,3 +1,4 @@
+#BACKUP-2021-02-24 6:14:51 AM
 import codecs, os, sys, socket, struct, select, time, string, random, hashlib, array, math
 from pythonping import ping
 from _thread import *
@@ -161,32 +162,15 @@ def cmd_news(payload):
     print("News Payload: "+str(payload))
     if (payload == "NAME=7") | (payload == "BP"):
 	    p = 'TOSAC_URL=http://www.vts-ps2.org/test.txt\n'
-	    p+= 'NEWS_URL=http://www.vts-ps2.org/test.txt\n'
+	    #p+= 'NEWS_URL=http://www.vts-ps2.org/test.txt\n'
 	    p+= 'BUDDY_SERVER=192.168.0.228\n'
 	    p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
 	    packet = create_packet('news', 'new7', p)
 	    #payload=''
-    else:
-	    p = 'VTSTech-SRVEmu v'+BUILD+'\n'
-	    p+= '===================\n'
-	    p+= 'Written by Veritas Technical Solutions www.VTS-Tech.org\n'
-	    p+= 'GitHub: https://github.com/Veritas83/VTSTech-SRVEmu\n\n'
-	    p+= 'Changelog:\n'
-	    p+= 'v0.56:\n'
-	    p+= 'News command implemented (new1)\n'
-	    p+= 'Now includes changelog\n'
-	    p+= 'v0.55:\n'
-	    p+= 'CPER Command Implemented\n'
-	    p+= 'v0.54:\n'
-	    p+= '+rom reply\n'
-	    p+= 'remove quotes on sviw\n'
-	    p+= 'no longer starting ~png conversation\n'
-	    p+= 'v0.53:\n'
-	    p+= 'Added Buddy Server socket\n'
 	    if (clientVERS =='BURNOUT5/ISLAND'):
 	    	packet = create_packet('news', 'new8', p)
 	    else:
-	    	packet = create_packet('news', 'new1', p)
+	    	packet = create_packet('news', 'new0', p)
     return packet
         
 def reply_skey():
@@ -646,7 +630,7 @@ def htosi(val):
 def threaded_client(connection):
     #connection.send(str.encode('Welcome to the Server\n'))
     global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, icmp, x00,x0A
-    connection.settimeout(240)
+    connection.settimeout(500)
     while True:        
         curr_time=time.time()
         msgSize = 0
