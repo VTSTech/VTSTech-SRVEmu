@@ -7,7 +7,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.62"
+BUILD="0.1-ALPHA R0.63"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
