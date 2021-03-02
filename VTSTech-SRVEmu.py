@@ -1,4 +1,3 @@
-#BACKUP-2021-02-24 6:14:51 AM
 import codecs, os, sys, socket, struct, select, time, string, random, hashlib, array, math
 from pythonping import ping
 from _thread import *
@@ -8,7 +7,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.6"
+BUILD="0.1-ALPHA R0.61"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
@@ -27,7 +26,7 @@ authsent=0
 SKEY = ''
 z=0
 a=''
-
+NO_DATA=False
 ping_cnt=0
 ping_sent=0
 ping_start=time.time()
@@ -115,7 +114,7 @@ reply=b''
 def parse_data(data):
 	tmp = data.split(codecs.decode('0A','hex_codec'))
 	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
 
 	for x in range(0,len(tmp)):
 		#print("DEBUG: "+str(x))
@@ -160,16 +159,15 @@ def create_packet(cmd, subcmd, payload):
 #Thx No23
 def cmd_news(payload):
     print("News Payload: "+str(payload))
+    p = 'NEWS_URL=http://www.vts-ps2.org/test.txt\n'
+    p+= 'BUDDY_SERVER=192.168.0.228\n'
+    p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
+    packet = create_packet('news', 'new0', p)
     if (payload == "NAME=7") | (payload == "BP"):
-	    p = 'NEWS_URL=http://www.vts-ps2.org/test.txt\n'
-	    p+= 'BUDDY_SERVER=192.168.0.228\n'
-	    p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
 	    packet = create_packet('news', 'new7', p)
 	    #payload=''
 	    if (clientVERS =='BURNOUT5/ISLAND'):
-	    	packet = create_packet('news', 'new8', p)
-	    else:
-	    	packet = create_packet('news', 'new1', p)
+	     packet = create_packet('news', 'new1', p)
     return packet
         
 def reply_skey():
@@ -191,7 +189,7 @@ def reply_skey():
 def reply_acct(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
 	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
 	reply=b''
 	MD5=hashlib.md5()
 	MD5.update(clientPASS.encode('ascii'))
@@ -232,7 +230,7 @@ def reply_acct(data):
 		acctStr="PERSONAS="+clientNAME.lower()		
 		reply+=acctStr.encode('ascii')+x0A
 		acctStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		acctStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())			
 		reply+=codecs.decode('00','hex_codec')
 		db.write(clientNAME+"#"+clientBORN+"#"+clientMAIL+"#"+MD5.hexdigest()+"#"+clientPERS+"#"+clientLAST)
@@ -242,7 +240,7 @@ def reply_acct(data):
 def reply_auth(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
 	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
 	reply=b''
 
 	if (clientVERS == 'BURNOUT5/ISLAND'): #Burnout Paradise
@@ -258,15 +256,15 @@ def reply_auth(data):
 		authStr="BORN=19800325"
 		reply+=authStr.encode('ascii')+x0A   
 		authStr="GEND=M"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="FROM=US"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="LANG=en"
 		reply+=authStr.encode('ascii')+x0A
 		authStr="SPAM=NN"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-		reply+=authStr.encode('ascii')+x0A       	
+		reply+=authStr.encode('ascii')+x0A        
 		authStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
 		reply+=authStr.encode('ascii')+x0A
 		authStr="ADDR=24.141.39.62"
@@ -274,7 +272,7 @@ def reply_auth(data):
 		authStr="_LUID=$000000000b32588d"
 		reply+=authStr.encode('ascii')
 		#authStr="DEFPER=1"
-		#reply+=authStr.encode('ascii')+x0A        			
+		#reply+=authStr.encode('ascii')+x0A            
 		reply+=codecs.decode('0A00','hex_codec')
 		print("AUTHSENT: ",authsent)
 		if authsent >=3:
@@ -287,23 +285,23 @@ def reply_auth(data):
 		authStr="NAME="+clientNAME.lower()
 		reply+=authStr.encode('ascii')+x0A
 		authStr="BORN=19800325"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="GEND=M"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="FROM=US"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="LANG=en"
 		reply+=authStr.encode('ascii')+x0A
 		authStr="SPAM=NN"
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="PERSONAS="+clientNAME.lower()
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="DEFPER=1"
-		reply+=authStr.encode('ascii')+x0A        			
+		reply+=authStr.encode('ascii')+x0A            
 		authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-		reply+=authStr.encode('ascii')+x0A        	
+		reply+=authStr.encode('ascii')+x0A         
 		authStr="LAST=2003"+time.strftime(".%m.%d %I:%M:%S",time.localtime())
-		reply+=authStr.encode('ascii')        	
+		reply+=authStr.encode('ascii')         
 		reply+=codecs.decode('0A00','hex_codec')				
 		return reply
 
@@ -318,22 +316,22 @@ def reply_auth(data):
 	authStr="BORN=19800325"
 	reply+=authStr.encode('ascii')+x0A   
 	authStr="GEND=M"
-	reply+=authStr.encode('ascii')+x0A        	
+	reply+=authStr.encode('ascii')+x0A         
 	authStr="FROM=US"
-	reply+=authStr.encode('ascii')+x0A        	
+	reply+=authStr.encode('ascii')+x0A         
 	authStr="LANG=en"
 	reply+=authStr.encode('ascii')+x0A
 	authStr="SPAM=NN"
-	reply+=authStr.encode('ascii')+x0A        	
+	reply+=authStr.encode('ascii')+x0A         
 	authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-	reply+=authStr.encode('ascii')+x0A       	
+	reply+=authStr.encode('ascii')+x0A        
 	authStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
 	#reply+=authStr.encode('ascii')+x0A
 	#authStr="ADDR=24.143.43.66"
 	reply+=authStr.encode('ascii')
 	#authStr="_LUID=$000000000b32588d"
 	#authStr="DEFPER=1"
-	#reply+=authStr.encode('ascii')+x0A        			
+	#reply+=authStr.encode('ascii')+x0A            
 	reply+=codecs.decode('0A00','hex_codec')
 	print("AUTHSENT: ",authsent)
 	if authsent >=3:
@@ -343,7 +341,7 @@ def reply_auth(data):
 def reply_cper(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
 	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
 	reply=b''
 	cperStr="PERS="+clientPERS
 	reply=cperStr.encode('ascii')+x0A
@@ -354,7 +352,7 @@ def reply_cper(data):
 	
 def reply_rom():
 	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize	
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
 	oddByte = codecs.decode('00','hex_codec')          
 	replyTmp=b'+rom'+pad
 	romStr="TI=1001"
@@ -385,7 +383,7 @@ def reply_rom():
 	return reply
 	
 def reply_who():
-	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize	
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
 	oddByte = codecs.decode('00','hex_codec')          
 	replyTmp=b'+who'+pad
 	uatrStr="M=VTSTech"
@@ -407,17 +405,17 @@ def reply_who():
 	uatrStr="LO=enUS"
 	reply+=uatrStr.encode('ascii')+x0A
 	uatrStr="LV=1049601"
-	reply+=uatrStr.encode('ascii')+x0A        	
+	reply+=uatrStr.encode('ascii')+x0A         
 	uatrStr="MD=0"
-	reply+=uatrStr.encode('ascii')+x0A        	
+	reply+=uatrStr.encode('ascii')+x0A         
 	uatrStr="PRES="
-	reply+=uatrStr.encode('ascii')+x0A        	
+	reply+=uatrStr.encode('ascii')+x0A         
 	uatrStr="RP=0"
-	reply+=uatrStr.encode('ascii')+x0A        	
+	reply+=uatrStr.encode('ascii')+x0A         
 	uatrStr="S="
-	reply+=uatrStr.encode('ascii')+x0A        	
-	uatrStr="X="        	
-	reply+=uatrStr.encode('ascii')+x0A        	        	        	
+	reply+=uatrStr.encode('ascii')+x0A         
+	uatrStr="X="         
+	reply+=uatrStr.encode('ascii')+x0A                           
 	uatrStr="P=1"
 	reply+=uatrStr.encode('ascii')+codecs.decode('0A00','hex_codec')
 	oddByte=len(codecs.decode(reply,'latin1'))+12
@@ -428,11 +426,11 @@ def reply_who():
 
 def reply_ping(data):
 	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-	global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad
+	global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
 	print("Ping Recv: "+str(ping_cnt)+" Ping Sent: "+str(ping_sent))
 	oddByte = codecs.decode('00','hex_codec')          
 	replyTmp = b'~png'+pad
-	reply = b'REF'+bytes(time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime()),'ascii')+b'\n'
+	reply = b'REF='+bytes(time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime()),'ascii')+b'\n'
 	reply += b'TIME=2\n'+x00
 	oddByte=len(codecs.decode(reply,'latin1'))+12
 	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
@@ -445,125 +443,139 @@ def reply_ping(data):
 	return reply
 	
 def build_reply(data):
-        global SKEYREPLY, SKEY
-        global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
-        global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize
-        global ping_cnt,ping_start,curr_time,ping_time,ping_sent,authsent
-        reply=b''
-        if (msgType == codecs.decode('801C0100','hex_codec')):
-        	print("DEBUG: enc in")
-        	reply = codecs.decode('83DA04000A00','hex_codec')
-        if (msgType == b'@dir'):
-	        tmp = data.split(codecs.decode('0A','hex_codec'))
-	        clientVERS = tmp[0].decode('latin1')[6:]
-	        if (clientVERS == "nfs-ps2-2003"):
-	        	clientVersion = tmp[1].decode('latin1')[6:-1]
-	        	clientSLUS = tmp[4].decode('latin1')[5:]
-	       	elif (clientVERS == "FLM/A1"):
-	       		clientVersion = tmp[1].decode('latin1')[4:]
-	       		clientSLUS = tmp[2].decode('latin1')[5:]
-	       	elif (clientVERS == "BURNOUT5/ISLAND"):
-		        clientSLUS = tmp[2].decode('latin1')[5:]
-	        
-	       	sessStr="SESS="+str(random.randint(1000,9999))+str(random.randint(1000,9999))+str(random.randint(10,99))
-	       	maskStr="MASK="+str(random.randint(1000,9999))+"f3f70ecb1757cd7001b9a7a"+str(random.randint(1000,9999))	        
-	       	replyTmp=msgType+pad
-	       	reply=SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
-	       	reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00
-	       	oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
-	       	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-	       	reply=replyTmp+oddByte+SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
-	       	reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00      	
-        	print("REPLY: "+reply.decode('latin1'))
-        if (msgType == b'skey'):
-        	tmp = data.split(codecs.decode('0A','hex_codec'))
-        	SKEY = tmp[0].decode('latin1')[5:]
-        	print("Client sKey: "+SKEY)       	     	
-        	reply = reply_skey()
-        if (msgType == b'fget'):
-        	reply = reply_who()
-        	print("REPLY: "+reply.decode('latin1'))      	
-        if (msgType == b'sele'):
-        	parse_data(data)
-        if ((msgType == b'auth')):
-        	authsent=authsent+1					
-        	replyTmp=msgType+pad
-        	parse_data(data)
-        	reply = reply_auth(data)
-        	if len(reply) > 1:
-        		oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
-        		oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        		reply=replyTmp+oddByte+reply
-        		print("REPLY: "+reply.decode('latin1'))
-        if (msgType == b'acct'):
-        	replyTmp=b'acct'+pad
-        	parse_data(data)
-        	reply = reply_acct(data)
-        	oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
-        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        	reply=replyTmp+oddByte+reply
-        	print("REPLY: "+reply.decode('latin1'))
-        if (msgType == b'pers'):
-        	parse_data(data)
-        	oddByte = codecs.decode('00','hex_codec')
-        	replyTmp=b'pers'+pad
-        	persStr="PERS="+clientNAME.lower()
-        	reply=persStr.encode('ascii')+x0A
-        	persStr="LKEY=3fcf27540c92935b0a66fd3b0000283c"       	
-        	reply+=persStr.encode('ascii')+codecs.decode('0A00','hex_codec')
-        	oddByte=len(codecs.decode(replyTmp+reply,'latin1'))+1
-        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        	reply=replyTmp+oddByte+reply
-        	print("REPLY: "+reply.decode('latin1'))	
-        if (msgType == b'sviw'):
-        	oddByte = codecs.decode('00','hex_codec')
-        	replyTmp=b'sviw'+pad        	
-        	sviwStr="N=5"
-        	reply=sviwStr.encode('ascii')+x0A
-        	sviwStr="NAMES=0,3,4,5,6"
-        	reply+=sviwStr.encode('ascii')+x0A
-        	sviwStr="DESCS=1,1,1,1,1"
-        	reply+=sviwStr.encode('ascii')+x0A
-        	sviwStr="PARAMS=2,2,2,2,2"
-        	reply+=sviwStr.encode('ascii')+codecs.decode('0A00','hex_codec')
-        	oddByte=len(codecs.decode(reply,'latin1'))+12
-        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        	reply=replyTmp+oddByte+reply
-        	print("REPLY: "+reply.decode('latin1'))
-        if (msgType == b'uatr'):
-        	time.sleep(1)
-        	reply = reply_who()
-        	print("REPLY: "+reply.decode('latin1'))
-        	time.sleep(1)
-        if (msgType == b'cper'):
-        	parse_data(data)
-        	replyTmp=b'cper'+pad
-        	reply = reply_cper(data)
-        	oddByte=len(codecs.decode(reply,'latin1'))+12
-        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        	reply=replyTmp+oddByte+reply
-        	print("REPLY: "+reply.decode('latin1'))
-        	time.sleep(1)
-        if (msgType == b'gsea'):
-        	replyTmp=b'gsea'+pad
-        	gseaStr="COUNT=0"        	
-        	reply=gseaStr.encode('ascii')+codecs.decode('0A00','hex_codec')
-        	oddByte=len(codecs.decode(reply,'latin1'))+12
-        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-        	reply=replyTmp+oddByte+reply
-        	print("REPLY: "+reply.decode('latin1'))
-        	time.sleep(1)
-				#ping				
-        if (msgType == b'~png'):
-        	ping_start=time.time()
-       		if (ping_cnt>=1):
-       			ping_cnt+=1
-       		else:
-       			ping_cnt=1       		
-       		reply = reply_ping(data)
-       		time.sleep(2)
+  global SKEYREPLY, SKEY
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER
+  global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize
+  global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
+  reply=b''
+  if (msgType == codecs.decode('801C0100','hex_codec')):
+    print("DEBUG: enc in")
+    reply = codecs.decode('83DA04000A00','hex_codec')
+  if (msgType == b'@dir'):
+    tmp = data.split(codecs.decode('0A','hex_codec'))
+    clientVERS = tmp[0].decode('latin1')[6:]
+    if (clientVERS == "nfs-ps2-2003"):
+     clientVersion = tmp[1].decode('latin1')[6:-1]
+     clientSLUS = tmp[4].decode('latin1')[5:]
+    elif (clientVERS == "FLM/A1"):
+      clientVersion = tmp[1].decode('latin1')[4:]
+      clientSLUS = tmp[2].decode('latin1')[5:]
+    elif (clientVERS == "BURNOUT5/ISLAND"):
+      clientSLUS = tmp[2].decode('latin1')[5:]
+    
+    sessStr="SESS="+str(random.randint(1000,9999))+str(random.randint(1000,9999))+str(random.randint(10,99))
+    maskStr="MASK="+str(random.randint(1000,9999))+"f3f70ecb1757cd7001b9a7a"+str(random.randint(1000,9999))         	
+    replyTmp=msgType+pad
+    reply=SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
+    reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00
+    oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
+    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+    reply=replyTmp+oddByte+SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
+    reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00       
+    print("REPLY: "+reply.decode('latin1'))
+  if (msgType == b'skey'):
+    tmp = data.split(codecs.decode('0A','hex_codec'))
+    SKEY = tmp[0].decode('latin1')[5:]
+    print("Client sKey: "+SKEY)              
+    reply = reply_skey()
+  if (msgType == b'fget'):
+    reply = reply_who()
+    print("REPLY: "+reply.decode('latin1'))       
+  if (msgType == b'news'):
+    reply = cmd_news('BP')
+    print("REPLY: "+reply.decode('latin1'))       
+  if (msgType == b'sele'):
+    parse_data(data)
+    packet = create_packet('sele', '', '')
+    return packet
+  if ((msgType == b'auth')):
+    authsent=authsent+1					
+    replyTmp=msgType+pad
+    parse_data(data)
+    reply = reply_auth(data)
+    if len(reply) > 1:
+     oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
+     oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+     reply=replyTmp+oddByte+reply
+     print("REPLY: "+reply.decode('latin1'))
+  if (msgType == b'acct'):
+    replyTmp=b'acct'+pad
+    parse_data(data)
+    reply = reply_acct(data)
+    oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
+    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+    reply=replyTmp+oddByte+reply
+    print("REPLY: "+reply.decode('latin1'))
+  if (msgType == b'pers'):
+    parse_data(data)
+    oddByte = codecs.decode('00','hex_codec')
+    replyTmp=b'pers'+pad
+    if isinstance(clientNAME,str):
+    	persStr="PERS="+clientNAME.lower()
+    	reply=persStr.encode('ascii')+x0A
+    	persStr="NAME="+clientNAME.lower()
+    else:
+    	persStr="PERS="+clientNAME[0].lower()	
+    	reply=persStr.encode('ascii')+x0A
+    	persStr="NAME="+clientNAME[0].lower()	
+    reply+=persStr.encode('ascii')+x0A
+    persStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
+    reply+=persStr.encode('ascii')+x0A
+    persStr="LKEY=3fcf27540c92935b0a66fd3b0000283c"        
+    reply+=persStr.encode('ascii')+codecs.decode('0A00','hex_codec')
+    oddByte=len(codecs.decode(replyTmp+reply,'latin1'))+1
+    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+    reply=replyTmp+oddByte+reply
+    print("REPLY: "+reply.decode('latin1'))	
+  if (msgType == b'sviw'):
+    oddByte = codecs.decode('00','hex_codec')
+    replyTmp=b'sviw'+pad         
+    sviwStr="N=5"
+    reply=sviwStr.encode('ascii')+x0A
+    sviwStr="NAMES=0,3,4,5,6"
+    reply+=sviwStr.encode('ascii')+x0A
+    sviwStr="DESCS=1,1,1,1,1"
+    reply+=sviwStr.encode('ascii')+x0A
+    sviwStr="PARAMS=2,2,2,2,2"
+    reply+=sviwStr.encode('ascii')+codecs.decode('0A00','hex_codec')
+    oddByte=len(codecs.decode(reply,'latin1'))+12
+    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+    reply=replyTmp+oddByte+reply
+    print("REPLY: "+reply.decode('latin1'))
+  if (msgType == b'uatr'):
+    time.sleep(1)
+    reply = reply_who()
+    print("REPLY: "+reply.decode('latin1'))
+    time.sleep(1)
+  if (msgType == b'cper'):
+    parse_data(data)
+    replyTmp=b'cper'+pad
+    reply = reply_cper(data)
+    oddByte=len(codecs.decode(reply,'latin1'))+12
+    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+    reply=replyTmp+oddByte+reply
+    print("REPLY: "+reply.decode('latin1'))
+    time.sleep(1)
+  if (msgType == b'gsea'):
+    replyTmp=b'gsea'+pad
+    gseaStr="COUNT=0"         
+    reply=gseaStr.encode('ascii')+codecs.decode('0A00','hex_codec')
+    oddByte=len(codecs.decode(reply,'latin1'))+12
+    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+    reply=replyTmp+oddByte+reply
+    print("REPLY: "+reply.decode('latin1'))
+    time.sleep(1)
+	#ping				
+  if (msgType == b'~png'):
+    ping_start=time.time()
+    if (ping_cnt>=1):
+     ping_cnt+=1
+    else:
+     ping_cnt=1          
+    reply = reply_ping(data)
+    time.sleep(2)
 
-       	return reply
+  return reply
 
 def htosi(val):
     uintval = int(val,16)
@@ -573,116 +585,45 @@ def htosi(val):
     return uintval
         
 def threaded_client(connection):
-    global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, icmp, x00,x0A
-    connection.settimeout(500)
-    while True:        
-        curr_time=time.time()
-        msgSize = 0
-        try:
-        	tmp = connection.recv(4)
-        	msgType = tmp[:4]
-        	print("RECV: "+str(msgType))
-	        if (msgType == b'NAME'):
-	        	msgSize = 3
-	        	connection.recv(int(msgSize))
-	        	reply = cmd_news('NAME=7')
-	        elif (msgType == b'sele'):
-	        	tmp = connection.recv(65)
-        		packet = create_packet('sele', '', '')
-	        	connection.sendall((packet))
-	        	time.sleep(1)
-	        	reply = cmd_news(1)
-	        	connection.sendall((reply))
-	        elif (msgType == b'ient'):
-	        	msgSize = 5
-	        	connection.recv(int(msgSize))
-	        	reply = cmd_news('BP')
-	        elif (msgType == b'TIME'):
-	        	msgSize = 4
-	        	print("SIZE: "+str(msgSize))
-	        	data = connection.recv(int(msgSize))               	
-	        #Add Buddy Socket replies here
-	        elif (msgType == b'RGET'):
-	        	msgSize = 200
-	        	connection.recv(int(msgSize))
-	        	reply = reply_ping(data)
-	        elif (msgType == b'PSET'):
-	        	tmp = connection.recv(104)
-        		packet = create_packet('PSET', '', '')
-	        	connection.sendall((packet))
-	        	reply = reply_ping(data)
-	        	connection.sendall((reply))
-	        elif (msgType == b'USCH'):
-	        	tmp = connection.recv(8)
-	        	msgSize = tmp[7]
-	        	print("SIZE: "+(str(msgSize)))
-	        	data = connection.recv(int(msgSize))
-	        	replyTmp=b'user'+pad
-	        	uschStr="PERS=VTSTech"+x0A
-	        	reply=uschStr.encode('ascii')
-	        	uschStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+x0A 
-	        	reply+=uschStr.encode('ascii')+codecs.decode('00','hex_codec')
-	        	oddByte=len(codecs.decode(reply,'latin1'))+12
-	        	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-	        	reply=replyTmp+oddByte+reply
-	        	print("REPLY: "+reply.decode('latin1'))
-	        	connection.sendall((reply))     	
-	        else:
-	        	try:
-	        		tmp = connection.recv(8)
-		        except:
-		        	print("Exception_RECV\n")
-	        	if (len(tmp) == 0):
-	        		msgSize = 0
-	        	elif (len(tmp) <= 5):
-	        		msgSize = tmp[4]
-	        	elif(len(tmp) == 8):
-	        		if (tmp[6] >= 1) & (clientVERS == 'BURNOUT5/ISLAND'):
-	        			msgSize = tmp[6]
-	        			msgSize +=tmp[7]
-	        			msgSize = htosi(hex(msgSize))
-	        		else:        		
-	        			msgSize = tmp[7]
-	        	print("SIZE: "+(str(msgSize)))
-	        	data = connection.recv(int(msgSize))
-	        	reply = build_reply(data)
-	        connection.sendall((reply))
-
-	        if ((curr_time - ping_start) > 5):
-	        	reply = reply_ping(data)
-	        	connection.sendall((reply))
-					#Or .. Add Buddy Socket replies here
-	        if (msgType == b'AUTH'):
-	        	packet = create_packet('AUTH','','')
-	        	connection.sendall((packet))
-	        	reply = reply_ping(data)
-	        	print("REPLY: "+reply.decode('latin1'))
-	        	connection.sendall((reply))
-
-	        if (msgType == b'auth') & (clientVERS == 'FLM/A1'):
-	        	reply = reply_rom()
-	        	print("REPLY: "+reply.decode('latin1'))
-	        	connection.sendall((reply))       	
-
-	        if (msgType == b'sviw') & (clientVERS == 'FLM/A1'):
-	        	reply = reply_who()
-	        	print("REPLY: "+reply.decode('latin1'))
-	        	connection.sendall((reply))
-	        	time.sleep(1)
-	        	reply = reply_ping(data)
-	        	connection.sendall((reply))		        	
-        except:
-        	time.sleep(0.5)
-        	curr_time=time.time()
-                					
-        reply=b''
-        if not data:
-            print("! end of data ... let's wait for some...")
-            for x in range(0,60):
-            	try:
-            		tmp = connection.recv(4)
-            	except:
-            		time.sleep(1)
+	global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, ping_sent
+	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA
+	connection.settimeout(500)
+	while True:        
+		curr_time=time.time()
+		try:
+		 tmp = connection.recv(12)
+		 NO_DATA=False
+		except:
+		 NO_DATA=True
+		 time.sleep(0.5)
+		 curr_time=time.time()            
+		 #reply=b''
+		 #if not NO_DATA==True:
+		 #	print("! end of data ... let's wait for some...")
+		 #	for x in range(0,60):
+		 #		try:
+		 #			tmp = connection.recv(12)
+		 #		except:
+		 #			time.sleep(0.2)
+		msgType = tmp[:4]
+		print("RECV: "+str(msgType))
+		if tmp[10] == 0:
+			msgSize=tmp[11]
+			print("SIZE1: "+(str(msgSize)))
+		else:
+			msgSize = tmp[10]
+			msgSize += tmp[11]
+			msgSize = int(struct.unpack(">h",bytes(str(msgSize),'ascii'))[0])
+			print("SIZE2: "+(str(msgSize)))		
+		msgSize = msgSize - 12
+		data = connection.recv(msgSize)
+		print("SIZE3: "+(str(msgSize)))
+		time.sleep(0.2)
+		reply = build_reply(data)
+		connection.sendall((reply))
+		if (msgType == b'pers'):
+			reply = reply_who()
+			connection.sendall((reply))
 while True:
 		CLIENT, ADDRESS = GameSocket.accept()
 		print('Player Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
