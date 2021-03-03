@@ -7,7 +7,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.63"
+BUILD="0.1-ALPHA R0.64"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
@@ -184,6 +184,7 @@ def cmd_news(payload):
     print("News Payload: "+str(payload))
     p = 'BUDDY_SERVER=192.168.0.228\n'
     p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
+    #p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
     p+= 'EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt\n'
     p+= 'TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt\n'
     p+= 'TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt\n'
@@ -405,8 +406,14 @@ def reply_who():
 	reply+=uatrStr.encode('ascii')+x0A
 	uatrStr="LA=192.168.0.133"
 	reply+=uatrStr.encode('ascii')+x0A
-	uatrStr="G=0"
+	uatrStr="P=1"
 	reply+=uatrStr.encode('ascii')+x0A
+	uatrStr="CL=511"
+	reply+=uatrStr.encode('ascii')+x0A
+	uatrStr="F=U"
+	reply+=uatrStr.encode('ascii')+x0A
+	uatrStr="G=0"
+	reply+=uatrStr.encode('ascii')+x0A	
 	uatrStr="HW=0"
 	reply+=uatrStr.encode('ascii')+x0A
 	uatrStr="I=71615"
@@ -423,9 +430,11 @@ def reply_who():
 	reply+=uatrStr.encode('ascii')+x0A         
 	uatrStr="S="
 	reply+=uatrStr.encode('ascii')+x0A         
+	uatrStr="US=0"
+	reply+=uatrStr.encode('ascii')+x0A         
+	uatrStr="VER=5"
+	reply+=uatrStr.encode('ascii')+x0A         	
 	uatrStr="X="         
-	reply+=uatrStr.encode('ascii')+x0A                           
-	uatrStr="P=1"
 	reply+=uatrStr.encode('ascii')+codecs.decode('0A00','hex_codec')
 	oddByte=len(codecs.decode(reply,'latin1'))+12
 	oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
@@ -440,12 +449,12 @@ def reply_mgm():
 	p += 'NAME=VTSTech\n'
 	p += 'PARAMS='+clientPARAMS+'\n'
 	p += 'PRIV='+clientPRIV+'\n'
-	p += 'PRIV='+clientSEED+'\n'
+	p += 'SEED=12345\n'
 	p += 'SYSFLAGS='+clientSYSFLAGS+'\n'
 	p += 'MADDR='+clientMAC+'\n'
 	p += 'COUNT=1\n'
-	p += 'NUMPART=1\n'
-	p += 'PARTSIZE0='+clientMAXSIZE+'\n'
+	p += 'NUMPART=0\n'
+	p += 'PARTSIZE='+clientMINSIZE+'\n'
 	p += 'GPSREGION=2\n'
 	p += 'GAMEPORT=9657\n'
 	p += 'VOIPPORT=9667\n'
@@ -453,7 +462,6 @@ def reply_mgm():
 	p += 'EVID=0\n'
 	p += 'IDENT=6450\n'
 	p += 'GAMEMODE=0\n'
-	p += 'PARTPARAMS0=\n'
 	p += 'ROOM=0\n'
 	p += 'WHEN='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
 	p += 'WHENC='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
@@ -516,9 +524,6 @@ def build_reply(data):
     SKEY = tmp[0].decode('latin1')[5:]
     print("Client sKey: "+SKEY)              
     reply = reply_skey()
-  if (msgType == b'fget'):
-    reply = reply_who()
-    print("REPLY: "+reply.decode('latin1'))       
   if (msgType == b'news'):
     news_cnt+=1
     if news_cnt == 1:
@@ -599,13 +604,19 @@ def build_reply(data):
   if (msgType == b'sviw'):
     oddByte = codecs.decode('00','hex_codec')
     replyTmp=b'sviw'+pad         
-    sviwStr="N=5"
+    sviwStr="N=9"
     reply=sviwStr.encode('ascii')+x0A
-    sviwStr="NAMES=0,3,4,5,6"
+    sviwStr="DESCS=1,1,1,1,1,1,1,1,1"
     reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="DESCS=1,1,1,1,1"
+    sviwStr="NAMES=0,3,4,5,6,7,8,9,10"
     reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="PARAMS=2,2,2,2,2"
+    sviwStr="PARAMS=2,2,2,2,2,2,2,2,2"
+    reply+=sviwStr.encode('ascii')+x0A
+    sviwStr="SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA"
+    reply+=sviwStr.encode('ascii')+x0A
+    sviwStr="TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts"
+    reply+=sviwStr.encode('ascii')+x0A
+    sviwStr="SS=65"
     reply+=sviwStr.encode('ascii')+codecs.decode('0A00','hex_codec')
     oddByte=len(codecs.decode(reply,'latin1'))+12
     oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
@@ -613,9 +624,8 @@ def build_reply(data):
     print("REPLY: "+reply.decode('latin1'))
   if (msgType == b'uatr'):
     time.sleep(1)
-    reply = reply_who()
-    print("REPLY: "+reply.decode('latin1'))
-    time.sleep(1)
+    #reply = reply_who()
+    #print("REPLY: "+reply.decode('latin1'))
   if (msgType == b'usld'):
     parse_data(data)
     p =  'IMGATE=0\n'
@@ -633,36 +643,42 @@ def build_reply(data):
     time.sleep(1)
   if (msgType == b'slst'):
     parse_data(data)
-    p='COUNT=27'                                     
-    p+='VIEW0=lobby,"Online Lobby Stats View\n'      
-    p+='VIEW1=DLC,"DLC Lobby Stats View\n'           
-    p+='VIEW2=RoadRules,"Road Rules\n'               
-    p+='VIEW3=DayBikeRRs,"Day Bike Road Rules\n'     
-    p+='VIEW4=NightBikeRR,"Night Bike Road Rules\n'  
-    p+='VIEW5=PlayerStatS,"Player Stats Summary\n'   
-    p+='VIEW6=LastEvent1,"Recent Event 1 Details\n'  
-    p+='VIEW7=LastEvent2,"Recent Event 2 Details\n'  
-    p+='VIEW8=LastEvent3,"Recent Event 3 Details\n'  
-    p+='VIEW9=LastEvent4,"Recent Event 4 Details\n'  
-    p+='VIEW10=LastEvent5,"Recent Event 5 Details\n' 
-    p+='VIEW11=OfflineProg,"Offline Progression\n'   
-    p+='VIEW12=Rival1,"Rival 1 information\n'        
-    p+='VIEW13=Rival2,"Rival 2 information\n'        
-    p+='VIEW14=Rival3,"Rival 3 information\n'        
-    p+='VIEW15=Rival4,"Rival 4 information\n'        
-    p+='VIEW16=Rival5,"Rival 5 information\n'        
-    p+='VIEW17=Rival6,"Rival 6 information\n'        
-    p+='VIEW18=Rival7,"Rival 7 information\n'        
-    p+='VIEW19=Rival8,"Rival 8 information\n'        
-    p+='VIEW20=Rival9,"Rival 9 information\n'        
-    p+='VIEW21=Rival10,"Rival 10 information\n'      
-    p+='VIEW22=DriverDetai,"Driver details\n'        
-    p+='VIEW23=RiderDetail,"Rider details\n'         
-    p+='VIEW24=IsldDetails,"Island details\n'        
-    p+='VIEW25=Friends,"Friends List\n'              
-    p+='VIEW26=PNetworkSta,"Paradise Network Stats\n'
+    p='COUNT=27\n'                                     
+    p+='VIEW0=lobby,"Online Lobby Stats View"\n'      
+    p+='VIEW1=DLC,"DLC Lobby Stats View"\n'           
+    p+='VIEW2=RoadRules,"Road Rules"\n'               
+    p+='VIEW3=DayBikeRRs,"Day Bike Road Rules"\n'     
+    p+='VIEW4=NightBikeRR,"Night Bike Road Rules"\n'  
+    p+='VIEW5=PlayerStatS,"Player Stats Summary"\n'   
+    p+='VIEW6=LastEvent1,"Recent Event 1 Details"\n'  
+    p+='VIEW7=LastEvent2,"Recent Event 2 Details"\n'  
+    p+='VIEW8=LastEvent3,"Recent Event 3 Details"\n'  
+    p+='VIEW9=LastEvent4,"Recent Event 4 Details"\n'  
+    p+='VIEW10=LastEvent5,"Recent Event 5 Details"\n' 
+    p+='VIEW11=OfflineProg,"Offline Progression"\n'   
+    p+='VIEW12=Rival1,"Rival 1 information"\n'        
+    p+='VIEW13=Rival2,"Rival 2 information"\n'        
+    p+='VIEW14=Rival3,"Rival 3 information"\n'        
+    p+='VIEW15=Rival4,"Rival 4 information"\n'        
+    p+='VIEW16=Rival5,"Rival 5 information"\n'        
+    p+='VIEW17=Rival6,"Rival 6 information"\n'        
+    p+='VIEW18=Rival7,"Rival 7 information"\n'        
+    p+='VIEW19=Rival8,"Rival 8 information"\n'        
+    p+='VIEW20=Rival9,"Rival 9 information"\n'        
+    p+='VIEW21=Rival10,"Rival 10 information"\n'      
+    p+='VIEW22=DriverDetai,"Driver details"\n'        
+    p+='VIEW23=RiderDetail,"Rider details"\n'         
+    p+='VIEW24=IsldDetails,"Island details"\n'        
+    p+='VIEW25=Friends,"Friends List"\n'              
+    p+='VIEW26=PNetworkSta,"Paradise Network Stats"\n'
     packet = create_packet('slst', '', p)
     return packet
+  if (msgType == b'sdta'):
+    parse_data(data)
+    p='SLOT=0\n'
+    p+='STATS=0,0,0,0,0,0,0,0,0\n'
+    reply = create_packet('sdta', '', p)
+    return reply
   if (msgType == b'cate'):
     parse_data(data)
     reply = create_packet('cate', '', '')
@@ -672,6 +688,15 @@ def build_reply(data):
   if (msgType == b'gpsc'):
     parse_data(data)
     reply = reply_mgm()
+  if (msgType == b'rvup'):
+    parse_data(data)
+    reply = create_packet('rvup', '', '')
+  if (msgType == b'fget'):
+    parse_data(data)
+    reply = create_packet('fget', '', '')    
+  if (msgType == b'fupd'):
+    parse_data(data)
+    reply = reply_rom()
   if (msgType == b'cper'):
     parse_data(data)
     replyTmp=b'cper'+pad
@@ -723,28 +748,33 @@ def threaded_client(connection):
 		 #			tmp = connection.recv(12)
 		 #		except:
 		 #			time.sleep(0.2)
-		msgType = tmp[:4]
-		print("RECV: "+str(msgType))
-		if tmp[10] == 0:
-			msgSize=tmp[11]
-			print("SIZE1: "+(str(msgSize)))
-		else:
-			msgSize = tmp[10]
-			msgSize += tmp[11]
-			msgSize = int(struct.unpack(">h",bytes(str(msgSize),'ascii'))[0])
-			print("SIZE2: "+(str(msgSize)))		
-		msgSize = msgSize - 12
-		data = connection.recv(msgSize)
-		print("SIZE3: "+(str(msgSize)))
-		time.sleep(0.2)
-		reply = build_reply(data)
-		connection.sendall((reply))
+		if len(tmp) != 0:
+			msgType = tmp[:4]
+			print("RECV: "+str(msgType))
+			print("Debug: "+str(len(tmp)))
+			if tmp[10] == 0:
+				msgSize=tmp[11]
+				print("SIZE1: "+(str(msgSize)))
+			else:
+				msgSize = int(struct.unpack(">h",bytes(str(tmp[10]+tmp[11]),'ascii'))[0])
+				print("SIZE2: "+(str(msgSize)))		
+			msgSize = msgSize - 12
+			data = connection.recv(msgSize)
+			print("SIZE3: "+(str(msgSize)))
+			time.sleep(0.2)
+			reply = build_reply(data)
+			connection.sendall((reply))
 		if (msgType == b'pers'):
 			reply = reply_who()
 			connection.sendall((reply))
-		if (msgType == b'gpsc'):
-			reply = reply_who()
-			connection.sendall((reply))
+		#if (msgType == b'gpsc'):
+			#reply = reply_mgm()
+			#connection.sendall((reply))
+		#if (msgType == b'fget'):
+			#parse_data(data)
+			#p =  'FLUP=0\n'
+			#packet = create_packet('+fup', '', p)
+			#connection.sendall((packet))
 while True:
 		CLIENT, ADDRESS = GameSocket.accept()
 		print('Player Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
