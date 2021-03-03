@@ -6,9 +6,9 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.65"
-SERVER_IP = '192.168.0.228'
-SERVER_IP_BIN = b'ADDR=192.168.0.228'
+BUILD="0.1-ALPHA R0.66"
+SERVER_IP = ''
+SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
 
 PORT_NFSU_PS2 = 10900 #ps2nfs04.ea.com:10900
@@ -17,11 +17,11 @@ PORT_BO3R_PS2 = 21840 #ps2lobby02.beta.ea.com:21840
 PORT_NFL05_PS2 = 20000  #ps2madden05.ea.com:20000
 PORT_BOP_PS3 = 21870  #ps3burnout08.ea.com:21870
 PORT_BOP_PC = 21840  #pcburnout08.ea.com:21871
+PORT_SSX3_PS2 = 11000 #ps2ssx04.ea.com:11000
 
 LISTENER = 10901
 BUDDY_PORT = 10899
 THREADCOUNT = 0
-EMU_MODE = "nfsu"
 SKEYREPLY = b''
 SKEYSENT=0
 authsent=0
@@ -38,6 +38,7 @@ curr_time=time.time()
 
 msgType=b''
 msgSize=b''
+clientALTS=''
 clientNAME=''
 clientVERS=''
 clientMAC=''
@@ -72,49 +73,51 @@ SKEY="$5075626c6963204b6579"
 
 def usage():
 	print("Usage:")
-	print("-nfsu Run in Need for Speed Underground Mode (PS2)")
-	print("-bo3r Run in Burnout 3 Takedown Review Copy Mode (PS2)")
-	print("-bo3u Run in Burnout 3 Takedown Retail Copy Mode (PS2)")
-	print("-bop3 Run in Burnout Paradise Mode (PS3)")
-	print("-bopc Run in Burnout Paradise Mode (PC)")
-	print("-p 12345 Run in Custom Game Mode on this TCP Port")
+	print("-bo3r  Run in Burnout 3 Takedown Review Copy Mode (PS2)")
+	print("-bo3u  Run in Burnout 3 Takedown Retail Copy Mode (PS2)")
+	print("-bop3  Run in Burnout Paradise Mode (PS3)")
+	print("-bopc  Run in Burnout Paradise Mode (PC)")
+	print("-nfsu  Run in Need for Speed Underground Mode (PS2)")
+	print("-nfl05 Run in Madden NFL 05 Mode (PS2)")
+	print("-ssx3  Run in SSX3 Mode (PS2)")
+	print("-p 123 Run in Custom Game Mode on this TCP Port")
+	print("-i ip  Run on this IPv4 Address")
 	quit()
 	
 def bind():
-	global GameSocket, BuddySocket, LISTENERSocket, SERVER_IP, PORT_NFSU_PS2, PORT_BO3U_PS2, PORT_BO3R_PS2, PORT_BO3P_PS2, PORT_BOP_PS3, TOTALARGS
+	global SERVER_IP, GameSocket, BuddySocket, LISTENERSocket, SERVER_IP, PORT_NFSU_PS2, PORT_BO3U_PS2, PORT_BO3R_PS2, PORT_BO3P_PS2, PORT_BOP_PS3, TOTALARGS
+	
 	for x in range(0,TOTALARGS,1):
-		if (TOTALARGS >= 4):	
+		if (TOTALARGS >= 6):	
 			print("Too many arguments! Check command line.")
 			usage()
-		elif (TOTALARGS==1):
+			exit()		
+		if (TOTALARGS==1):
 			usage()
 		elif (sys.argv[x] == "-nfl05"):
-			EMU_MODE = "nfl05"
+			print("IP: "+SERVER_IP+" Port: "+str(PORT_BO3U_PS2))
 			GameSocket.bind((SERVER_IP, PORT_NFL05_PS2))
 			print("Now running in Madden NFL 2005 Mode\n")
 		elif (sys.argv[x] == "-nfsu"):
-			EMU_MODE = "nfsu"
 			GameSocket.bind((SERVER_IP, PORT_NFSU_PS2))
 			print("Now running in Need for Speed: Underground Mode\n")
+		elif (sys.argv[x] == "-ssx3"):
+			GameSocket.bind((SERVER_IP, PORT_SSX3_PS2))
+			print("Now running in SSX3 Mode\n")
 		elif (sys.argv[x] == "-bo3r"):
-			EMU_MODE = "bo3r"
 			print("IP: "+SERVER_IP+" Port: "+str(PORT_BO3U_PS2))
 			GameSocket.bind((SERVER_IP, PORT_BO3R_PS2))
 			print("Now running in Burnout 3 Review Mode (PS2)\n")
 		elif (sys.argv[x] == "-bo3u"):
-			EMU_MODE = "bo3u"
 			GameSocket.bind((SERVER_IP, PORT_BO3U_PS2))
 			print("Now running in Burnout 3 Retail Mode (PS2)\n")
 		elif (sys.argv[x] == "-bop3"):
-			EMU_MODE = "bop"
 			GameSocket.bind((SERVER_IP, PORT_BOP_PS3))
 			print("Now running in Burnout Paradise Mode (PS3)\n")   
 		elif (sys.argv[x] == "-bopc"):
-			EMU_MODE = "bop"
 			GameSocket.bind((SERVER_IP, PORT_BOP_PC))
 			print("Now running in Burnout Paradise Mode (PC)\n")   
 		elif (sys.argv[x] == "-p"):
-			EMU_MODE = "custom"
 			GameSocket.bind((SERVER_IP, int(sys.argv[x+1])))
 			print("Now running in Custom Game Mode\n")   
 	LISTENERSocket.bind((SERVER_IP, LISTENER))
@@ -125,6 +128,14 @@ def bind():
 	print("Bind complete.\n")
 
 print("VTSTech-SRVEmu v"+BUILD+"\nGitHub: https://github.com/Veritas83/VTSTech-SRVEmu\nContributors: No23\n")
+for x in range(0,TOTALARGS,1):
+	if (TOTALARGS >= 6):	
+		print("Too many arguments! Check command line.")
+		usage()
+		exit()
+	if (sys.argv[x] == "-i"):
+		SERVER_IP = sys.argv[x+1]
+		SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')		
 bind()
 print('Waiting for connections.. ')
 reply=b''
@@ -192,8 +203,9 @@ def create_packet(cmd, subcmd, payload):
     return struct.pack(">4s4sL%ds" % size, bytearray(cmd, 'ascii'), bytearray(subcmd, 'ascii'), size + 12, bytearray(payload, 'ascii'))
 #Thx No23
 def cmd_news(payload):
+    global SERVER_IP
     print("News Payload: "+str(payload))
-    p = 'BUDDY_SERVER=192.168.0.228\n'
+    p = 'BUDDY_SERVER='+SERVER_IP+'\n'
     p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
     #p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
     p+= 'EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt\n'
@@ -561,6 +573,7 @@ def build_reply(data):
     sessStr="SESS="+clientSESS
     maskStr="MASK="+str(random.randint(1000,9999))+"f3f70ecb1757cd7001b9a7a"+str(random.randint(1000,9999))         	
     replyTmp=msgType+pad
+    print("Debug"+str(SERVER_IP_BIN))
     reply=SERVER_IP_BIN+x0A+SERVER_PORT_BIN+x0A
     reply+=bytes(sessStr.encode("ascii"))+x0A+bytes(maskStr.encode("ascii"))+x0A+x00
     oddByte=len(codecs.decode(reply+replyTmp,'latin1'))+1
@@ -620,7 +633,7 @@ def build_reply(data):
     replyTmp=b'pers'+pad
     persStr="A=24.141.39.62"
     reply=persStr.encode('ascii')+x0A
-    persStr='EX-telemetry=192.168.0.228,9983,enUS'
+    persStr='EX-telemetry='+SERVER_IP+',9983,enUS'
     reply=persStr.encode('ascii')+x0A
     persStr="LA=24.141.39.62"
     reply=persStr.encode('ascii')+x0A
@@ -745,6 +758,10 @@ def build_reply(data):
     parse_data(data)
     p='COUNT=0\n'
     reply = create_packet('gqwk', '', p)
+  if (msgType == b'onln'):
+    parse_data(data)
+    p='PERS='+clientNAME+'\n'
+    reply = create_packet('onln', '', p)
   if (msgType == b'gpsc'):
     parse_data(data)
     reply = reply_mgm()
