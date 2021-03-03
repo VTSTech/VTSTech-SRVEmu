@@ -1,5 +1,4 @@
 import codecs, os, sys, socket, struct, select, time, string, random, hashlib, array, math
-from pythonping import ping
 from _thread import *
 
 GameSocket = socket.socket()
@@ -11,11 +10,14 @@ BUILD="0.1-ALPHA R0.65"
 SERVER_IP = '192.168.0.228'
 SERVER_IP_BIN = b'ADDR=192.168.0.228'
 SERVER_PORT_BIN= b'PORT=10901'
+
 PORT_NFSU_PS2 = 10900 #ps2nfs04.ea.com:10900
 PORT_BO3U_PS2 = 21800	#ps2burnout05.ea.com:21800
 PORT_BO3R_PS2 = 21840 #ps2lobby02.beta.ea.com:21840
+PORT_NFL05_PS2 = 20000  #ps2madden05.ea.com:20000
 PORT_BOP_PS3 = 21870  #ps3burnout08.ea.com:21870
-PORT_BOP_PC = 21841  #ps3burnout08.ea.com:21870
+PORT_BOP_PC = 21840  #pcburnout08.ea.com:21871
+
 LISTENER = 10901
 BUDDY_PORT = 10899
 THREADCOUNT = 0
@@ -86,6 +88,10 @@ def bind():
 			usage()
 		elif (TOTALARGS==1):
 			usage()
+		elif (sys.argv[x] == "-nfl05"):
+			EMU_MODE = "nfl05"
+			GameSocket.bind((SERVER_IP, PORT_NFL05_PS2))
+			print("Now running in Madden NFL 2005 Mode\n")
 		elif (sys.argv[x] == "-nfsu"):
 			EMU_MODE = "nfsu"
 			GameSocket.bind((SERVER_IP, PORT_NFSU_PS2))
@@ -125,7 +131,7 @@ reply=b''
 
 def parse_data(data):
 	tmp = data.split(codecs.decode('0A','hex_codec'))
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,news_cnt
 
 	for x in range(0,len(tmp)):
@@ -144,6 +150,8 @@ def parse_data(data):
 			clientVERS = tmp[x].decode('latin1')[5:]
 		elif (tmp[x].decode('latin1')[:4] == "NAME"):
 			clientNAME = tmp[x].decode('latin1')[5:]
+		elif (tmp[x].decode('latin1')[:4] == "USER"):
+			clientUSER = tmp[x].decode('latin1')[5:]	
 		elif (tmp[x].decode('latin1')[:4] == "PASS"):
 			clientPASS = tmp[x].decode('latin1')[5:]	
 		elif (tmp[x].decode('latin1')[:4] == "PERS"):
@@ -234,7 +242,7 @@ def reply_skey():
 	
 def reply_acct(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,news_cnt
 	reply=b''
 	MD5=hashlib.md5()
@@ -285,7 +293,7 @@ def reply_acct(data):
 
 def reply_auth(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
 	reply=b''
 
@@ -360,7 +368,7 @@ def reply_auth(data):
 
 def reply_cper(data):
 	tmp = data[11:].split(codecs.decode('0A','hex_codec'))
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
 	reply=b''
 	cperStr="PERS="+clientPERS
@@ -371,7 +379,7 @@ def reply_cper(data):
 	return reply
 	
 def reply_rom():
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
 	oddByte = codecs.decode('00','hex_codec')          
 	replyTmp=b'+rom'+pad
@@ -403,7 +411,7 @@ def reply_rom():
 	return reply
 	
 def reply_who():
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
 	oddByte = codecs.decode('00','hex_codec')          
 	replyTmp=b'+who'+pad
@@ -486,9 +494,41 @@ def reply_mgm():
 	packet = create_packet('+mgm', '', p)
 	print("REPLY: "+packet.decode('latin1'))
 	return packet	
+
+def reply_gam():
+	p =  'CUSTFLAGS='+clientCUSTFLAGS+'\n'
+	p += 'MINSIZE='+clientMINSIZE+'\n'
+	p += 'MAXSIZE='+clientMAXSIZE+'\n'
+	p += 'NAME=VTSTech\n'
+	p += 'PARAMS='+clientPARAMS+'\n'
+	p += 'PRIV='+clientPRIV+'\n'
+	p += 'SEED=12345\n'
+	p += 'SYSFLAGS='+clientSYSFLAGS+'\n'
+	p += 'MADDR='+clientMAC+'\n'
+	p += 'COUNT=1\n'
+	p += 'NUMPART=1\n'
+	p += 'PARTSIZE='+clientMINSIZE+'\n'
+	p += 'GPSREGION=2\n'
+	p += 'GAMEPORT=9657\n'
+	p += 'VOIPPORT=9667\n'
+	p += 'EVGID=0\n'
+	p += 'EVID=0\n'
+	p += 'IDENT=6450\n'
+	p += 'GAMEMODE=0\n'
+	p += 'PARTPARAMS=0\n'
+	p += 'ROOM=0\n'
+	p += 'SESS='+clientSESS+'\n'
+	p += 'OPGUEST=0\n'
+	p += 'WHEN='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
+	p += 'WHENC='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
+	p += 'GPSHOST=VTSTech\n'
+	p += 'HOST=VTSTech\n'
+	packet = create_packet('+gam', '', p)
+	print("REPLY: "+packet.decode('latin1'))
+	return packet		
 	
 def reply_ping(data):
-	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+	global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
 	global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
 	print("Ping Recv: "+str(ping_cnt)+" Ping Sent: "+str(ping_sent))
 	oddByte = codecs.decode('00','hex_codec')          
@@ -507,7 +547,7 @@ def reply_ping(data):
 	
 def build_reply(data):
   global SKEYREPLY, SKEY
-  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST, clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,ping_cnt
   reply=b''
   if (msgType == codecs.decode('801C0100','hex_codec')):
@@ -515,6 +555,7 @@ def build_reply(data):
     reply = codecs.decode('83DA04000A00','hex_codec')
   if (msgType == b'@dir'):
     parse_data(data)
+    print("@dir: "+data.decode('latin1'))
     tmp = data.split(codecs.decode('0A','hex_codec'))    
     clientSESS=str(random.randint(1000,9999))+str(random.randint(1000,9999))+str(random.randint(10,99))
     sessStr="SESS="+clientSESS
@@ -532,6 +573,7 @@ def build_reply(data):
     SKEY = tmp[0].decode('latin1')[5:]
     print("Client sKey: "+SKEY)              
     reply = reply_skey()
+    time.sleep(1)
   if (msgType == b'news'):
     news_cnt+=1
     if news_cnt == 1:
@@ -692,6 +734,13 @@ def build_reply(data):
   if (msgType == b'cate'):
     parse_data(data)
     reply = create_packet('cate', '', '')
+  if (msgType == b'user'):
+    parse_data(data)
+    p="NAME="+clientNAME+"\n"
+    reply = create_packet('user', '', p)
+  if (msgType == b'cusr'):
+    parse_data(data)
+    reply = create_packet('cusr', '', '')
   if (msgType == b'gqwk'):
     parse_data(data)
     p='COUNT=0\n'
@@ -769,9 +818,11 @@ def threaded_client(connection):
 			else:
 				msgSize = tmp[10]
 				msgSize +=tmp[11]
-				#print("Debug:"+str(msgSize))
-				msgSize = int(struct.unpack(">h",bytes(str(msgSize),'ascii'))[0])
-				#print("SIZE2: "+(str(msgSize)))		
+				if msgSize == 1:
+					msgSize+=255
+				else:
+					msgSize = int(struct.unpack(">h",bytes(str(msgSize),'ascii'))[0])
+					#print("SIZE2: "+(str(msgSize)))		
 			msgSize = msgSize - 12
 			data = connection.recv(msgSize)
 			print("SIZE: "+(str(msgSize)))
@@ -784,7 +835,7 @@ def threaded_client(connection):
 			if (msgType == b'sviw'):
 				reply = reply_ping(data)
 				connection.sendall((reply))
-				reply = reply_who()
+				reply = reply_gam()
 				connection.sendall((reply))
 		#if (msgType == b'fget'):
 			#parse_data(data)
