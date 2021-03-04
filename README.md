@@ -1,4 +1,4 @@
 # VTSTech-SRVEmu
 
-<img src="https://i.gyazo.com/3a96cf3bf30ae49f7efa1d6cdc3f1ded.png">
-<img src="https://i.gyazo.com/0350a784dfac1e72c3755176653e3e99.png">
+<img src="https://i.gyazo.com/2e202390d0b73fa02dec0a17a19c1e5e.png">
+<img src="https://i.gyazo.com/9940a7f8b5d02c492e61fbe149c605a7.png">
