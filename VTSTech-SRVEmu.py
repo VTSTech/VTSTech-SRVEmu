@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.68"
+BUILD="0.1-ALPHA R0.69"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -32,7 +32,7 @@ NO_DATA=False
 news_cnt=0
 ping_cnt=0
 ping_sent=0
-ping_start=time.time()
+ping_start=time.time()+15
 ping_time=time.time()
 curr_time=time.time()
 
@@ -320,7 +320,7 @@ def cmd_news(payload):
       packet = create_packet('news', 'new7', p)
       #payload=''
     if (clientVERS =='BURNOUT5/ISLAND'):
-      packet = create_packet('news', 'new1', p)
+      packet = create_packet('news', 'new8', p)
     return packet
         
 def reply_skey():
@@ -482,7 +482,40 @@ def reply_cper(data):
   reply+=cperStr.encode('ascii')+x0A
   reply+=codecs.decode('00','hex_codec')
   return reply
-  
+
+def reply_gjoi():
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
+  global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
+  oddByte = codecs.decode('00','hex_codec')          
+  replyTmp=b'gjoi'+pad
+  gjoiStr="TI=1001"
+  reply=gjoiStr.encode('ascii')+x0A
+  gjoiStr="N=room"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="H=vtstech"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="D=burnout revival"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="F=CK"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="A=24.141.39.62"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="T=0"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="L=5"
+  reply+=gjoiStr.encode('ascii')+x0A
+  gjoiStr="P=0"
+  reply+=gjoiStr.encode('ascii')+codecs.decode('0A00','hex_codec')
+  oddByte=len(codecs.decode(reply,'latin1'))+12
+  oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
+  reply=replyTmp+oddByte+reply
+  print("REPLY: "+reply.decode('latin1'))
+  if (clientVERS == "BURNOUT5/ISLAND"):
+    reply=b''
+  return reply
+    
 def reply_rom():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
@@ -496,7 +529,7 @@ def reply_rom():
   reply+=romStr.encode('ascii')+x0A
   romStr="H=vtstech"
   reply+=romStr.encode('ascii')+x0A
-  romStr="D=burnout 3 revival"
+  romStr="D=burnout revival"
   reply+=romStr.encode('ascii')+x0A
   romStr="F=CK"
   reply+=romStr.encode('ascii')+x0A
@@ -506,8 +539,7 @@ def reply_rom():
   reply+=romStr.encode('ascii')+x0A
   romStr="L=5"
   reply+=romStr.encode('ascii')+x0A
-  romStr="P=0"
-  reply+=romStr.encode('ascii')+x0A            
+  romStr="P=0"        
   reply+=romStr.encode('ascii')+codecs.decode('0A00','hex_codec')
   oddByte=len(codecs.decode(reply,'latin1'))+12
   oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
@@ -532,7 +564,7 @@ def reply_who():
   reply+=whoStr.encode('ascii')+x0A
   whoStr="A=24.141.39.62"
   reply+=whoStr.encode('ascii')+x0A
-  whoStr="LA=192.168.0.222"
+  whoStr="LA=192.168.0.133"
   reply+=whoStr.encode('ascii')+x0A
   whoStr="P=1"
   reply+=whoStr.encode('ascii')+x0A
@@ -540,7 +572,7 @@ def reply_who():
   reply+=whoStr.encode('ascii')+x0A
   whoStr="F=U"
   reply+=whoStr.encode('ascii')+x0A
-  whoStr="G=0"
+  whoStr="G=1"
   reply+=whoStr.encode('ascii')+x0A  
   whoStr="HW=0"
   reply+=whoStr.encode('ascii')+x0A
@@ -554,8 +586,8 @@ def reply_who():
   reply+=whoStr.encode('ascii')+x0A         
   whoStr="PRES="
   reply+=whoStr.encode('ascii')+x0A         
-  #whoStr="SESS="+clientSESS
-  #reply+=whoStr.encode('ascii')+x0A         
+  whoStr="SESS="+clientSESS
+  reply+=whoStr.encode('ascii')+x0A         
   whoStr="RP=0"
   reply+=whoStr.encode('ascii')+x0A         
   whoStr="S="
@@ -782,42 +814,26 @@ def build_reply(data):
     reply = create_packet('peek', '', p)    
   if (msgType == b'pers'):
     parse_data(data)
-    oddByte = codecs.decode('00','hex_codec')
-    replyTmp=b'pers'+pad
-    persStr="A=24.141.39.62"
-    reply=persStr.encode('ascii')+x0A
-    #persStr='EX-telemetry='+SERVER_IP+',9983,enUS'
-    #reply=persStr.encode('ascii')+x0A
-    persStr="LA=24.141.39.62"
-    reply=persStr.encode('ascii')+x0A
-    persStr="LOC=enUS"
-    reply=persStr.encode('ascii')+x0A
-    #persStr="IDLE=10000"
-    #reply+=persStr.encode('ascii')+x0A
-    persStr="MA="+clientMAC
-    reply+=persStr.encode('ascii')+x0A
+    #persStr="A=24.141.39.62\n"
+    #if (clientVERS == 'BURNOUT5/ISLAND'):
+    	#print("fired")
+    	#persStr+='EX-telemetry='+SERVER_IP+',9983,enUS\n'
+    	#persStr+="IDLE=10000\n"
+    #persStr+="LA=24.141.39.62\n"
+    persStr="LOC=enUS\n"
+    persStr+="MA="+clientMAC+"\n"
     if isinstance(clientNAME,str):
-      persStr="PERS="+clientNAME.lower()
-      reply+=persStr.encode('ascii')+x0A
-      persStr="NAME="+clientNAME.lower()
+      persStr+="PERS="+clientNAME.lower()+"\n"
+      persStr+="NAME="+clientNAME.lower()+"\n"
     else:
-      persStr="PERS="+clientNAME[0].lower()  
-      reply+=persStr.encode('ascii')+x0A
-      persStr="NAME="+clientNAME[0].lower()  
-    reply+=persStr.encode('ascii')+x0A
-    persStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-    reply+=persStr.encode('ascii')+x0A
-    persStr="PLAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-    reply+=persStr.encode('ascii')+x0A
-    persStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-    reply+=persStr.encode('ascii')+x0A
-    persStr="PSINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-    reply+=persStr.encode('ascii')+x0A
-    persStr="LKEY=3fcf27540c92935b0a66fd3b0000283c"        
-    reply+=persStr.encode('ascii')+codecs.decode('0A00','hex_codec')
-    oddByte=len(codecs.decode(replyTmp+reply,'latin1'))+1
-    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-    reply=replyTmp+oddByte+reply
+      persStr+="PERS="+clientNAME[0].lower()+"\n"
+      persStr+="NAME="+clientNAME[0].lower()+"\n"
+    persStr+="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    persStr+="PLAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    persStr+="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    persStr+="PSINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    persStr+="LKEY=3fcf27540c92935b0a66fd3b0000283c\n"
+    reply = create_packet('pers', '', persStr)
     print("REPLY: "+reply.decode('latin1'))  
   if (msgType == b'room'):
     parse_data(data)
@@ -851,7 +867,7 @@ def build_reply(data):
     SKEY = tmp[0].decode('latin1')[5:]
     print("Client sKey: "+SKEY)              
     reply = reply_skey()
-    time.sleep(1)
+    #time.sleep(1)
   if (msgType == b'sviw'):
     oddByte = codecs.decode('00','hex_codec')
     replyTmp=b'sviw'+pad         
@@ -941,7 +957,7 @@ def threaded_client(connection):
   connection.settimeout(500)
   while True:        
     curr_time=time.time()
-    if ((curr_time - ping_start) > 5):
+    if (((curr_time - ping_start) > 5) & (ping_cnt >=1)):
       reply = reply_ping('')
       connection.sendall((reply))    
     try:
@@ -969,6 +985,7 @@ def threaded_client(connection):
       else:
         msgSize = tmp[10]
         msgSize +=tmp[11]
+        print("Debug: "+(str(msgSize)))
         if msgSize == 1:
           msgSize+=255
         else:
@@ -977,10 +994,11 @@ def threaded_client(connection):
       msgSize = msgSize - 12
       data = connection.recv(msgSize)
       print("SIZE: "+(str(msgSize)))
-      time.sleep(0.2)
+      #time.sleep(0.2)
       reply = build_reply(data)
       connection.sendall((reply))
       if (msgType == b'pers'):
+        time.sleep(1)
         reply = reply_who()
         connection.sendall((reply))
       if (msgType == b'AUTH'):
