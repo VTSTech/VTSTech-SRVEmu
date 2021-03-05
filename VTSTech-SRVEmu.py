@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.70D"
+BUILD="0.1-ALPHA R0.71"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -375,9 +375,7 @@ def reply_acct(data):
       if (clientNAME == clientUSER):
         reply=b'authimst'#if account exists, cannot create
         return reply
-      print("DEBUG: "+clientUSER)
-    clientUSER = x.split("#")[0]
-    clientMAIL = x.split("#")[2]
+    clientUSER = clientNAME
     acctStr="TOS=1"
     reply=acctStr.encode('ascii')+x0A
     acctStr="NAME="+clientNAME.lower()
