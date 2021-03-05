@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.70 (SSX3)"
+BUILD="0.1-ALPHA R0.71 (SSX3)"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -69,6 +69,8 @@ clientSYSFLAGS=''
 
 pingREF=''
 pingTIME='2'
+
+roomNAME=''
 
 NEWS_PAYLOAD=0
 
@@ -152,7 +154,7 @@ def parse_data(data):
   tmp = data.split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,news_cnt
   
   if (msgType == b'news'):
@@ -160,72 +162,79 @@ def parse_data(data):
       if (tmp[x].decode('latin1')[:4] == "NAME"):
         NEWS_PAYLOAD = tmp[x].decode('latin1')[5:]
         break
-  if (msgType == b'~png'):
+  elif (msgType == b'~png'):
     for x in range(0,len(tmp)):  
       if (tmp[x].decode('latin1')[:3] == "REF"):
         pingREF = tmp[x].decode('latin1')[4:]
       if (tmp[x].decode('latin1')[:4] == "TIME"):
         pingTIME = tmp[x].decode('latin1')[5:]
-  for x in range(0,len(tmp)):
-    #print("DEBUG: "+str(x))
-    if (tmp[x].decode('latin1')[:3] == "MID") | (tmp[x].decode('latin1')[:3] == "MAC"):
-      clientMAC = tmp[x].decode('latin1')[4:]
-    elif (tmp[x].decode('latin1')[:3] == "PID"):
-      clientPID = tmp[x].decode('latin1')[4:]
-    elif (tmp[x].decode('latin1')[:3] == "SKU"):
-      clientSKU = tmp[x].decode('latin1')[4:]
-    elif (tmp[x].decode('latin1')[:4] == "ALTS"):
-      clientALTS = tmp[x].decode('latin1')[5:]  
-    elif (tmp[x].decode('latin1')[:4] == "BORN"):
-      clientBORN = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:4] == "SLUS"):
-      clientSLUS = tmp[x].decode('latin1')[5:]        
-    elif (tmp[x].decode('latin1')[:4] == "VERS"):
-      clientVERS = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:4] == "NAME"):
-      clientNAME = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:4] == "USER"):
-      clientUSER = tmp[x].decode('latin1')[5:]  
-    elif (tmp[x].decode('latin1')[:4] == "PASS"):
-      clientPASS = tmp[x].decode('latin1')[5:]  
-    elif (tmp[x].decode('latin1')[:4] == "PERS"):
-      clientPERS = tmp[x].decode('latin1')[5:]  
-    elif (tmp[x].decode('latin1')[:4] == "PROD"):
-      clientPROD = tmp[x].decode('latin1')[5:]  
-    elif (tmp[x].decode('latin1')[:4] == "SEED"):
-      clientSEED = tmp[x].decode('latin1')[5:]  
-    elif (tmp[x].decode('latin1')[:4] == "MAIL"):
-      clientMAIL = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:4] == "LAST"):
-      clientLAST = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:4] == "LKEY"):
-      clientLKEY = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:4] == "PRIV"):
-      clientPRIV = tmp[x].decode('latin1')[5:]
-    elif (tmp[x].decode('latin1')[:5] == "PLAST"):
-      clientPLAST = tmp[x].decode('latin1')[6:]
-    elif (tmp[x].decode('latin1')[:5] == "MADDR"):
-      clientMADDR = tmp[x].decode('latin1')[6:]
-    elif (tmp[x].decode('latin1')[:6] == "HWFLAG"):
-      clientHWFLAG = tmp[x].decode('latin1')[7:]
-    elif (tmp[x].decode('latin1')[:6] == "HWMASK"):
-      clientHWMASK = tmp[x].decode('latin1')[7:]
-    elif (tmp[x].decode('latin1')[:6] == "DEFPER"):
-      clientDEFPER = tmp[x].decode('latin1')[7:]
-    elif (tmp[x].decode('latin1')[:6] == "PARAMS"):
-      clientPARAMS = tmp[x].decode('latin1')[7:]
-    elif (tmp[x].decode('latin1')[:6] == "SDKVER"):
-      clientSDKVER = tmp[x].decode('latin1')[7:]
-    elif (tmp[x].decode('latin1')[:7] == "MINSIZE"):
-      clientMINSIZE = tmp[x].decode('latin1')[8:]
-    elif (tmp[x].decode('latin1')[:7] == "MAXSIZE"):
-      clientMAXSIZE = tmp[x].decode('latin1')[8:]
-    elif (tmp[x].decode('latin1')[:8] == "SYSFLAGS"):
-      clientSYSFLAGS = tmp[x].decode('latin1')[9:]
-    elif (tmp[x].decode('latin1')[:9] == "CUSTFLAGS"):
-      clientCUSTFLAGS = tmp[x].decode('latin1')[10:]
-    elif (tmp[x].decode('latin1')[:9] == "PERSONAS"):
-      clientPERSONAS = tmp[x].decode('latin1')[10:]        
+      break
+  elif (msgType == b'room'):
+    for x in range(0,len(tmp)):  
+      if (tmp[x].decode('latin1')[:4] == "NAME"):
+        roomNAME = tmp[x].decode('latin1')[5:]
+      break
+  else:
+	  for x in range(0,len(tmp)):
+	    #print("DEBUG: "+str(x))
+	    if (tmp[x].decode('latin1')[:3] == "MID") | (tmp[x].decode('latin1')[:3] == "MAC"):
+	      clientMAC = tmp[x].decode('latin1')[4:]
+	    elif (tmp[x].decode('latin1')[:3] == "PID"):
+	      clientPID = tmp[x].decode('latin1')[4:]
+	    elif (tmp[x].decode('latin1')[:3] == "SKU"):
+	      clientSKU = tmp[x].decode('latin1')[4:]
+	    elif (tmp[x].decode('latin1')[:4] == "ALTS"):
+	      clientALTS = tmp[x].decode('latin1')[5:]  
+	    elif (tmp[x].decode('latin1')[:4] == "BORN"):
+	      clientBORN = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:4] == "SLUS"):
+	      clientSLUS = tmp[x].decode('latin1')[5:]        
+	    elif (tmp[x].decode('latin1')[:4] == "VERS"):
+	      clientVERS = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:4] == "NAME"):
+	      clientNAME = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:4] == "USER"):
+	      clientUSER = tmp[x].decode('latin1')[5:]  
+	    elif (tmp[x].decode('latin1')[:4] == "PASS"):
+	      clientPASS = tmp[x].decode('latin1')[5:]  
+	    elif (tmp[x].decode('latin1')[:4] == "PERS"):
+	      clientPERS = tmp[x].decode('latin1')[5:]  
+	    elif (tmp[x].decode('latin1')[:4] == "PROD"):
+	      clientPROD = tmp[x].decode('latin1')[5:]  
+	    elif (tmp[x].decode('latin1')[:4] == "SEED"):
+	      clientSEED = tmp[x].decode('latin1')[5:]  
+	    elif (tmp[x].decode('latin1')[:4] == "MAIL"):
+	      clientMAIL = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:4] == "LAST"):
+	      clientLAST = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:4] == "LKEY"):
+	      clientLKEY = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:4] == "PRIV"):
+	      clientPRIV = tmp[x].decode('latin1')[5:]
+	    elif (tmp[x].decode('latin1')[:5] == "PLAST"):
+	      clientPLAST = tmp[x].decode('latin1')[6:]
+	    elif (tmp[x].decode('latin1')[:5] == "MADDR"):
+	      clientMADDR = tmp[x].decode('latin1')[6:]
+	    elif (tmp[x].decode('latin1')[:6] == "HWFLAG"):
+	      clientHWFLAG = tmp[x].decode('latin1')[7:]
+	    elif (tmp[x].decode('latin1')[:6] == "HWMASK"):
+	      clientHWMASK = tmp[x].decode('latin1')[7:]
+	    elif (tmp[x].decode('latin1')[:6] == "DEFPER"):
+	      clientDEFPER = tmp[x].decode('latin1')[7:]
+	    elif (tmp[x].decode('latin1')[:6] == "PARAMS"):
+	      clientPARAMS = tmp[x].decode('latin1')[7:]
+	    elif (tmp[x].decode('latin1')[:6] == "SDKVER"):
+	      clientSDKVER = tmp[x].decode('latin1')[7:]
+	    elif (tmp[x].decode('latin1')[:7] == "MINSIZE"):
+	      clientMINSIZE = tmp[x].decode('latin1')[8:]
+	    elif (tmp[x].decode('latin1')[:7] == "MAXSIZE"):
+	      clientMAXSIZE = tmp[x].decode('latin1')[8:]
+	    elif (tmp[x].decode('latin1')[:8] == "SYSFLAGS"):
+	      clientSYSFLAGS = tmp[x].decode('latin1')[9:]
+	    elif (tmp[x].decode('latin1')[:9] == "CUSTFLAGS"):
+	      clientCUSTFLAGS = tmp[x].decode('latin1')[10:]
+	    elif (tmp[x].decode('latin1')[:9] == "PERSONAS"):
+	      clientPERSONAS = tmp[x].decode('latin1')[10:]        
 
 #Thx No23
 def create_packet(cmd, subcmd, payload):
@@ -302,7 +311,7 @@ def cmd_news(payload):
     else:
     	p = 'BUDDY_SERVER='+SERVER_IP+'\n'
     	p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
-    	#p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
+    	p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
     	p+= 'EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt\n'
     	p+= 'ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt\n'
     	p+= 'TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt\n'
@@ -314,7 +323,7 @@ def cmd_news(payload):
     	p+= 'AVATAR_URL=http://ps3burnout08.ea.com/AV.txt\n'
     	p+= 'STORE_URL=http://ps3burnout08.ea.com/STORE.txt\n'
     	p+= 'LIVE_NEWS_URL_IMAGE_PATH=.\n'
-    	#p+= 'USE_GLOBAL_ROAD_RULE_SCORES=0\n'
+    	p+= 'USE_GLOBAL_ROAD_RULE_SCORES=0\n'
     	p+= 'NEWS_TEXT=VTSTech.is.reviving.games\n'
     	p+= 'TOS_TEXT=VTSTech.is.reviving.games\n'
     	p+= 'ROAD_RULES_SKEY=frscores\n'
@@ -322,6 +331,7 @@ def cmd_news(payload):
     	p+= 'NEWS_DATE='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
     	p+= 'NEWS_URL=http://ps3burnout08.ea.com/news.txt\n'
     	p+= 'USE_ETOKEN=0\n'
+    time.sleep(1)
     news_cmd='new'+str(NEWS_PAYLOAD)
     packet = create_packet('news', news_cmd, p)
 
@@ -352,7 +362,7 @@ def reply_acct(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,news_cnt
   reply=b''
   MD5=hashlib.md5()
@@ -365,7 +375,6 @@ def reply_acct(data):
       if (clientNAME == clientUSER):
         reply=b'authimst'#if account exists, cannot create
         return reply
-    print("DEBUG: "+clientNAME)  
     clientUSER = clientNAME
     acctStr="TOS=1"
     reply=acctStr.encode('ascii')+x0A
@@ -404,7 +413,7 @@ def reply_auth(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   reply=b''
 
@@ -481,7 +490,7 @@ def reply_cper(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   reply=b''
   cperStr="PERS="+clientPERS
@@ -494,7 +503,7 @@ def reply_cper(data):
 def reply_gjoi():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp=b'gjoi'+pad
@@ -527,15 +536,15 @@ def reply_gjoi():
 def reply_rom():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp=b'+rom'+pad
-  romStr="TI=1001"
+  romStr="I=1001"
   reply=romStr.encode('ascii')+x0A
-  romStr="N=room"
+  romStr="N="+roomNAME
   reply+=romStr.encode('ascii')+x0A
-  romStr="H=vtstech"
+  romStr="H="+clientNAME
   reply+=romStr.encode('ascii')+x0A
   romStr="D=burnout revival"
   reply+=romStr.encode('ascii')+x0A
@@ -547,7 +556,7 @@ def reply_rom():
   reply+=romStr.encode('ascii')+x0A
   romStr="L=5"
   reply+=romStr.encode('ascii')+x0A
-  romStr="P=0"        
+  romStr="P=0"
   reply+=romStr.encode('ascii')+codecs.decode('0A00','hex_codec')
   oddByte=len(codecs.decode(reply,'latin1'))+12
   oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
@@ -560,7 +569,7 @@ def reply_rom():
 def reply_who():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp=b'+who'+pad
@@ -594,8 +603,8 @@ def reply_who():
   reply+=whoStr.encode('ascii')+x0A         
   whoStr="PRES="
   reply+=whoStr.encode('ascii')+x0A         
-  whoStr="SESS="+clientSESS
-  reply+=whoStr.encode('ascii')+x0A         
+  #whoStr="SESS="+clientSESS
+  #reply+=whoStr.encode('ascii')+x0A         
   whoStr="RP=0"
   reply+=whoStr.encode('ascii')+x0A         
   whoStr="S="
@@ -613,6 +622,10 @@ def reply_who():
   return reply
 
 def reply_mgm():
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
+  global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
+  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
   p =  'CUSTFLAGS='+clientCUSTFLAGS+'\n'
   p += 'MINSIZE='+clientMINSIZE+'\n'
   p += 'MAXSIZE='+clientMAXSIZE+'\n'
@@ -645,12 +658,43 @@ def reply_mgm():
   return packet  
 
 def reply_pop():
-  p =  'Z=0/1\n'
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
+  global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
+  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
+  p =  'Z=1/1\n'
   packet = create_packet('+pop', '', p)
   print("REPLY: "+packet.decode('latin1'))
   return packet  
+
+def reply_mesg():
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
+  global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
+  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
+  p =  'PRIV= \n'
+  p += 'TEXT="challenge 0 0 0 0 1 0 4 1 NA_R_F004 0 0 0 0"\n'
+  p += 'ATTR=N3\n'
+  packet = create_packet('mesg', '', p)
+  print("REPLY: "+packet.decode('latin1'))
+  return packet 
   
+def reply_usr():
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
+  global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
+  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
+  p =  'I=1\n'
+  p += 'N='+clientNAME+'\n'
+  packet = create_packet('+usr', '', p)
+  print("REPLY: "+packet.decode('latin1'))
+  return packet
+    
 def reply_gam():
+  global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
+  global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
+  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
   p =  'CUSTFLAGS='+clientCUSTFLAGS+'\n'
   p += 'MINSIZE='+clientMINSIZE+'\n'
   p += 'MAXSIZE='+clientMAXSIZE+'\n'
@@ -685,7 +729,7 @@ def reply_gam():
 def reply_ping(data):
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp = b'~png'+pad
@@ -706,11 +750,11 @@ def build_reply(data):
   global SKEYREPLY, SKEY
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,ping_cnt
   reply=b''
   if (msgType == codecs.decode('801C0100','hex_codec')):
-    print("DEBUG: enc in")
+    print("* Encryption Detected *\n")
     reply = codecs.decode('83DA04000A00','hex_codec')
   if (msgType == b'@dir'):
     parse_data(data)
@@ -767,6 +811,9 @@ def build_reply(data):
   if (msgType == b'cate'):
     parse_data(data)
     reply = create_packet('cate', '', '')
+  if (msgType == b'chal'):
+    parse_data(data)
+    reply = create_packet('chal', '', '')
   if (msgType == b'cper'):
     parse_data(data)
     replyTmp=b'cper'+pad
@@ -776,6 +823,9 @@ def build_reply(data):
     reply=replyTmp+oddByte+reply
     print("REPLY: "+reply.decode('latin1'))
     time.sleep(1)
+  if (msgType == b'CONN'):
+    parse_data(data)
+    reply = create_packet('CONN', '', '')
   if (msgType == b'cusr'):
     parse_data(data)
     reply = create_packet('cusr', '', '')
@@ -812,6 +862,9 @@ def build_reply(data):
     p="NAME=\n"
     p="COUNT=0\n"
     reply = create_packet('move', '', p)
+  if (msgType == b'mesg'):
+    #parse_data(data)
+    reply = reply_mesg()
   if (msgType == b'news'):
     parse_data(data)
     news_cnt+=1
@@ -828,7 +881,7 @@ def build_reply(data):
   if (msgType == b'peek'):
     parse_data(data)
     p="NAME="+clientNAME+"\n"
-    reply = create_packet('peek', '', p)    
+    reply = create_packet('peek', '', p)
   if (msgType == b'pers'):
     parse_data(data)
     persStr="A=24.141.39.62\n"
@@ -840,38 +893,41 @@ def build_reply(data):
     persStr="LOC=enUS\n"
     persStr+="MA="+clientMAC+"\n"
     if isinstance(clientNAME,str):
-      persStr+="PERS="+clientNAME.lower()+"\n"
       persStr+="NAME="+clientNAME.lower()+"\n"
+      persStr+="PERS="+clientNAME.lower()+"\n"
     else:
-      persStr+="PERS="+clientNAME[0].lower()+"\n"
       persStr+="NAME="+clientNAME[0].lower()+"\n"
+      persStr+="PERS="+clientNAME[0].lower()+"\n"
     persStr+="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
     persStr+="PLAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
     persStr+="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
-    persStr+="PSINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    #persStr+="PSINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
     persStr+="LKEY=3fcf27540c92935b0a66fd3b0000283c\n"
     reply = create_packet('pers', '', persStr)
     print("REPLY: "+reply.decode('latin1'))  
   if (msgType == b'room'):
     parse_data(data)
-    reply = create_packet('room', '', '')
+    p = 'NAME='+roomNAME+'\n'
+    packet = create_packet('room', '', p)
+    return packet    
   if (msgType == b'rvup'):
     parse_data(data)
     reply = create_packet('rvup', '', '')
   if (msgType == b'sele'):
     parse_data(data)
-    p =  'VERS='+clientVERS+'\n'
-    p += 'SKU='+clientSKU+'\n'
-    p += 'USERS=0\n'
-    p += 'GAMES=0\n'
-    p += 'MYGAME=1\n'
-    p += 'ROOMS=0\n'
-    p += 'MESGS=0\n'
-    p += 'ASYNC=1\n'
-    p += 'USERSETS=0\n'
-    p += 'MESGTYPES=100728964\n'    
-    p += 'STATS=0\n'
-    packet = create_packet('sele', '', p)
+    #p =  'VERS='+clientVERS+'\n'
+    #p += 'SKU='+clientSKU+'\n'
+    #p = 'USERS=0\n'
+    #p += 'GAMES=0\n'
+    #p += 'MYGAME=1\n'
+    #p += 'ROOMS=0\n'
+    #p += 'MESGS=0\n'
+    #p += 'ASYNC=1\n'
+    #p += 'USERSETS=0\n'
+    #p += 'MESGTYPES=100728964\n'    
+    #p += 'SLOTS=4\n'
+    #p += 'STATS=0\n'
+    packet = create_packet('sele', '', '')
     return packet
   if (msgType == b'sdta'):
     parse_data(data)
@@ -885,6 +941,10 @@ def build_reply(data):
     print("Client sKey: "+SKEY)              
     reply = reply_skey()
     #time.sleep(1)
+  if (msgType == b'snap'):
+    parse_data(data)
+    reply = create_packet('snap', '', '')
+    return reply
   if (msgType == b'sviw'):
     oddByte = codecs.decode('00','hex_codec')
     replyTmp=b'sviw'+pad         
@@ -944,12 +1004,20 @@ def build_reply(data):
     #print("REPLY: "+reply.decode('latin1'))
   if (msgType == b'user'):
     parse_data(data)
-    p="NAME="+clientNAME+"\n"
+    p="NAME=test\n"
+    p+="CRC=\n"
+    p+="PID=\n"
     reply = create_packet('user', '', p)
+  if (msgType == b'USER'):
+    parse_data(data)
+    p="NAME=test\n"
+    p+="CRC=\n"
+    p+="PID=\n"
+    reply = create_packet('USER', '', p)
   if (msgType == b'USCH'):
     parse_data(data)    
     p="NAME="+clientUSER+"\n"
-    reply = create_packet('usch', '', p)
+    reply = create_packet('USCH', '', p)
   if (msgType == b'usld'):
     parse_data(data)
     p =  'IMGATE=0\n'
@@ -1023,12 +1091,14 @@ def threaded_client(connection):
         reply = reply_ping(data)
         #time.sleep(1)
         connection.sendall((reply))
+      if (msgType == b'room'):
+        reply = reply_rom()
+        connection.sendall((reply))
       if (msgType == b'move'):
-        time.sleep(1)
         reply = reply_pop()
         connection.sendall((reply))
-        reply = reply_rom()
-        connection.sendall((reply))        
+        reply = reply_usr()
+        connection.sendall((reply))              
     #print("D5")
     #if (msgType == b'fget'):
       #parse_data(data)
