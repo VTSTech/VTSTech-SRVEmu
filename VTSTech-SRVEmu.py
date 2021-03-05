@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.69"
+BUILD="0.1-ALPHA R0.70"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -18,6 +18,7 @@ PORT_NFL05_PS2 = 20000  #ps2madden05.ea.com:20000
 PORT_BOP_PS3 = 21870  #ps3burnout08.ea.com:21870
 PORT_BOP_PC = 21840  #pcburnout08.ea.com:21871
 PORT_SSX3_PS2 = 11000 #ps2ssx04.ea.com:11000
+PORT_NC04_PS2 = 10600 #ps2nascar04.ea.com:10600
 
 LISTENER = 10901
 BUDDY_PORT = 10899
@@ -32,12 +33,13 @@ NO_DATA=False
 news_cnt=0
 ping_cnt=0
 ping_sent=0
-ping_start=time.time()+15
+ping_start=time.time()
 ping_time=time.time()
 curr_time=time.time()
 
 msgType=b''
 msgSize=b''
+
 clientALTS=''
 clientNAME=''
 clientVERS=''
@@ -65,6 +67,9 @@ clientPERSONAS=''
 clientSEED=''
 clientSYSFLAGS=''
 
+pingREF=''
+pingTIME='2'
+
 NEWS_PAYLOAD=0
 
 pad = codecs.decode('00000000000000','hex_codec')
@@ -83,6 +88,7 @@ def usage():
   print("-bopc  Run in Burnout Paradise Mode (PC)")
   print("-nfsu  Run in Need for Speed Underground Mode (PS2)")
   print("-nfl05 Run in Madden NFL 05 Mode (PS2)")
+  print("-nc04  Run in Nascar Thunder 04 Mode (PS2)")
   print("-ssx3  Run in SSX3 Mode (PS2)")
   print("-p 123 Run in Custom Game Mode on this TCP Port")
   print("-i ip  Run on this IPv4 Address")
@@ -99,13 +105,19 @@ def bind():
     if (TOTALARGS==1):
       usage()
     elif (sys.argv[x] == "-nfl05"):
-      print("IP: "+SERVER_IP+" Port: "+str(PORT_BO3U_PS2))
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_NFL05_PS2))
       GameSocket.bind((SERVER_IP, PORT_NFL05_PS2))
       print("Now running in Madden NFL 2005 Mode\n")
+    elif (sys.argv[x] == "-nc04"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_NC04_PS2))
+      GameSocket.bind((SERVER_IP, PORT_NC04_PS2))
+      print("Now running in NASCAR Thunder 2004 Mode\n")
     elif (sys.argv[x] == "-nfsu"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_NFSU_PS2))
       GameSocket.bind((SERVER_IP, PORT_NFSU_PS2))
       print("Now running in Need for Speed: Underground Mode\n")
     elif (sys.argv[x] == "-ssx3"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_SSX3_PS2))
       GameSocket.bind((SERVER_IP, PORT_SSX3_PS2))
       print("Now running in SSX3 Mode\n")
     elif (sys.argv[x] == "-bo3r"):
@@ -113,44 +125,34 @@ def bind():
       GameSocket.bind((SERVER_IP, PORT_BO3R_PS2))
       print("Now running in Burnout 3 Review Mode (PS2)\n")
     elif (sys.argv[x] == "-bo3u"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_BO3U_PS2))
       GameSocket.bind((SERVER_IP, PORT_BO3U_PS2))
       print("Now running in Burnout 3 Retail Mode (PS2)\n")
     elif (sys.argv[x] == "-bop3"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_BOP_PS3))
       GameSocket.bind((SERVER_IP, PORT_BOP_PS3))
       print("Now running in Burnout Paradise Mode (PS3)\n")   
     elif (sys.argv[x] == "-bopc"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_BOP_PC))
       GameSocket.bind((SERVER_IP, PORT_BOP_PC))
       print("Now running in Burnout Paradise Mode (PC)\n")   
     elif (sys.argv[x] == "-p"):
+      print("IP: "+SERVER_IP+" Port: "+str(int(sys.argv[x+1])))
       GameSocket.bind((SERVER_IP, int(sys.argv[x+1])))
       print("Now running in Custom Game Mode\n")   
       
   LISTENERSocket.bind((SERVER_IP, LISTENER))
   BuddySocket.bind((SERVER_IP, BUDDY_PORT))
-  LISTENERSocket.listen(1)
-  GameSocket.listen(1)
-  BuddySocket.listen(1)
+  LISTENERSocket.listen(8)
+  GameSocket.listen(8)
+  BuddySocket.listen(8)
   print("Bind complete.\n")
-
-print("VTSTech-SRVEmu v"+BUILD+"\nGitHub: https://github.com/Veritas83/VTSTech-SRVEmu\nContributors: No23\n")
-for x in range(0,TOTALARGS,1):
-  if (TOTALARGS >= 6):  
-    print("Too many arguments! Check command line.")
-    usage()
-    exit()
-  if (sys.argv[x] == "-i"):
-    SERVER_IP = sys.argv[x+1]
-    SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')    
-
-bind()
-print('Waiting for connections.. ')
-reply=b''
 
 def parse_data(data):
   tmp = data.split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,news_cnt
   
   if (msgType == b'news'):
@@ -158,6 +160,12 @@ def parse_data(data):
       if (tmp[x].decode('latin1')[:4] == "NAME"):
         NEWS_PAYLOAD = tmp[x].decode('latin1')[5:]
         break
+  if (msgType == b'~png'):
+    for x in range(0,len(tmp)):  
+      if (tmp[x].decode('latin1')[:3] == "REF"):
+        pingREF = tmp[x].decode('latin1')[4:]
+      if (tmp[x].decode('latin1')[:4] == "TIME"):
+        pingTIME = tmp[x].decode('latin1')[5:]
   for x in range(0,len(tmp)):
     #print("DEBUG: "+str(x))
     if (tmp[x].decode('latin1')[:3] == "MID") | (tmp[x].decode('latin1')[:3] == "MAC"):
@@ -231,6 +239,7 @@ def cmd_news(payload):
     print("News Payload: "+str(NEWS_PAYLOAD))
 	
     if (NEWS_PAYLOAD == 1):
+    	print("fired!")
     	p='VTSTech-SRVEmu R0.66\n'
     	p+='===================\n'
     	p+='Written by Veritas Technical Solutions www.VTS-Tech.org\n'
@@ -343,7 +352,7 @@ def reply_acct(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,news_cnt
   reply=b''
   MD5=hashlib.md5()
@@ -396,7 +405,7 @@ def reply_auth(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   reply=b''
 
@@ -473,7 +482,7 @@ def reply_cper(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   reply=b''
   cperStr="PERS="+clientPERS
@@ -486,7 +495,7 @@ def reply_cper(data):
 def reply_gjoi():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp=b'gjoi'+pad
@@ -519,7 +528,7 @@ def reply_gjoi():
 def reply_rom():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp=b'+rom'+pad
@@ -552,7 +561,7 @@ def reply_rom():
 def reply_who():
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp=b'+who'+pad
@@ -636,6 +645,12 @@ def reply_mgm():
   print("REPLY: "+packet.decode('latin1'))
   return packet  
 
+def reply_pop():
+  p =  'Z=0/1\n'
+  packet = create_packet('+pop', '', p)
+  print("REPLY: "+packet.decode('latin1'))
+  return packet  
+  
 def reply_gam():
   p =  'CUSTFLAGS='+clientCUSTFLAGS+'\n'
   p += 'MINSIZE='+clientMINSIZE+'\n'
@@ -671,28 +686,28 @@ def reply_gam():
 def reply_ping(data):
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, msgType, msgSize, ping_sent, pad, NO_DATA
-  print("Ping Recv: "+str(ping_cnt)+" Ping Sent: "+str(ping_sent))
   oddByte = codecs.decode('00','hex_codec')          
   replyTmp = b'~png'+pad
-  reply = b'REF='+bytes(time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime()),'ascii')+b'\n'
-  reply += b'TIME=2\n'+x00
+  reply = b'REF='+bytes(time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime()),'ascii')+x0A
+  reply += b'TIME='+bytes(pingTIME,'ascii')+x0A+x00
   oddByte=len(codecs.decode(reply,'latin1'))+12
   oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
   reply=replyTmp+oddByte+reply
   if (ping_sent>=1):
     ping_sent+=1
+    return reply
   else:
     ping_sent=1
-  msgType=b''
-  return reply
+    return reply
+  #msgType=b''
   
 def build_reply(data):
   global SKEYREPLY, SKEY
   global clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU, clientDEFPER, clientLAST
   global clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV, clientMINSIZE, clientMAXSIZE
-  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD
+  global clientPARAMS, clientCUSTFLAGS, clientPRIV, clientSEED, clientSEED, clientSYSFLAGS,clientSESS, clientSKU, clientSLUS, clientUSER, clientPID, NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt,ping_cnt
   reply=b''
   if (msgType == codecs.decode('801C0100','hex_codec')):
@@ -716,11 +731,12 @@ def build_reply(data):
     print("REPLY: "+reply.decode('latin1'))
   #ping        
   if (msgType == b'~png'):
+    parse_data(data)
     ping_start=time.time()
     if (ping_cnt>=1):
      ping_cnt+=1
     else:
-     ping_cnt=1          
+     ping_cnt=1
     reply = reply_ping(data)
     time.sleep(2)
   if (msgType == b'acct'):
@@ -793,7 +809,9 @@ def build_reply(data):
     time.sleep(1)
   if (msgType == b'move'):
     parse_data(data)
-    p="NAME="+clientNAME+"\n"
+    p="IDENT=0\n"
+    p="NAME=\n"
+    p="COUNT=0\n"
     reply = create_packet('move', '', p)
   if (msgType == b'news'):
     parse_data(data)
@@ -814,12 +832,12 @@ def build_reply(data):
     reply = create_packet('peek', '', p)    
   if (msgType == b'pers'):
     parse_data(data)
-    #persStr="A=24.141.39.62\n"
+    persStr="A=24.141.39.62\n"
     #if (clientVERS == 'BURNOUT5/ISLAND'):
     	#print("fired")
     	#persStr+='EX-telemetry='+SERVER_IP+',9983,enUS\n'
     	#persStr+="IDLE=10000\n"
-    #persStr+="LA=24.141.39.62\n"
+    persStr+="LA=24.141.39.62\n"
     persStr="LOC=enUS\n"
     persStr+="MA="+clientMAC+"\n"
     if isinstance(clientNAME,str):
@@ -952,32 +970,24 @@ def build_reply(data):
   return reply
        
 def threaded_client(connection):
-  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, ping_sent
+  global SKEYREPLY, SKEYSENT, z, ping_cnt, ping_start, curr_time, ping_time, ping_sent,pingTIME
   global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
   connection.settimeout(500)
   while True:        
     curr_time=time.time()
-    if (((curr_time - ping_start) > 5) & (ping_cnt >=1)):
-      reply = reply_ping('')
-      connection.sendall((reply))    
-    try:
+    #print("D1")
+    try:           	
      tmp = connection.recv(12)
-     NO_DATA=False
+     NO_DATA=False     
     except:
-     NO_DATA=True
+     print("D3")
+     NO_DATA=True     
      time.sleep(0.5)
-     curr_time=time.time()            
-     #reply=b''
-     #if not NO_DATA==True:
-     #  print("! end of data ... let's wait for some...")
-     #  for x in range(0,60):
-     #    try:
-     #      tmp = connection.recv(12)
-     #    except:
-     #      time.sleep(0.2)
+     curr_time=time.time()     
     if len(tmp) != 0:
       msgType = tmp[:4]
-      print("RECV: "+str(msgType))
+      if msgType != b'~png':
+      	print("RECV: "+str(msgType))
       #print("Debug: "+str(len(tmp)))
       if tmp[10] == 0:
         msgSize=tmp[11]
@@ -993,7 +1003,8 @@ def threaded_client(connection):
           #print("SIZE2: "+(str(msgSize)))    
       msgSize = msgSize - 12
       data = connection.recv(msgSize)
-      print("SIZE: "+(str(msgSize)))
+      if msgType != b'~png':
+      	print("SIZE: "+(str(msgSize)))
       #time.sleep(0.2)
       reply = build_reply(data)
       connection.sendall((reply))
@@ -1001,7 +1012,7 @@ def threaded_client(connection):
         time.sleep(1)
         reply = reply_who()
         connection.sendall((reply))
-      if (msgType == b'AUTH'):
+      if (msgType == b'AUTH') | (msgType == b'onln'):
         reply = reply_ping(data)
         #time.sleep(1)
         connection.sendall((reply))
@@ -1013,12 +1024,37 @@ def threaded_client(connection):
         reply = reply_ping(data)
         #time.sleep(1)
         connection.sendall((reply))
+      if (msgType == b'move'):
+        time.sleep(1)
+        reply = reply_pop()
+        connection.sendall((reply))
+        reply = reply_rom()
+        connection.sendall((reply))        
+    #print("D5")
     #if (msgType == b'fget'):
       #parse_data(data)
       #p =  'FLUP=0\n'
       #packet = create_packet('+fup', '', p)
       #connection.sendall((packet))
+
+# *** START *** #
+print("VTSTech-SRVEmu v"+BUILD+"\nGitHub: https://github.com/Veritas83/VTSTech-SRVEmu\nContributors: No23\n")
+
+for x in range(0,TOTALARGS,1):
+  if (TOTALARGS >= 6):  
+    print("Too many arguments! Check command line.")
+    usage()
+    exit()
+  if (sys.argv[x] == "-i"):
+    SERVER_IP = sys.argv[x+1]
+    SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')    
+
+bind()
+print('Waiting for connections.. ')
+reply=b''
+
 while True:
+    print("D6")
     CLIENT, ADDRESS = GameSocket.accept()
     print('Player Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
     start_new_thread(threaded_client, (CLIENT, ))
@@ -1034,3 +1070,4 @@ while True:
     start_new_thread(threaded_client, (CLIENT, ))
     THREADCOUNT += 1
     print('Thread Number: ' + str(THREADCOUNT))
+    print("D7")
