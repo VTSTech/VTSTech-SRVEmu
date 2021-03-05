@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.70C"
+BUILD="0.1-ALPHA R0.70D"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -1000,6 +1000,8 @@ def build_reply(data):
   if (msgType == b'user') | (msgType == b'USER'):
     parse_data(data)
     p="NAME="+clientNAME+"\n"
+    p+="CRC=\n"
+    p+="PID=\n"
     reply = create_packet(str(msgType), '', p)
   if (msgType == b'USCH'):
     parse_data(data)    
