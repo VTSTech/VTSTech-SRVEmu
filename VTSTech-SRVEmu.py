@@ -365,9 +365,8 @@ def reply_acct(data):
       if (clientNAME == clientUSER):
         reply=b'authimst'#if account exists, cannot create
         return reply
-      print("DEBUG: "+clientUSER)
-    clientUSER = x.split("#")[0]
-    clientMAIL = x.split("#")[2]
+    print("DEBUG: "+clientNAME)  
+    clientUSER = clientNAME
     acctStr="TOS=1"
     reply=acctStr.encode('ascii')+x0A
     acctStr="NAME="+clientNAME.lower()
