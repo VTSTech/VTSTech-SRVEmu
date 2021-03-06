@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.68 (BO3)"
+BUILD="0.1-ALPHA R0.69 (BO3)"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -331,7 +331,6 @@ def cmd_news(payload):
     	p+= 'NEWS_DATE='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
     	p+= 'NEWS_URL=http://ps3burnout08.ea.com/news.txt\n'
     	p+= 'USE_ETOKEN=0\n'
-    #time.sleep(1)
     news_cmd='new'+str(NEWS_PAYLOAD)
     packet = create_packet('news', news_cmd, p)
 
@@ -505,7 +504,7 @@ def reply_rom():
 	global pad,pad2,x00,x0A,oddByte,reply,msgType,msgSize,authsent,NO_DATA,news_cnt
 	oddByte = codecs.decode('00','hex_codec')
 	replyTmp=b'+rom'+pad
-	romStr="I=1001"
+	romStr="TI=1001"
 	reply=romStr.encode('ascii')+x0A
 	romStr="N=room"
 	reply+=romStr.encode('ascii')+x0A
@@ -677,6 +676,7 @@ def reply_ping(data):
   else:
     ping_sent=1
     return reply
+  time.sleep(1.1)
   #msgType=b''
 	
 def build_reply(data):
@@ -714,7 +714,7 @@ def build_reply(data):
     else:
      ping_cnt=1
     reply = reply_ping(data)
-    time.sleep(2)
+    time.sleep(1)
   elif (msgType == b'acct'):
     replyTmp=b'acct'+pad
     parse_data(data)
@@ -756,6 +756,11 @@ def build_reply(data):
   elif (msgType == b'cusr'):
     parse_data(data)
     reply = create_packet('cusr', '', '')
+  if (msgType == b'edit'):
+    parse_data(data)
+    p='NAME='+clientNAME+'\n'
+    p+='MAIL='+clientMAIL+'\n'
+    reply = create_packet('edit', '', p)
   elif (msgType == b'fget'):
     parse_data(data)
     reply = create_packet('fget', '', '')    
@@ -763,12 +768,9 @@ def build_reply(data):
     parse_data(data)
     reply = reply_rom()
   elif (msgType == b'gsea'):
-    replyTmp=b'gsea'+pad
-    gseaStr="COUNT=1"         
-    reply=gseaStr.encode('ascii')+codecs.decode('0A00','hex_codec')
-    oddByte=len(codecs.decode(reply,'latin1'))+12
-    oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
-    reply=replyTmp+oddByte+reply
+    p='COUNT=0\n'
+    p+='CANCEL=1\n'
+    reply = create_packet('gsea', '', p)
     print("REPLY: "+reply.decode('latin1'))
     #time.sleep(1)
   elif (msgType == b'gpsc'):
@@ -928,6 +930,10 @@ def build_reply(data):
     parse_data(data)
     p="NAME="+clientNAME+"\n"
     reply = create_packet('user', '', p)
+  if (msgType == b'USCH'):
+    parse_data(data)    
+    p="NAME=test\n"
+    reply = create_packet('USER', '', p)    
 
   return reply
        
@@ -937,16 +943,17 @@ def threaded_client(connection):
   connection.settimeout(500)
   while True:        
     curr_time=time.time()
-    if (((curr_time - ping_start) > 5)):
+    print("Ping Diff: "+str(curr_time - ping_start))
+    if (((curr_time - ping_start) > 2.5)):
       reply = reply_ping('')
-      connection.sendall((reply))  
+      connection.sendall((reply))
+      ping_start=time.time()
     try:           	
      tmp = connection.recv(12)
      NO_DATA=False     
     except:
      print("D3")
      NO_DATA=True     
-     time.sleep(0.5)
      curr_time=time.time()     
     if len(tmp) != 0:
       msgType = tmp[:4]
@@ -969,7 +976,6 @@ def threaded_client(connection):
       data = connection.recv(msgSize)
       if msgType != b'~png':
       	print("SIZE: "+(str(msgSize)))
-      #time.sleep(0.2)
       reply = build_reply(data)
       connection.sendall((reply))
       if (msgType == b'pers'):
