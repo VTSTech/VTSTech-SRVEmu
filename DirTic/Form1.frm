@@ -366,7 +366,7 @@ Public DataPrev As String
 Public moreCmd As Boolean
 Public clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU
 Public clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV
-Public clientSESS, clientSLUS, clientPID, clientDEFPER, clientLAST, clientSEED, clientSYSFLAGS, clientSKEY
+Public clientSESS, clientSLUS, clientPID, clientDEFPER, clientLAST, clientSEED, clientSYSFLAGS, clientSKEY, userNAME
 Public NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME, ParseTmp, skeyStr
 'Option Explicit
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
@@ -441,6 +441,9 @@ For x = 0 To UBound(params)
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PASS=" Then
       clientPASS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PERS=" Then
+        If msgType = "user" Then
+            userNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+        End If
       clientPERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PROD=" Then
       clientPROD = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
@@ -509,14 +512,14 @@ msgType = Mid(HexToString(DataStr), 1, 4)
 'subCmd = Mid(HexToString(DataStr), 5, 4)
 msgSize = Mid(HexToString(DataStr), 12, 1)
 
-Text2.Text = Buff & vbCrLf & "[+] Received: " & msgType & " Size: " & Asc(msgSize) & vbCrLf
+Text2.Text = Buff & vbCrLf & vbCrLf & "[+] Received: " & msgType & " Size: " & Asc(msgSize) & vbCrLf & vbCrLf
 Buff = Text2.Text
-Text2.Text = Buff & vbCrLf & (Mid(HexToString(DataStr), 13, Len(HexToString(DataStr)) - 3)) & vbCrLf
-Buff = Text2.Text
+'Text2.Text = Buff & vbCrLf & (Mid(HexToString(DataStr), 13, Len(HexToString(DataStr)) - 3)) & vbCrLf
+'Buff = Text2.Text
 
 OutStr = ""
 a = GetParams(msgType, params)
-
+ParseTmp = ""
 If msgType = "@dir" Then
     OutStr = "ADDR=192.168.0.228" & Chr(10)
     OutStr = OutStr & "PORT=10901" & Chr(10)
@@ -524,30 +527,16 @@ If msgType = "@dir" Then
     OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-ElseIf msgType = "sele" Then
-    OutStr = "USERS=0" & Chr(10)
-    OutStr = OutStr & "GAMES=0" & Chr(10)
-    OutStr = OutStr & "MYGAME=1" & Chr(10)
-    OutStr = OutStr & "ROOMS=0" & Chr(10)
-    OutStr = OutStr & "MESGS=0" & Chr(10)
-    'OutStr = OutStr & "ASYNC=1" & Chr(10)
-    OutStr = OutStr & "USERSETS=0" & Chr(10)
-    OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
-    OutStr = OutStr & "STATS=0" & Chr(10)
+ElseIf msgType = "acct" Then
+    OutStr = "TOS=1" & Chr(10)
+    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-    'Sleep (200)
-ElseIf msgType = "skey" Then
-    'a = GetParams(msgType, params)
-    OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
-    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-    skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "auth" Then
     OutStr = "TOS=1" & Chr(10)
     OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
     OutStr = OutStr & "MAIL=nospam@no.no" & Chr(10)
-    OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
+    OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving" & Chr(10)
     OutStr = OutStr & "BORN=19800325" & Chr(10)
     OutStr = OutStr & "GEND=M" & Chr(10)
     OutStr = OutStr & "FROM=US" & Chr(10)
@@ -559,24 +548,34 @@ ElseIf msgType = "auth" Then
     OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "cper" Then
+    OutStr = "PERS=" & clientPERS & Chr(10)
+    OutStr = OutStr & "ALTS=" & clientALTS & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "news" Then
     a = GetParams(msgType, params)
     pad2 = HexToBin("00 00 00")
-    OutStr = "BUDDY_SERVER=" & Winsock3.LocalIP & Chr(10)
-    OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
-    OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
-    OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
-    OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/NEWS.txt" & Chr(10)
-    OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
-    OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
-    OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
-    OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
-    OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
-    OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
-    OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
-    OutStr = OutStr & "STORE_URL=http://ps3burnout08.ea.com/STORE.txt" & Chr(10)
-    OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
-    OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
+    'MsgBox subCmd
+    If subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
+        OutStr = "VTSTech.is.reviving.games" & Chr(10)
+    Else
+        OutStr = "BUDDY_SERVER=" & Winsock3.LocalIP & Chr(10)
+        OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
+        OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
+        OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
+        OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/NEWS.txt" & Chr(10)
+        OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
+        OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
+        OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
+        OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
+        OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
+        OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
+        OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
+        OutStr = OutStr & "STORE_URL=http://ps3burnout08.ea.com/STORE.txt" & Chr(10)
+        OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
+        OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
+    End If
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     sizeHex = Hex(msgLen)
     If msgLen >= 256 Then
@@ -615,6 +614,25 @@ ElseIf msgType = "pers" Then
     OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "sele" Then
+    OutStr = "USERS=1" & Chr(10)
+    OutStr = OutStr & "GAMES=1" & Chr(10)
+    OutStr = OutStr & "MYGAME=1" & Chr(10)
+    OutStr = OutStr & "ROOMS=1" & Chr(10)
+    OutStr = OutStr & "MESGS=1" & Chr(10)
+    'OutStr = OutStr & "ASYNC=1" & Chr(10)
+    OutStr = OutStr & "USERSETS=1" & Chr(10)
+    'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
+    OutStr = OutStr & "STATS=1" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    'Sleep (200)
+ElseIf msgType = "skey" Then
+    'a = GetParams(msgType, params)
+    OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "sviw" Then
     OutStr = "N=5" & Chr(10)
     OutStr = OutStr & "DESC=1,1,1,1,1" & Chr(10)
@@ -623,6 +641,28 @@ ElseIf msgType = "sviw" Then
     'OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
     'OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
     'OutStr = OutStr & "SS=65" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "user" Then
+    'a = GetParams(msgType, params)
+    OutStr = "PERS=" & userNAME & Chr(10)
+    'OutStr = OutStr & "CRC=0" & Chr(10)
+    'OutStr = OutStr & "PID=0" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "usld" Then
+    'a = GetParams(msgType, params)
+    OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
+    OutStr = "IMGATE=0" & Chr(10)
+    OutStr = OutStr & "QMSG0=TEST0" & Chr(10)
+    OutStr = OutStr & "QMSG1=TEST1" & Chr(10)
+    OutStr = OutStr & "QMSG2=TEST2" & Chr(10)
+    OutStr = OutStr & "QMSG3=TEST3" & Chr(10)
+    OutStr = OutStr & "QMSG4=TEST4" & Chr(10)
+    OutStr = OutStr & "QMSG5=TEST5" & Chr(10)
+    OutStr = OutStr & "SPM_EA=0" & Chr(10)
+    OutStr = OutStr & "SPM_PART=0" & Chr(10)
+    OutStr = OutStr & "UID=$000000000b32588d" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 End If
@@ -752,7 +792,7 @@ On Error Resume Next
 'Game Socket Port
 Set fso = CreateObject("Scripting.FileSystemObject")
 
-Build = "0.1-R3"
+Build = "0.1-R4"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
