@@ -555,7 +555,8 @@ ElseIf msgType = "auth" Then
     OutStr = OutStr & "SPAM=NN" & Chr(10)
     OutStr = OutStr & "SINCE=2021.03.05-11:11:11" & Chr(10)
     OutStr = OutStr & "LAST=2021.03.05-11:11:11" & Chr(10)
-    'OutStr = OutStr & "SINCE=2021.03.05-11:11:11" & Chr(10)
+    OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
+    OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "news" Then
@@ -563,19 +564,28 @@ ElseIf msgType = "news" Then
     pad2 = HexToBin("00 00 00")
     OutStr = "BUDDY_SERVER=" & Winsock3.LocalIP & Chr(10)
     OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
-    OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/news.txt" & Chr(10)
+    OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
+    OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
+    OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/NEWS.txt" & Chr(10)
     OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
-    'OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
+    OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
     OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
-    'OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
-    'OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
-    'OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
-    'OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
-    'OutStr = OutStr & "STORE_URL=http://ps3burnout08.ea.com/STORE.txt" & Chr(10)
-    'OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
+    OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
+    OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
+    OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
+    OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
+    OutStr = OutStr & "STORE_URL=http://ps3burnout08.ea.com/STORE.txt" & Chr(10)
+    OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
+    OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    sizeHex = Hex(msgLen)
     If msgLen >= 256 Then
-        pad2 = HexToBin("00 00 02 01")
+        If Len(sizeHex) <= 3 Then
+            sizeHex = "0" + sizeHex
+        End If
+        s1 = Mid(sizeHex, 1, 2)
+        s2 = Mid(sizeHex, 3, 2)
+        pad2 = HexToBin("00 00 " & s1 & " " & s2)
         'ParseTmp = ""
         ParseTmp = msgType & subCmd & pad2 & OutStr & Chr(0)
     Else
@@ -742,7 +752,7 @@ On Error Resume Next
 'Game Socket Port
 Set fso = CreateObject("Scripting.FileSystemObject")
 
-Build = "0.1-R2"
+Build = "0.1-R3"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
