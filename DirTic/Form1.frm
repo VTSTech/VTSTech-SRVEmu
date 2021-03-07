@@ -312,7 +312,7 @@ Begin VB.Form Form1
    Begin VB.Label Label2 
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
-      Caption         =   "Socket State:"
+      Caption         =   "Socket States:"
       BeginProperty Font 
          Name            =   "Verdana"
          Size            =   9
@@ -327,7 +327,7 @@ Begin VB.Form Form1
       Left            =   5880
       TabIndex        =   6
       Top             =   120
-      Width           =   1275
+      Width           =   1380
    End
    Begin VB.Label Label1 
       AutoSize        =   -1  'True
@@ -624,18 +624,37 @@ Private Sub Combo1_Click()
 Winsock1.Close
 Winsock2.Close
 Winsock3.Close
+'Burnout 3 Takedown, 0
+'Burnout 3 Takedown (Review), 1
+'Burnout Paradise (PS3), 2
+'Need for Speed: Underground, 3
+'Madden NFL 05, 4
+'NASCAR Thunder 2004, 5
+'SSX3, 6
 If Combo1.ListIndex = 0 Then
     Winsock1.LocalPort = 21800
 ElseIf Combo1.ListIndex = 1 Then
     Winsock1.LocalPort = 21840
 ElseIf Combo1.ListIndex = 2 Then
+    Winsock1.LocalPort = 21870
+ElseIf Combo1.ListIndex = 3 Then
+    Winsock1.LocalPort = 10900
+ElseIf Combo1.ListIndex = 4 Then
+    Winsock1.LocalPort = 20000
+ElseIf Combo1.ListIndex = 5 Then
+    Winsock1.LocalPort = 10600
+ElseIf Combo1.ListIndex = 6 Then
     Winsock1.LocalPort = 11000
 End If
 Text1.Text = Winsock1.LocalPort
 End Sub
 
 Private Sub Command1_Click()
-
+clientSKEY = ""
+moreCmd = False
+ParseTmp = ""
+tmp2 = ""
+tmp3 = ""
 If Command1.Caption = "Stop" Then
 Winsock1.Close
 Winsock2.Close
@@ -723,7 +742,7 @@ On Error Resume Next
 'Game Socket Port
 Set fso = CreateObject("Scripting.FileSystemObject")
 
-Build = "0.1-R1"
+Build = "0.1-R2"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -731,7 +750,11 @@ Check1.value = 1
 Combo1.Text = "Burnout 3 Takedown"
 Combo1.AddItem "Burnout 3 Takedown", 0
 Combo1.AddItem "Burnout 3 Takedown (Review)", 1
-Combo1.AddItem "SSX3", 2
+Combo1.AddItem "Burnout Paradise (PS3)", 2
+Combo1.AddItem "Need for Speed: Underground", 3
+Combo1.AddItem "Madden NFL 05", 4
+Combo1.AddItem "NASCAR Thunder 2004", 5
+Combo1.AddItem "SSX3", 6
 
 Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 08 32 DB 32 B7 FF 96)"
@@ -761,7 +784,7 @@ Shell ("cmd.exe /c start bitcoin:1ByfBujg9bnmk1XXY2rxY6obhqHMUNiDuP?amount=0.02&
 End Sub
 
 Private Sub Timer1_Timer()
-Label2.Caption = "Socket State: " & Winsock1.State
+Label2.Caption = "Socket States: " & Winsock1.State & Winsock2.State & Winsock3.State
 DoEvents
 End Sub
 
@@ -772,6 +795,11 @@ End Sub
 
 Private Sub Winsock1_ConnectionRequest(ByVal requestID As Long)
 '* Game Socket
+clientSKEY = ""
+moreCmd = False
+ParseTmp = ""
+tmp2 = ""
+tmp3 = ""
 Winsock1.Close
 Winsock1.Accept (requestID)
 Buff = Text2.Text
