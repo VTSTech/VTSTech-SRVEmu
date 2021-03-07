@@ -3,35 +3,43 @@ Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
 Begin VB.Form Form1 
    BackColor       =   &H00000000&
    Caption         =   "SRVEmu GUI v0.1"
-   ClientHeight    =   7305
+   ClientHeight    =   7440
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   9135
+   ClientWidth     =   9255
    LinkTopic       =   "Form1"
-   ScaleHeight     =   7305
-   ScaleWidth      =   9135
+   ScaleHeight     =   7440
+   ScaleWidth      =   9255
    StartUpPosition =   1  'CenterOwner
+   Begin VB.TextBox Text5 
+      Height          =   315
+      Left            =   120
+      TabIndex        =   16
+      Text            =   "222.222.222.222"
+      Top             =   480
+      Width           =   1455
+   End
    Begin VB.ComboBox Combo1 
       Height          =   315
-      Left            =   960
+      Left            =   120
       TabIndex        =   15
       Text            =   "Combo1"
       Top             =   120
-      Width           =   3135
+      Width           =   3975
    End
    Begin VB.CheckBox Check3 
       BackColor       =   &H80000007&
-      Caption         =   "binary"
+      Caption         =   "Binary"
       ForeColor       =   &H8000000A&
       Height          =   195
-      Left            =   8280
+      Left            =   7320
       TabIndex        =   14
-      Top             =   360
+      Top             =   600
       Width           =   735
    End
    Begin MSWinsockLib.Winsock Winsock1 
       Left            =   8160
-      Top             =   6840
+      Top             =   6960
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
@@ -39,37 +47,37 @@ Begin VB.Form Form1
    Begin VB.CommandButton Command4 
       Caption         =   "Convert"
       Height          =   255
-      Left            =   7320
+      Left            =   6480
       TabIndex        =   12
-      Top             =   360
+      Top             =   600
       Width           =   735
    End
    Begin VB.TextBox Text4 
-      Height          =   5895
-      Left            =   6480
+      Height          =   5775
+      Left            =   6600
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   11
       Text            =   "Form1.frx":0000
-      Top             =   600
-      Width           =   2655
+      Top             =   960
+      Width           =   2535
    End
    Begin VB.TextBox Text3 
-      Height          =   1095
-      Left            =   0
+      Height          =   855
+      Left            =   120
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   10
       Text            =   "Form1.frx":0006
-      Top             =   600
-      Width           =   6495
+      Top             =   960
+      Width           =   6375
    End
    Begin VB.CommandButton Command3 
       Caption         =   "Reset"
       Height          =   255
       Left            =   5760
       TabIndex        =   9
-      Top             =   360
+      Top             =   600
       Width           =   735
    End
    Begin VB.CommandButton Command2 
@@ -77,22 +85,22 @@ Begin VB.Form Form1
       Height          =   255
       Left            =   5010
       TabIndex        =   7
-      Top             =   360
+      Top             =   600
       Width           =   735
    End
    Begin VB.Timer Timer1 
       Left            =   8640
-      Top             =   6840
+      Top             =   6960
    End
    Begin VB.TextBox Text2 
       Height          =   4815
-      Left            =   0
+      Left            =   120
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   4
       Text            =   "Form1.frx":000C
-      Top             =   1680
-      Width           =   6495
+      Top             =   1920
+      Width           =   6375
    End
    Begin VB.CheckBox Check2 
       BackColor       =   &H00000000&
@@ -119,27 +127,27 @@ Begin VB.Form Form1
       Height          =   255
       Left            =   4260
       TabIndex        =   1
-      Top             =   360
+      Top             =   600
       Width           =   735
    End
    Begin VB.TextBox Text1 
-      Height          =   285
-      Left            =   120
+      Height          =   315
+      Left            =   1560
       TabIndex        =   0
       Text            =   "Port"
-      Top             =   120
+      Top             =   480
       Width           =   735
    End
    Begin MSWinsockLib.Winsock Winsock2 
       Left            =   7680
-      Top             =   6840
+      Top             =   6960
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock3 
       Left            =   7200
-      Top             =   6840
+      Top             =   6960
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
@@ -150,9 +158,9 @@ Begin VB.Form Form1
       Caption         =   "1ByfBujg9bnmk1XXY2rxY6obhqHMUNiDuP"
       ForeColor       =   &H00FFFF00&
       Height          =   195
-      Left            =   3022
+      Left            =   3015
       TabIndex        =   13
-      Top             =   7080
+      Top             =   7200
       Width           =   3120
    End
    Begin VB.Label Label3 
@@ -163,7 +171,7 @@ Begin VB.Form Form1
       Height          =   195
       Left            =   3255
       TabIndex        =   8
-      Top             =   6840
+      Top             =   6960
       Width           =   2655
    End
    Begin VB.Label Label2 
@@ -185,7 +193,7 @@ Begin VB.Form Form1
       Height          =   195
       Left            =   3960
       TabIndex        =   5
-      Top             =   6600
+      Top             =   6720
       Width           =   1245
    End
 End
@@ -514,27 +522,30 @@ Private Sub Form_Load()
 On Error Resume Next
 'Game Socket Port
 Set fso = CreateObject("Scripting.FileSystemObject")
+
+Build = "0.1-R0"
+Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
+
 Combo1.Text = "Burnout 3 Takedown"
 Combo1.AddItem "Burnout 3 Takedown", 0
 Combo1.AddItem "Burnout 3 Takedown (Review)", 1
 Combo1.AddItem "SSX3", 2
+
 Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 08 32 DB 32 B7 FF 96)"
 Text4.Text = ""
+Text5.Text = "192.168.0.228"
 
 '* Game Socket
-Winsock1.Bind 0, "192.168.0.228"
-'Winsock1.Bind 0, Winsock1.LocalIP
+Winsock1.Bind 0, Text5.Text
 Winsock1.Close
 '* Listener Socket
-Winsock2.Bind 0, "192.168.0.228"
-'Winsock1.Bind 0, Winsock1.LocalIP
+Winsock2.Bind 0, Text5.Text
 Winsock2.Close
 '* Buddy Socket
-Winsock3.Bind 0, "192.168.0.228"
-'Winsock1.Bind 0, Winsock1.LocalIP
+Winsock3.Bind 0, Text5.Text
 Winsock3.Close
 
 Timer1.Interval = 100
@@ -618,7 +629,7 @@ Else
         Sleep (250)
         Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
         ParseTmp = ""
-    Else
+    ElseIf Len(tmp2) > 1 Then
         Winsock2.SendData (HexToBin(StringToHex(tmp2)))
     End If
 End If
@@ -627,17 +638,24 @@ Private Sub Winsock3_DataArrival(ByVal bytesTotal As Long)
 '* Buddy Socket 10899
 On Error Resume Next
 Randomize Timer
-Winsock3.GetData Data, vbString
+Winsock2.GetData Data, vbString
 Buff = Text2.Text
 DataStr = StringToHex(Data)
 DataLen = Len(Data)
 tmp2 = ParseData(DataStr)
 Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
-If Len(tmp2) > 1 Then
-    'Sleep (250)
-    Winsock3.SendData HexToBin(StringToHex(tmp2))
-End If
-If moreCmd = True Then
-    Winsock3.SendData HexToBin(StringToHex(ParseData("moreCmd")))
+If Len(ParseTmp) >= 1 Then
+    'tmp3 = HexToBin(StringToHex(ParseData("moreCmd")))
+    Winsock3.SendData (HexToBin(StringToHex(ParseTmp)))
+Else
+    If msgType = "skey" Then
+        Winsock3.SendData (HexToBin(StringToHex(tmp2)))
+        tmp3 = ParseData(DataStr)
+        Sleep (250)
+        Winsock3.SendData (HexToBin(StringToHex(ParseTmp)))
+        ParseTmp = ""
+    Else
+        Winsock2.SendData (HexToBin(StringToHex(tmp2)))
+    End If
 End If
 End Sub
