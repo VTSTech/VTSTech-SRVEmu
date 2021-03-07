@@ -12,15 +12,33 @@ Begin VB.Form Form1
    ScaleWidth      =   9255
    StartUpPosition =   1  'CenterOwner
    Begin VB.TextBox Text5 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   315
       Left            =   120
       TabIndex        =   16
       Text            =   "222.222.222.222"
       Top             =   480
-      Width           =   1455
+      Width           =   1695
    End
    Begin VB.ComboBox Combo1 
-      Height          =   315
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   330
       Left            =   120
       TabIndex        =   15
       Text            =   "Combo1"
@@ -30,12 +48,21 @@ Begin VB.Form Form1
    Begin VB.CheckBox Check3 
       BackColor       =   &H80000007&
       Caption         =   "Binary"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H8000000A&
       Height          =   195
-      Left            =   7320
+      Left            =   7560
       TabIndex        =   14
       Top             =   600
-      Width           =   735
+      Width           =   975
    End
    Begin MSWinsockLib.Winsock Winsock1 
       Left            =   8160
@@ -46,13 +73,31 @@ Begin VB.Form Form1
    End
    Begin VB.CommandButton Command4 
       Caption         =   "Convert"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   255
       Left            =   6480
       TabIndex        =   12
       Top             =   600
-      Width           =   735
+      Width           =   975
    End
    Begin VB.TextBox Text4 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   5775
       Left            =   6600
       MultiLine       =   -1  'True
@@ -63,6 +108,15 @@ Begin VB.Form Form1
       Width           =   2535
    End
    Begin VB.TextBox Text3 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   855
       Left            =   120
       MultiLine       =   -1  'True
@@ -74,6 +128,15 @@ Begin VB.Form Form1
    End
    Begin VB.CommandButton Command3 
       Caption         =   "Reset"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   255
       Left            =   5760
       TabIndex        =   9
@@ -82,6 +145,15 @@ Begin VB.Form Form1
    End
    Begin VB.CommandButton Command2 
       Caption         =   "Send"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   255
       Left            =   5010
       TabIndex        =   7
@@ -93,6 +165,15 @@ Begin VB.Form Form1
       Top             =   6960
    End
    Begin VB.TextBox Text2 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   4815
       Left            =   120
       MultiLine       =   -1  'True
@@ -105,6 +186,15 @@ Begin VB.Form Form1
    Begin VB.CheckBox Check2 
       BackColor       =   &H00000000&
       Caption         =   "UDP"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00808080&
       Height          =   255
       Left            =   5040
@@ -115,15 +205,33 @@ Begin VB.Form Form1
    Begin VB.CheckBox Check1 
       BackColor       =   &H00000000&
       Caption         =   "TCP"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00808080&
       Height          =   255
       Left            =   4280
       TabIndex        =   2
       Top             =   120
-      Width           =   615
+      Width           =   735
    End
    Begin VB.CommandButton Command1 
       Caption         =   "Listen"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   255
       Left            =   4260
       TabIndex        =   1
@@ -131,8 +239,17 @@ Begin VB.Form Form1
       Width           =   735
    End
    Begin VB.TextBox Text1 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   315
-      Left            =   1560
+      Left            =   1800
       TabIndex        =   0
       Text            =   "Port"
       Top             =   480
@@ -156,45 +273,81 @@ Begin VB.Form Form1
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
       Caption         =   "1ByfBujg9bnmk1XXY2rxY6obhqHMUNiDuP"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00FFFF00&
-      Height          =   195
-      Left            =   3015
+      Height          =   210
+      Left            =   2677
       TabIndex        =   13
       Top             =   7200
-      Width           =   3120
+      Width           =   3900
    End
    Begin VB.Label Label3 
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
       Caption         =   "VTSTech Veritas Technical Solutions"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00FFFF00&
-      Height          =   195
-      Left            =   3255
+      Height          =   210
+      Left            =   2917
       TabIndex        =   8
       Top             =   6960
-      Width           =   2655
+      Width           =   3345
    End
    Begin VB.Label Label2 
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
       Caption         =   "Socket State:"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00C0C0C0&
-      Height          =   195
+      Height          =   210
       Left            =   5880
       TabIndex        =   6
       Top             =   120
-      Width           =   975
+      Width           =   1275
    End
    Begin VB.Label Label1 
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
       Caption         =   "Written by Veritas"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00FFFF00&
-      Height          =   195
-      Left            =   3960
+      Height          =   210
+      Left            =   3622
       TabIndex        =   5
       Top             =   6720
-      Width           =   1245
+      Width           =   1710
    End
 End
 Attribute VB_Name = "Form1"
@@ -263,20 +416,70 @@ For x = 0 To UBound(params)
     End If
     If Mid(HexToString(Trim(params(x))), y, 4) = "MID=" Then
         clientMID = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
-    ElseIf Mid(HexToString(params(x)), y, 4) = "SKU=" Then
+    ElseIf Mid(HexToString(Trim(params(x))), y, 4) = "PID=" Then
+        clientPID = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 4) = "SKU=" Then
         clientSKU = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
-    ElseIf Mid(HexToString(params(x)), y, 5) = "VERS=" Then
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "ALTS=" Then
+      clientALTS = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "VERS=" Then
         clientVERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "BORN=" Then
+      clientBORN = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "SLUS=" Then
+      clientSLUS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "VERS=" Then
+      clientVERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "NAME=" Then
         If msgType = "news" Then
             subCmd = "new" & Mid(HexToString(Trim(params(x))), y + 5, 1)
         Else
             clientNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         End If
-    ElseIf Mid(HexToString(params(x)), y, 5) = "PERS=" Then
-        clientPERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
-    ElseIf Mid(HexToString(params(x)), y, 5) = "SKEY=" Then
-        clientSKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "USER=" Then
+      clientUSER = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PASS=" Then
+      clientPASS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PERS=" Then
+      clientPERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PROD=" Then
+      clientPROD = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "SKEY=" Then
+      clientSKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "SEED=" Then
+      clientSEED = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "MAIL=" Then
+      clientMAIL = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "LAST=" Then
+      clientLAST = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "LKEY=" Then
+      clientLKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PRIV=" Then
+      clientPRIV = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 6) = "PLAST=" Then
+      clientPLAST = Mid(HexToString(Trim(params(x))), y + 6, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 6) = "MADDR=" Then
+      clientMADDR = Mid(HexToString(Trim(params(x))), y + 6, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "HWFLAG=" Then
+      clientHWFLAG = Mid(HexToString(Trim(params(x))), y + 7, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "HWMASK=" Then
+      clientHWMASK = Mid(HexToString(Trim(params(x))), y + 7, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "DEFPER=" Then
+      clientDEFPER = Mid(HexToString(Trim(params(x))), y + 7, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "PARAMS=" Then
+      clientPARAMS = Mid(HexToString(Trim(params(x))), y + 7, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "SDKVER=" Then
+      clientSDKVER = Mid(HexToString(Trim(params(x))), y + 7, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 8) = "MINSIZE=" Then
+      clientMINSIZE = Mid(HexToString(Trim(params(x))), y + 8, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 8) = "MAXSIZE=" Then
+      clientMAXSIZE = Mid(HexToString(Trim(params(x))), y + 8, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 9) = "PERSONAS=" Then
+      clientPERSONAS = Mid(HexToString(Trim(params(x))), y + 9, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 9) = "SYSFLAGS=" Then
+      clientSYSFLAGS = Mid(HexToString(Trim(params(x))), y + 9, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 10) = "CUSTFLAGS=" Then
+      clientCUSTFLAGS = Mid(HexToString(Trim(params(x))), y + 10, Len(HexToString(Trim(params(x)))))
     End If
 Next x
 End Function
@@ -285,11 +488,11 @@ moar:
 Buff = Text2.Text
 pad = HexToBin("00 00 00 00 00 00 00")
 'MsgBox (DataStr)
-If DataStr = "moreCmd" Or msgType = "skey" Then
+If DataStr = "moreCmd" Or (msgType = "skey" And Len(clientSKEY) <= 1) Or moreCmd = True Then
     DataStr = DataPrev
     cmds = Split(DataStr, "0A 00")
     DataStr = cmds(1)
-    'moreCmd = False
+    moreCmd = False
 End If
 cmds = Split(DataStr, "0A 00")
 params = Split(cmds(0), "0A")
@@ -298,7 +501,7 @@ If UBound(cmds) >= 1 Then
     If Len(cmds(1)) >= 1 Then
         moreCmd = True
     Else
-        'moreCmd = False
+        moreCmd = False
     End If
 End If
 DataStr = Trim(DataStr)
@@ -340,17 +543,11 @@ ElseIf msgType = "skey" Then
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-    'ParseTmp = ParseData
-    'If moreCmd = False Then
-        'ParseTmp = ParseData
-    'ElseIf moreCmd = True Then
-        'ParseData = ParseTmp & (HexToBin(StringToHex(ParseData("moreCmd"))))
-    'End If
 ElseIf msgType = "auth" Then
     OutStr = "TOS=1" & Chr(10)
-    OutStr = OutStr & "NAME=VTSTech" & Chr(10)
+    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
     OutStr = OutStr & "MAIL=nospam@no.no" & Chr(10)
-    OutStr = OutStr & "PERSONAS=VTSTech" & Chr(10)
+    OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
     OutStr = OutStr & "BORN=19800325" & Chr(10)
     OutStr = OutStr & "GEND=M" & Chr(10)
     OutStr = OutStr & "FROM=US" & Chr(10)
@@ -369,7 +566,7 @@ ElseIf msgType = "news" Then
     OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/news.txt" & Chr(10)
     OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
     'OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
-    'OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
+    OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
     'OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
     'OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
     'OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
@@ -379,10 +576,10 @@ ElseIf msgType = "news" Then
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     If msgLen >= 256 Then
         pad2 = HexToBin("00 00 02 01")
-        ParseTmp = ""
+        'ParseTmp = ""
         ParseTmp = msgType & subCmd & pad2 & OutStr & Chr(0)
     Else
-        ParseTmp = ""
+        'ParseTmp = ""
         ParseTmp = msgType & subCmd & pad2 & Chr(msgLen) & OutStr & Chr(0)
     End If
     'If moreCmd = False Then
@@ -400,22 +597,22 @@ ElseIf msgType = "pers" Then
     'PID=SSX-PS2-2004
     OutStr = "LOC=en" & Chr(10)
     OutStr = OutStr & "MA=$00041f828759" & Chr(10)
-    OutStr = OutStr & "PERS=VTSTech" & Chr(10)
-    OutStr = OutStr & "NAME=VTSTech" & Chr(10)
+    OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
+    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
     OutStr = OutStr & "LAST=2021.03.05-11:11:11" & Chr(10)
-    OutStr = OutStr & "PLAST=2021.03.05-11:11:11" & Chr(10)
-    OutStr = OutStr & "PSINCE=2021.03.05-11:11:11" & Chr(10)
+    'OutStr = OutStr & "PLAST=2021.03.05-11:11:11" & Chr(10)
+    'OutStr = OutStr & "PSINCE=2021.03.05-11:11:11" & Chr(10)
     OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "sviw" Then
-    OutStr = "N=9" & Chr(10)
-    OutStr = OutStr & "DESC=1,1,1,1,1,1,1,1,1" & Chr(10)
-    OutStr = OutStr & "NAMES=0,3,4,5,6,7,8,9,10" & Chr(10)
-    OutStr = OutStr & "PARAMS=2,2,2,2,2,2,2,2,2" & Chr(10)
-    OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
-    OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
-    OutStr = OutStr & "SS=65" & Chr(10)
+    OutStr = "N=5" & Chr(10)
+    OutStr = OutStr & "DESC=1,1,1,1,1" & Chr(10)
+    OutStr = OutStr & "NAMES=0,3,4,5,6" & Chr(10)
+    OutStr = OutStr & "PARAMS=2,2,2,2,2" & Chr(10)
+    'OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
+    'OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
+    'OutStr = OutStr & "SS=65" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 End If
@@ -424,6 +621,9 @@ DataPrev = DataStr
 End Function
 
 Private Sub Combo1_Click()
+Winsock1.Close
+Winsock2.Close
+Winsock3.Close
 If Combo1.ListIndex = 0 Then
     Winsock1.LocalPort = 21800
 ElseIf Combo1.ListIndex = 1 Then
@@ -523,7 +723,7 @@ On Error Resume Next
 'Game Socket Port
 Set fso = CreateObject("Scripting.FileSystemObject")
 
-Build = "0.1-R0"
+Build = "0.1-R1"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -575,21 +775,21 @@ Private Sub Winsock1_ConnectionRequest(ByVal requestID As Long)
 Winsock1.Close
 Winsock1.Accept (requestID)
 Buff = Text2.Text
-Text2.Text = Buff & "[+] Connection request (" & requestID & ") " & Winsock1.RemoteHostIP & ":" & Winsock1.RemotePort & vbCrLf
+Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock1.RemoteHostIP & ":" & Winsock1.RemotePort & vbCrLf
 End Sub
 Private Sub Winsock2_ConnectionRequest(ByVal requestID As Long)
 '* Listener Socket 10901
 Winsock2.Close
 Winsock2.Accept (requestID)
 Buff = Text2.Text
-Text2.Text = Buff & "[+] Connection request (" & requestID & ") " & Winsock2.RemoteHostIP & ":" & Winsock2.RemotePort & vbCrLf
+Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock2.RemoteHostIP & ":" & Winsock2.RemotePort & vbCrLf
 End Sub
 Private Sub Winsock3_ConnectionRequest(ByVal requestID As Long)
 '* Buddy Socket 10899
 Winsock3.Close
 Winsock3.Accept (requestID)
 Buff = Text2.Text
-Text2.Text = Buff & "[+] Connection request (" & requestID & ") " & Winsock3.RemoteHostIP & ":" & Winsock3.RemotePort & vbCrLf
+Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock3.RemoteHostIP & ":" & Winsock3.RemotePort & vbCrLf
 End Sub
 Private Sub Winsock1_DataArrival(ByVal bytesTotal As Long)
 '* Game Socket
@@ -624,16 +824,28 @@ If Len(ParseTmp) >= 1 Then
     Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
 Else
     If msgType = "skey" Then
-        Winsock2.SendData (HexToBin(StringToHex(tmp2)))
-        tmp3 = ParseData(DataStr)
-        Sleep (250)
-        Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
+        If moreCmd = True Or Len(clientSKEY) >= 1 Then
+            tmp3 = ParseData(DataStr)
+            Sleep (250)
+            If Len(ParseTmp) >= 1 Then
+                Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
+            End If
+            If Len(tmp2) >= 1 Then
+                Winsock2.SendData (HexToBin(StringToHex(tmp2)))
+            End If
+        End If
         ParseTmp = ""
-    ElseIf Len(tmp2) > 1 Then
+    End If
+    If Len(tmp2) > 1 And Len(clientSKEY) >= 1 And Not msgType = "skey" Then
         Winsock2.SendData (HexToBin(StringToHex(tmp2)))
     End If
 End If
+
+If msgType = "sviw" Then
+    Winsock2.SendData (HexToBin("7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00")) '~png
+End If
 End Sub
+
 Private Sub Winsock3_DataArrival(ByVal bytesTotal As Long)
 '* Buddy Socket 10899
 On Error Resume Next
@@ -650,12 +862,14 @@ If Len(ParseTmp) >= 1 Then
 Else
     If msgType = "skey" Then
         Winsock3.SendData (HexToBin(StringToHex(tmp2)))
-        tmp3 = ParseData(DataStr)
-        Sleep (250)
-        Winsock3.SendData (HexToBin(StringToHex(ParseTmp)))
+        If moreCmd = True Then
+            tmp3 = ParseData(DataStr)
+            Sleep (250)
+            Winsock3.SendData (HexToBin(StringToHex(ParseTmp)))
+        End If
         ParseTmp = ""
-    Else
-        Winsock2.SendData (HexToBin(StringToHex(tmp2)))
+    ElseIf Len(tmp2) > 1 Then
+        Winsock3.SendData (HexToBin(StringToHex(tmp2)))
     End If
 End If
 End Sub
