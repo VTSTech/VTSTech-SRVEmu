@@ -269,6 +269,26 @@ Begin VB.Form Form1
       _ExtentY        =   741
       _Version        =   393216
    End
+   Begin VB.Label Label5 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "Connected Players:"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   5400
+      TabIndex        =   17
+      Top             =   360
+      Width           =   1845
+   End
    Begin VB.Label Label4 
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
@@ -369,7 +389,7 @@ Public clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS
 Public clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV
 Public clientSESS, clientSLUS, clientPID, clientDEFPER, clientLAST, clientSEED, clientSYSFLAGS, clientSKEY, userNAME
 Public NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME, ParseTmp, skeyStr, acctDB, clientPASS
-
+Public PlayerCnt, PlayerNum
 'Option Explicit
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Public Function HexToString(ByVal HexToStr As String) As String
@@ -569,13 +589,18 @@ ElseIf msgType = "auth" Then
     If fso.FileExists(acctDB) = False Then
         ParseData = "authimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
     Else
+        Close #3
         Open acctDB For Input As #3
             While Not EOF(3)
                 Line Input #3, acctUSER
                 tmp = Split(acctUSER, "#")
-                If tmp(0) = clientNAME Then
+                If tmp(0) = clientNAME Then 'And tmp(3) = clientPASS Then
                     userExist = True
+                    clientNAME = tmp(0)
+                    clientBORN = tmp(1)
                     clientMAIL = tmp(2)
+                    clientPASS = tmp(3)
+                    clientPERS = tmp(4)
                     clientSINCE = tmp(5)
                     OutStr = "TOS=1" & Chr(10)
                     OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
@@ -599,8 +624,18 @@ ElseIf msgType = "auth" Then
         Close #2
         If userExist = False Then
             ParseData = "authimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
+        'ElseIf userExist = True Then
+            'ParseData = "passimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
         End If
     End If
+ElseIf msgType = "AUTH" Then
+    OutStr = "NAME=" & clientNAME & Chr(10)
+    OutStr = OutStr & "USER=" & clientNAME & Chr(10)
+    OutStr = OutStr & "PROD=" & clientVERS & Chr(10)
+    OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock3.SendData ParseData
 ElseIf msgType = "cper" Then
     OutStr = "PERS=" & clientPERS & Chr(10)
     OutStr = OutStr & "ALTS=" & clientALTS & Chr(10)
@@ -668,14 +703,16 @@ ElseIf msgType = "pers" Then
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "sele" Then
-    OutStr = "USERS=1" & Chr(10)
-    OutStr = OutStr & "GAMES=1" & Chr(10)
+    OutStr = "VERS=" & clientVERS & Chr(10)
+    OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
+    OutStr = OutStr & "USERS=0" & Chr(10)
+    OutStr = OutStr & "GAMES=0" & Chr(10)
     OutStr = OutStr & "MYGAME=1" & Chr(10)
-    OutStr = OutStr & "ROOMS=1" & Chr(10)
-    OutStr = OutStr & "MESGS=1" & Chr(10)
-    'OutStr = OutStr & "ASYNC=1" & Chr(10)
+    OutStr = OutStr & "ROOMS=0" & Chr(10)
+    OutStr = OutStr & "MESGS=0" & Chr(10)
+    OutStr = OutStr & "ASYNC=1" & Chr(10)
     OutStr = OutStr & "USERSETS=1" & Chr(10)
-    'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
+    OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
     OutStr = OutStr & "STATS=1" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
@@ -722,7 +759,48 @@ End If
 DataPrev = DataStr
 'ParseData = ParseData
 End Function
-
+Public Function Send_Who()
+    msgType = "+who"
+    OutStr = "M=" & clientNAME & Chr(10)
+    OutStr = OutStr & "N=" & clientNAME & Chr(10)
+    OutStr = OutStr & "MA=" & clientMAC & Chr(10)
+    OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
+    OutStr = OutStr & "LA=" & Winsock2.RemoteHostIP & Chr(10)
+    OutStr = OutStr & "P=1" & Chr(10)
+    OutStr = OutStr & "CL=511" & Chr(10)
+    OutStr = OutStr & "F=U" & Chr(10)
+    OutStr = OutStr & "G=0" & Chr(10)
+    OutStr = OutStr & "HW=0" & Chr(10)
+    OutStr = OutStr & "I=71615" & Chr(10)
+    OutStr = OutStr & "LO=enUS" & Chr(10)
+    OutStr = OutStr & "LV=1049601" & Chr(10)
+    OutStr = OutStr & "MD=0" & Chr(10)
+    OutStr = OutStr & "PRES=" & Chr(10)
+    OutStr = OutStr & "RP=0" & Chr(10)
+    OutStr = OutStr & "S=" & Chr(10)
+    OutStr = OutStr & "US=0" & Chr(10)
+    OutStr = OutStr & "VER=5" & Chr(10)
+    OutStr = OutStr & "X=" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    whoStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock2.SendData whoStr
+End Function
+Public Function Send_Rom()
+    msgType = "+rom"
+    OutStr = "TI=1001" & Chr(10)
+    OutStr = OutStr & "N=room" & Chr(10)
+    OutStr = OutStr & "H=vtstech" & Chr(10)
+    OutStr = OutStr & "D=vtstech server revival" & Chr(10)
+    OutStr = OutStr & "F=CK" & Chr(10)
+    OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
+    OutStr = OutStr & "T=0" & Chr(10)
+    OutStr = OutStr & "L=5" & Chr(10)
+    OutStr = OutStr & "P=0" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    romStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock2.SendData romStr
+End Function
+    
 Private Sub Combo1_Click()
 Winsock1.Close
 Winsock2.Close
@@ -758,6 +836,7 @@ moreCmd = False
 ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
+PlayerCnt = 0
 If Command1.Caption = "Stop" Then
 Winsock1.Close
 Winsock2.Close
@@ -797,19 +876,19 @@ fin:
 End Sub
 
 Private Sub Command2_Click()
-If Winsock1.State = 0 Then
+If Winsock2.State = 0 Then
 MsgBox "Error. Cannot send thru a closed socket"
 GoTo fin
-ElseIf Winsock1.State = 2 Then
+ElseIf Winsock2.State = 2 Then
 MsgBox "Error. Wait for something to send to"
 GoTo fin
-ElseIf Winsock1.State = 9 Then
+ElseIf Winsock2.State = 9 Then
 MsgBox "Error. Connection has been lost"
 GoTo fin
 End If
 out = Text3.Text
 out = HexToString(out)
-Winsock1.SendData (out)
+Winsock2.SendData (out)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[-] Sent: " & StringToHex(out) & vbCrLf
 fin:
@@ -840,15 +919,17 @@ Else
 End If
 End Sub
 
+
 Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R6"
+Build = "0.1-R7"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
-
+PlayerCnt = 0
+PlayerNum = PlayerCnt
 Combo1.Text = "Burnout 3 Takedown"
 Combo1.AddItem "Burnout 3 Takedown", 0
 Combo1.AddItem "Burnout 3 Takedown (Review)", 1
@@ -859,7 +940,7 @@ Combo1.AddItem "NASCAR Thunder 2004", 5
 Combo1.AddItem "SSX3", 6
 
 Text2.Text = ""
-Text3.Text = "Enter data to send in hex (ex: 08 32 DB 32 B7 FF 96)"
+Text3.Text = "Enter data to send in hex (ex: 7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00)"
 Text4.Text = ""
 Text5.Text = "192.168.0.228"
 
@@ -888,6 +969,7 @@ End Sub
 
 Private Sub Timer1_Timer()
 Label2.Caption = "Socket States: " & Winsock1.State & Winsock2.State & Winsock3.State
+Label5.Caption = "Connected Players: " & PlayerCnt
 DoEvents
 End Sub
 
@@ -921,6 +1003,7 @@ moreCmd = False
 ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
+PlayerCnt = PlayerCnt - 1
 End Sub
 Private Sub Winsock3_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
 Winsock3.Close
@@ -928,6 +1011,7 @@ Winsock3.Listen
 End Sub
 Private Sub Winsock2_ConnectionRequest(ByVal requestID As Long)
 '* Listener Socket 10901
+PlayerCnt = PlayerCnt + 1
 Winsock2.Close
 Winsock2.Accept (requestID)
 Buff = Text2.Text
@@ -992,6 +1076,8 @@ End If
 
 If msgType = "sviw" Then
     Winsock2.SendData (HexToBin("7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00")) '~png
+    a = Send_Who()
+    a = Send_Rom()
 End If
 End Sub
 
