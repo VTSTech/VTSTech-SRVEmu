@@ -5,7 +5,7 @@ Begin VB.Form Form1
    Caption         =   "SRVEmu GUI v0.1"
    ClientHeight    =   7440
    ClientLeft      =   60
-   ClientTop       =   345
+   ClientTop       =   645
    ClientWidth     =   9255
    LinkTopic       =   "Form1"
    ScaleHeight     =   7440
@@ -369,6 +369,22 @@ Begin VB.Form Form1
       Top             =   6720
       Width           =   1710
    End
+   Begin VB.Menu file 
+      Caption         =   "File"
+      Index           =   0
+      Begin VB.Menu save 
+         Caption         =   "Save"
+         Index           =   3
+      End
+      Begin VB.Menu exit 
+         Caption         =   "Exit"
+         Index           =   4
+      End
+   End
+   Begin VB.Menu about 
+      Caption         =   "About"
+      Index           =   1
+   End
 End
 Attribute VB_Name = "Form1"
 Attribute VB_GlobalNameSpace = False
@@ -379,7 +395,7 @@ Public Data, DataLen, OutStr
 Dim DataVal(9999)
 Public Buff
 Public out
-Public x, y, num, value, tmp2, tmp3
+Public x, y, num, value, tmp2, tmp3, Build
 Public msgType, pad, msgLen, fso, subCmd
 Public DataStr As String
 Public DataPrev As String
@@ -802,6 +818,17 @@ Public Function Send_Rom()
     Winsock2.SendData romStr
 End Function
     
+Private Sub about_Click(Index As Integer)
+msgStr = "Written by Veritas/VTSTech (Nigel Todman)" & vbCr & "Veritas Technical Solutions (www.VTS-Tech.org)" & vbCr
+msgStr = msgStr & "GitHub: https://github.com/Veritas83/VTSTech-SRVEmu" & vbCr & vbCr
+msgStr = msgStr & "Not affiliated with or endorsed by EA, Electronic Arts Inc" & vbCr
+msgStr = msgStr & "All copyrights and trademarks property of their respective owners" & vbCr & vbCr
+msgStr = msgStr & "This project would not be possible without the previous work by the following:" & vbCr & vbCr
+msgStr = msgStr & "TeknoGods/eaEmu & HarpyWar/nfsuserver & riperiperi/Breakin-In" & vbCr & vbCr
+msgStr = msgStr & "With contributions from: No23" & vbCr
+MsgBox msgStr
+End Sub
+
 Private Sub Combo1_Click()
 Winsock1.Close
 Winsock2.Close
@@ -925,7 +952,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R8"
+Build = "0.1-R9"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -966,6 +993,13 @@ End Sub
 
 Private Sub Label4_Click()
 Shell ("cmd.exe /c start bitcoin:1ByfBujg9bnmk1XXY2rxY6obhqHMUNiDuP?amount=0.02&message=donation"), vbNormalFocus
+End Sub
+
+Private Sub save_Click(Index As Integer)
+Open VB.App.Path & "\log.txt" For Output As #4
+Print #4, "VTSTech-SRVEmu v" & Build & vbCrLf & Text2.Text
+Close #4
+MsgBox "log.txt written", vbInformation
 End Sub
 
 Private Sub Timer1_Timer()
@@ -1109,3 +1143,4 @@ Else
     End If
 End If
 End Sub
+ 
