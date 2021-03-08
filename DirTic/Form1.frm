@@ -537,7 +537,7 @@ ElseIf msgType = "acct" Then
         Open acctDB For Append As #1
             Print #1, clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
         Close #1
-        MsgBox clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
+        'MsgBox clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
     Else
         Open acctDB For Input As #2
             While Not EOF(2)
@@ -545,7 +545,7 @@ ElseIf msgType = "acct" Then
                 tmp = Split(acctUSER, "#")
                 If tmp(0) = clientNAME Then
                     pad2 = HexToBin("00 00 00")
-                    ParseData = "authimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
+                    ParseData = "acctimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
                     userExist = True
                     Close #2
                     Winsock2.SendData ParseData
@@ -564,21 +564,43 @@ ElseIf msgType = "acct" Then
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     End If
 ElseIf msgType = "auth" Then
-    OutStr = "TOS=1" & Chr(10)
-    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
-    OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
-    OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving" & Chr(10)
-    OutStr = OutStr & "BORN=19800325" & Chr(10)
-    OutStr = OutStr & "GEND=M" & Chr(10)
-    OutStr = OutStr & "FROM=US" & Chr(10)
-    OutStr = OutStr & "LANG=en" & Chr(10)
-    OutStr = OutStr & "SPAM=NN" & Chr(10)
-    OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-    OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-    OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
-    OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
-    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    userExist = False
+    pad2 = HexToBin("00 00 00")
+    If fso.FileExists(acctDB) = False Then
+        ParseData = "authimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
+    Else
+        Open acctDB For Input As #3
+            While Not EOF(3)
+                Line Input #3, acctUSER
+                tmp = Split(acctUSER, "#")
+                If tmp(0) = clientNAME Then
+                    userExist = True
+                    clientMAIL = tmp(2)
+                    clientSINCE = tmp(5)
+                    OutStr = "TOS=1" & Chr(10)
+                    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+                    OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
+                    OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
+                    OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
+                    OutStr = OutStr & "GEND=M" & Chr(10)
+                    OutStr = OutStr & "FROM=US" & Chr(10)
+                    OutStr = OutStr & "LANG=en" & Chr(10)
+                    OutStr = OutStr & "SPAM=NN" & Chr(10)
+                    OutStr = OutStr & "SINCE=" & clientSINCE
+                    OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+                    OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
+                    OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
+                    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+                    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+                    Winsock2.SendData ParseData
+                    Close #2
+                End If
+            Wend
+        Close #2
+        If userExist = False Then
+            ParseData = "authimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
+        End If
+    End If
 ElseIf msgType = "cper" Then
     OutStr = "PERS=" & clientPERS & Chr(10)
     OutStr = OutStr & "ALTS=" & clientALTS & Chr(10)
@@ -822,7 +844,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R5"
+Build = "0.1-R6"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -894,6 +916,11 @@ End Sub
 Private Sub Winsock2_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
 Winsock2.Close
 Winsock2.Listen
+clientSKEY = ""
+moreCmd = False
+ParseTmp = ""
+tmp2 = ""
+tmp3 = ""
 End Sub
 Private Sub Winsock3_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
 Winsock3.Close
