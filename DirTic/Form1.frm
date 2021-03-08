@@ -636,6 +636,7 @@ ElseIf msgType = "AUTH" Then
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock3.SendData ParseData
+    Winsock3.SendData (HexToBin("7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00"))
 ElseIf msgType = "cper" Then
     OutStr = "PERS=" & clientPERS & Chr(10)
     OutStr = OutStr & "ALTS=" & clientALTS & Chr(10)
@@ -924,7 +925,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R7"
+Build = "0.1-R8"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -1085,7 +1086,7 @@ Private Sub Winsock3_DataArrival(ByVal bytesTotal As Long)
 '* Buddy Socket 10899
 On Error Resume Next
 Randomize Timer
-Winsock2.GetData Data, vbString
+Winsock3.GetData Data, vbString
 Buff = Text2.Text
 DataStr = StringToHex(Data)
 DataLen = Len(Data)
