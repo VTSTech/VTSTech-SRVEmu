@@ -405,7 +405,7 @@ Public clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS
 Public clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV
 Public clientSESS, clientSLUS, clientPID, clientDEFPER, clientLAST, clientSEED, clientSYSFLAGS, clientSKEY, userNAME
 Public NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME, ParseTmp, skeyStr, acctDB, clientPASS
-Public PlayerCnt, PlayerNum
+Public PlayerCnt, PlayerNum, secCNT, pingSEC
 'Option Explicit
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Public Function HexToString(ByVal HexToStr As String) As String
@@ -471,10 +471,15 @@ For x = 0 To UBound(params)
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "NAME=" Then
         If msgType = "news" Then
             subCmd = "new" & Mid(HexToString(Trim(params(x))), y + 5, 1)
+        ElseIf msgType = "room" Then
+            roomNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         Else
             clientNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         End If
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "USER=" Then
+        If msgType = "USCH" Then
+            userNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+        End If
       clientUSER = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PASS=" Then
       clientPASS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
@@ -497,6 +502,8 @@ For x = 0 To UBound(params)
       clientLKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PRIV=" Then
       clientPRIV = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+    ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "TIME=" Then
+      pingTIME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 6) = "PLAST=" Then
       clientPLAST = Mid(HexToString(Trim(params(x))), y + 6, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 6) = "MADDR=" Then
@@ -566,6 +573,8 @@ If msgType = "@dir" Then
     OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "~png" Then
+    pingSEC = secCNT
 ElseIf msgType = "acct" Then
     If fso.FileExists(acctDB) = False Then
         Close #1
@@ -658,6 +667,14 @@ ElseIf msgType = "cper" Then
     OutStr = OutStr & "ALTS=" & clientALTS & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "move" Then
+    a = Send_Who()
+    a = Send_Rom()
+    OutStr = "IDENT=0" & Chr(10)
+    OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
+    OutStr = OutStr & "COUNT=0" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = "move" & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "news" Then
     a = GetParams(msgType, params)
     pad2 = HexToBin("00 00 00")
@@ -719,6 +736,9 @@ ElseIf msgType = "pers" Then
     OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "room" Then
+    a = Send_Rom()
+    'Sleep (200)
 ElseIf msgType = "sele" Then
     OutStr = "VERS=" & clientVERS & Chr(10)
     OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
@@ -757,6 +777,13 @@ ElseIf msgType = "user" Then
     'OutStr = OutStr & "PID=0" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+ElseIf msgType = "USCH" Then
+    'a = GetParams(msgType, params)
+    OutStr = "NAME=" & userNAME & Chr(10)
+    'OutStr = OutStr & "CRC=0" & Chr(10)
+    'OutStr = OutStr & "PID=0" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    ParseData = "USER" & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "usld" Then
     'a = GetParams(msgType, params)
     OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
@@ -804,19 +831,41 @@ Public Function Send_Who()
 End Function
 Public Function Send_Rom()
     msgType = "+rom"
-    OutStr = "TI=1001" & Chr(10)
-    OutStr = OutStr & "N=room" & Chr(10)
-    OutStr = OutStr & "H=vtstech" & Chr(10)
-    OutStr = OutStr & "D=vtstech server revival" & Chr(10)
-    OutStr = OutStr & "F=CK" & Chr(10)
+    OutStr = "IDENT=1001" & Chr(10)
+    OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
+    OutStr = OutStr & "HOST=" & clientPERS & Chr(10)
+    OutStr = OutStr & "DESC=" & Chr(10)
+    OutStr = OutStr & "COUNT=1" & Chr(10)
+    OutStr = OutStr & "LIMIT=50" & Chr(10)
+    OutStr = OutStr & "FLAGS=C" & Chr(10)
+    OutStr = OutStr & "I=420" & Chr(10)
+    OutStr = OutStr & "N=" & clientPERS & Chr(10)
+    OutStr = OutStr & "M=" & clientPERS & Chr(10)
+    OutStr = OutStr & "R=" & roomNAME & Chr(10)
+    OutStr = OutStr & "RI=1001" & Chr(10)
+    OutStr = OutStr & "F=" & Chr(10)
     OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
-    OutStr = OutStr & "T=0" & Chr(10)
-    OutStr = OutStr & "L=5" & Chr(10)
+    OutStr = OutStr & "S=" & Chr(10)
     OutStr = OutStr & "P=0" & Chr(10)
+    OutStr = OutStr & "X=0" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     romStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock2.SendData romStr
 End Function
+Public Function Send_Png()
+    msgType = "~png"
+    OutStr = "REF=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+    OutStr = OutStr & "TIME=" & pingTIME & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    pingStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    If Winsock2.State = 7 Then
+        Winsock2.SendData pingStr
+    End If
+    If Winsock3.State = 7 Then
+        Winsock3.SendData pingStr
+    End If
+End Function
+
     
 Private Sub about_Click(Index As Integer)
 msgStr = "Written by Veritas/VTSTech (Nigel Todman)" & vbCr & "Veritas Technical Solutions (www.VTS-Tech.org)" & vbCr
@@ -948,16 +997,24 @@ End If
 End Sub
 
 
+Private Sub exit_Click(Index As Integer)
+Unload Form1
+End
+End Sub
+
 Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R9"
+Build = "0.1-R10"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
 PlayerCnt = 0
 PlayerNum = PlayerCnt
+pingTIME = 2
+secCNT = 0
+pingSEC = 30
 Combo1.Text = "Burnout 3 Takedown"
 Combo1.AddItem "Burnout 3 Takedown", 0
 Combo1.AddItem "Burnout 3 Takedown (Review)", 1
@@ -982,9 +1039,8 @@ Winsock2.Close
 Winsock3.Bind 0, Text5.Text
 Winsock3.Close
 
-Timer1.Interval = 100
+Timer1.Interval = 999
 Timer1.Enabled = True
-'MsgBox Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS")
 End Sub
 
 Private Sub Label3_Click()
@@ -1003,9 +1059,13 @@ MsgBox "log.txt written", vbInformation
 End Sub
 
 Private Sub Timer1_Timer()
+secCNT = secCNT + 1
 Label2.Caption = "Socket States: " & Winsock1.State & Winsock2.State & Winsock3.State
 Label5.Caption = "Connected Players: " & PlayerCnt
 DoEvents
+If (secCNT - pingSEC) > Int(pingTIME) And (Winsock2.State = 7 Or Winsock3.State = 7) Then
+    a = Send_Png()
+End If
 End Sub
 
 Private Sub Winsock1_Close()
