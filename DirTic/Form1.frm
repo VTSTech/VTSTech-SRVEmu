@@ -364,10 +364,12 @@ Public msgType, pad, msgLen, fso, subCmd
 Public DataStr As String
 Public DataPrev As String
 Public moreCmd As Boolean
+Public userExist As Boolean
 Public clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS, clientBORN, clientMAIL, clientSKU
 Public clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV
 Public clientSESS, clientSLUS, clientPID, clientDEFPER, clientLAST, clientSEED, clientSYSFLAGS, clientSKEY, userNAME
-Public NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME, ParseTmp, skeyStr
+Public NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, roomNAME, ParseTmp, skeyStr, acctDB, clientPASS
+
 'Option Explicit
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Public Function HexToString(ByVal HexToStr As String) As String
@@ -421,7 +423,7 @@ For x = 0 To UBound(params)
     ElseIf Mid(HexToString(Trim(params(x))), y, 4) = "SKU=" Then
         clientSKU = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "ALTS=" Then
-      clientALTS = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
+      clientALTS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "VERS=" Then
         clientVERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
     ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "BORN=" Then
@@ -488,6 +490,7 @@ Next x
 End Function
 Public Function ParseData(DataStr As String)
 moar:
+Set fso = CreateObject("Scripting.FileSystemObject")
 Buff = Text2.Text
 pad = HexToBin("00 00 00 00 00 00 00")
 'MsgBox (DataStr)
@@ -528,22 +531,50 @@ If msgType = "@dir" Then
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
 ElseIf msgType = "acct" Then
-    OutStr = "TOS=1" & Chr(10)
-    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
-    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-    ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    If fso.FileExists(acctDB) = False Then
+        Close #1
+        clientLAST = Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS")
+        Open acctDB For Append As #1
+            Print #1, clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
+        Close #1
+        MsgBox clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
+    Else
+        Open acctDB For Input As #2
+            While Not EOF(2)
+                Line Input #2, acctUSER
+                tmp = Split(acctUSER, "#")
+                If tmp(0) = clientNAME Then
+                    pad2 = HexToBin("00 00 00")
+                    ParseData = "authimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
+                    userExist = True
+                    Close #2
+                    Winsock2.SendData ParseData
+                End If
+            Wend
+        Close #2
+    End If
+    If userExist = False Then
+        OutStr = "TOS=1" & Chr(10)
+        OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+        OutStr = OutStr & "AGE=21" & Chr(10)
+        OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
+        OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    End If
 ElseIf msgType = "auth" Then
     OutStr = "TOS=1" & Chr(10)
     OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
-    OutStr = OutStr & "MAIL=nospam@no.no" & Chr(10)
+    OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
     OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving" & Chr(10)
     OutStr = OutStr & "BORN=19800325" & Chr(10)
     OutStr = OutStr & "GEND=M" & Chr(10)
     OutStr = OutStr & "FROM=US" & Chr(10)
     OutStr = OutStr & "LANG=en" & Chr(10)
     OutStr = OutStr & "SPAM=NN" & Chr(10)
-    OutStr = OutStr & "SINCE=2021.03.05-11:11:11" & Chr(10)
-    OutStr = OutStr & "LAST=2021.03.05-11:11:11" & Chr(10)
+    OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+    OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
     OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
     OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -608,7 +639,7 @@ ElseIf msgType = "pers" Then
     OutStr = OutStr & "MA=$00041f828759" & Chr(10)
     OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
     OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
-    OutStr = OutStr & "LAST=2021.03.05-11:11:11" & Chr(10)
+    OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
     'OutStr = OutStr & "PLAST=2021.03.05-11:11:11" & Chr(10)
     'OutStr = OutStr & "PSINCE=2021.03.05-11:11:11" & Chr(10)
     OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
@@ -789,10 +820,9 @@ End Sub
 
 Private Sub Form_Load()
 On Error Resume Next
-'Game Socket Port
 Set fso = CreateObject("Scripting.FileSystemObject")
-
-Build = "0.1-R4"
+acctDB = VB.App.Path & "\acct.db"
+Build = "0.1-R5"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -823,6 +853,7 @@ Winsock3.Close
 
 Timer1.Interval = 100
 Timer1.Enabled = True
+'MsgBox Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS")
 End Sub
 
 Private Sub Label3_Click()
@@ -854,6 +885,19 @@ Winsock1.Close
 Winsock1.Accept (requestID)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock1.RemoteHostIP & ":" & Winsock1.RemotePort & vbCrLf
+End Sub
+
+Private Sub Winsock1_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
+Winsock1.Close
+Winsock1.Listen
+End Sub
+Private Sub Winsock2_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
+Winsock2.Close
+Winsock2.Listen
+End Sub
+Private Sub Winsock3_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
+Winsock3.Close
+Winsock3.Listen
 End Sub
 Private Sub Winsock2_ConnectionRequest(ByVal requestID As Long)
 '* Listener Socket 10901
