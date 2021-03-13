@@ -6,10 +6,10 @@ Begin VB.Form Form1
    ClientHeight    =   7440
    ClientLeft      =   60
    ClientTop       =   645
-   ClientWidth     =   9255
+   ClientWidth     =   9900
    LinkTopic       =   "Form1"
    ScaleHeight     =   7440
-   ScaleWidth      =   9255
+   ScaleWidth      =   9900
    StartUpPosition =   1  'CenterOwner
    Begin VB.TextBox Text5 
       BeginProperty Font 
@@ -98,14 +98,14 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   5775
-      Left            =   6600
+      Height          =   855
+      Left            =   6480
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   11
       Text            =   "Form1.frx":0000
       Top             =   960
-      Width           =   2535
+      Width           =   3375
    End
    Begin VB.TextBox Text3 
       BeginProperty Font 
@@ -174,13 +174,13 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   4815
+      Height          =   4935
       Left            =   120
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   4
       Text            =   "Form1.frx":000C
-      Top             =   1920
+      Top             =   1800
       Width           =   6375
    End
    Begin VB.CheckBox Check2 
@@ -268,6 +268,406 @@ Begin VB.Form Form1
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   0
+      Left            =   8160
+      Top             =   6480
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   1
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   2
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   3
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   4
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   5
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   6
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   7
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   8
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   9
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   10
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   11
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   12
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   13
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   14
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   15
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   16
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   17
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   18
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   19
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   20
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   21
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   22
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   23
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   24
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   25
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   26
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   27
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   28
+      Left            =   0
+      Top             =   0
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin VB.Label Label13 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6555
+      TabIndex        =   25
+      Top             =   3600
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label12 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6555
+      TabIndex        =   24
+      Top             =   3360
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label11 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6555
+      TabIndex        =   23
+      Top             =   3120
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label10 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6555
+      TabIndex        =   22
+      Top             =   2880
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label9 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6560
+      TabIndex        =   21
+      Top             =   2640
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label8 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6560
+      TabIndex        =   20
+      Top             =   2400
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label7 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6560
+      TabIndex        =   19
+      Top             =   2160
+      Visible         =   0   'False
+      Width           =   1275
+   End
+   Begin VB.Label Label6 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "clientPROD = "
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00C0C0C0&
+      Height          =   210
+      Left            =   6560
+      TabIndex        =   18
+      Top             =   1920
+      Visible         =   0   'False
+      Width           =   1275
    End
    Begin VB.Label Label5 
       AutoSize        =   -1  'True
@@ -404,16 +804,25 @@ Public clientALTS, clientNAME, clientVERS, clientMAC, clientPERS, clientPERSONAS
 Public clientPLAST, clientMADDR, clientUSER, clientMINSIZE, clientMAXSIZE, clientPARAMS, clientCUSTFLAGS, clientPRIV
 Public clientSESS, clientSLUS, clientPID, clientDEFPER, clientLAST, clientSEED, clientSYSFLAGS, clientSKEY, userNAME
 Public NEWS_PAYLOAD, clientLKEY, clientPROD, pingREF, pingTIME, ParseTmp, skeyStr, acctDB, clientPASS
-Public PlayerCnt, PlayerNum, secCNT, pingSEC, protoVER, roomTOTAL, roomINDEX, roomSIZE, roomPLAYERS, roomHOST, roomNAME
-Public clientTID
+Public PlayerCnt, playerNUM, secCNT, pingSEC, protoVER, roomTOTAL, roomINDEX, roomMAXSIZE, roomPLAYERS, roomHOST, roomNAME
+Public clientTID, playerNAME, playerROOM, playerIP, playerPORT, playerID
 Private Type room
     roomINDEX As Integer
     roomNAME As String
-    roomSIZE As Integer
+    roomMAXSIZE As Integer
     roomPLAYERS As Integer
     roomHOST As String
 End Type
-Dim rooms() As room
+Private Type player
+    playerNUM As Integer
+    playerID As Integer
+    playerNAME As String
+    playerROOM As Integer
+    playerIP As String
+    playerPORT As Long
+End Type
+Dim rooms(9999) As room
+Dim players(9999) As player
 'Option Explicit
 Dim DataVal(9999)
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
@@ -472,30 +881,36 @@ For x = 0 To UBound(params)
         ElseIf Mid(HexToString(Trim(params(x))), y, 4) = "SKU=" Then
             clientSKU = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "ALTS=" Then
-          clientALTS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientALTS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "VERS=" Then
             clientVERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            Label8.Caption = "VERS " & clientVERS
+            Label8.Visible = True
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "BORN=" Then
-          clientBORN = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientBORN = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "SLUS=" Then
-          clientSLUS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
-        ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "VERS=" Then
-          clientVERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientSLUS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "NAME=" Then
             If msgType = "news" Then
                 subCmd = "new" & Mid(HexToString(Trim(params(x))), y + 5, 1)
             ElseIf msgType = "room" Then
                 roomNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            ElseIf msgType = "peek" Then
+                roomNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
             Else
                 clientNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+                Label9.Caption = "USER " & clientNAME
+                Label9.Visible = True
             End If
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "USER=" Then
             If msgType = "USCH" Then
                 userNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
             End If
-          clientUSER = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientUSER = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            Label9.Caption = "USER " & clientUSER
+            Label9.Visible = True
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PASS=" Then
-          clientPASS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientPASS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PERS=" Then
             If msgType = "user" Then
                 userNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
@@ -503,27 +918,31 @@ For x = 0 To UBound(params)
                 clientPERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
             End If
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PROD=" Then
-          clientPROD = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientPROD = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            Label7.Caption = "PROD " & clientPROD
+            Label7.Visible = True
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "SKEY=" Then
-          clientSKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientSKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "SEED=" Then
-          clientSEED = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientSEED = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "MAIL=" Then
-          clientMAIL = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientMAIL = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "LAST=" Then
-          clientLAST = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientLAST = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "LKEY=" Then
-          clientLKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientLKEY = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PRIV=" Then
-          clientPRIV = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            clientPRIV = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "TIME=" Then
-          pingTIME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            pingTIME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 6) = "PLAST=" Then
           clientPLAST = Mid(HexToString(Trim(params(x))), y + 6, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 6) = "MADDR=" Then
           clientMADDR = Mid(HexToString(Trim(params(x))), y + 6, Len(HexToString(Trim(params(x)))))
           tmp = Split(clientMADDR, "$")
           clientNAME = tmp(0)
+          Label9.Caption = "USER " & clientNAME
+          Label9.Visible = True
         ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "HWFLAG=" Then
           clientHWFLAG = Mid(HexToString(Trim(params(x))), y + 7, Len(HexToString(Trim(params(x)))))
         ElseIf Mid(HexToString(Trim(params(x))), y, 7) = "HWMASK=" Then
@@ -548,13 +967,42 @@ For x = 0 To UBound(params)
     ElseIf protoVER = 2 Then
         If Mid(HexToString(Trim(params(x))), y, 4) = "TID=" Then
             clientTID = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))) - y - 4)
+            If Len(clientTID) > 1 Then
+                clientTID = Mid(HexToString(Trim(params(x))), y + 4, Len(HexToString(Trim(params(x)))) - (y * 2) - 2)
+            End If
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PROD=" Then
             clientPROD = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))) - y - 5)
+            Label7.Caption = "PROD " & clientPROD
+            Label7.Visible = True
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "VERS=" Then
             clientVERS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))) - y - 5)
+            Label8.Caption = "VERS " & clientVERS
+            Label8.Visible = True
         End If
     End If
 Next x
+End Function
+Public Function CreateRoom(host)
+roomTOTAL = roomTOTAL + 1
+roomINDEX = 1000 + Int(roomTOTAL)
+rooms(roomTOTAL).roomINDEX = roomINDEX
+rooms(roomTOTAL).roomHOST = players(host - 1000).playerIP
+rooms(roomTOTAL).roomMAXSIZE = 8
+rooms(roomTOTAL).roomNAME = "TestRoom"
+rooms(roomTOTAL).roomPLAYERS = 1
+players(host - 1000).playerROOM = rooms(roomTOTAL).roomINDEX
+players(host - 1000).playerPORT = 28500
+If protoVER = 1 Then
+ElseIf protoVER = 2 Then
+    msgType = "CGAM"
+    OutStr = "LOBBY-ID=1" & Chr(34) & "1" & Chr(34) & " "
+    OutStr = OutStr & "GAME-ID=" & Chr(34) & rooms(roomTOTAL).roomINDEX & Chr(34)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    cgamData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock4(host - 1000).SendData cgamData
+    Sleep (500)
+    DoEvents
+End If
 End Function
 Public Function ParseData(DataStr As String)
 moar:
@@ -592,13 +1040,24 @@ OutStr = ""
 a = GetParams(msgType, params)
 ParseTmp = ""
 
-If msgType = "@tic" Then
+If msgType = "@tic" Or msgType = "@dir" Then
     protoVER = 1
+    Label6.Caption = "protoVER 1"
+    Label6.Visible = True
 ElseIf msgType = "CONN" Then
     protoVER = 2
+    Label6.Caption = "protoVER 2"
+    Label6.Visible = True
+ElseIf msgType = HexToString("80 1C 01 00") Then
+    protoVER = 0
+    Label6.Caption = "protoVER 0"
+    Label6.Visible = True
+    Text2.Text = Text2.Text & vbCrLf & vbCrLf & "!! Encryption Detected !!" & vbCrLf
+    Buff = Text2.Text
 End If
 
 If protoVER = 1 Then
+    Label6.Caption = "protoVER 1 " & msgType
     If msgType = "@dir" Then
         OutStr = "ADDR=" & Winsock1.LocalIP & Chr(10)
         OutStr = OutStr & "PORT=10901" & Chr(10)
@@ -735,11 +1194,15 @@ If protoVER = 1 Then
         'TEXT=05GkkkkiWxYUsUWOrK1liy3/8s4WdLT1qK2Jbqt6XAP6lhDsb/9/+XDriFxK4pcWuNXHrkVya5UDKpc//f/v/3/7/9/+//f/v/3/4D0B+BAgeP/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/83nJuf/v/y5cA%3d
         ParseData = "auxi" & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "move" Then
-        a = Send_Who()
         a = Send_Rom()
+        Sleep (200)
+        a = Send_Who()
+        Sleep (200)
+        a = Send_usr()
+        Sleep (200)
         OutStr = "IDENT=0" & Chr(10)
         OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
-        OutStr = OutStr & "COUNT=0" & Chr(10)
+        OutStr = OutStr & "COUNT=1" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = "move" & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "news" Then
@@ -750,6 +1213,7 @@ If protoVER = 1 Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         Else
             OutStr = "BUDDY_SERVER=" & Winsock3.LocalIP & Chr(10)
+            OutStr = OutStr & "BUDDY_URL=http://ps3burnout08.ea.com/BUDDY.txt" & Chr(10)
             OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
             OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
             OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
@@ -810,21 +1274,25 @@ If protoVER = 1 Then
         OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
         OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        persData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        Winsock2.SendData persData
     ElseIf msgType = "room" Or msgType = "RGET" Then
-        a = Send_Rom()
+        OutStr = "IDENT=0" & Chr(10)
+        OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
+        OutStr = OutStr & "COUNT=1" & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = "room" & pad & Chr(msgLen) & OutStr & Chr(0)
         'Sleep (200)
     ElseIf msgType = "sele" Then
         'OutStr = "VERS=" & clientVERS & Chr(10)
         'OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
-        
-        OutStr = "GAMES=0" & Chr(10)
-        OutStr = OutStr & "CTRL=0" & Chr(10)
-        OutStr = OutStr & "ROOMS=0" & Chr(10)
-        OutStr = OutStr & "INGAME=0" & Chr(10)
-        OutStr = OutStr & "MYGAME=1" & Chr(10)
+        'OutStr = "GAMES=0" & Chr(10)
+        'OutStr = OutStr & "CTRL=0" & Chr(10)
+        'OutStr = OutStr & "ROOMS=0" & Chr(10)
+        'OutStr = OutStr & "INGAME=0" & Chr(10)
+        OutStr = "MYGAME=1" & Chr(10)
         OutStr = OutStr & "USERS=1" & Chr(10)
-        OutStr = OutStr & "PLATFORM=PS3" & Chr(10)
+        OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
         OutStr = OutStr & "MESGS=1" & Chr(10)
         OutStr = OutStr & "ASYNC=0" & Chr(10)
         OutStr = OutStr & "RANKS=0" & Chr(10)
@@ -893,42 +1361,56 @@ If protoVER = 1 Then
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     End If
 ElseIf protoVER = 2 Then
+    Label6.Caption = "protoVER 2 " & msgType
     If msgType = "CONN" Then
-        'OutStr = "PROT=1" & Chr(10)
-        'OutStr = OutStr & "PROD=" & clientPROD & Chr(10)
-        'OutStr = OutStr & "VERS=" & clientVERS & Chr(10)
-        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
+        OutStr = "NUM-CHALLENGES=0" & Chr(0)
+        'OutStr = OutStr & "PROD=" & clientPROD & Chr(0)
+        'OutStr = OutStr & "VERS=" & clientVERS & Chr(0)
+        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(0)
         'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         msgLen = Len(msgType) + 8 + 1
         ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
-    'ElseIf msgType = "CGAM" Then
-        'OutStr = "TICKET={" & Chr(34) & "VTSTech" & Chr(34) & "}"
-        'OutStr = OutStr & "PROD=" & clientPROD & Chr(10)
-        'OutStr = OutStr & "VERS=" & clientVERS & Chr(10)
-        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
-        'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-        'ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
+    ElseIf msgType = "CGAM" Then
+        If players(PlayerCnt).playerROOM = 0 Then
+            a = CreateRoom(players(PlayerCnt).playerID)
+        End If
+        msgType = "UGAM"
+        OutStr = "QUENCH=" & Chr(34) & "20" & Chr(34)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    ElseIf msgType = "GLST" Then
+        OutStr = "TID=" & clientTID & " "
+        OutStr = OutStr & "NUM-GAMES=" & roomTOTAL & " "
+        OutStr = OutStr & "LOBBY-ID=1"
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = HexToBin(StringToHex(msgType & pad & Chr(msgLen) & OutStr & Chr(0)))
     ElseIf msgType = "USER" Then
         'YD[&YE@@eÀ¨äÀ¨Þ7Ü9!Ct"seúMPúhHUSERTICKET=YOLO
-        OutStr = "TICKET={" & Chr(34) & "VTSTech" & Chr(34) & "}"
-        'OutStr = OutStr & "PROD=" & clientPROD & Chr(10)
-        'OutStr = OutStr & "VERS=" & clientVERS & Chr(10)
-        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
+        OutStr = Trim("TICKET=") & Chr(34) & players(PlayerCnt).playerID & Chr(34)
+        'OutStr = OutStr & "PROD=" & clientPROD & Chr(0)
+        'OutStr = OutStr & "VERS=" & clientVERS & Chr(0)
+        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(0)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    ElseIf msgType = "LLST" Then
+        OutStr = "TID=" & clientTID & " "
+        'OutStr = OutStr & "NUM-REGIONS=1" & " "
+        OutStr = OutStr & "NUM-LOBBIES=1"
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "FILE" Then
-        'OutStr = "CLEAN-TEXT=" & Chr(34) & "VTSTech.is.reviving.games" & Chr(34) & Chr(10)
-        'OutStr = OutStr & "PROD=" & clientPROD & Chr(10)
-        'OutStr = OutStr & "VERS=" & clientVERS & Chr(10)
-        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
+        'OutStr = "CLEAN-TEXT=" & Chr(34) & "VTSTech.is.reviving.games" & Chr(34) & Chr(0)
+        'OutStr = OutStr & "PROD=" & clientPROD & Chr(0)
+        'OutStr = OutStr & "VERS=" & clientVERS & Chr(0)
+        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(0)
         msgLen = Len(msgType) + 8 + 1
         ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
     ElseIf msgType = "PROF" Then
         'YD[&YEF @eÀ¨äÀ¨Þ7Ü9!Ct:seú©PúsøPROFCLEAN-TEXT="YOLO"
         OutStr = "CLEAN-TEXT=" & Chr(34) & "VTSTech" & Chr(34)
-        'OutStr = OutStr & "PROD=" & clientPROD & Chr(10)
-        'OutStr = OutStr & "VERS=" & clientVERS & Chr(10)
-        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
+        'OutStr = OutStr & "PROD=" & clientPROD & Chr(0)
+        'OutStr = OutStr & "VERS=" & clientVERS & Chr(0)
+        'OutStr = OutStr & "LKEY=" & clientLKEY & Chr(0)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "RLST" Then
@@ -943,18 +1425,70 @@ End If
 DataPrev = DataStr
 'ParseData = ParseData
 End Function
-Public Function Send_RDAT()
+Public Function Send_LDAT(Index)
+    msgType = "LDAT"
+    x = 0
+    For x = 0 To roomTOTAL
+        OutStr = "TID=" & clientTID & " "
+        OutStr = OutStr & "LOBBY-ID=1" & " "
+        'OutStr = OutStr & "NAME=" & Chr(34) & rooms(x).roomNAME & Chr(34) & " "
+        OutStr = OutStr & "NAME=" & Chr(34) & "Global" & Chr(34) & " "
+        OutStr = OutStr & "LOCALE=0" & " "
+        OutStr = OutStr & "NUM-GAMES=" & roomTOTAL & " "
+        OutStr = OutStr & "FAVORITE-GAMES=0" & " "
+        OutStr = OutStr & "FAVORITE-PLAYERS=0"
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ldatData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        Winsock4(Index).SendData ldatData 'protoVER = 2
+        x = x + 1
+        Sleep (200)
+        DoEvents
+    Next x
+End Function
+Public Function Send_RDAT(Index)
     'YD[&YEx"@eKÀ¨äÀ¨Þ7Ü9!Ctxseú»PùúmRDATPTID=1 REGION-ID=1 NAME="IamLupo" LOCALE=0 NUM-GAMES=1 NUM-PLAYERS=1
     msgType = "RDAT"
     OutStr = "TID=" & clientTID & " "
     OutStr = OutStr & "REGION-ID=1" & " "
-    OutStr = OutStr & "NAME=" & Chr(34) & "VTSTech" & Chr(34) & " "
+    OutStr = OutStr & "NAME=" & Chr(34) & "Global" & Chr(34) & " "
     OutStr = OutStr & "LOCALE=0" & " "
-    OutStr = OutStr & "NUM-GAMES=1" & " "
-    OutStr = OutStr & "NUM-PLAYERS=1"
+    OutStr = OutStr & "NUM-GAMES=" & roomTOTAL & " "
+    OutStr = OutStr & "NUM-PLAYERS=" & playerNUM
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     rdatData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-    Winsock1.SendData rdatData
+    Winsock4(Index).SendData rdatData 'protoVER = 2
+End Function
+Public Function Send_GDAT(Index)
+    'TID IP PORT GAME-ID FAVORITE NUM-FAV-PLAYERS NUM-PLAYERS MAX-PLAYERS NAME
+    msgType = "GDAT"
+    x = 1
+    For x = 1 To Int(roomTOTAL)
+        OutStr = "TID=" & clientTID & " "
+        OutStr = OutStr & "IP=" & Chr(34) & rooms(x).roomHOST & Chr(34) & " "
+        'OutStr = OutStr & "NAME=" & Chr(34) & rooms(x).roomNAME & Chr(34) & " "
+        OutStr = OutStr & "PORT=28500" & " "
+        'OutStr = OutStr & "GAME-ID=" & rooms(x).roomINDEX & " "
+        OutStr = OutStr & "GAME-ID=1" & " "
+        OutStr = OutStr & "FAVORITE=0" & " "
+        OutStr = OutStr & "NUM-FAV-PLAYERS=0" & " "
+        OutStr = OutStr & "NUM-PLAYERS=" & rooms(x).roomPLAYERS & " "
+        OutStr = OutStr & "MAX-PLAYERS=" & rooms(x).roomMAXSIZE & " "
+        OutStr = OutStr & "NAME=" & Chr(34) & rooms(x).roomNAME & Chr(34)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        gdatData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        Winsock4(Index).SendData gdatData 'protoVER = 2
+        x = x + 1
+        Sleep (200)
+        DoEvents
+    Next x
+End Function
+Public Function Send_usr()
+    msgType = "+usr"
+    OutStr = "I=1" & clientTID & Chr(10)
+    OutStr = OutStr & "N=" & clientNAME & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    usrData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock2.SendData usrData
 End Function
 Public Function Send_Who()
     msgType = "+who"
@@ -985,23 +1519,23 @@ Public Function Send_Who()
 End Function
 Public Function Send_Rom()
     msgType = "+rom"
-    OutStr = "IDENT=1001" & Chr(10)
-    OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
-    OutStr = OutStr & "HOST=" & clientPERS & Chr(10)
-    OutStr = OutStr & "DESC=" & Chr(10)
-    OutStr = OutStr & "COUNT=1" & Chr(10)
-    OutStr = OutStr & "LIMIT=50" & Chr(10)
-    OutStr = OutStr & "FLAGS=C" & Chr(10)
-    OutStr = OutStr & "I=420" & Chr(10)
+    'OutStr = "IDENT=1001" & Chr(10)
+    'OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
+    'OutStr = OutStr & "HOST=" & clientPERS & Chr(10)
+    'OutStr = OutStr & "DESC=" & Chr(10)
+    'OutStr = OutStr & "COUNT=1" & Chr(10)
+    'OutStr = OutStr & "LIMIT=50" & Chr(10)
+    'OutStr = OutStr & "FLAGS=C" & Chr(10)
+    OutStr = "I=420" & Chr(10)
     OutStr = OutStr & "N=" & clientPERS & Chr(10)
-    OutStr = OutStr & "M=" & clientPERS & Chr(10)
-    OutStr = OutStr & "R=" & roomNAME & Chr(10)
-    OutStr = OutStr & "RI=1001" & Chr(10)
-    OutStr = OutStr & "F=" & Chr(10)
-    OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
-    OutStr = OutStr & "S=" & Chr(10)
-    OutStr = OutStr & "P=0" & Chr(10)
-    OutStr = OutStr & "X=0" & Chr(10)
+    'OutStr = OutStr & "M=" & clientPERS & Chr(10)
+    'OutStr = OutStr & "R=" & roomNAME & Chr(10)
+    'OutStr = OutStr & "RI=1001" & Chr(10)
+    'OutStr = OutStr & "F=" & Chr(10)
+    'OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
+    'OutStr = OutStr & "S=" & Chr(10)
+    OutStr = OutStr & "T=1" & Chr(10)
+    OutStr = OutStr & "L=4" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     romStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock2.SendData romStr
@@ -1057,11 +1591,14 @@ ElseIf Combo1.ListIndex = 4 Then
     Winsock1.LocalPort = 20000
 ElseIf Combo1.ListIndex = 5 Then
     Winsock1.LocalPort = 14300
+    protoVER = 2
 ElseIf Combo1.ListIndex = 6 Then
     Winsock1.LocalPort = 10600
 ElseIf Combo1.ListIndex = 7 Then
     Winsock1.LocalPort = 10900
 ElseIf Combo1.ListIndex = 8 Then
+    Winsock1.LocalPort = 20900
+ElseIf Combo1.ListIndex = 9 Then
     Winsock1.LocalPort = 11000
 End If
 Text1.Text = Winsock1.LocalPort
@@ -1074,6 +1611,16 @@ ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
 PlayerCnt = 0
+Label6.Visible = False
+Label7.Visible = False
+Label8.Visible = False
+Label9.Visible = False
+Label10.Visible = False
+Label11.Visible = False
+Label12.Visible = False
+Label13.Visible = False
+'Label14.Visible = False
+'Label15.Visible = False
 If Command1.Caption = "Stop" Then
 Winsock1.Close
 Winsock2.Close
@@ -1083,6 +1630,9 @@ GoTo fin
 End If
 
 If Check1.Enabled = True Then
+    Winsock1.Close
+    Winsock2.Close
+    Winsock3.Close
     Winsock1.Protocol = sckTCPProtocol
     Winsock2.Protocol = sckTCPProtocol
     Winsock3.Protocol = sckTCPProtocol
@@ -1098,7 +1648,8 @@ GoTo fin
 Else
     Winsock1.LocalPort = Val(Text1.Text) 'Game
     Winsock2.LocalPort = 10901 'Listener
-    Winsock3.LocalPort = 10899 'Buddy
+    'Winsock3.LocalPort = 10899 'Buddy
+    Winsock3.LocalPort = 28500 'Buddy
 End If
 
 Winsock1.Listen
@@ -1166,12 +1717,12 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R13"
+Build = "0.1-R14"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
 PlayerCnt = 0
-PlayerNum = PlayerCnt
+playerNUM = PlayerCnt
 pingTIME = 2
 secCNT = 0
 pingSEC = 30
@@ -1185,7 +1736,8 @@ Combo1.AddItem "Madden NFL 05", 4
 Combo1.AddItem "Medal of Honor: Rising Sun", 5
 Combo1.AddItem "NASCAR Thunder 2004", 6
 Combo1.AddItem "Need for Speed: Underground", 7
-Combo1.AddItem "SSX3", 8
+Combo1.AddItem "Need for Speed: Underground 2", 8
+Combo1.AddItem "SSX3", 9
 
 Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00)"
@@ -1226,6 +1778,9 @@ secCNT = secCNT + 1
 Label2.Caption = "Socket States: " & Winsock1.State & Winsock2.State & Winsock3.State
 Label5.Caption = "Connected Players: " & PlayerCnt
 DoEvents
+If Winsock1.State = 0 Then
+Winsock1.Listen
+End If
 If (secCNT - pingSEC) > Int(pingTIME) * 10 And (Winsock2.State = 7 Or Winsock3.State = 7) Then
     a = Send_Png()
 End If
@@ -1243,8 +1798,15 @@ moreCmd = False
 ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
+PlayerCnt = PlayerCnt + 1
+players(PlayerCnt).playerNUM = PlayerCnt
+players(PlayerCnt).playerID = Int(1000 + PlayerCnt)
+players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
+players(PlayerCnt).playerROOM = 0
+players(PlayerCnt).playerPORT = Winsock1.RemotePort
+players(PlayerCnt).playerNAME = ""
 Winsock1.Close
-Winsock1.Accept (requestID)
+Winsock4(PlayerCnt).Accept (requestID)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock1.RemoteHostIP & ":" & Winsock1.RemotePort & vbCrLf
 End Sub
@@ -1252,6 +1814,7 @@ End Sub
 Private Sub Winsock1_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
 Winsock1.Close
 Winsock1.Listen
+PlayerCnt = PlayerCnt - 1
 End Sub
 Private Sub Winsock2_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
 Winsock2.Close
@@ -1269,7 +1832,6 @@ Winsock3.Listen
 End Sub
 Private Sub Winsock2_ConnectionRequest(ByVal requestID As Long)
 '* Listener Socket 10901
-PlayerCnt = PlayerCnt + 1
 Winsock2.Close
 Winsock2.Accept (requestID)
 Buff = Text2.Text
@@ -1296,13 +1858,6 @@ If Len(tmp2) > 1 Then
     'Sleep (250)
     Winsock1.SendData (HexToBin(StringToHex(tmp2)))
 End If
-If msgType = "RLST" Then
-    DoEvents
-    Sleep (1000)
-    DoEvents
-    a = Send_RDAT()
-End If
-
 If moreCmd = True Then
     Winsock1.SendData (HexToBin(StringToHex(ParseData("moreCmd"))))
 End If
@@ -1339,14 +1894,27 @@ Else
     End If
 End If
 
-If msgType = "auth" Then
+'If msgType = "auth" Then
     'a = Send_Who()
+    'a = Send_Rom()
+'End If
+
+If msgType = "pers" Then
+    DoEvents
     a = Send_Rom()
+    Sleep (500)
+    DoEvents
+    a = Send_Who()
+    Sleep (500)
+    DoEvents
+    a = Send_usr()
 End If
+
 If msgType = "sviw" Then
     a = Send_Who()
     'a = Send_Rom()
 End If
+
 End Sub
 
 Private Sub Winsock3_DataArrival(ByVal bytesTotal As Long)
@@ -1377,3 +1945,60 @@ Else
 End If
 End Sub
  
+Private Sub Winsock4_ConnectionRequest(Index As Integer, ByVal requestID As Long)
+'* Game Socket
+clientSKEY = ""
+moreCmd = False
+ParseTmp = ""
+tmp2 = ""
+tmp3 = ""
+PlayerCnt = PlayerCnt + 1
+'ReDim players(PlayerCnt)
+players(PlayerCnt).playerNUM = PlayerCnt
+players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
+players(PlayerCnt).playerROOM = 0
+players(PlayerCnt).playerPORT = Winsock1.RemotePort
+players(PlayerCnt).playerNAME = ""
+Winsock4(Index).Close
+Winsock4(Index).Accept (requestID)
+Buff = Text2.Text
+Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock4(Index).RemoteHostIP & ":" & Winsock4(Index).RemotePort & vbCrLf
+End Sub
+
+Private Sub Winsock4_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+'* Game Socket
+On Error Resume Next
+Randomize Timer
+Winsock4(Index).GetData Data, vbString
+Buff = Text2.Text
+DataStr = StringToHex(Data)
+DataLen = Len(Data)
+tmp2 = ParseData(DataStr)
+Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
+If Len(tmp2) > 1 Then
+    'Sleep (250)
+    Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
+End If
+If msgType = "RLST" Then
+    DoEvents
+    Sleep (1000)
+    DoEvents
+    a = Send_RDAT(Index)
+End If
+If msgType = "GLST" Then
+    DoEvents
+    Sleep (500)
+    DoEvents
+    a = Send_GDAT(Index)
+End If
+If msgType = "LLST" Then
+    DoEvents
+    Sleep (500)
+    DoEvents
+    a = Send_LDAT(Index)
+End If
+If moreCmd = True Then
+    Winsock4(Index).SendData (HexToBin(StringToHex(ParseData("moreCmd"))))
+End If
+End Sub
+
