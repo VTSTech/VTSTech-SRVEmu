@@ -65,7 +65,7 @@ Begin VB.Form Form1
       Width           =   975
    End
    Begin MSWinsockLib.Winsock Winsock1 
-      Left            =   8160
+      Left            =   8880
       Top             =   6960
       _ExtentX        =   741
       _ExtentY        =   741
@@ -161,7 +161,7 @@ Begin VB.Form Form1
       Width           =   735
    End
    Begin VB.Timer Timer1 
-      Left            =   8640
+      Left            =   9360
       Top             =   6960
    End
    Begin VB.TextBox Text2 
@@ -256,14 +256,14 @@ Begin VB.Form Form1
       Width           =   735
    End
    Begin MSWinsockLib.Winsock Winsock2 
-      Left            =   7680
+      Left            =   8400
       Top             =   6960
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock3 
-      Left            =   7200
+      Left            =   7920
       Top             =   6960
       _ExtentX        =   741
       _ExtentY        =   741
@@ -271,7 +271,7 @@ Begin VB.Form Form1
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   0
-      Left            =   8160
+      Left            =   9360
       Top             =   6480
       _ExtentX        =   741
       _ExtentY        =   741
@@ -279,224 +279,248 @@ Begin VB.Form Form1
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   1
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   6480
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   2
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   6480
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   3
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   6480
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   4
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   6000
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   5
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   6000
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   6
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   6000
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   7
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   6000
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   8
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   5520
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   9
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   5520
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   10
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   5520
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   11
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   5520
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   12
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   5040
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   13
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   5040
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   14
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   5040
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   15
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   5040
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   16
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   4560
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   17
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   4560
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   18
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   4560
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   19
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   4560
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   20
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   4080
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   21
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   4080
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   22
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   4080
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   23
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   4080
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   24
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   3600
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   25
-      Left            =   0
-      Top             =   0
+      Left            =   8880
+      Top             =   3600
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   26
-      Left            =   0
-      Top             =   0
+      Left            =   8400
+      Top             =   3600
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   27
-      Left            =   0
-      Top             =   0
+      Left            =   7920
+      Top             =   3600
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock Winsock4 
       Index           =   28
-      Left            =   0
-      Top             =   0
+      Left            =   9360
+      Top             =   3120
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   29
+      Left            =   8880
+      Top             =   3120
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   30
+      Left            =   8400
+      Top             =   3120
+      _ExtentX        =   741
+      _ExtentY        =   741
+      _Version        =   393216
+   End
+   Begin MSWinsockLib.Winsock Winsock4 
+      Index           =   31
+      Left            =   7920
+      Top             =   3120
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
@@ -1028,9 +1052,15 @@ If UBound(cmds) >= 1 Then
 End If
 DataStr = Trim(DataStr)
 msgType = Mid(HexToString(DataStr), 1, 4)
-'subCmd = Mid(HexToString(DataStr), 5, 4)
+subCmd = Mid(HexToString(DataStr), 5, 4)
 msgSize = Mid(HexToString(DataStr), 12, 1)
-
+'sizeHex = Hex(msgSize)
+If Asc(msgSize) >= 256 Or Asc(msgSize) = 0 Then
+    msgSize = Mid(HexToString(DataStr), 11, 2)
+    If Asc(msgSize) = 1 Then
+        msgSize = 256
+    End If
+End If
 Text2.Text = Buff & vbCrLf & vbCrLf & "[+] Received: " & msgType & " Size: " & Asc(msgSize) & vbCrLf & vbCrLf
 Buff = Text2.Text
 'Text2.Text = Buff & vbCrLf & (Mid(HexToString(DataStr), 13, Len(HexToString(DataStr)) - 3)) & vbCrLf
@@ -1064,8 +1094,8 @@ If protoVER = 1 Then
         OutStr = OutStr & "SESS=1337420011" & Chr(10)
         OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-        dirData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        Winsock1.SendData dirData
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        'Winsock1.SendData dirData
     ElseIf msgType = "~png" Then
         pingSEC = secCNT
     ElseIf msgType = "acct" Then
@@ -1086,16 +1116,21 @@ If protoVER = 1 Then
                         ParseData = "acctimst" & pad2 & Chr(14) & Chr(10) & Chr(0)
                         userExist = True
                         Close #2
-                        Winsock2.SendData ParseData
+                        Winsock4(PlayerCnt).SendData ParseData
                     End If
                 Wend
             Close #2
-        End If
-        If userExist = False Then
+            Close #1
+            clientLAST = Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS")
+            Open acctDB For Append As #1
+                Print #1, clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
+            Close #1
+            userExist = True
             OutStr = "TOS=1" & Chr(10)
             OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
             OutStr = OutStr & "AGE=21" & Chr(10)
             OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
+            OutStr = OutStr & "CPAT=1" & Chr(10)
             OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1108,7 +1143,7 @@ If protoVER = 1 Then
         'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
         'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         'skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        'Winsock2.SendData skeyStr
+        'Winsock4(PlayerCnt + 1).SendData skeyStr
         'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "auth" Then
         userExist = False
@@ -1144,8 +1179,8 @@ If protoVER = 1 Then
                         OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
                         OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
                         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-                        authStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-                        Winsock2.SendData authStr
+                        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+                        'Winsock4(PlayerCnt).SendData authStr
                         Close #2
                     End If
                 Wend
@@ -1253,7 +1288,7 @@ If protoVER = 1 Then
         End If
         'If moreCmd = False Then
         '    Sleep (200)
-        '    Winsock2.SendData ParseTmp
+        '    Winsock4(PlayerCnt + 1).SendData ParseTmp
         'End If
         ParseData = msgType & subCmd & pad2 & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "onln" Then
@@ -1274,12 +1309,17 @@ If protoVER = 1 Then
         OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
         OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-        persData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        Winsock2.SendData persData
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "room" Or msgType = "RGET" Then
-        OutStr = "IDENT=0" & Chr(10)
+        If players(PlayerCnt).playerROOM = 0 Then
+            a = CreateRoom(players(PlayerCnt).playerID)
+        End If
+        OutStr = "LIDENT=1" & Chr(10)
+        OutStr = OutStr & "LCOUNT=1" & Chr(10)
         OutStr = OutStr & "NAME=" & roomNAME & Chr(10)
+        OutStr = OutStr & "HOST=" & clientNAME & Chr(10)
         OutStr = OutStr & "COUNT=1" & Chr(10)
+        OutStr = OutStr & "LIMIT=50" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = "room" & pad & Chr(msgLen) & OutStr & Chr(0)
         'Sleep (200)
@@ -1290,17 +1330,17 @@ If protoVER = 1 Then
         'OutStr = OutStr & "CTRL=0" & Chr(10)
         'OutStr = OutStr & "ROOMS=0" & Chr(10)
         'OutStr = OutStr & "INGAME=0" & Chr(10)
-        OutStr = "MYGAME=1" & Chr(10)
-        OutStr = OutStr & "USERS=1" & Chr(10)
-        OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
-        OutStr = OutStr & "MESGS=1" & Chr(10)
-        OutStr = OutStr & "ASYNC=0" & Chr(10)
-        OutStr = OutStr & "RANKS=0" & Chr(10)
-        'OutStr = OutStr & "MORE=1" & Chr(10)
-        OutStr = OutStr & "SLOTS=8" & Chr(10)
-        OutStr = OutStr & "USERSETS=0" & Chr(10)
-        OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
+        'OutStr = "MYGAME=1" & Chr(10)
+        OutStr = OutStr & "MORE=0" & Chr(10)
+        'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
+        OutStr = OutStr & "SLOTS=4" & Chr(10)
+        'OutStr = OutStr & "ASYNC=0" & Chr(10)
         OutStr = OutStr & "STATS=0" & Chr(10)
+        'OutStr = OutStr & "MORE=1" & Chr(10)
+        'OutStr = OutStr & "SLOTS=8" & Chr(10)
+        'OutStr = OutStr & "USERSETS=0" & Chr(10)
+        'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
+        'OutStr = OutStr & "STATS=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         'Sleep (200)
@@ -1311,14 +1351,15 @@ If protoVER = 1 Then
         'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        Winsock2.SendData skeyStr
+        Winsock4(PlayerCnt + 1).SendData skeyStr
         Sleep (1000)
         'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "sviw" Then
         OutStr = "N=9" & Chr(10)
-        OutStr = OutStr & "DESC=1,1,1,1,1,1,1,1,1" & Chr(10)
         OutStr = OutStr & "NAMES=0,3,4,5,6,7,8,9" & Chr(10)
+        OutStr = OutStr & "DESC=1,1,1,1,1,1,1,1,1" & Chr(10)
         OutStr = OutStr & "PARAMS=2,2,2,2,2,2,2,2" & Chr(10)
+        OutStr = OutStr & "WIDTHS=1,1,1,1,1,1,1,1" & Chr(10)
         OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
         OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
         OutStr = OutStr & "SS=65" & Chr(10)
@@ -1326,7 +1367,11 @@ If protoVER = 1 Then
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "user" Then
         'a = GetParams(msgType, params)
-        OutStr = "PERS=" & userNAME & Chr(10)
+        If Len(userNAME) > 1 Then
+            OutStr = "PERS=" & userNAME & Chr(10)
+        Else
+            OutStr = "PERS=" & clientNAME & Chr(10)
+        End If
         'OutStr = OutStr & "CRC=0" & Chr(10)
         'OutStr = OutStr & "PID=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1342,7 +1387,7 @@ If protoVER = 1 Then
         If Winsock1.State = 7 Then
             Winsock1.SendData uschStr
         Else
-            Winsock2.SendData uschStr
+            Winsock4(PlayerCnt).SendData uschStr
         End If
     ElseIf msgType = "usld" Then
         'a = GetParams(msgType, params)
@@ -1552,6 +1597,11 @@ Public Function Send_Png()
     If Winsock3.State = 7 Then
         Winsock3.SendData pingStr
     End If
+    For x = 0 To PlayerCnt
+    If Winsock4(x).State = 7 Then
+        Winsock4(x).SendData pingStr
+    End If
+    Next x
 End Function
 
     
@@ -1605,6 +1655,8 @@ Text1.Text = Winsock1.LocalPort
 End Sub
 
 Private Sub Command1_Click()
+Dim rooms(9999) As room
+Dim players(9999) As player
 clientSKEY = ""
 moreCmd = False
 ParseTmp = ""
@@ -1648,8 +1700,8 @@ GoTo fin
 Else
     Winsock1.LocalPort = Val(Text1.Text) 'Game
     Winsock2.LocalPort = 10901 'Listener
-    'Winsock3.LocalPort = 10899 'Buddy
-    Winsock3.LocalPort = 28500 'Buddy
+    Winsock3.LocalPort = 10899 'Buddy
+    'Winsock3.LocalPort = 28500 'Buddy
 End If
 
 Winsock1.Listen
@@ -1717,7 +1769,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R14"
+Build = "0.1-R15"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -1779,7 +1831,13 @@ Label2.Caption = "Socket States: " & Winsock1.State & Winsock2.State & Winsock3.
 Label5.Caption = "Connected Players: " & PlayerCnt
 DoEvents
 If Winsock1.State = 0 Then
-Winsock1.Listen
+    Winsock1.Listen
+End If
+If Winsock2.State = 0 Then
+    Winsock2.Listen
+End If
+If Winsock3.State = 0 Then
+    Winsock3.Listen
 End If
 If (secCNT - pingSEC) > Int(pingTIME) * 10 And (Winsock2.State = 7 Or Winsock3.State = 7) Then
     a = Send_Png()
@@ -1798,15 +1856,35 @@ moreCmd = False
 ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
-PlayerCnt = PlayerCnt + 1
-players(PlayerCnt).playerNUM = PlayerCnt
-players(PlayerCnt).playerID = Int(1000 + PlayerCnt)
-players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
-players(PlayerCnt).playerROOM = 0
-players(PlayerCnt).playerPORT = Winsock1.RemotePort
-players(PlayerCnt).playerNAME = ""
-Winsock1.Close
-Winsock4(PlayerCnt).Accept (requestID)
+playerExists = False
+For x = 0 To PlayerCnt
+    If players(x).playerIP = Winsock1.RemoteHostIP Then
+        PlayerCnt = PlayerCnt
+        playerExists = True
+        Winsock1.Close
+        Winsock4(PlayerCnt).Close
+        Winsock4(PlayerCnt).Accept (requestID)
+        players(PlayerCnt).playerNUM = PlayerCnt
+        players(PlayerCnt).playerID = Int(1000 + PlayerCnt)
+        players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
+        players(PlayerCnt).playerROOM = 0
+        players(PlayerCnt).playerPORT = Winsock1.RemotePort
+        players(PlayerCnt).playerNAME = ""
+    End If
+Next x
+If playerExists = False Then
+        Winsock1.Close
+        Winsock4(PlayerCnt).Close
+        Winsock4(PlayerCnt).Accept (requestID)
+        PlayerCnt = PlayerCnt + 1
+        x = PlayerCnt
+        players(PlayerCnt).playerNUM = PlayerCnt
+        players(PlayerCnt).playerID = Int(1000 + PlayerCnt)
+        players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
+        players(PlayerCnt).playerROOM = 0
+        players(PlayerCnt).playerPORT = Winsock1.RemotePort
+        players(PlayerCnt).playerNAME = ""
+End If
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock1.RemoteHostIP & ":" & Winsock1.RemotePort & vbCrLf
 End Sub
@@ -1833,7 +1911,8 @@ End Sub
 Private Sub Winsock2_ConnectionRequest(ByVal requestID As Long)
 '* Listener Socket 10901
 Winsock2.Close
-Winsock2.Accept (requestID)
+Winsock4(PlayerCnt + 1).Close
+Winsock4(PlayerCnt + 1).Accept (requestID)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock2.RemoteHostIP & ":" & Winsock2.RemotePort & vbCrLf
 End Sub
@@ -1901,13 +1980,13 @@ End If
 
 If msgType = "pers" Then
     DoEvents
-    a = Send_Rom()
-    Sleep (500)
+    'a = Send_Rom()
+    'Sleep (500)
     DoEvents
-    a = Send_Who()
-    Sleep (500)
+    'a = Send_Who()
+    'Sleep (500)
     DoEvents
-    a = Send_usr()
+    'a = Send_usr()
 End If
 
 If msgType = "sviw" Then
@@ -1946,13 +2025,12 @@ End If
 End Sub
  
 Private Sub Winsock4_ConnectionRequest(Index As Integer, ByVal requestID As Long)
-'* Game Socket
+'* Listener Socket
 clientSKEY = ""
 moreCmd = False
-ParseTmp = ""
+'ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
-PlayerCnt = PlayerCnt + 1
 'ReDim players(PlayerCnt)
 players(PlayerCnt).playerNUM = PlayerCnt
 players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
@@ -1966,7 +2044,7 @@ Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Win
 End Sub
 
 Private Sub Winsock4_DataArrival(Index As Integer, ByVal bytesTotal As Long)
-'* Game Socket
+'*Listener Socket
 On Error Resume Next
 Randomize Timer
 Winsock4(Index).GetData Data, vbString
@@ -1975,6 +2053,29 @@ DataStr = StringToHex(Data)
 DataLen = Len(Data)
 tmp2 = ParseData(DataStr)
 Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
+If Len(ParseTmp) >= 1 Then
+    'tmp3 = HexToBin(StringToHex(ParseData("moreCmd")))
+    Winsock4(Index).SendData (HexToBin(StringToHex(ParseTmp)))
+Else
+    If msgType = "skey" Then
+        If moreCmd = True Or Len(clientSKEY) >= 1 Then
+            DataStr = StringToHex(Data)
+            tmp3 = ParseData(DataStr)
+            Sleep (250)
+            If Len(ParseTmp) >= 1 Then
+                Winsock4(Index).SendData (HexToBin(StringToHex(ParseTmp)))
+            End If
+            If Len(tmp2) >= 1 Then
+                Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
+            End If
+        End If
+        ParseTmp = ""
+    End If
+    If Len(tmp2) > 1 And Len(clientSKEY) >= 1 And Not msgType = "skey" Then
+        Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
+        tmp2 = ""
+    End If
+End If
 If Len(tmp2) > 1 Then
     'Sleep (250)
     Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
@@ -2002,3 +2103,13 @@ If moreCmd = True Then
 End If
 End Sub
 
+Private Sub Winsock4_Error(Index As Integer, ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
+'Winsock4(Index).Close
+'Winsock4(Index).Listen
+clientSKEY = ""
+moreCmd = False
+ParseTmp = ""
+tmp2 = ""
+tmp3 = ""
+'PlayerCnt = PlayerCnt - 1
+End Sub
