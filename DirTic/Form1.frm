@@ -1673,6 +1673,21 @@ Label12.Visible = False
 Label13.Visible = False
 'Label14.Visible = False
 'Label15.Visible = False
+
+'* Game Socket
+Winsock1.Close
+Winsock1.Bind 0, Text5.Text
+
+'* Listener Socket
+Winsock2.Close
+Winsock2.Bind 0, Text5.Text
+
+'* Buddy Socket
+Winsock3.Close
+Winsock3.Bind 0, Text5.Text
+
+
+
 If Command1.Caption = "Stop" Then
 Winsock1.Close
 Winsock2.Close
@@ -1795,16 +1810,6 @@ Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00)"
 Text4.Text = ""
 Text5.Text = "192.168.0.228"
-
-'* Game Socket
-Winsock1.Bind 0, Text5.Text
-Winsock1.Close
-'* Listener Socket
-Winsock2.Bind 0, Text5.Text
-Winsock2.Close
-'* Buddy Socket
-Winsock3.Bind 0, Text5.Text
-Winsock3.Close
 
 Timer1.Interval = 999
 Timer1.Enabled = True
