@@ -11,6 +11,44 @@ Begin VB.Form Form1
    ScaleHeight     =   7440
    ScaleWidth      =   9900
    StartUpPosition =   1  'CenterOwner
+   Begin VB.CheckBox Check5 
+      BackColor       =   &H80000007&
+      Caption         =   "+rom"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H8000000A&
+      Height          =   195
+      Left            =   2640
+      TabIndex        =   27
+      Top             =   720
+      Width           =   975
+   End
+   Begin VB.CheckBox Check4 
+      BackColor       =   &H80000007&
+      Caption         =   "+who"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H8000000A&
+      Height          =   195
+      Left            =   2640
+      TabIndex        =   26
+      Top             =   480
+      Width           =   975
+   End
    Begin VB.TextBox Text5 
       BeginProperty Font 
          Name            =   "Verdana"
@@ -1338,14 +1376,14 @@ If protoVER = 1 Then
     ElseIf msgType = "sele" Then
         'OutStr = "VERS=" & clientVERS & Chr(10)
         'OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
-        OutStr = "MORE=1" & Chr(10)
-        OutStr = OutStr & "SLOTS=4" & Chr(10)
-        OutStr = OutStr & "STATS=1" & Chr(10)
-        OutStr = OutStr & "USERS=1" & Chr(10)
-        OutStr = OutStr & "GAMES=1" & Chr(10)
-        OutStr = OutStr & "RANKS=1" & Chr(10)
-        OutStr = OutStr & "ROOMS=1" & Chr(10)
-        OutStr = OutStr & "MESGS=1" & Chr(10)
+        OutStr = "MORE=0" & Chr(10)
+        OutStr = OutStr & "SLOTS=1" & Chr(10)
+        OutStr = OutStr & "STATS=0" & Chr(10)
+        OutStr = OutStr & "USERS=0" & Chr(10)
+        OutStr = OutStr & "GAMES=0" & Chr(10)
+        OutStr = OutStr & "RANKS=0" & Chr(10)
+        OutStr = OutStr & "ROOMS=0" & Chr(10)
+        OutStr = OutStr & "MESGS=0" & Chr(10)
         'OutStr = OutStr & "ASYNC=1" & Chr(10)
         'OutStr = OutStr & "USERSETS=0" & Chr(10)
         'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
@@ -1572,7 +1610,9 @@ Public Function Send_Who(Index)
     'OutStr = OutStr & "X=" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     whoStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-    Winsock4(Index).SendData whoStr
+    If Check4.value = 1 Then
+        Winsock4(Index).SendData whoStr
+    End If
 End Function
 Public Function Send_Rom(Index)
     msgType = "+rom"
@@ -1596,7 +1636,9 @@ Public Function Send_Rom(Index)
     'OutStr = OutStr & "L=4" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     romStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-    Winsock4(Index).SendData romStr
+    If Check5.value = 1 Then
+        Winsock4(Index).SendData romStr
+    End If
 End Function
 Public Function Send_Png(Index)
     msgType = "~png"
@@ -1806,7 +1848,7 @@ Else
     Print #1, Text5.Text & " ps2nfs05.ea.com"
     Print #1, Text5.Text & " ps2ssx04.ea.com" & vbCrLf
     Close #1
-    MsgBox ("HOSTS file written succesfully")
+    MsgBox ("HOSTS file written successfully")
 End If
 derp:
 If Err.Number >= 1 Then
@@ -1824,7 +1866,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R19"
+Build = "0.1-R20"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
