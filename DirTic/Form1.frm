@@ -1094,7 +1094,7 @@ If protoVER = 1 Then
     If msgType = "@dir" Then
         OutStr = "PORT=10901" & Chr(10)
         OutStr = OutStr & "SESS=1337420011" & Chr(10)
-        OutStr = OutStr & "ADDR=" & Winsock1.LocalIP & Chr(10)
+        OutStr = OutStr & "ADDR=" & Text5.Text & Chr(10)
         OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
@@ -1252,14 +1252,15 @@ If protoVER = 1 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = "move" & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "news" Then
+        pingSEC = secCNT
         a = GetParams(msgType, params)
         pad2 = HexToBin("00 00 00")
         'MsgBox subCmd
         If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         Else
-            OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
-            OutStr = OutStr & "BUDDY_SERVER=" & Winsock3.LocalIP & Chr(10)
+            'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
+            OutStr = "BUDDY_SERVER=" & Text5.Text & Chr(10)
             OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
             'OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
             'OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
@@ -1300,7 +1301,7 @@ If protoVER = 1 Then
         '    Sleep (200)
         '    Winsock4(PlayerCnt + 1).SendData ParseTmp
         'End If
-        ParseData = msgType & subCmd & pad2 & Chr(msgLen) & OutStr & Chr(0)
+        'ParseData = msgType & subCmd & pad2 & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "onln" Then
         OutStr = "PERS=VTSTech" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1340,9 +1341,9 @@ If protoVER = 1 Then
         OutStr = "MORE=1" & Chr(10)
         OutStr = OutStr & "SLOTS=4" & Chr(10)
         OutStr = OutStr & "STATS=1" & Chr(10)
-        'OutStr = OutStr & "USERS=1" & Chr(10)
+        OutStr = OutStr & "USERS=1" & Chr(10)
         OutStr = OutStr & "GAMES=1" & Chr(10)
-        'OutStr = OutStr & "MYGAME=1" & Chr(10)
+        OutStr = OutStr & "RANKS=1" & Chr(10)
         OutStr = OutStr & "ROOMS=1" & Chr(10)
         OutStr = OutStr & "MESGS=1" & Chr(10)
         'OutStr = OutStr & "ASYNC=1" & Chr(10)
@@ -1597,7 +1598,7 @@ Public Function Send_Rom(Index)
     romStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock4(Index).SendData romStr
 End Function
-Public Function Send_Png()
+Public Function Send_Png(Index)
     msgType = "~png"
     OutStr = "REF=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
     OutStr = OutStr & "TIME=" & pingTIME & Chr(10)
@@ -1609,11 +1610,9 @@ Public Function Send_Png()
     If Winsock3.State = 7 Then
         Winsock3.SendData pingStr
     End If
-    For x = 0 To PlayerCnt
-    If Winsock4(x).State = 7 Then
-        Winsock4(x).SendData pingStr
+    If Winsock4(Index).State = 7 Then
+        Winsock4(Index).SendData pingStr
     End If
-    Next x
 End Function
 
     
@@ -1825,13 +1824,13 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R18"
+Build = "0.1-R19"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
 PlayerCnt = 0
 playerNUM = PlayerCnt
-pingTIME = 2
+pingTIME = 1
 secCNT = 0
 pingSEC = 30
 protoVER = 1
@@ -1885,9 +1884,15 @@ End If
 If Winsock3.State = 0 Then
     Winsock3.Listen
 End If
-If (secCNT - pingSEC) > Int(pingTIME) * 10 And (Winsock2.State = 7 Or Winsock3.State = 7) Then
-    a = Send_Png()
+
+If (secCNT - pingSEC) > Int(pingTIME) * 10 Then
+    For x = 0 To PlayerCnt + 1
+        If Winsock4(x).State = 7 Then
+            a = Send_Png(x)
+        End If
+    Next x
 End If
+
 End Sub
 
 Private Sub Winsock1_Close()
@@ -1965,7 +1970,8 @@ End Sub
 Private Sub Winsock3_ConnectionRequest(ByVal requestID As Long)
 '* Buddy Socket 10899
 Winsock3.Close
-Winsock3.Accept (requestID)
+Winsock4(PlayerCnt + 1).Close
+Winsock4(PlayerCnt + 1).Accept (requestID)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock3.RemoteHostIP & ":" & Winsock3.RemotePort & vbCrLf
 End Sub
