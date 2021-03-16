@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.73"
+BUILD="0.1-ALPHA R0.73A"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -1099,7 +1099,7 @@ def threaded_client(connection):
       if msgType != b'~png':
       	print("RECV: "+str(msgType))
       #print("Debug: "+str(len(tmp)))
-      if tmp[10] == 0:
+      if tmp[10] >= 0 and <= 12:
         msgSize=tmp[11]
         #print("SIZE1: "+(str(msgSize)))
       else:
