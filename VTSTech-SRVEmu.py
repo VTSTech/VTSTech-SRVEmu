@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.72"
+BUILD="0.1-ALPHA R0.73"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -123,7 +123,7 @@ def bind():
     elif (sys.argv[x] == "-nfsu2"):
       print("IP: "+SERVER_IP+" Port: "+str(PORT_NFSU2_PS2))
       GameSocket.bind((SERVER_IP, PORT_NFSU2_PS2))
-      print("Now running in Need for Speed: Underground Mode\n")
+      print("Now running in Need for Speed: Underground 2 Mode\n")
     elif (sys.argv[x] == "-ssx3"):
       print("IP: "+SERVER_IP+" Port: "+str(PORT_SSX3_PS2))
       GameSocket.bind((SERVER_IP, PORT_SSX3_PS2))
@@ -251,12 +251,13 @@ def create_packet(cmd, subcmd, payload):
 #Thx No23
 def cmd_news(payload):
     global SERVER_IP, NEWS_PAYLOAD
-    
+   
+    if (len(NEWS_PAYLOAD) > 1):
+    	NEWS_PAYLOAD = NEWS_PAYLOAD[0]
     print("News Payload: "+str(NEWS_PAYLOAD))
-	
-    if (int(NEWS_PAYLOAD) >= 1) | (int(NEWS_PAYLOAD) <= 3):
+    if (int(NEWS_PAYLOAD) >= 1) and (int(NEWS_PAYLOAD) <= 3):
     	print("fired!")
-    	p='VTSTech-SRVEmu R0.72\n'
+    	p='VTSTech-SRVEmu R0.73\n'
     	p+='===================\n'
     	p+='\n'
     	p+='Written by Veritas Technical Solutions www.VTS-Tech.org\n'
@@ -1149,7 +1150,7 @@ def threaded_client(connection):
       #connection.sendall((packet))
 
 # *** START *** #
-print("VTSTech-SRVEmu v"+BUILD+"\nGitHub: https://github.com/Veritas83/VTSTech-SRVEmu\nContributors: No23\n")
+print("VTSTech-SRVEmu v"+BUILD+"\nGitHub: https://github.com/Veritas83/VTSTech-SRVEmu\nContributors: No23, iamLupo\n")
 
 for x in range(0,TOTALARGS,1):
   if (TOTALARGS >= 6):  
