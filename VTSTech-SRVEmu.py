@@ -1099,7 +1099,7 @@ def threaded_client(connection):
       if msgType != b'~png':
       	print("RECV: "+str(msgType))
       #print("Debug: "+str(len(tmp)))
-      if tmp[10] >= 0 and <= 12:
+      if (tmp[10] >= 0) and (tmp[10] <= 12):
         msgSize=tmp[11]
         #print("SIZE1: "+(str(msgSize)))
       else:
