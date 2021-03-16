@@ -800,6 +800,9 @@ Begin VB.Form Form1
          Caption         =   "Save"
          Index           =   3
       End
+      Begin VB.Menu do_hosts 
+         Caption         =   "Populate HOSTS file"
+      End
       Begin VB.Menu exit 
          Caption         =   "Exit"
          Index           =   4
@@ -1089,9 +1092,9 @@ End If
 If protoVER = 1 Then
     Label6.Caption = "protoVER 1 " & msgType
     If msgType = "@dir" Then
-        OutStr = "ADDR=" & Winsock1.LocalIP & Chr(10)
-        OutStr = OutStr & "PORT=10901" & Chr(10)
+        OutStr = "PORT=10901" & Chr(10)
         OutStr = OutStr & "SESS=1337420011" & Chr(10)
+        OutStr = OutStr & "ADDR=" & Winsock1.LocalIP & Chr(10)
         OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
@@ -1337,13 +1340,13 @@ If protoVER = 1 Then
         OutStr = "MORE=1" & Chr(10)
         OutStr = OutStr & "SLOTS=4" & Chr(10)
         OutStr = OutStr & "STATS=1" & Chr(10)
-        OutStr = OutStr & "USERS=1" & Chr(10)
+        'OutStr = OutStr & "USERS=1" & Chr(10)
         OutStr = OutStr & "GAMES=1" & Chr(10)
-        OutStr = OutStr & "MYGAME=1" & Chr(10)
+        'OutStr = OutStr & "MYGAME=1" & Chr(10)
         OutStr = OutStr & "ROOMS=1" & Chr(10)
         OutStr = OutStr & "MESGS=1" & Chr(10)
         'OutStr = OutStr & "ASYNC=1" & Chr(10)
-        OutStr = OutStr & "USERSETS=0" & Chr(10)
+        'OutStr = OutStr & "USERSETS=0" & Chr(10)
         'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
         'OutStr = OutStr & "INGAME=0" & Chr(10)
         'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
@@ -1363,10 +1366,10 @@ If protoVER = 1 Then
         Sleep (1000)
         'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "sviw" Then
-        OutStr = "N=5" & Chr(10)
-        OutStr = OutStr & "NAMES=0,3,4,5,6" & Chr(10)
-        OutStr = OutStr & "PARAMS=2,2,2,2,2" & Chr(10)
-        OutStr = OutStr & "WIDTHS=1,1,1,1,1" & Chr(10)
+        OutStr = "N=3" & Chr(10)
+        OutStr = OutStr & "NAMES=1,2,4" & Chr(10)
+        OutStr = OutStr & "PARAMS=1,1,1" & Chr(10)
+        OutStr = OutStr & "WIDTHS=1,1,1" & Chr(10)
         'OutStr = OutStr & "DESC=1,1,1,1,1,1" & Chr(10)
         'OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
         'OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
@@ -1545,27 +1548,27 @@ Public Function Send_usr()
 End Function
 Public Function Send_Who(Index)
     msgType = "+who"
-    OutStr = "M=" & clientNAME & Chr(10)
-    OutStr = OutStr & "N=" & clientNAME & Chr(10)
-    OutStr = OutStr & "MA=" & clientMAC & Chr(10)
-    OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
-    OutStr = OutStr & "LA=" & Winsock2.RemoteHostIP & Chr(10)
-    OutStr = OutStr & "P=1" & Chr(10)
-    OutStr = OutStr & "CL=511" & Chr(10)
-    OutStr = OutStr & "F=U" & Chr(10)
-    OutStr = OutStr & "G=1" & Chr(10)
-    OutStr = OutStr & "HW=0" & Chr(10)
+    OutStr = "N=" & clientNAME & Chr(10)
     OutStr = OutStr & "I=71615" & Chr(10)
-    OutStr = OutStr & "LO=enUS" & Chr(10)
+    OutStr = OutStr & "G=1" & Chr(10)
+    OutStr = OutStr & "CL=511" & Chr(10)
     OutStr = OutStr & "LV=1049601" & Chr(10)
     OutStr = OutStr & "MD=0" & Chr(10)
-    OutStr = OutStr & "PRES=" & Chr(10)
-    OutStr = OutStr & "SESS=" & clientSESS & Chr(10)
-    OutStr = OutStr & "RP=0" & Chr(10)
-    OutStr = OutStr & "S=" & Chr(10)
-    OutStr = OutStr & "US=0" & Chr(10)
-    OutStr = OutStr & "VER=5" & Chr(10)
-    OutStr = OutStr & "X=" & Chr(10)
+    OutStr = OutStr & "T=1" & Chr(10)
+    'OutStr = OutStr & "MA=" & clientMAC & Chr(10)
+    'OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
+    'OutStr = OutStr & "LA=" & Winsock2.RemoteHostIP & Chr(10)
+    'OutStr = OutStr & "P=1" & Chr(10)
+    'OutStr = OutStr & "F=U" & Chr(10)
+    'OutStr = OutStr & "HW=0" & Chr(10)
+    'OutStr = OutStr & "LO=enUS" & Chr(10)
+    'OutStr = OutStr & "PRES=" & Chr(10)
+    'OutStr = OutStr & "SESS=" & clientSESS & Chr(10)
+    'OutStr = OutStr & "RP=0" & Chr(10)
+    'OutStr = OutStr & "S=" & Chr(10)
+    'OutStr = OutStr & "US=0" & Chr(10)
+    'OutStr = OutStr & "VER=5" & Chr(10)
+    'OutStr = OutStr & "X=" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     whoStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock4(Index).SendData whoStr
@@ -1580,15 +1583,16 @@ Public Function Send_Rom(Index)
     'OutStr = OutStr & "LIMIT=50" & Chr(10)
     'OutStr = OutStr & "FLAGS=C" & Chr(10)
     OutStr = "I=420" & Chr(10)
-    OutStr = OutStr & "N=" & clientPERS & Chr(10)
+    'OutStr = OutStr & "N=" & clientPERS & Chr(10)
     'OutStr = OutStr & "M=" & clientPERS & Chr(10)
-    'OutStr = OutStr & "R=" & roomNAME & Chr(10)
-    'OutStr = OutStr & "RI=1001" & Chr(10)
+    OutStr = OutStr & "R=" & roomNAME & Chr(10)
+    OutStr = OutStr & "HW=4" & Chr(10)
+    OutStr = OutStr & "RP=1001" & Chr(10)
     'OutStr = OutStr & "F=" & Chr(10)
     'OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
     'OutStr = OutStr & "S=" & Chr(10)
-    OutStr = OutStr & "T=1" & Chr(10)
-    OutStr = OutStr & "L=4" & Chr(10)
+    'OutStr = OutStr & "T=1" & Chr(10)
+    'OutStr = OutStr & "L=4" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     romStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock4(Index).SendData romStr
@@ -1785,6 +1789,27 @@ End If
 End Sub
 
 
+Private Sub do_hosts_Click()
+If fso.FileExists("C:\Windows\System32\drivers\etc\hosts") = False Then
+    MsgBox ("HOSTS file not found")
+Else
+    Close #1
+    Open "C:\Windows\System32\drivers\etc\hosts" For Append As #1
+    Print #1, Text5.Text & " ps2burnout06.ea.com"
+    Print #1, Text5.Text & " ps2burnout05.ea.com"
+    Print #1, Text5.Text & " ps3burnout08.ea.com"
+    Print #1, Text5.Text & " ps2kok05.ea.com"
+    Print #1, Text5.Text & " ps2madden05.ea.com"
+    Print #1, Text5.Text & " ps2nascar04.ea.com"
+    Print #1, Text5.Text & " ps2nfs06.ea.com"
+    Print #1, Text5.Text & " ps2nfs04.ea.com"
+    Print #1, Text5.Text & " ps2nfs05.ea.com"
+    Print #1, Text5.Text & " ps2ssx04.ea.com" & vbCrLf
+    Close #1
+    MsgBox ("HOSTS file written succesfully")
+End If
+End Sub
+
 Private Sub exit_Click(Index As Integer)
 Unload Form1
 End
@@ -1794,7 +1819,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R16"
+Build = "0.1-R17"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
@@ -1966,6 +1991,7 @@ DataStr = StringToHex(Data)
 DataLen = Len(Data)
 tmp2 = ParseData(DataStr)
 Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
+Index = playerNUM
 If Len(ParseTmp) >= 1 Then
     'tmp3 = HexToBin(StringToHex(ParseData("moreCmd")))
     Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
