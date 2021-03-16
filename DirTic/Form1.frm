@@ -1790,6 +1790,7 @@ End Sub
 
 
 Private Sub do_hosts_Click()
+On Error GoTo derp
 If fso.FileExists("C:\Windows\System32\drivers\etc\hosts") = False Then
     MsgBox ("HOSTS file not found")
 Else
@@ -1808,6 +1809,11 @@ Else
     Close #1
     MsgBox ("HOSTS file written succesfully")
 End If
+derp:
+If Err.Number >= 1 Then
+    MsgBox ("Run as Administrator!")
+    End
+End If
 End Sub
 
 Private Sub exit_Click(Index As Integer)
@@ -1819,7 +1825,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R17"
+Build = "0.1-R18"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 21800
 Check1.value = 1
