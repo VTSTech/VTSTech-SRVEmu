@@ -6,12 +6,13 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.71"
+BUILD="0.1-ALPHA R0.72"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
 
 PORT_NFSU_PS2 = 10900 #ps2nfs04.ea.com:10900
+PORT_NFSU2_PS2 = 20900 #ps2nfs05.ea.com:10900
 PORT_BO3U_PS2 = 21800  #ps2burnout05.ea.com:21800
 PORT_BO3R_PS2 = 21840 #ps2lobby02.beta.ea.com:21840
 PORT_NFL05_PS2 = 20000  #ps2madden05.ea.com:20000
@@ -89,6 +90,7 @@ def usage():
   print("-bop3  Run in Burnout Paradise Mode (PS3)")
   print("-bopc  Run in Burnout Paradise Mode (PC)")
   print("-nfsu  Run in Need for Speed Underground Mode (PS2)")
+  print("-nfsu2  Run in Need for Speed Underground 2 Mode (PS2)")
   print("-nfl05 Run in Madden NFL 05 Mode (PS2)")
   print("-nc04  Run in Nascar Thunder 04 Mode (PS2)")
   print("-ssx3  Run in SSX3 Mode (PS2)")
@@ -117,6 +119,10 @@ def bind():
     elif (sys.argv[x] == "-nfsu"):
       print("IP: "+SERVER_IP+" Port: "+str(PORT_NFSU_PS2))
       GameSocket.bind((SERVER_IP, PORT_NFSU_PS2))
+      print("Now running in Need for Speed: Underground Mode\n")
+    elif (sys.argv[x] == "-nfsu2"):
+      print("IP: "+SERVER_IP+" Port: "+str(PORT_NFSU2_PS2))
+      GameSocket.bind((SERVER_IP, PORT_NFSU2_PS2))
       print("Now running in Need for Speed: Underground Mode\n")
     elif (sys.argv[x] == "-ssx3"):
       print("IP: "+SERVER_IP+" Port: "+str(PORT_SSX3_PS2))
@@ -248,13 +254,43 @@ def cmd_news(payload):
     
     print("News Payload: "+str(NEWS_PAYLOAD))
 	
-    if (NEWS_PAYLOAD == 1):
+    if (int(NEWS_PAYLOAD) >= 1) | (int(NEWS_PAYLOAD) <= 3):
     	print("fired!")
-    	p='VTSTech-SRVEmu R0.66\n'
+    	p='VTSTech-SRVEmu R0.72\n'
     	p+='===================\n'
+    	p+='\n'
     	p+='Written by Veritas Technical Solutions www.VTS-Tech.org\n'
+    	p+='\n'
     	p+='GitHub: https://github.com/Veritas83/VTSTech-SRVEmu\n'
+    	p+='\n'
     	p+='Changelog:\n'
+    	p+='\n'
+    	p+='R0.72\n'
+    	p+='Updated in game changelog\n'
+    	p+='Added Need for Speed Underground 2 Mode\n'
+    	p+='Various command improvements\n'
+    	p+='\n'
+    	p+='R0.71\n'
+    	p+='Cleaned up global defines\n'
+    	p+='Fixed bug in account creation\n'
+    	p+='\n'
+    	p+='R0.70\n'
+    	p+='New Command Handlers: ROOM, MESG, +USR, +GAM, +POP\n'
+    	p+='Added Encryption Detection\n'
+    	p+='Ping stability improvements\n'
+    	p+='Added NASCAR Thunder 2004 Mode\n'    	
+    	p+='\n'
+    	p+='R0.69\n'
+    	p+='New Command Handler: GJOI\n'
+    	p+='PERS command improvements\n'
+    	p+='\n'
+    	p+='R0.68\n'
+    	p+='Reindented script\n'
+    	p+='Various code improvements\n'
+    	p+='\n'
+    	p+='R0.67\n'
+    	p+='Internal Release\n'
+    	p+='\n'
     	p+='R0.66\n'
     	p+='Added SSX3 Mode\n'
     	p+='Specify IPv4 with -i now\n'
@@ -312,35 +348,29 @@ def cmd_news(payload):
     else:
     	p = 'BUDDY_SERVER='+SERVER_IP+'\n'
     	p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
-    	p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
-    	p+= 'EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt\n'
-    	p+= 'ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt\n'
+    	#p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
+    	#p+= 'EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt\n'
+    	#p+= 'ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt\n'
     	p+= 'TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt\n'
     	p+= 'TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt\n'
     	p+= 'TOS_URL=http://ps3burnout08.ea.com/TOS.txt\n'    	    	   
-    	p+= 'LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt\n'
-    	p+= 'LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt\n'
-    	p+= 'PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt\n'
-    	p+= 'AVATAR_URL=http://ps3burnout08.ea.com/AV.txt\n'
-    	p+= 'STORE_URL=http://ps3burnout08.ea.com/STORE.txt\n'
-    	p+= 'LIVE_NEWS_URL_IMAGE_PATH=.\n'
-    	p+= 'USE_GLOBAL_ROAD_RULE_SCORES=0\n'
-    	p+= 'NEWS_TEXT=VTSTech.is.reviving.games\n'
-    	p+= 'TOS_TEXT=VTSTech.is.reviving.games\n'
-    	p+= 'ROAD_RULES_SKEY=frscores\n'
-    	p+= 'CHAL_SKEY=chalscores\n'
+    	#p+= 'LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt\n'
+    	#p+= 'LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt\n'
+    	#p+= 'PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt\n'
+    	#p+= 'AVATAR_URL=http://ps3burnout08.ea.com/AV.txt\n'
+    	#p+= 'STORE_URL=http://ps3burnout08.ea.com/STORE.txt\n'
+    	#p+= 'LIVE_NEWS_URL_IMAGE_PATH=.\n'
+    	#p+= 'USE_GLOBAL_ROAD_RULE_SCORES=0\n'
+    	p+= 'NEWS_TEXT=VTSTech.is.reviving.games_NEWS\n'
+    	p+= 'TOS_TEXT=VTSTech.is.reviving.games_TOS\n'
+    	#p+= 'ROAD_RULES_SKEY=frscores\n'
+    	#p+= 'CHAL_SKEY=chalscores\n'
     	p+= 'NEWS_DATE='+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+'\n'
     	p+= 'NEWS_URL=http://ps3burnout08.ea.com/news.txt\n'
-    	p+= 'USE_ETOKEN=0\n'
+    	#p+= 'USE_ETOKEN=0\n'
     time.sleep(1)
     news_cmd='new'+str(NEWS_PAYLOAD)
     packet = create_packet('news', news_cmd, p)
-
-    if (payload == "NAME=7") | (payload == "BP"):
-      packet = create_packet('news', 'new7', p)
-      #payload=''
-    if (clientVERS =='BURNOUT5/ISLAND'):
-      packet = create_packet('news', 'new8', p)
     return packet
         
 def reply_skey():
@@ -378,13 +408,13 @@ def reply_acct(data):
         reply=b'authimst'#if account exists, cannot create
         return reply
     clientUSER = clientNAME
-    acctStr="TOS=1"
-    reply=acctStr.encode('ascii')+x0A
+    #acctStr="TOS=1"
+    #reply=acctStr.encode('ascii')+x0A
     acctStr="NAME="+clientNAME.lower()
     reply+=acctStr.encode('ascii')+x0A
     acctStr="AGE=21"
     reply+=acctStr.encode('ascii')+x0A   
-    acctStr="PERSONAS="+clientNAME.lower()    
+    acctStr="PERSONAS="+clientNAME+',is,reviving,games'
     reply+=acctStr.encode('ascii')+x0A
     clientLAST=time.strftime("%Y.%m.%d %I:%M:%S",time.localtime())
     acctStr="SINCE="+clientLAST
@@ -401,7 +431,7 @@ def reply_acct(data):
     reply+=acctStr.encode('ascii')+x0A
     acctStr="AGE=21"
     reply+=acctStr.encode('ascii')+x0A   
-    acctStr="PERSONAS="+clientNAME.lower()    
+    acctStr="PERSONAS="+clientNAME+',is,reviving,games'
     reply+=acctStr.encode('ascii')+x0A
     acctStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
     reply+=authStr.encode('ascii')+x0A         
@@ -422,13 +452,13 @@ def reply_auth(data):
 
   if (clientVERS == 'BURNOUT5/ISLAND'): #Burnout Paradise
     clientNAME = clientMADDR.split("$")
-    #authStr="TOS=1"
-    #reply=authStr.encode('ascii')+x0A
-    authStr="NAME=VTSTech"
+    authStr="TOS=1"
     reply=authStr.encode('ascii')+x0A
+    authStr="NAME=VTSTech"
+    reply=authStr.encode('ascii')+x0A    
     authStr="MAIL=nospam@vts-tech.org"
     reply+=authStr.encode('ascii')+x0A
-    authStr="PERSONAS=VTSTech"
+    authStr="PERSONAS="+clientNAME+',is,reviving,games'
     reply+=authStr.encode('ascii')+x0A
     authStr="BORN=19800325"
     reply+=authStr.encode('ascii')+x0A   
@@ -456,13 +486,15 @@ def reply_auth(data):
       reply=b''
     return reply
     
-  authStr="TOS=1"
-  reply=authStr.encode('ascii')+x0A
+  #authStr="TOS=1"
+  #reply=authStr.encode('ascii')+x0A
   authStr="NAME="+clientNAME.lower()
+  reply=authStr.encode('ascii')+x0A
+  authStr="ADDR=24.141.39.62"
   reply+=authStr.encode('ascii')+x0A
   authStr="MAIL="+clientMAIL
   reply+=authStr.encode('ascii')+x0A
-  authStr="PERSONAS="+clientNAME.lower()
+  authStr="PERSONAS="+clientNAME+',is,reviving,games'
   reply+=authStr.encode('ascii')+x0A
   authStr="BORN=19800325"
   reply+=authStr.encode('ascii')+x0A   
@@ -474,15 +506,15 @@ def reply_auth(data):
   reply+=authStr.encode('ascii')+x0A
   authStr="SPAM=NN"
   reply+=authStr.encode('ascii')+x0A         
-  authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-  reply+=authStr.encode('ascii')+x0A        
-  authStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
+  #authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
+  #reply+=authStr.encode('ascii')+x0A        
+  #authStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
   #reply+=authStr.encode('ascii')+x0A
   #authStr="ADDR=24.143.43.66"
   #reply+=authStr.encode('ascii')
   #authStr="_LUID=$000000000b32588d"
-  #authStr="DEFPER=1"
-  #reply+=authStr.encode('ascii')+x0A            
+  authStr="DEFPER=1"
+  reply+=authStr.encode('ascii')+x0A            
   reply+=codecs.decode('0A00','hex_codec')
   print("AUTHSENT: ",authsent)
   if authsent >=3:
@@ -895,25 +927,23 @@ def build_reply(data):
     reply = create_packet('peek', '', p)
   if (msgType == b'pers'):
     parse_data(data)
-    persStr="A=24.141.39.62\n"
+    persStr="LKEY=3fcf27540c92935b0a66fd3b0000283c\n"
+    if isinstance(clientNAME,str):
+      persStr+="PERS="+clientNAME.lower()+"\n"
+    else:
+      persStr+="PERS="+clientNAME[0].lower()+"\n"
+    #persStr="A=24.141.39.62\n"
     #if (clientVERS == 'BURNOUT5/ISLAND'):
     	#print("fired")
     	#persStr+='EX-telemetry='+SERVER_IP+',9983,enUS\n'
     	#persStr+="IDLE=10000\n"
-    persStr+="LA=24.141.39.62\n"
-    persStr="LOC=enUS\n"
-    persStr+="MA="+clientMAC+"\n"
-    if isinstance(clientNAME,str):
-      persStr+="NAME="+clientNAME.lower()+"\n"
-      persStr+="PERS="+clientNAME.lower()+"\n"
-    else:
-      persStr+="NAME="+clientNAME[0].lower()+"\n"
-      persStr+="PERS="+clientNAME[0].lower()+"\n"
-    persStr+="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
-    persStr+="PLAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
-    persStr+="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
-    #persStr+="PSINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
-    persStr+="LKEY=3fcf27540c92935b0a66fd3b0000283c\n"
+    #persStr+="LA=24.141.39.62\n"
+    #persStr="LOC=enUS\n"
+    #persStr+="MA="+clientMAC+"\n"
+    #persStr+="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    #persStr+="PLAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    #persStr+="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"
+    #persStr+="PSINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())+"\n"    
     reply = create_packet('pers', '', persStr)
     print("REPLY: "+reply.decode('latin1'))  
   if (msgType == b'room'):
@@ -928,7 +958,9 @@ def build_reply(data):
     parse_data(data)
     #p =  'VERS='+clientVERS+'\n'
     #p += 'SKU='+clientSKU+'\n'
-    #p = 'USERS=0\n'
+    p = 'MORE=0\n'
+    p += 'SLOTS=4\n'
+    p += 'STATS=0\n'
     #p += 'GAMES=0\n'
     #p += 'MYGAME=1\n'
     #p += 'ROOMS=0\n'
@@ -936,8 +968,6 @@ def build_reply(data):
     #p += 'ASYNC=1\n'
     #p += 'USERSETS=0\n'
     #p += 'MESGTYPES=100728964\n'    
-    #p += 'SLOTS=4\n'
-    #p += 'STATS=0\n'
     packet = create_packet('sele', '', '')
     return packet
   if (msgType == b'sdta'):
@@ -955,19 +985,30 @@ def build_reply(data):
   if (msgType == b'sviw'):
     oddByte = codecs.decode('00','hex_codec')
     replyTmp=b'sviw'+pad         
-    sviwStr="N=9"
-    reply=sviwStr.encode('ascii')+x0A
-    sviwStr="DESCS=1,1,1,1,1,1,1,1,1"
-    reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="NAMES=0,3,4,5,6,7,8,9,10"
-    reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="PARAMS=2,2,2,2,2,2,2,2,2"
-    reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA"
-    reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts"
-    reply+=sviwStr.encode('ascii')+x0A
-    sviwStr="SS=65"
+    if (clientVERS == "BURNOUT5/ISLAND"):
+	    sviwStr="N=3"
+	    reply=sviwStr.encode('ascii')+x0A
+	    sviwStr="DESCS=1,1,1"
+	    reply+=sviwStr.encode('ascii')+x0A
+	    sviwStr="NAMES=0,3,4"
+	    reply+=sviwStr.encode('ascii')+x0A
+	    sviwStr="PARAMS=2,2,2"
+	    reply+=sviwStr.encode('ascii')+x0A
+	    sviwStr="WIDTHS=1,1,1"
+	    reply+=sviwStr.encode('ascii')+x0A    	
+	    sviwStr="SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA"
+	    reply+=sviwStr.encode('ascii')+x0A
+	    sviwStr="TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts"
+	    reply+=sviwStr.encode('ascii')+x0A
+	    sviwStr="SS=65"
+    else:
+    	sviwStr="N=3"
+    	reply=sviwStr.encode('ascii')+x0A
+    	sviwStr="NAMES=0,3,4"
+    	reply+=sviwStr.encode('ascii')+x0A
+    	sviwStr="PARAMS=2,2,2"
+    	reply+=sviwStr.encode('ascii')+x0A
+    	sviwStr="WIDTHS=1,1,1"
     reply+=sviwStr.encode('ascii')+codecs.decode('0A00','hex_codec')
     oddByte=len(codecs.decode(reply,'latin1'))+12
     oddByte = codecs.decode('{0:x}'.format(int(oddByte)),'hex_codec')
@@ -1048,7 +1089,7 @@ def threaded_client(connection):
      tmp = connection.recv(12)
      NO_DATA=False     
     except:
-     print("D3")
+     #print("D3")
      NO_DATA=True     
      time.sleep(0.5)
      curr_time=time.time()     
@@ -1124,7 +1165,7 @@ print('Waiting for connections.. ')
 reply=b''
 
 while True:
-    print("D6")
+    #print("D6")
     CLIENT, ADDRESS = GameSocket.accept()
     print('Player Connected from: ' + ADDRESS[0] + ':' + str(ADDRESS[1]))
     start_new_thread(threaded_client, (CLIENT, ))
@@ -1140,4 +1181,4 @@ while True:
     start_new_thread(threaded_client, (CLIENT, ))
     THREADCOUNT += 1
     print('Thread Number: ' + str(THREADCOUNT))
-    print("D7")
+    #print("D7")
