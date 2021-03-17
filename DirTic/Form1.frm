@@ -11,6 +11,23 @@ Begin VB.Form Form1
    ScaleHeight     =   7440
    ScaleWidth      =   9900
    StartUpPosition =   1  'CenterOwner
+   Begin VB.ComboBox Combo2 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   330
+      Left            =   120
+      TabIndex        =   28
+      Text            =   "Combo1"
+      Top             =   480
+      Width           =   2055
+   End
    Begin VB.CheckBox Check5 
       BackColor       =   &H80000007&
       Caption         =   "+rom"
@@ -25,10 +42,10 @@ Begin VB.Form Form1
       EndProperty
       ForeColor       =   &H8000000A&
       Height          =   195
-      Left            =   2640
+      Left            =   3120
       TabIndex        =   27
       Top             =   720
-      Width           =   975
+      Width           =   855
    End
    Begin VB.CheckBox Check4 
       BackColor       =   &H80000007&
@@ -44,10 +61,10 @@ Begin VB.Form Form1
       EndProperty
       ForeColor       =   &H8000000A&
       Height          =   195
-      Left            =   2640
+      Left            =   3120
       TabIndex        =   26
       Top             =   480
-      Width           =   975
+      Width           =   855
    End
    Begin VB.TextBox Text5 
       BeginProperty Font 
@@ -64,6 +81,7 @@ Begin VB.Form Form1
       TabIndex        =   16
       Text            =   "222.222.222.222"
       Top             =   480
+      Visible         =   0   'False
       Width           =   1695
    End
    Begin VB.ComboBox Combo1 
@@ -287,7 +305,7 @@ Begin VB.Form Form1
          Strikethrough   =   0   'False
       EndProperty
       Height          =   315
-      Left            =   1800
+      Left            =   2280
       TabIndex        =   0
       Text            =   "Port"
       Top             =   480
@@ -891,6 +909,7 @@ Dim players(9999) As player
 'Option Explicit
 Dim DataVal(9999)
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Private Declare Function GetIpAddrTable_API Lib "IpHlpApi" Alias "GetIpAddrTable" (pIPAddrTable As Any, pdwSize As Long, ByVal bOrder As Long) As Long
 Public Function HexToString(ByVal HexToStr As String) As String
 Dim strTemp   As String
 Dim strReturn As String
@@ -1168,22 +1187,23 @@ If protoVER = 1 Then
                     End If
                 Wend
             Close #2
-            Close #1
+            
+            Close #3
             clientLAST = Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS")
-            Open acctDB For Append As #1
-                Print #1, clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
-            Close #1
-            userExist = True
-            OutStr = "TOS=1" & Chr(10)
-            OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
-            OutStr = OutStr & "AGE=21" & Chr(10)
-            OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
-            OutStr = OutStr & "CPAT=1" & Chr(10)
-            OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-            OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-            ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+            Open acctDB For Append As #3
+                Print #3, clientNAME & "#" & clientBORN & "#" & clientMAIL & "#" & clientPASS & "#" & clientNAME & "#" & clientLAST
+            Close #3
         End If
+        userExist = True
+        OutStr = "TOS=1" & Chr(10)
+        OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+        OutStr = OutStr & "AGE=21" & Chr(10)
+        OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
+        OutStr = OutStr & "CPAT=1" & Chr(10)
+        OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     'ElseIf msgType = "addr" Then 'msgType = "skey"
         'a = GetParams(msgType, params)
         'msgType = "skey"
@@ -1247,8 +1267,12 @@ If protoVER = 1 Then
         OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         authData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        Winsock3.SendData authData
+        ParseData = authData
         'Winsock3.SendData (HexToBin("7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00"))
+    ElseIf msgType = "chal" Then
+        OutStr = "HOST=0" & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "cper" Then
         OutStr = "PERS=" & clientPERS & Chr(10)
         OutStr = OutStr & "ALTS=" & clientALTS & Chr(10)
@@ -1295,6 +1319,7 @@ If protoVER = 1 Then
         pad2 = HexToBin("00 00 00")
         'MsgBox subCmd
         If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
+        'If subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         Else
             'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
@@ -1341,7 +1366,7 @@ If protoVER = 1 Then
         'End If
         'ParseData = msgType & subCmd & pad2 & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "onln" Then
-        OutStr = "PERS=VTSTech" & Chr(10)
+        OutStr = "PERS=" & clientNAME & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "pers" Then
@@ -1402,7 +1427,7 @@ If protoVER = 1 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         Winsock4(PlayerCnt + 1).SendData skeyStr
-        Sleep (1000)
+        'Sleep (1000)
         'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "sviw" Then
         OutStr = "N=3" & Chr(10)
@@ -1441,7 +1466,6 @@ If protoVER = 1 Then
         End If
     ElseIf msgType = "usld" Then
         'a = GetParams(msgType, params)
-        OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
         OutStr = "IMGATE=0" & Chr(10)
         OutStr = OutStr & "QMSG0=TEST0" & Chr(10)
         OutStr = OutStr & "QMSG1=TEST1" & Chr(10)
@@ -1683,28 +1707,38 @@ Winsock3.Close
 'Need for Speed: Underground", 7
 'SSX3", 8
 If Combo1.ListIndex = 0 Then
-    Winsock1.LocalPort = 21800
+    Winsock1.LocalPort = 11600
 ElseIf Combo1.ListIndex = 1 Then
-    Winsock1.LocalPort = 21840
+    Winsock1.LocalPort = 21800
 ElseIf Combo1.ListIndex = 2 Then
-    Winsock1.LocalPort = 21870
+    Winsock1.LocalPort = 21840
 ElseIf Combo1.ListIndex = 3 Then
-    Winsock1.LocalPort = 11500
+    Winsock1.LocalPort = 21870
 ElseIf Combo1.ListIndex = 4 Then
-    Winsock1.LocalPort = 20000
+    Winsock1.LocalPort = 11500
 ElseIf Combo1.ListIndex = 5 Then
+    Winsock1.LocalPort = 20000
+ElseIf Combo1.ListIndex = 6 Then
     Winsock1.LocalPort = 14300
     protoVER = 2
-ElseIf Combo1.ListIndex = 6 Then
-    Winsock1.LocalPort = 10600
 ElseIf Combo1.ListIndex = 7 Then
-    Winsock1.LocalPort = 10900
+    Winsock1.LocalPort = 10600
 ElseIf Combo1.ListIndex = 8 Then
-    Winsock1.LocalPort = 20900
+    Winsock1.LocalPort = 10900
 ElseIf Combo1.ListIndex = 9 Then
+    Winsock1.LocalPort = 20900
+ElseIf Combo1.ListIndex = 10 Then
     Winsock1.LocalPort = 11000
 End If
 Text1.Text = Winsock1.LocalPort
+End Sub
+
+Private Sub Combo2_Change()
+Text5.Text = Combo2.Text
+End Sub
+
+Private Sub Combo2_Click()
+Text5.Text = Combo2.Text
 End Sub
 
 Private Sub Command1_Click()
@@ -1837,16 +1871,18 @@ If fso.FileExists("C:\Windows\System32\drivers\etc\hosts") = False Then
 Else
     Close #1
     Open "C:\Windows\System32\drivers\etc\hosts" For Append As #1
+    Print #1, Text5.Text & " ps2bond04.ea.com"
     Print #1, Text5.Text & " ps2burnout06.ea.com"
     Print #1, Text5.Text & " ps2burnout05.ea.com"
     Print #1, Text5.Text & " ps3burnout08.ea.com"
     Print #1, Text5.Text & " ps2kok05.ea.com"
     Print #1, Text5.Text & " ps2madden05.ea.com"
     Print #1, Text5.Text & " ps2nascar04.ea.com"
+    Print #1, Text5.Text & " ps2nbastreet05.ea.com"
     Print #1, Text5.Text & " ps2nfs06.ea.com"
     Print #1, Text5.Text & " ps2nfs04.ea.com"
     Print #1, Text5.Text & " ps2nfs05.ea.com"
-    Print #1, Text5.Text & " ps2ssx04.ea.com" & vbCrLf
+    Print #1, Text5.Text & " ps2ssx04.ea.com"
     Close #1
     MsgBox ("HOSTS file written successfully")
 End If
@@ -1862,37 +1898,61 @@ Unload Form1
 End
 End Sub
 
+' Returns an array with the local IP addresses (as strings).
+' Author: Christian d'Heureuse, www.source-code.biz
+Public Function GetIpAddrTable()
+   Dim Buf(0 To 511) As Byte
+   Dim BufSize As Long: BufSize = UBound(Buf) + 1
+   Dim rc As Long
+   rc = GetIpAddrTable_API(Buf(0), BufSize, 1)
+   If rc <> 0 Then Err.Raise vbObjectError, , "GetIpAddrTable failed with return value " & rc
+   Dim NrOfEntries As Integer: NrOfEntries = Buf(1) * 256 + Buf(0)
+   If NrOfEntries = 0 Then GetIpAddrTable = Array(): Exit Function
+   ReDim IpAddrs(0 To NrOfEntries - 1) As String
+   Dim i As Integer
+   For i = 0 To NrOfEntries - 1
+      Dim j As Integer, s As String: s = ""
+      For j = 0 To 3: s = s & IIf(j > 0, ".", "") & Buf(4 + i * 24 + j): Next
+      IpAddrs(i) = s
+      Next
+   GetIpAddrTable = IpAddrs
+   End Function
+
 Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R20"
+Build = "0.1-R21"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
-Text1.Text = 21800
+Text1.Text = 11600
 Check1.value = 1
 PlayerCnt = 0
 playerNUM = PlayerCnt
-pingTIME = 1
+pingTIME = 3
 secCNT = 0
 pingSEC = 30
 protoVER = 1
-Combo1.Text = "Burnout 3 Takedown"
-Combo1.AddItem "Burnout 3 Takedown", 0
-Combo1.AddItem "Burnout 3 Takedown (Review)", 1
-Combo1.AddItem "Burnout Paradise (PS3)", 2
-Combo1.AddItem "Fight Night 2004", 3
-Combo1.AddItem "Madden NFL 05", 4
-Combo1.AddItem "Medal of Honor: Rising Sun", 5
-Combo1.AddItem "NASCAR Thunder 2004", 6
-Combo1.AddItem "Need for Speed: Underground", 7
-Combo1.AddItem "Need for Speed: Underground 2", 8
-Combo1.AddItem "SSX3", 9
-
+Combo1.AddItem "007: Everything or Nothing", 0
+Combo1.AddItem "Burnout 3 Takedown", 1
+Combo1.AddItem "Burnout 3 Takedown (Review)", 2
+Combo1.AddItem "Burnout Paradise (PS3)", 3
+Combo1.AddItem "Fight Night 2004", 4
+Combo1.AddItem "Madden NFL 05", 5
+Combo1.AddItem "Medal of Honor: Rising Sun", 6
+Combo1.AddItem "NASCAR Thunder 2004", 7
+Combo1.AddItem "Need for Speed: Underground", 8
+Combo1.AddItem "Need for Speed: Underground 2", 9
+Combo1.AddItem "SSX3", 10
+Combo1.Text = Combo1.List(0)
 Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00)"
 Text4.Text = ""
 Text5.Text = "192.168.0.228"
-
+Combo2.Text = ""
+For x = 0 To UBound(GetIpAddrTable)
+    Combo2.AddItem GetIpAddrTable(x), x
+Next x
+Combo2.Text = Combo2.List(1)
 Timer1.Interval = 999
 Timer1.Enabled = True
 End Sub
@@ -2012,8 +2072,8 @@ End Sub
 Private Sub Winsock3_ConnectionRequest(ByVal requestID As Long)
 '* Buddy Socket 10899
 Winsock3.Close
-Winsock4(PlayerCnt + 1).Close
-Winsock4(PlayerCnt + 1).Accept (requestID)
+Winsock4(PlayerCnt + 2).Close
+Winsock4(PlayerCnt + 2).Accept (requestID)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock3.RemoteHostIP & ":" & Winsock3.RemotePort & vbCrLf
 End Sub
