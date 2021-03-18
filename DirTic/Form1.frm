@@ -1318,8 +1318,9 @@ If protoVER = 1 Then
         a = GetParams(msgType, params)
         pad2 = HexToBin("00 00 00")
         'MsgBox subCmd
-        If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
+        'If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
         'If subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
+        If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new3" Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         Else
             'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
@@ -1404,10 +1405,10 @@ If protoVER = 1 Then
         OutStr = "MORE=0" & Chr(10)
         OutStr = OutStr & "SLOTS=1" & Chr(10)
         OutStr = OutStr & "STATS=0" & Chr(10)
-        OutStr = OutStr & "USERS=0" & Chr(10)
+        OutStr = OutStr & "USERS=1" & Chr(10)
         OutStr = OutStr & "GAMES=0" & Chr(10)
-        OutStr = OutStr & "RANKS=0" & Chr(10)
-        OutStr = OutStr & "ROOMS=0" & Chr(10)
+        OutStr = OutStr & "RANKS=1" & Chr(10)
+        OutStr = OutStr & "ROOMS=1" & Chr(10)
         OutStr = OutStr & "MESGS=0" & Chr(10)
         'OutStr = OutStr & "ASYNC=1" & Chr(10)
         'OutStr = OutStr & "USERSETS=0" & Chr(10)
@@ -1504,7 +1505,7 @@ ElseIf protoVER = 2 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = HexToBin(StringToHex(msgType & pad & Chr(msgLen) & OutStr & Chr(0)))
     ElseIf msgType = "USER" Then
-        'YD[&YE@@eÀ¨äÀ¨Þ7Ü9!Ct"seúMPúhHUSERTICKET=YOLO
+        'YD[&YE@@e??????7?9!Ct"se?MP?hHUSERTICKET=YOLO
         OutStr = Trim("TICKET=") & Chr(34) & players(PlayerCnt).playerID & Chr(34)
         'OutStr = OutStr & "PROD=" & clientPROD & Chr(0)
         'OutStr = OutStr & "VERS=" & clientVERS & Chr(0)
@@ -1525,7 +1526,7 @@ ElseIf protoVER = 2 Then
         msgLen = Len(msgType) + 8 + 1
         ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
     ElseIf msgType = "PROF" Then
-        'YD[&YEF @eÀ¨äÀ¨Þ7Ü9!Ct:seú©PúsøPROFCLEAN-TEXT="YOLO"
+        'YD[&YEF @e??????7?9!Ct:se??P?s?PROFCLEAN-TEXT="YOLO"
         OutStr = "CLEAN-TEXT=" & Chr(34) & "VTSTech" & Chr(34)
         'OutStr = OutStr & "PROD=" & clientPROD & Chr(0)
         'OutStr = OutStr & "VERS=" & clientVERS & Chr(0)
@@ -1533,7 +1534,7 @@ ElseIf protoVER = 2 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "RLST" Then
-        'YD[&YEH!@e|À¨äÀ¨Þ7Ü9!CtXseú»Pùú# RLST TID=1 NUM-REGIONS=1
+        'YD[&YEH!@e|??????7?9!CtXse??P??#?RLST TID=1 NUM-REGIONS=1
         OutStr = "TID=" & clientTID & " "
         OutStr = OutStr & "NUM-REGIONS=1"
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1565,7 +1566,7 @@ Public Function Send_LDAT(Index)
     Next x
 End Function
 Public Function Send_RDAT(Index)
-    'YD[&YEx"@eKÀ¨äÀ¨Þ7Ü9!Ctxseú»PùúmRDATPTID=1 REGION-ID=1 NAME="IamLupo" LOCALE=0 NUM-GAMES=1 NUM-PLAYERS=1
+    'YD[&YEx"@eK??????7?9!Ctxse??P??mRDATPTID=1 REGION-ID=1 NAME="IamLupo" LOCALE=0 NUM-GAMES=1 NUM-PLAYERS=1
     msgType = "RDAT"
     OutStr = "TID=" & clientTID & " "
     OutStr = OutStr & "REGION-ID=1" & " "
@@ -1706,6 +1707,7 @@ Winsock3.Close
 'NASCAR Thunder 2004", 6
 'Need for Speed: Underground", 7
 'SSX3", 8
+
 If Combo1.ListIndex = 0 Then
     Winsock1.LocalPort = 11600
 ElseIf Combo1.ListIndex = 1 Then
@@ -1717,17 +1719,19 @@ ElseIf Combo1.ListIndex = 3 Then
 ElseIf Combo1.ListIndex = 4 Then
     Winsock1.LocalPort = 11500
 ElseIf Combo1.ListIndex = 5 Then
-    Winsock1.LocalPort = 20000
+    Winsock1.LocalPort = 21500
 ElseIf Combo1.ListIndex = 6 Then
+    Winsock1.LocalPort = 20000
+ElseIf Combo1.ListIndex = 7 Then
     Winsock1.LocalPort = 14300
     protoVER = 2
-ElseIf Combo1.ListIndex = 7 Then
-    Winsock1.LocalPort = 10600
 ElseIf Combo1.ListIndex = 8 Then
-    Winsock1.LocalPort = 10900
+    Winsock1.LocalPort = 10600
 ElseIf Combo1.ListIndex = 9 Then
-    Winsock1.LocalPort = 20900
+    Winsock1.LocalPort = 10900
 ElseIf Combo1.ListIndex = 10 Then
+    Winsock1.LocalPort = 20900
+ElseIf Combo1.ListIndex = 11 Then
     Winsock1.LocalPort = 11000
 End If
 Text1.Text = Winsock1.LocalPort
@@ -1922,7 +1926,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R21"
+Build = "0.1-R22"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text1.Text = 11600
 Check1.value = 1
@@ -1937,12 +1941,13 @@ Combo1.AddItem "Burnout 3 Takedown", 1
 Combo1.AddItem "Burnout 3 Takedown (Review)", 2
 Combo1.AddItem "Burnout Paradise (PS3)", 3
 Combo1.AddItem "Fight Night 2004", 4
-Combo1.AddItem "Madden NFL 05", 5
-Combo1.AddItem "Medal of Honor: Rising Sun", 6
-Combo1.AddItem "NASCAR Thunder 2004", 7
-Combo1.AddItem "Need for Speed: Underground", 8
-Combo1.AddItem "Need for Speed: Underground 2", 9
-Combo1.AddItem "SSX3", 10
+Combo1.AddItem "Fight Night Round 2", 5
+Combo1.AddItem "Madden NFL 05", 6
+Combo1.AddItem "Medal of Honor: Rising Sun", 7
+Combo1.AddItem "NASCAR Thunder 2004", 8
+Combo1.AddItem "Need for Speed: Underground", 9
+Combo1.AddItem "Need for Speed: Underground 2", 10
+Combo1.AddItem "SSX3", 11
 Combo1.Text = Combo1.List(0)
 Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00)"
@@ -1963,6 +1968,14 @@ End Sub
 
 Private Sub Label4_Click()
 Shell ("cmd.exe /c start bitcoin:1ByfBujg9bnmk1XXY2rxY6obhqHMUNiDuP?amount=0.02&message=donation"), vbNormalFocus
+End Sub
+
+Private Sub Label7_Click()
+VB.Clipboard.SetText clientPROD
+End Sub
+
+Private Sub Label8_Click()
+VB.Clipboard.SetText clientVERS
 End Sub
 
 Private Sub save_Click(Index As Integer)
@@ -2095,62 +2108,6 @@ If moreCmd = True Then
     Winsock1.SendData (HexToBin(StringToHex(ParseData("moreCmd"))))
 End If
 End Sub
-Private Sub Winsock2_DataArrival(ByVal bytesTotal As Long)
-'* Listener Socket 10901
-On Error Resume Next
-Randomize Timer
-Winsock2.GetData Data, vbString
-Buff = Text2.Text
-DataStr = StringToHex(Data)
-DataLen = Len(Data)
-tmp2 = ParseData(DataStr)
-Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
-Index = playerNUM
-If Len(ParseTmp) >= 1 Then
-    'tmp3 = HexToBin(StringToHex(ParseData("moreCmd")))
-    Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
-Else
-    If msgType = "skey" Then
-        If moreCmd = True Or Len(clientSKEY) >= 1 Then
-            tmp3 = ParseData(DataStr)
-            Sleep (250)
-            If Len(ParseTmp) >= 1 Then
-                Winsock2.SendData (HexToBin(StringToHex(ParseTmp)))
-            End If
-            If Len(tmp2) >= 1 Then
-                Winsock2.SendData (HexToBin(StringToHex(tmp2)))
-            End If
-        End If
-        ParseTmp = ""
-    End If
-    If Len(tmp2) > 1 And Len(clientSKEY) >= 1 And Not msgType = "skey" Then
-        Winsock2.SendData (HexToBin(StringToHex(tmp2)))
-    End If
-End If
-
-'If msgType = "auth" Then
-    'a = Send_Who()
-    'a = Send_Rom()
-'End If
-
-If msgType = "pers" Then
-    DoEvents
-    'a = Send_Rom()
-    'Sleep (500)
-    DoEvents
-    'a = Send_Who()
-    'Sleep (500)
-    DoEvents
-    'a = Send_usr()
-End If
-
-If msgType = "sviw" Then
-    a = Send_Who(Index)
-    a = Send_Rom(Index)
-End If
-
-End Sub
-
 Private Sub Winsock3_DataArrival(ByVal bytesTotal As Long)
 '* Buddy Socket 10899
 On Error Resume Next
@@ -2231,6 +2188,8 @@ Else
         tmp2 = ""
     End If
 End If
+Sleep (100)
+DoEvents
 If Len(tmp2) > 1 Then
     'Sleep (250)
     Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
@@ -2254,7 +2213,7 @@ If msgType = "LLST" Then
     a = Send_LDAT(Index)
 End If
 
-If msgType = "sviw" Then
+If msgType = "sviw" Or msgType = "ussv" Then
     a = Send_Who(Index)
     a = Send_Rom(Index)
 End If
@@ -2274,3 +2233,4 @@ tmp2 = ""
 tmp3 = ""
 'PlayerCnt = PlayerCnt - 1
 End Sub
+
