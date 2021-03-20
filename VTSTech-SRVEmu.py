@@ -6,7 +6,7 @@ BuddySocket = socket.socket()
 LISTENERSocket = socket.socket()
 
 TOTALARGS = len(sys.argv)
-BUILD="0.1-ALPHA R0.73B"
+BUILD="0.1-ALPHA R0.73C"
 SERVER_IP = ''
 SERVER_IP_BIN = b'ADDR='+bytes(SERVER_IP,'ascii')
 SERVER_PORT_BIN= b'PORT=10901'
@@ -254,6 +254,8 @@ def cmd_news(payload):
    
     if (len(NEWS_PAYLOAD) > 1):
     	NEWS_PAYLOAD = NEWS_PAYLOAD[0]
+    if (NEWS_PAYLOAD == "c"):
+    	NEWS_PAYLOAD = int(7)
     print("News Payload: "+str(NEWS_PAYLOAD))
     if (int(NEWS_PAYLOAD) >= 1) and (int(NEWS_PAYLOAD) <= 3):
     	print("fired!")
@@ -349,6 +351,7 @@ def cmd_news(payload):
     else:
     	p = 'BUDDY_SERVER='+SERVER_IP+'\n'
     	p+= 'BUDDY_PORT='+str(BUDDY_PORT)+'\n'
+    	p+= 'BUDDY_URL=http://ps3burnout08.ea.com/\n'
     	#p+= 'LIVE_NEWS_URL=https://gos.ea.com/easo/editorial/Burnout/2008/livedata/main.jsp?lang=en&from=enUS&game=Burnout&platform=PS3&env=live\n'
     	#p+= 'EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt\n'
     	#p+= 'ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt\n'
@@ -414,8 +417,12 @@ def reply_acct(data):
     acctStr="NAME="+clientNAME.lower()
     reply+=acctStr.encode('ascii')+x0A
     acctStr="AGE=21"
-    reply+=acctStr.encode('ascii')+x0A   
-    acctStr="PERSONAS="+clientNAME+',is,reviving,games'
+    reply+=acctStr.encode('ascii')+x0A
+    if isinstance(clientNAME,str):
+      acctStr+="PERSONAS="+clientNAME.lower()+",is,reviving,games\n"
+    else:
+      acctStr+="PERSONAS="+clientNAME[0].lower()+",is,reviving,games\n"    
+    #acctStr="PERSONAS="+clientNAME+',is,reviving,games'
     reply+=acctStr.encode('ascii')+x0A
     clientLAST=time.strftime("%Y.%m.%d %I:%M:%S",time.localtime())
     acctStr="SINCE="+clientLAST
@@ -432,7 +439,10 @@ def reply_acct(data):
     reply+=acctStr.encode('ascii')+x0A
     acctStr="AGE=21"
     reply+=acctStr.encode('ascii')+x0A   
-    acctStr="PERSONAS="+clientNAME+',is,reviving,games'
+    if isinstance(clientNAME,str):
+      acctStr+="PERSONAS="+clientNAME.lower()+",is,reviving,games\n"
+    else:
+      acctStr+="PERSONAS="+clientNAME[0].lower()+",is,reviving,games\n" 
     reply+=acctStr.encode('ascii')+x0A
     acctStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
     reply+=authStr.encode('ascii')+x0A         
@@ -456,10 +466,13 @@ def reply_auth(data):
     authStr="TOS=1"
     reply=authStr.encode('ascii')+x0A
     authStr="NAME=VTSTech"
-    reply=authStr.encode('ascii')+x0A    
+    reply+=authStr.encode('ascii')+x0A    
     authStr="MAIL=nospam@vts-tech.org"
     reply+=authStr.encode('ascii')+x0A
-    authStr="PERSONAS="+clientNAME+',is,reviving,games'
+    if isinstance(clientNAME,str):
+      authStr="PERSONAS="+clientNAME.lower()+",is,reviving,games\n"
+    else:
+      authStr="PERSONAS="+clientNAME[0].lower()+",is,reviving,games\n" 
     reply+=authStr.encode('ascii')+x0A
     authStr="BORN=19800325"
     reply+=authStr.encode('ascii')+x0A   
@@ -486,41 +499,41 @@ def reply_auth(data):
     if authsent >=3:
       reply=b''
     return reply
-    
-  #authStr="TOS=1"
-  #reply=authStr.encode('ascii')+x0A
-  authStr="NAME="+clientNAME.lower()
-  reply=authStr.encode('ascii')+x0A
-  authStr="ADDR=24.141.39.62"
-  reply+=authStr.encode('ascii')+x0A
-  authStr="MAIL="+clientMAIL
-  reply+=authStr.encode('ascii')+x0A
-  authStr="PERSONAS="+clientNAME+',is,reviving,games'
-  reply+=authStr.encode('ascii')+x0A
-  authStr="BORN=19800325"
-  reply+=authStr.encode('ascii')+x0A   
-  authStr="GEND=M"
-  reply+=authStr.encode('ascii')+x0A         
-  authStr="FROM=US"
-  reply+=authStr.encode('ascii')+x0A         
-  authStr="LANG=en"
-  reply+=authStr.encode('ascii')+x0A
-  authStr="SPAM=NN"
-  reply+=authStr.encode('ascii')+x0A         
-  #authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-  #reply+=authStr.encode('ascii')+x0A        
-  #authStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
-  #reply+=authStr.encode('ascii')+x0A
-  #authStr="ADDR=24.143.43.66"
-  #reply+=authStr.encode('ascii')
-  #authStr="_LUID=$000000000b32588d"
-  authStr="DEFPER=1"
-  reply+=authStr.encode('ascii')+x0A            
-  reply+=codecs.decode('0A00','hex_codec')
-  print("AUTHSENT: ",authsent)
-  if authsent >=3:
-    reply=b''
-  return reply    
+  else:    
+	  #authStr="TOS=1"
+	  #reply=authStr.encode('ascii')+x0A
+	  authStr="NAME="+clientNAME.lower()
+	  reply=authStr.encode('ascii')+x0A
+	  authStr="ADDR=24.141.39.62"
+	  reply+=authStr.encode('ascii')+x0A
+	  authStr="MAIL="+clientMAIL
+	  reply+=authStr.encode('ascii')+x0A
+	  authStr="PERSONAS="+clientNAME+',is,reviving,games'
+	  reply+=authStr.encode('ascii')+x0A
+	  authStr="BORN=19800325"
+	  reply+=authStr.encode('ascii')+x0A   
+	  authStr="GEND=M"
+	  reply+=authStr.encode('ascii')+x0A         
+	  authStr="FROM=US"
+	  reply+=authStr.encode('ascii')+x0A         
+	  authStr="LANG=en"
+	  reply+=authStr.encode('ascii')+x0A
+	  authStr="SPAM=NN"
+	  reply+=authStr.encode('ascii')+x0A         
+	  #authStr="SINCE="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
+	  #reply+=authStr.encode('ascii')+x0A        
+	  #authStr="LAST="+time.strftime("%Y.%m.%d-%I:%M:%S",time.localtime())
+	  #reply+=authStr.encode('ascii')+x0A
+	  #authStr="ADDR=24.143.43.66"
+	  #reply+=authStr.encode('ascii')
+	  #authStr="_LUID=$000000000b32588d"
+	  authStr="DEFPER=1"
+	  reply+=authStr.encode('ascii')+x0A            
+	  reply+=codecs.decode('0A00','hex_codec')
+	  print("AUTHSENT: ",authsent)
+	  if authsent >=3:
+	    reply=b''
+	  return reply    
 
 def reply_cper(data):
   tmp = data[11:].split(codecs.decode('0A','hex_codec'))
@@ -987,15 +1000,15 @@ def build_reply(data):
     oddByte = codecs.decode('00','hex_codec')
     replyTmp=b'sviw'+pad         
     if (clientVERS == "BURNOUT5/ISLAND"):
-	    sviwStr="N=3"
+	    sviwStr="N=9"
 	    reply=sviwStr.encode('ascii')+x0A
-	    sviwStr="DESCS=1,1,1"
+	    sviwStr="DESCS=1,1,1,1,1,1,1,1,1"
 	    reply+=sviwStr.encode('ascii')+x0A
-	    sviwStr="NAMES=0,3,4"
+	    sviwStr="NAMES=0,3,4,0,3,4,0,3,4"
 	    reply+=sviwStr.encode('ascii')+x0A
-	    sviwStr="PARAMS=2,2,2"
+	    sviwStr="PARAMS=2,2,2,2,2,2,2,2,2"
 	    reply+=sviwStr.encode('ascii')+x0A
-	    sviwStr="WIDTHS=1,1,1"
+	    sviwStr="WIDTHS=1,1,1,1,1,1,1,1,1"
 	    reply+=sviwStr.encode('ascii')+x0A    	
 	    sviwStr="SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA"
 	    reply+=sviwStr.encode('ascii')+x0A
@@ -1141,7 +1154,13 @@ def threaded_client(connection):
         reply = reply_pop()
         connection.sendall((reply))
         reply = reply_usr()
-        connection.sendall((reply))              
+        connection.sendall((reply))     
+      if (msgType == b'usld'):
+        #reply = reply_who()
+        #connection.sendall((reply))        
+        ping_cnt=1
+        ping_start=time.time()
+        reply = reply_ping(data)                 
     #print("D5")
     #if (msgType == b'fget'):
       #parse_data(data)
