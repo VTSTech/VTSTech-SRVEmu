@@ -11,6 +11,26 @@ Begin VB.Form Form1
    ScaleHeight     =   7440
    ScaleWidth      =   9900
    StartUpPosition =   1  'CenterOwner
+   Begin VB.CheckBox Check6 
+      BackColor       =   &H80000007&
+      Caption         =   "is VTS?"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H8000000A&
+      Height          =   195
+      Left            =   8640
+      TabIndex        =   29
+      Top             =   600
+      Value           =   1  'Checked
+      Width           =   975
+   End
    Begin VB.ComboBox Combo2 
       BeginProperty Font 
          Name            =   "Verdana"
@@ -1151,7 +1171,11 @@ If protoVER = 1 Then
     If msgType = "@dir" Then
         OutStr = "PORT=10901" & Chr(10)
         OutStr = OutStr & "SESS=1337420011" & Chr(10)
-        OutStr = OutStr & "ADDR=" & Text5.Text & Chr(10)
+        If Check6.value = 1 Then
+            OutStr = OutStr & "ADDR=" & Text5.Text & Chr(10)
+        Else
+            OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
+        End If
         OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
@@ -1233,20 +1257,20 @@ If protoVER = 1 Then
                         clientPERS = tmp(4)
                         clientSINCE = tmp(5)
                         'OutStr = "VERS=" & clientVERS & Chr(10)
-                        'OutStr = "TOS=1" & Chr(10)
+                        OutStr = "TOS=1" & Chr(10)
                         OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
-                        OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
                         OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
-                        'OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
-                        'OutStr = OutStr & "GEND=M" & Chr(10)
-                        'OutStr = OutStr & "FROM=US" & Chr(10)
-                        'OutStr = OutStr & "LANG=en" & Chr(10)
-                        'OutStr = OutStr & "SPAM=NN" & Chr(10)
                         OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
-                        'OutStr = OutStr & "SINCE=" & clientSINCE & Chr(10)
-                        'OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-                        OutStr = OutStr & "CPAT=1" & Chr(10)
-                        'OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
+                        OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
+                        OutStr = OutStr & "FROM=US" & Chr(10)
+                        OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
+                        OutStr = OutStr & "GEND=M" & Chr(10)
+                        OutStr = OutStr & "SPAM=NN" & Chr(10)
+                        OutStr = OutStr & "SINCE=" & clientSINCE & Chr(10)
+                        OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+                        OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
+                        OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
+                        'OutStr = OutStr & "CPAT=1" & Chr(10)
                         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
                         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
                         'Winsock4(PlayerCnt).SendData authStr
@@ -1320,7 +1344,7 @@ If protoVER = 1 Then
         'MsgBox subCmd
         'If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
         'If subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
-        If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new3" Then
+        If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new3" Or subCmd = "new7" Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         Else
             'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
@@ -1343,6 +1367,10 @@ If protoVER = 1 Then
             'OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
             'OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
         End If
+        If subCmd = "newc" Then
+            subCmd = "new7"
+            OutStr = "VTSTech.is.reviving.games" & Chr(10)
+        End If
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         sizeHex = Hex(msgLen)
         If msgLen >= 256 Then
@@ -1353,9 +1381,6 @@ If protoVER = 1 Then
             s2 = Mid(sizeHex, 3, 2)
             pad2 = HexToBin("00 00 " & s1 & " " & s2)
             'ParseTmp = ""
-            If subCmd = "newc" Then
-                subCmd = "new7"
-            End If
             ParseTmp = msgType & subCmd & pad2 & OutStr & Chr(0)
         Else
             'ParseTmp = ""
@@ -1375,15 +1400,15 @@ If protoVER = 1 Then
         'MID=$00041f828759
         'PID=SSX-PS2-2004
         'OutStr = "LOC=en" & Chr(10)
-        'OutStr = OutStr & "MA=" & clientMAC & Chr(10)
-        'OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
         OutStr = "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
         OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
-        'OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        'OutStr = OutStr & "LOC=enUS" & Chr(10)
+        'OutStr = OutStr & "MA=" & clientMAC & Chr(10)
+        'OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+        'OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
         'OutStr = OutStr & "PLAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
         'OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
         'OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-        
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "room" Or msgType = "RGET" Then
@@ -1400,26 +1425,29 @@ If protoVER = 1 Then
         ParseData = "room" & pad & Chr(msgLen) & OutStr & Chr(0)
         'Sleep (200)
     ElseIf msgType = "sele" Then
-        'OutStr = "VERS=" & clientVERS & Chr(10)
-        'OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
-        OutStr = "MORE=0" & Chr(10)
-        OutStr = OutStr & "SLOTS=1" & Chr(10)
-        OutStr = OutStr & "STATS=0" & Chr(10)
-        OutStr = OutStr & "USERS=1" & Chr(10)
-        OutStr = OutStr & "GAMES=0" & Chr(10)
-        OutStr = OutStr & "RANKS=1" & Chr(10)
-        OutStr = OutStr & "ROOMS=1" & Chr(10)
-        OutStr = OutStr & "MESGS=0" & Chr(10)
-        'OutStr = OutStr & "ASYNC=1" & Chr(10)
-        'OutStr = OutStr & "USERSETS=0" & Chr(10)
-        'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
-        'OutStr = OutStr & "INGAME=0" & Chr(10)
-        'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
-        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        'msgLen = Len(msgType) + 8 + 1
-        'ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
-        'Sleep (200)
+        If clientVERS = "BURNOUT5/ISLAND" Then
+            msgLen = Len(msgType) + 8 + 1
+            ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
+        Else
+            'OutStr = "VERS=" & clientVERS & Chr(10)
+            'OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
+            OutStr = "MORE=0" & Chr(10)
+            OutStr = OutStr & "SLOTS=1" & Chr(10)
+            OutStr = OutStr & "STATS=0" & Chr(10)
+            OutStr = OutStr & "USERS=1" & Chr(10)
+            OutStr = OutStr & "GAMES=0" & Chr(10)
+            OutStr = OutStr & "RANKS=1" & Chr(10)
+            OutStr = OutStr & "ROOMS=1" & Chr(10)
+            OutStr = OutStr & "MESGS=0" & Chr(10)
+            'OutStr = OutStr & "ASYNC=1" & Chr(10)
+            'OutStr = OutStr & "USERSETS=0" & Chr(10)
+            'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
+            'OutStr = OutStr & "INGAME=0" & Chr(10)
+            'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
+            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        End If
+        Sleep (200)
     ElseIf msgType = "skey" Then
         'a = GetParams(msgType, params)
         'msgType = "skey"
@@ -1430,15 +1458,50 @@ If protoVER = 1 Then
         Winsock4(PlayerCnt + 1).SendData skeyStr
         'Sleep (1000)
         'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    ElseIf msgType = "slst" Then
+        OutStr = "COUNT=27" & Chr(10)
+        OutStr = OutStr & "VIEW0=lobby," & Chr(34) & "Online Lobby Stats View" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW1=DLC," & Chr(34) & "DLC Lobby Stats View" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW2=RoadRules," & Chr(34) & "Road Rules" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW3=DayBikeRRs," & Chr(34) & "Day Bike Road Rules" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW4=NightBikeRR," & Chr(34) & "Night Bike Road Rules" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW5=PlayerStatS," & Chr(34) & "Player Stats Summary" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW6=LastEvent1," & Chr(34) & "Recent Event 1 Details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW7=LastEvent2," & Chr(34) & "Recent Event 2 Details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW8=LastEvent3," & Chr(34) & "Recent Event 3 Details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW9=LastEvent4," & Chr(34) & "Recent Event 4 Details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW10=LastEvent5," & Chr(34) & "Recent Event 5 Details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW11=OfflineProg," & Chr(34) & "Offline Progression" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW12=Rival1," & Chr(34) & "Rival 1 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW13=Rival2," & Chr(34) & "Rival 2 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW14=Rival3," & Chr(34) & "Rival 3 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW15=Rival4," & Chr(34) & "Rival 4 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW16=Rival5," & Chr(34) & "Rival 5 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW17=Rival6," & Chr(34) & "Rival 6 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW18=Rival7," & Chr(34) & "Rival 7 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW19=Rival8," & Chr(34) & "Rival 8 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW20=Rival9," & Chr(34) & "Rival 9 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW21=Rival10," & Chr(34) & "Rival 10 information" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW22=DriverDetai," & Chr(34) & "Driver details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW23=RiderDetail," & Chr(34) & "Rider details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW24=IsldDetails," & Chr(34) & "Island details" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW25=Friends," & Chr(34) & "Friends List" & Chr(34) & Chr(10)
+        OutStr = OutStr & "VIEW26=PNetworkSta," & Chr(34) & "Paradise Network Stats" & Chr(34) & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "sviw" Then
-        OutStr = "N=3" & Chr(10)
-        OutStr = OutStr & "NAMES=1,2,4" & Chr(10)
-        OutStr = OutStr & "PARAMS=1,1,1" & Chr(10)
-        OutStr = OutStr & "WIDTHS=1,1,1" & Chr(10)
-        'OutStr = OutStr & "DESC=1,1,1,1,1,1" & Chr(10)
-        'OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
-        'OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
-        'OutStr = OutStr & "SS=65" & Chr(10)
+        OutStr = "N=9" & Chr(10)
+        OutStr = OutStr & "NAMES=1,2,4,1,2,4,1,2,4" & Chr(10)
+        OutStr = OutStr & "PARAMS=1,1,1,1,1,1,1,1,1" & Chr(10)
+        OutStr = OutStr & "WIDTHS=1,1,1,1,1,1,1,1,1" & Chr(10)
+        OutStr = OutStr & "DESC=1,1,1,1,1,1,1,1,1" & Chr(10)
+        OutStr = OutStr & "SYMS=TOTCOM,a,0,TAKEDNS,RIVALS,ACHIEV,FBCHAL,RANK,WINS,SNTTEAM,SNTFFA" & Chr(10)
+        OutStr = OutStr & "TYPES=~num,~num,~num,~num,~rnk,~num,~pts,~pts" & Chr(10)
+        OutStr = OutStr & "SS=65" & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    ElseIf msgType = "gqwk" Then
+        OutStr = "COUNT=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "user" Then
@@ -1602,13 +1665,47 @@ Public Function Send_GDAT(Index)
         DoEvents
     Next x
 End Function
-Public Function Send_usr()
+Public Function Send_usr(Index)
     msgType = "+usr"
     OutStr = "I=1" & clientTID & Chr(10)
     OutStr = OutStr & "N=" & clientNAME & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     usrData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     Winsock2.SendData usrData
+End Function
+Function Send_Mgm(Index)
+    msgType = "+mgm"
+    OutStr = "CUSTFLAGS='+clientCUSTFLAGS & Chr(10)"
+    OutStr = OutStr & "MINSIZE=" + clientMINSIZE & Chr(10)
+    OutStr = OutStr & "MAXSIZE=" + clientMAXSIZE & Chr(10)
+    OutStr = OutStr & "NAME=VTSTech & Chr(10)"
+    OutStr = OutStr & "PARAMS=" + clientPARAMS & Chr(10)
+    OutStr = OutStr & "PRIV=" + clientPRIV & Chr(10)
+    OutStr = OutStr & "SEED=12345 & Chr(10)"
+    OutStr = OutStr & "SYSFLAGS=" + clientSYSFLAGS & Chr(10)
+    OutStr = OutStr & "MADDR=" + clientMAC & Chr(10)
+    OutStr = OutStr & "COUNT=1 & Chr(10)"
+    OutStr = OutStr & "NUMPART=1 & Chr(10)"
+    OutStr = OutStr & "PARTSIZE=" + clientMINSIZE & Chr(10)
+    OutStr = OutStr & "GPSREGION=2 & Chr(10)"
+    OutStr = OutStr & "GAMEPORT=9657 & Chr(10)"
+    OutStr = OutStr & "VOIPPORT=9667 & Chr(10)"
+    OutStr = OutStr & "EVGID=0 & Chr(10)"
+    OutStr = OutStr & "EVID=0 & Chr(10)"
+    OutStr = OutStr & "IDENT=6450 & Chr(10)"
+    OutStr = OutStr & "GAMEMODE=0 & Chr(10)"
+    OutStr = OutStr & "PARTPARAMS=0 & Chr(10)"
+    OutStr = OutStr & "ROOM=0 & Chr(10)"
+    '#OutStr = OutStr & "SESS="+clientSESS+"\n"
+    OutStr = OutStr & "OPGUEST=0" & Chr(10)
+    OutStr = OutStr & "WHEN=" + Time.strftime("%Y.%m.%d-%I:%M:%S", Time.localtime()) + "\n"
+    OutStr = OutStr & "WHENC=" + Time.strftime("%Y.%m.%d-%I:%M:%S", Time.localtime()) + "\n"
+    OutStr = OutStr & "GPSHOST=VTSTech" & Chr(10)
+    OutStr = OutStr & "HOST=VTSTech" & Chr(10)
+    OutStr = "PERS=" & clientNAME & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    mgmStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock4(Index).SendData mgmStr
 End Function
 Public Function Send_Who(Index)
     msgType = "+who"
@@ -2029,6 +2126,7 @@ For x = 0 To PlayerCnt
         playerExists = True
         Winsock1.Close
         Winsock4(PlayerCnt).Close
+        Sleep (250)
         Winsock4(PlayerCnt).Accept (requestID)
         players(PlayerCnt).playerNUM = PlayerCnt
         players(PlayerCnt).playerID = Int(1000 + PlayerCnt)
@@ -2168,6 +2266,9 @@ Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
 If Len(ParseTmp) >= 1 Then
     'tmp3 = HexToBin(StringToHex(ParseData("moreCmd")))
     Winsock4(Index).SendData (HexToBin(StringToHex(ParseTmp)))
+ElseIf Len(tmp2) >= 1 Then
+    'tmp3 = HexToBin(StringToHex(ParseData("moreCmd")))
+    Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
 Else
     If msgType = "skey" Then
         If moreCmd = True Or Len(clientSKEY) >= 1 Then
@@ -2190,10 +2291,7 @@ Else
 End If
 Sleep (100)
 DoEvents
-If Len(tmp2) > 1 Then
-    'Sleep (250)
-    Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
-End If
+
 If msgType = "RLST" Then
     DoEvents
     Sleep (1000)
@@ -2213,9 +2311,13 @@ If msgType = "LLST" Then
     a = Send_LDAT(Index)
 End If
 
-If msgType = "sviw" Or msgType = "ussv" Then
+If msgType = "pers" Or msgType = "sviw" Then
     a = Send_Who(Index)
     a = Send_Rom(Index)
+End If
+
+If msgType = "gpsc" Or msgType = "gqwk" Then
+    a = Send_Mgm(Index)
 End If
 
 If moreCmd = True Then
