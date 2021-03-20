@@ -11,9 +11,26 @@ Begin VB.Form Form1
    ScaleHeight     =   7440
    ScaleWidth      =   9900
    StartUpPosition =   1  'CenterOwner
+   Begin VB.TextBox Text6 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   285
+      Left            =   120
+      TabIndex        =   30
+      Text            =   "Text6"
+      Top             =   810
+      Width           =   2055
+   End
    Begin VB.CheckBox Check6 
       BackColor       =   &H80000007&
-      Caption         =   "is VTS?"
+      Caption         =   "is Host?"
       BeginProperty Font 
          Name            =   "Verdana"
          Size            =   9
@@ -29,7 +46,7 @@ Begin VB.Form Form1
       TabIndex        =   29
       Top             =   600
       Value           =   1  'Checked
-      Width           =   975
+      Width           =   1095
    End
    Begin VB.ComboBox Combo2 
       BeginProperty Font 
@@ -174,13 +191,13 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   855
+      Height          =   735
       Left            =   6480
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   11
       Text            =   "Form1.frx":0000
-      Top             =   960
+      Top             =   1080
       Width           =   3375
    End
    Begin VB.TextBox Text3 
@@ -193,13 +210,13 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   855
+      Height          =   735
       Left            =   120
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   10
       Text            =   "Form1.frx":0006
-      Top             =   960
+      Top             =   1080
       Width           =   6375
    End
    Begin VB.CommandButton Command3 
@@ -1174,7 +1191,7 @@ If protoVER = 1 Then
         If Check6.value = 1 Then
             OutStr = OutStr & "ADDR=" & Text5.Text & Chr(10)
         Else
-            OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
+            OutStr = OutStr & "ADDR=" & Text6.Text & Chr(10)
         End If
         OutStr = OutStr & "MASK=f3f7f3f70ecb1757cd7001b9a7af3f7" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1851,6 +1868,10 @@ ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
 
+If Text6.Text = "Enter Public IP" Then
+ MsgBox "Please visit www.ipchicken.com and enter your public ip"
+ GoTo fin
+End If
 If Command1.Caption = "Stop" Then
     Winsock1.Close
     Winsock2.Close
@@ -2023,8 +2044,9 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R22"
+Build = "0.1-R23"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
+Text6.Text = "Enter Public IP"
 Text1.Text = 11600
 Check1.value = 1
 PlayerCnt = 0
