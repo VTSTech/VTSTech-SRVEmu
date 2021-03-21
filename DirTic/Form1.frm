@@ -1310,6 +1310,11 @@ If protoVER = 1 Then
         authData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ParseData = authData
         'Winsock3.SendData (HexToBin("7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00"))
+    ElseIf msgType = "cate" Then
+        'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        msgLen = Len(msgType) + 8 + 1
+        ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
     ElseIf msgType = "chal" Then
         OutStr = "HOST=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1325,7 +1330,7 @@ If protoVER = 1 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "fget" Then
-        a = Send_Who(Index)
+        'a = Send_Who(Index)
         OutStr = "FLUP=0" & Chr(10)
         OutStr = OutStr & "PRES=" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1389,6 +1394,7 @@ If protoVER = 1 Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         End If
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        'large msg fix
         sizeHex = Hex(msgLen)
         If msgLen >= 256 Then
             If Len(sizeHex) <= 3 Then
@@ -1520,6 +1526,12 @@ If protoVER = 1 Then
         OutStr = OutStr & "SS=65" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    ElseIf msgType = "gpsc" Then
+        msgType = "gjoi"
+        'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        msgLen = Len(msgType) + 8 + 1
+        ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
     ElseIf msgType = "gqwk" Then
         OutStr = "COUNT=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1695,35 +1707,49 @@ Public Function Send_usr(Index)
 End Function
 Function Send_Mgm(Index)
     msgType = "+mgm"
-    OutStr = "CUSTFLAGS='+clientCUSTFLAGS & Chr(10)"
-    OutStr = OutStr & "MINSIZE=" + clientMINSIZE & Chr(10)
-    OutStr = OutStr & "MAXSIZE=" + clientMAXSIZE & Chr(10)
-    OutStr = OutStr & "NAME=" + clientNAME & Chr(10)
-    OutStr = OutStr & "PARAMS=" + clientPARAMS & Chr(10)
-    OutStr = OutStr & "PRIV=" + clientPRIV & Chr(10)
+    OutStr = "CUSTFLAGS=" & clientCUSTFLAGS & Chr(10)
+    OutStr = OutStr & "MINSIZE=" & clientMINSIZE & Chr(10)
+    OutStr = OutStr & "MAXSIZE=" & clientMAXSIZE & Chr(10)
+    OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+    OutStr = OutStr & "PARAMS=" & clientPARAMS & Chr(10)
+    OutStr = OutStr & "PRIV=" & clientPRIV & Chr(10)
     OutStr = OutStr & "SEED=12345 & Chr(10)"
-    OutStr = OutStr & "SYSFLAGS=" + clientSYSFLAGS & Chr(10)
-    OutStr = OutStr & "MADDR=" + clientMAC & Chr(10)
+    OutStr = OutStr & "SYSFLAGS=" & clientSYSFLAGS & Chr(10)
+    OutStr = OutStr & "MADDR=" & clientMAC & Chr(10)
     OutStr = OutStr & "COUNT=1 & Chr(10)"
     OutStr = OutStr & "NUMPART=1 & Chr(10)"
-    OutStr = OutStr & "PARTSIZE=" + clientMINSIZE & Chr(10)
-    OutStr = OutStr & "GPSREGION=2 & Chr(10)"
-    OutStr = OutStr & "GAMEPORT=9657 & Chr(10)"
-    OutStr = OutStr & "VOIPPORT=9667 & Chr(10)"
-    OutStr = OutStr & "EVGID=0 & Chr(10)"
-    OutStr = OutStr & "EVID=0 & Chr(10)"
-    OutStr = OutStr & "IDENT=6450 & Chr(10)"
-    OutStr = OutStr & "GAMEMODE=0 & Chr(10)"
-    OutStr = OutStr & "PARTPARAMS=0 & Chr(10)"
-    OutStr = OutStr & "ROOM=1 & Chr(10)"
+    OutStr = OutStr & "PARTSIZE=" & clientMINSIZE & Chr(10)
+    OutStr = OutStr & "GPSREGION=2" & Chr(10)
+    OutStr = OutStr & "GAMEPORT=9657" & Chr(10)
+    OutStr = OutStr & "VOIPPORT=9667" & Chr(10)
+    OutStr = OutStr & "EVGID=0" & Chr(10)
+    OutStr = OutStr & "EVID=0" & Chr(10)
+    OutStr = OutStr & "IDENT=6450" & Chr(10)
+    OutStr = OutStr & "GAMEMODE=0" & Chr(10)
+    OutStr = OutStr & "PARTPARAMS=0" & Chr(10)
+    OutStr = OutStr & "ROOM=1" & Chr(10)
     OutStr = OutStr & "OPGUEST=0" & Chr(10)
-    OutStr = OutStr & "WHEN=" + Time.strftime("%Y.%m.%d-%I:%M:%S", Time.localtime()) + "\n"
-    OutStr = OutStr & "WHENC=" + Time.strftime("%Y.%m.%d-%I:%M:%S", Time.localtime()) + "\n"
+    OutStr = OutStr & "WHEN=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+    OutStr = OutStr & "WHENC=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
     OutStr = OutStr & "GPSHOST=VTSTech" & Chr(10)
     OutStr = OutStr & "HOST=VTSTech" & Chr(10)
-    OutStr = "PERS=" & clientNAME & Chr(10)
+    OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-    mgmStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    'large msg fix
+    sizeHex = Hex(msgLen)
+    If msgLen >= 256 Then
+        If Len(sizeHex) <= 3 Then
+            sizeHex = "0" + sizeHex
+        End If
+        s1 = Mid(sizeHex, 1, 2)
+        s2 = Mid(sizeHex, 3, 2)
+        pad2 = HexToBin("00 00 " & s1 & " " & s2)
+        'ParseTmp = ""
+        mgmStr = msgType & subCmd & pad2 & OutStr & Chr(0)
+    Else
+        'ParseTmp = ""
+        mgmStr = msgType & subCmd & pad2 & Chr(msgLen) & OutStr & Chr(0)
+    End If
     Winsock4(Index).SendData mgmStr
 End Function
 Public Function Send_Who(Index)
@@ -2046,7 +2072,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R24"
+Build = "0.1-R25"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
@@ -2057,7 +2083,7 @@ PlayerCnt = 0
 playerNUM = PlayerCnt
 pingTIME = 3
 secCNT = 0
-pingSEC = 30
+pingSEC = 10
 protoVER = 1
 Combo1.AddItem "007: Everything or Nothing", 0
 Combo1.AddItem "Burnout 3 Takedown", 1
@@ -2124,7 +2150,7 @@ If Winsock3.State = 0 Then
 End If
 
 If (secCNT - pingSEC) > Int(pingTIME) * 10 Then
-    For x = 0 To PlayerCnt + 1
+    For x = 0 To PlayerCnt + 2
         If Winsock4(x).State = 7 Then
             a = Send_Png(x)
         End If
@@ -2343,6 +2369,7 @@ If msgType = "pers" Or msgType = "sviw" Then
 End If
 
 If msgType = "gpsc" Or msgType = "gqwk" Then
+    'a = Send_Who(Index)
     a = Send_Mgm(Index)
 End If
 
