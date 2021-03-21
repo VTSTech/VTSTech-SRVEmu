@@ -1238,9 +1238,10 @@ If protoVER = 1 Then
         userExist = True
         OutStr = "TOS=1" & Chr(10)
         OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+        OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
         OutStr = OutStr & "AGE=21" & Chr(10)
         OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
-        OutStr = OutStr & "CPAT=1" & Chr(10)
+        OutStr = OutStr & "SPAM=NN" & Chr(10)
         OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
         OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1280,7 +1281,6 @@ If protoVER = 1 Then
                         OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
                         OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
                         OutStr = OutStr & "FROM=US" & Chr(10)
-                        OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
                         OutStr = OutStr & "GEND=M" & Chr(10)
                         OutStr = OutStr & "SPAM=NN" & Chr(10)
                         OutStr = OutStr & "SINCE=" & clientSINCE & Chr(10)
@@ -1443,8 +1443,11 @@ If protoVER = 1 Then
         'Sleep (200)
     ElseIf msgType = "sele" Then
         If clientVERS = "BURNOUT5/ISLAND" Then
-            msgLen = Len(msgType) + 8 + 1
-            ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
+            OutStr = "MYGAME=1" & Chr(10)
+            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+            'msgLen = Len(msgType) + 8 + 1
+            'ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
         Else
             'OutStr = "VERS=" & clientVERS & Chr(10)
             'OutStr = OutStr & "SKU=" & clientSKU & Chr(10)
@@ -1695,7 +1698,7 @@ Function Send_Mgm(Index)
     OutStr = "CUSTFLAGS='+clientCUSTFLAGS & Chr(10)"
     OutStr = OutStr & "MINSIZE=" + clientMINSIZE & Chr(10)
     OutStr = OutStr & "MAXSIZE=" + clientMAXSIZE & Chr(10)
-    OutStr = OutStr & "NAME=VTSTech & Chr(10)"
+    OutStr = OutStr & "NAME=" + clientNAME & Chr(10)
     OutStr = OutStr & "PARAMS=" + clientPARAMS & Chr(10)
     OutStr = OutStr & "PRIV=" + clientPRIV & Chr(10)
     OutStr = OutStr & "SEED=12345 & Chr(10)"
@@ -1712,8 +1715,7 @@ Function Send_Mgm(Index)
     OutStr = OutStr & "IDENT=6450 & Chr(10)"
     OutStr = OutStr & "GAMEMODE=0 & Chr(10)"
     OutStr = OutStr & "PARTPARAMS=0 & Chr(10)"
-    OutStr = OutStr & "ROOM=0 & Chr(10)"
-    '#OutStr = OutStr & "SESS="+clientSESS+"\n"
+    OutStr = OutStr & "ROOM=1 & Chr(10)"
     OutStr = OutStr & "OPGUEST=0" & Chr(10)
     OutStr = OutStr & "WHEN=" + Time.strftime("%Y.%m.%d-%I:%M:%S", Time.localtime()) + "\n"
     OutStr = OutStr & "WHENC=" + Time.strftime("%Y.%m.%d-%I:%M:%S", Time.localtime()) + "\n"
@@ -2044,7 +2046,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R23"
+Build = "0.1-R24"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
