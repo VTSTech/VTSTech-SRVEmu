@@ -1280,6 +1280,7 @@ If protoVER = 1 Then
                         OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
                         OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
                         OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
+                        OutStr = OutStr & "LANG=enUS" & Chr(10)
                         OutStr = OutStr & "FROM=US" & Chr(10)
                         OutStr = OutStr & "GEND=M" & Chr(10)
                         OutStr = OutStr & "SPAM=NN" & Chr(10)
@@ -1311,10 +1312,11 @@ If protoVER = 1 Then
         ParseData = authData
         'Winsock3.SendData (HexToBin("7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00"))
     ElseIf msgType = "cate" Then
-        'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-        'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        msgLen = Len(msgType) + 8 + 1
-        ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
+        OutStr = "VIEW=17Cars" & Chr(10)
+        msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+        ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        'msgLen = Len(msgType) + 8 + 1
+        'ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
     ElseIf msgType = "chal" Then
         OutStr = "HOST=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1366,32 +1368,39 @@ If protoVER = 1 Then
         'MsgBox subCmd
         'If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
         'If subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
-        If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new3" Or subCmd = "new7" Then
+        If subCmd = "newc" Then
+            subCmd = "new7"
+            'OutStr = "VTSTech.is.reviving.games" & Chr(10)
+        End If
+        If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new3" Then
             OutStr = "VTSTech.is.reviving.games" & Chr(10)
         Else
             'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
             OutStr = "BUDDY_SERVER=" & Text5.Text & Chr(10)
             OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
-            'OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
-            'OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
-            OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/NEWS.txt" & Chr(10)
+            OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
+            OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
+            'OutStr = OutStr & "NEWS_URL=http://gos.ea.com/easo/editorial/common/2008/news/news.jsp?lang=enUS&from=CA&game=Burnout&platform=PS3" & Chr(10)
             OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
             OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
             OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
             OutStr = OutStr & "NEWS_DATE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-            'OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
-            'OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
-            'OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
-            'OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
+            OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/news-bp.txt"
+            OutStr = OutStr & "BUNDLE_PATH=http://ps3burnout08.ea.com/" & Chr(10)
+            OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
+            OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
+            OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
+            OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
             OutStr = OutStr & "STORE_URL=http://ps3burnout08.ea.com/STORE.txt" & Chr(10)
+            OutStr = OutStr & "AVAIL_DLC_URL=http://ps3burnout08.ea.com/STORE_DLC.txt" & Chr(10)
+            OutStr = OutStr & "STORE_DLC_URL=http://ps3burnout08.ea.com/STORE_DLC.txt" & Chr(10)
             OutStr = OutStr & "TOS_TEXT=VTSTech.is.reviving.games_TOS" & Chr(10)
             OutStr = OutStr & "NEWS_TEXT=VTSTech.is.reviving.games_NEWS" & Chr(10)
             'OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
-            'OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
+            OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
         End If
-        If subCmd = "newc" Then
-            subCmd = "new7"
-            OutStr = "VTSTech.is.reviving.games" & Chr(10)
+        If subCmd = "new7" Then
+            'OutStr = "VTSTech.is.reviving.games" & Chr(10)
         End If
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         'large msg fix
@@ -1447,6 +1456,14 @@ If protoVER = 1 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = "room" & pad & Chr(msgLen) & OutStr & Chr(0)
         'Sleep (200)
+    ElseIf msgType = "rvup" Then
+        'msgType = "skey"
+        'OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
+        'OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
+        msgLen = Len(msgType) + 8 + 1
+        ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
+        'Sleep (1000)
+        'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "sele" Then
         If clientVERS = "BURNOUT5/ISLAND" Then
             OutStr = "MYGAME=1" & Chr(10)
@@ -1527,12 +1544,23 @@ If protoVER = 1 Then
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     ElseIf msgType = "gpsc" Then
-        msgType = "gjoi"
+        msgType = "gpsc"
+        OutStr = OutStr & "IDENT=1001" & Chr(10)
+        OutStr = OutStr & "GAMEMODE=0" & Chr(10)
+        OutStr = OutStr & "PARTPARAMS=0" & Chr(10)
+        OutStr = OutStr & "ROOM=1" & Chr(10)
+        OutStr = OutStr & "OPGUEST=0" & Chr(10)
+        OutStr = OutStr & "WHEN=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        OutStr = OutStr & "WHENC=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+        OutStr = OutStr & "GPSHOST=VTSTech" & Chr(10)
+        OutStr = OutStr & "HOST=VTSTech" & Chr(10)
+        OutStr = OutStr & "ADDR=" & Text6.Text & Chr(10)
         'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         'ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         msgLen = Len(msgType) + 8 + 1
         ParseData = msgType & pad & Chr(msgLen) & Chr(0) ' empty response
     ElseIf msgType = "gqwk" Then
+        msgType = "quik"
         OutStr = "COUNT=0" & Chr(10)
         msgLen = Len(msgType) + 8 + Len(OutStr) + 1
         ParseData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
@@ -1713,21 +1741,21 @@ Function Send_Mgm(Index)
     OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
     OutStr = OutStr & "PARAMS=" & clientPARAMS & Chr(10)
     OutStr = OutStr & "PRIV=" & clientPRIV & Chr(10)
-    OutStr = OutStr & "SEED=12345 & Chr(10)"
+    OutStr = OutStr & "SEED=12345" & Chr(10)
     OutStr = OutStr & "SYSFLAGS=" & clientSYSFLAGS & Chr(10)
     OutStr = OutStr & "MADDR=" & clientMAC & Chr(10)
-    OutStr = OutStr & "COUNT=1 & Chr(10)"
-    OutStr = OutStr & "NUMPART=1 & Chr(10)"
+    OutStr = OutStr & "COUNT=1" & Chr(10)
+    OutStr = OutStr & "NUMPART=1" & Chr(10)
     OutStr = OutStr & "PARTSIZE=" & clientMINSIZE & Chr(10)
     OutStr = OutStr & "GPSREGION=2" & Chr(10)
-    OutStr = OutStr & "GAMEPORT=9657" & Chr(10)
-    OutStr = OutStr & "VOIPPORT=9667" & Chr(10)
+    OutStr = OutStr & "GAMEPORT=3659" & Chr(10)
+    OutStr = OutStr & "VOIPPORT=3667" & Chr(10)
     OutStr = OutStr & "EVGID=0" & Chr(10)
     OutStr = OutStr & "EVID=0" & Chr(10)
     OutStr = OutStr & "IDENT=6450" & Chr(10)
     OutStr = OutStr & "GAMEMODE=0" & Chr(10)
     OutStr = OutStr & "PARTPARAMS=0" & Chr(10)
-    OutStr = OutStr & "ROOM=1" & Chr(10)
+    OutStr = OutStr & "ROOM=0" & Chr(10)
     OutStr = OutStr & "OPGUEST=0" & Chr(10)
     OutStr = OutStr & "WHEN=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
     OutStr = OutStr & "WHENC=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
@@ -2072,7 +2100,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R25"
+Build = "0.1-R26"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
@@ -2336,10 +2364,10 @@ Else
         End If
         ParseTmp = ""
     End If
-    If Len(tmp2) > 1 And Len(clientSKEY) >= 1 And Not msgType = "skey" Then
-        Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
-        tmp2 = ""
-    End If
+    'If Len(tmp2) > 1 And Len(clientSKEY) >= 1 And Not msgType = "skey" Then
+    '    Winsock4(Index).SendData (HexToBin(StringToHex(tmp2)))
+    '    tmp2 = ""
+    'End If
 End If
 Sleep (100)
 DoEvents
@@ -2371,6 +2399,11 @@ End If
 If msgType = "gpsc" Or msgType = "gqwk" Then
     'a = Send_Who(Index)
     a = Send_Mgm(Index)
+    msgType = "gjoi"
+    OutStr = "IDENT=1001" & Chr(10)
+    msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+    gjoiData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+    Winsock4(Index).SendData (HexToBin(StringToHex(gjoiData)))
 End If
 
 If moreCmd = True Then
@@ -2379,13 +2412,13 @@ End If
 End Sub
 
 Private Sub Winsock4_Error(Index As Integer, ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
-'Winsock4(Index).Close
+Winsock4(Index).Close
 'Winsock4(Index).Listen
 clientSKEY = ""
 moreCmd = False
 ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
-'PlayerCnt = PlayerCnt - 1
+PlayerCnt = PlayerCnt - 1
 End Sub
 
