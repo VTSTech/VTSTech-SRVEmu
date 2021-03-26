@@ -618,6 +618,46 @@ Begin VB.Form Form1
       _ExtentY        =   741
       _Version        =   393216
    End
+   Begin VB.Label Label15 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "FakeDNS"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   -1  'True
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00FFFF00&
+      Height          =   210
+      Left            =   8160
+      TabIndex        =   32
+      Top             =   6960
+      Width           =   840
+   End
+   Begin VB.Label Label14 
+      AutoSize        =   -1  'True
+      BackColor       =   &H00000000&
+      Caption         =   "VTSTech-SRVEmu"
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   -1  'True
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H00FFFF00&
+      Height          =   210
+      Left            =   8160
+      TabIndex        =   31
+      Top             =   7200
+      Width           =   1620
+   End
    Begin VB.Label Label13 
       AutoSize        =   -1  'True
       BackColor       =   &H00000000&
@@ -1126,6 +1166,38 @@ ElseIf protoVER = 2 Then
     DoEvents
 End If
 End Function
+Public Function GetCmdNum(DataStr As String)
+    If Len(HexToString(DataStr)) = GetCmdSize(DataStr) Then
+        GetCmdNum = 0
+    Else
+        msgSizeTmp = GetCmdSize(DataStr)
+        maxCmd = msgSizeTmp / 13
+        MsgBox maxCmd
+    End If
+End Function
+Public Function GetCmdSize(DataStr As String)
+    msgType = Mid(HexToString(DataStr), 1, 4)
+    subCmd = Mid(HexToString(DataStr), 5, 4)
+    msgSize = Asc(Mid(HexToString(DataStr), 12, 1))
+    If msgSize >= 256 Or msgSize = 0 Then
+        msgSize = Mid(HexToString(DataStr), 11, 2)
+        If Asc(msgSize) = 1 Then
+            msgSize = 256
+        End If
+    End If
+    'large msg fix
+    sizeHex = Hex(msgSize)
+    If msgSize >= 256 Then
+        If Len(sizeHex) <= 3 Then
+            sizeHex = "0" + sizeHex
+        End If
+        s1 = Mid(sizeHex, 1, 2)
+        s2 = Mid(sizeHex, 3, 2)
+        GetCmdSize = Asc(HexToString(s1 & " " & s2))
+    Else
+        GetCmdSize = msgSize
+    End If
+End Function
 Public Function ParseData(DataStr As String, Index As Integer)
 moar:
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -1133,23 +1205,36 @@ Buff = Text2.Text
 pad = HexToBin("00 00 00 00 00 00 00")
 'MsgBox (DataStr)
 
-'If DataStr = "moreCmd" Or (msgType = "skey" And Len(clientSKEY) <= 1) Or moreCmd = True Then
-'    DataStr = DataPrev
-'    cmds = Split(DataStr, "0A 00")
-'    DataStr = cmds(1)
-'    moreCmd = False
-'End If
-cmds = Split(DataStr, "0A 00")
-params = Split(cmds(0), "0A")
-'MsgBox UBound(params)
-If UBound(cmds) >= 1 Then
-    moreCmd = True
-    TotalCMD = UBound(cmds)
+If clientVERS = "KOKPS22004/M1" Then
+    'Fight Night 2004 doesn't split commands by 0A 00, breaking many things.
+    'Not quite fixed yet...
+    TotalCMD = GetCmdNum(DataStr)
+    If TotalCMD >= 1 Then
+        For z = 0 To TotalCMD
+            If z = 0 Then
+                'cmds(z) = Mid(DataStr, 0, GetCmdSize(DataStr))
+            Else
+                For y = z To 0 Step -1
+                    'TotalSize = TotalSize + GetCmdSize(cmds(y))
+                Next y
+            End If
+        Next z
+    Else
+        TotalCMD = 0
+        'cmds(0) = DataStr
+    End If
 Else
-    moreCmd = False
-    TotalCMD = 0
+    cmds = Split(DataStr, "0A 00")
+    params = Split(cmds(0), "0A")
+    'MsgBox UBound(params)
+    If UBound(cmds) >= 1 Then
+        moreCmd = True
+        TotalCMD = UBound(cmds)
+    Else
+        moreCmd = False
+        TotalCMD = 0
+    End If
 End If
-
 For z = 0 To TotalCMD
     If Len(Trim(cmds(z))) > 1 Then
     DataStr = Trim(cmds(z))
@@ -1395,8 +1480,37 @@ For z = 0 To TotalCMD
                 'OutStr = "VTSTech.is.reviving.games" & Chr(10)
             End If
             If subCmd = "new1" Or subCmd = "new3" Then
-                OutStr = "VTSTech.is.reviving.games" & Chr(10)
-            ElseIf subCmd = "new0" Then
+                OutStr = OutStr & "Written by VTSTech Veritas Technical Solutions" & Chr(10)
+                OutStr = OutStr & "GitHub: github.com/Veritas83/VTSTech-SRVEmu" & Chr(10)
+                OutStr = OutStr & "Homepage: VTS-Tech.org" & Chr(10)
+                OutStr = OutStr & "Changelog:" & Chr(10)
+                OutStr = OutStr & "R28" & Chr(10) & Chr(10)
+                OutStr = OutStr & "Added Built-in Changelog" & Chr(10)
+                OutStr = OutStr & "Added GitHub links for SRVEmu & FakeDNS" & Chr(10)
+                OutStr = OutStr & "Added Thread Counter" & Chr(10)
+                OutStr = OutStr & "Added option to click 'Yes' to visit IPChicken.com" & Chr(10)
+                OutStr = OutStr & "R27" & Chr(10) & Chr(10)
+                OutStr = OutStr & "Improved handling of multiple commands at once" & Chr(10)
+                OutStr = OutStr & "LAN/WAN switch improvements" & Chr(10)
+                OutStr = OutStr & "Various code optimizations" & Chr(10)
+                OutStr = OutStr & "R26" & Chr(10) & Chr(10)
+                OutStr = OutStr & "RVUP Command handler" & Chr(10)
+                OutStr = OutStr & "R25" & Chr(10) & Chr(10)
+                OutStr = OutStr & "CATE, GPSC Command handler" & Chr(10)
+                OutStr = OutStr & "Improved large packet handling" & Chr(10)
+                OutStr = OutStr & "R24" & Chr(10) & Chr(10)
+                OutStr = OutStr & "LAN/WAN switch. Uncheck 'Is Host' to send WAN IP" & Chr(10)
+                OutStr = OutStr & "AUTH improvements" & Chr(10)
+                OutStr = OutStr & "R23" & Chr(10) & Chr(10)
+                OutStr = OutStr & "Added Public IP option" & Chr(10)
+                OutStr = OutStr & "R22" & Chr(10) & Chr(10)
+                OutStr = OutStr & "Burnout Paradise login fix" & Chr(10)
+                OutStr = OutStr & "R21" & Chr(10) & Chr(10)
+                OutStr = OutStr & "IP Selection drop down." & Chr(10)
+                OutStr = OutStr & "CHAL Command handler" & Chr(10)
+                OutStr = OutStr & "ONLN improvements" & Chr(10)
+                OutStr = OutStr & "Added 007: Everything or Nothing mode" & Chr(10)
+            ElseIf subCmd = "new0" And clientVERS = "BURNOUT5/ISLAND" Then
                 OutStr = "ps2bond04.ea.com" & Chr(10)
             Else
                 'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
@@ -1467,7 +1581,7 @@ For z = 0 To TotalCMD
             'OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
-        ElseIf msgType = "room" Or msgType = "RGET" Then
+        ElseIf msgType = "room" Then
             If players(PlayerCnt).playerROOM = 0 Then
                 a = CreateRoom(players(PlayerCnt).playerID)
             End If
@@ -1587,6 +1701,12 @@ For z = 0 To TotalCMD
             OutStr = "COUNT=0" & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        ElseIf msgType = "uatr" Then
+            OutStr = OutStr & "IDENT=1001" & Chr(10)
+            'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            'resp(z) =  msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+            msgLen = Len(msgType) + 8 + 1
+            resp(z) = msgType & pad & Chr(msgLen) & Chr(0)  ' empty response
         ElseIf msgType = "user" Then
             'a = GetParams(msgType, params)
             If Len(userNAME) > 1 Then
@@ -1691,6 +1811,7 @@ For z = 0 To TotalCMD
 Next z
 For y = 0 To TotalCMD
     derrrp = derrrp & resp(y)
+    resp(y) = ""
 Next y
 Winsock4(Index).SendData derrrp
 derrrp = ""
@@ -1954,7 +2075,10 @@ tmp2 = ""
 tmp3 = ""
 
 If Text6.Text = "Enter Public IP" Then
- MsgBox "Please visit www.ipchicken.com and enter your public ip"
+ tmp = MsgBox("Please visit www.ipchicken.com and enter your public ip", vbYesNo)
+ If tmp = vbYes Then
+    Shell ("cmd.exe /c start https://www.ipchicken.com/")
+ End If
  GoTo fin
 End If
 If Command1.Caption = "Stop" Then
@@ -2013,8 +2137,8 @@ GoTo fin
 Else
     Winsock1.LocalPort = Val(Text1.Text) 'Game
     Winsock2.LocalPort = 10901 'Listener
-    Winsock3.LocalPort = 10899 'Buddy
-    'Winsock3.LocalPort = 28500 'Buddy
+    'Winsock3.LocalPort = 10899 'Buddy
+    Winsock3.LocalPort = 13505 'Buddy
 End If
 
 Winsock1.Listen
@@ -2131,7 +2255,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R27"
+Build = "0.1-R28"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
@@ -2169,6 +2293,14 @@ Next x
 Combo2.Text = Combo2.List(1)
 Timer1.Interval = 999
 Timer1.Enabled = True
+End Sub
+
+Private Sub Label14_Click()
+Shell ("cmd.exe /c start http://github.com/Veritas83/VTSTech-SRVEmu"), vbNormalFocus
+End Sub
+
+Private Sub Label15_Click()
+Shell ("cmd.exe /c start https://github.com/Crypt0s/FakeDns"), vbNormalFocus
 End Sub
 
 Private Sub Label3_Click()
@@ -2236,30 +2368,31 @@ ParseTmp = ""
 tmp2 = ""
 tmp3 = ""
 playerExists = False
-threadCnt = threadCnt + 1
 If PlayerCnt <= -1 Then
     PlayerCnt = 0
 End If
-For x = 0 To PlayerCnt
+For x = 0 To threadCnt
     If players(x).playerIP = Winsock1.RemoteHostIP Then
         PlayerCnt = PlayerCnt
         playerExists = True
         Winsock1.Close
-        Winsock4(PlayerCnt).Close
+        Winsock4(x).Close
         Sleep (250)
-        Winsock4(PlayerCnt).Accept (requestID)
-        players(PlayerCnt).playerNUM = PlayerCnt
-        players(PlayerCnt).playerID = Int(1000 + PlayerCnt)
-        players(PlayerCnt).playerIP = Winsock1.RemoteHostIP
-        players(PlayerCnt).playerROOM = 0
-        players(PlayerCnt).playerPORT = Winsock1.RemotePort
-        players(PlayerCnt).playerNAME = ""
+        Winsock4(x).Accept (requestID)
+        threadCnt = threadCnt + 1
+        players(x).playerNUM = PlayerCnt
+        players(x).playerID = Int(1000 + PlayerCnt)
+        players(x).playerIP = Winsock1.RemoteHostIP
+        players(x).playerROOM = 0
+        players(x).playerPORT = Winsock1.RemotePort
+        players(x).playerNAME = ""
     End If
 Next x
 If playerExists = False Then
         Winsock1.Close
         Winsock4(threadCnt).Close
         Winsock4(threadCnt).Accept (requestID)
+        threadCnt = threadCnt + 1
         playerNUM = playerNUM + 1
         x = PlayerCnt
         players(threadCnt).playerNUM = playerNUM
@@ -2295,16 +2428,19 @@ End Sub
 Private Sub Winsock2_ConnectionRequest(ByVal requestID As Long)
 '* Listener Socket 10901
 Winsock2.Close
-Winsock4(PlayerCnt + 1).Close
-Winsock4(PlayerCnt + 1).Accept (requestID)
+threadCnt = threadCnt + 1
+Winsock4(threadCnt).Close
+Winsock4(threadCnt).Accept (requestID)
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock2.RemoteHostIP & ":" & Winsock2.RemotePort & vbCrLf
 End Sub
 Private Sub Winsock3_ConnectionRequest(ByVal requestID As Long)
 '* Buddy Socket 10899
 Winsock3.Close
-Winsock4(PlayerCnt + 2).Close
-Winsock4(PlayerCnt + 2).Accept (requestID)
+threadCnt = threadCnt + 1
+Winsock4(threadCnt).Close
+Winsock4(threadCnt).Accept (requestID)
+
 Buff = Text2.Text
 Text2.Text = Buff & vbCrLf & "[+] Connection request (" & requestID & ") " & Winsock3.RemoteHostIP & ":" & Winsock3.RemotePort & vbCrLf
 End Sub
@@ -2340,8 +2476,8 @@ tmp2 = ParseData(DataStr, Index)
 Text2.Text = Buff & Mid(tmp2, 12, Len(tmp2))
 Sleep (250)
 If msgType = "pers" Or msgType = "sviw" Then
-    'a = Send_Who(Index)
-    'a = Send_Rom(Index)
+    a = Send_Who(Index)
+    a = Send_Rom(Index)
 End If
 
 If msgType = "gpsc" Or msgType = "gqwk" Then
