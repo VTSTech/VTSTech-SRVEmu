@@ -1245,6 +1245,9 @@ For z = 0 To TotalCMD
     DataStr = Trim(cmds(z))
     msgType = Mid(HexToString(DataStr), 1, 4)
     subCmd = Mid(HexToString(DataStr), 5, 4)
+    If msgType = "news" And StringToHex(subCmd) = "00 00 00 00" Then
+        subCmd = "new7"
+    End If
     msgSize = Mid(HexToString(DataStr), 12, 1)
     'sizeHex = Hex(msgSize)
     If Asc(msgSize) >= 256 Or Asc(msgSize) = 0 Then
@@ -1480,12 +1483,8 @@ For z = 0 To TotalCMD
             'MsgBox subCmd
             'If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
             'If subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
-            If subCmd = "newc" Then
-                subCmd = "new7"
-                'OutStr = "VTSTech.is.reviving.games" & Chr(10)
-            End If
-            If subCmd = "new1" Or subCmd = "new3" Then
-                OutStr = OutStr & "Written by VTSTech Veritas Technical Solutions" & Chr(10)
+            If subCmd = "new0" Or subCmd = "new1" Or subCmd = "new2" Or subCmd = "new3" Then
+                OutStr = "Written by VTSTech Veritas Technical Solutions" & Chr(10)
                 OutStr = OutStr & "GitHub: github.com/Veritas83/VTSTech-SRVEmu" & Chr(10)
                 OutStr = OutStr & "Homepage: VTS-Tech.org" & Chr(10)
                 OutStr = OutStr & "Changelog:" & Chr(10)
@@ -1519,27 +1518,28 @@ For z = 0 To TotalCMD
                 OutStr = OutStr & "ONLN improvements" & Chr(10)
                 OutStr = OutStr & "Added 007: Everything or Nothing mode" & Chr(10)
             ElseIf subCmd = "new0" And clientPROD = "PS2-BOND-2004" Then
-                OutStr = "ps2bond04.ea.com" & Chr(10)
-            ElseIf clientPROD = "BURNOUT5/ISLAND" Then
-                'OutStr = "BUDDY_URL=http://ps3burnout08.ea.com/" & Chr(10)
-                OutStr = "BUDDY_SERVER=" & Text5.Text & Chr(10)
+                OutStr = "ohi.vts-ps2.org" & Chr(10)
+            ElseIf clientVERS = "BURNOUT5/ISLAND" And subCmd = HexToString("00 00 00 00") Then
+                subCmd = "new7"
+                OutStr = "BUDDY_URL=http://ohi.vts-ps2.org/" & Chr(10)
+                OutStr = OutStr & "BUDDY_SERVER=" & Text5.Text & Chr(10)
                 OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
-                OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ps3burnout08.ea.com/EACONNECT.txt" & Chr(10)
-                OutStr = OutStr & "ETOKEN_URL=http://ps3burnout08.ea.com/ETOKEN.txt" & Chr(10)
+                OutStr = OutStr & "EACONNECT_WEBOFFER_URL=http://ohi.vts-ps2.org/EACONNECT.txt" & Chr(10)
+                OutStr = OutStr & "ETOKEN_URL=http://ohi.vts-ps2.org/ETOKEN.txt" & Chr(10)
                 'OutStr = OutStr & "NEWS_URL=http://gos.ea.com/easo/editorial/common/2008/news/news.jsp?lang=enUS&from=CA&game=Burnout&platform=PS3" & Chr(10)
-                OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
-                OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
-                OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
+                OutStr = OutStr & "TOSAC_URL=http://ohi.vts-ps2.org/TOSAC.txt" & Chr(10)
+                OutStr = OutStr & "TOSA_URL=http://ohi.vts-ps2.org/TOSA.txt" & Chr(10)
+                OutStr = OutStr & "TOS_URL=http://ohi.vts-ps2.org/TOS.txt" & Chr(10)
                 OutStr = OutStr & "NEWS_DATE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-                OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/news-bp.txt"
-                OutStr = OutStr & "BUNDLE_PATH=http://ps3burnout08.ea.com/" & Chr(10)
-                OutStr = OutStr & "LIVE_NEWS_URL=http://ps3burnout08.ea.com/LIVE.txt" & Chr(10)
-                OutStr = OutStr & "LIVE_NEWS2_URL=http://ps3burnout08.ea.com/LIVE2.txt" & Chr(10)
-                OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ps3burnout08.ea.com/PROD.txt" & Chr(10)
-                OutStr = OutStr & "AVATAR_URL=http://ps3burnout08.ea.com/AV.txt" & Chr(10)
-                OutStr = OutStr & "STORE_URL=http://ps3burnout08.ea.com/STORE.txt" & Chr(10)
-                OutStr = OutStr & "AVAIL_DLC_URL=http://ps3burnout08.ea.com/STORE_DLC.txt" & Chr(10)
-                OutStr = OutStr & "STORE_DLC_URL=http://ps3burnout08.ea.com/STORE_DLC.txt" & Chr(10)
+                OutStr = OutStr & "NEWS_URL=http://ohi.vts-ps2.org/news-bp.txt"
+                OutStr = OutStr & "BUNDLE_PATH=http://ohi.vts-ps2.org/" & Chr(10)
+                OutStr = OutStr & "LIVE_NEWS_URL=http://ohi.vts-ps2.org/LIVE.txt" & Chr(10)
+                OutStr = OutStr & "LIVE_NEWS2_URL=http://ohi.vts-ps2.org/LIVE2.txt" & Chr(10)
+                OutStr = OutStr & "PRODUCT_SEARCH_URL=http://ohi.vts-ps2.org/PROD.txt" & Chr(10)
+                OutStr = OutStr & "AVATAR_URL=http://ohi.vts-ps2.org/AV.txt" & Chr(10)
+                OutStr = OutStr & "STORE_URL=http://ohi.vts-ps2.org/STORE.txt" & Chr(10)
+                OutStr = OutStr & "AVAIL_DLC_URL=http://ohi.vts-ps2.org/STORE_DLC.txt" & Chr(10)
+                OutStr = OutStr & "STORE_DLC_URL=http://ohi.vts-ps2.org/STORE_DLC.txt" & Chr(10)
                 OutStr = OutStr & "TOS_TEXT=VTSTech.is.reviving.games_TOS" & Chr(10)
                 OutStr = OutStr & "NEWS_TEXT=VTSTech.is.reviving.games_NEWS" & Chr(10)
                 'OutStr = OutStr & "LIVE_NEWS_URL_IMAGE_PATH=." & Chr(10)
@@ -1550,14 +1550,14 @@ For z = 0 To TotalCMD
                 OutStr = OutStr & "BUDDYPORT=" & Winsock3.LocalPort & Chr(10)
                 OutStr = OutStr & "BUDDYMSGTIMEOUT=10000" & Chr(10)
             Else
-                OutStr = "BUDDY_URL=http://ohi.vts-ps2.org" & Chr(10)
+                OutStr = "BUDDY_URL=http://ohi.vts-ps2.org/" & Chr(10)
                 OutStr = OutStr & "BUDDY_SERVER=" & Text5.Text & Chr(10)
                 OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
-                OutStr = OutStr & "TOSAC_URL=http://ps3burnout08.ea.com/TOSAC.txt" & Chr(10)
-                OutStr = OutStr & "TOSA_URL=http://ps3burnout08.ea.com/TOSA.txt" & Chr(10)
-                OutStr = OutStr & "TOS_URL=http://ps3burnout08.ea.com/TOS.txt" & Chr(10)
-                OutStr = OutStr & "NEWS_DATE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-                OutStr = OutStr & "NEWS_URL=http://ps3burnout08.ea.com/news.txt"
+                OutStr = OutStr & "TOSAC_URL=http://ohi.vts-ps2.org/TOSAC.txt" & Chr(10)
+                OutStr = OutStr & "TOSA_URL=http://ohi.vts-ps2.org/TOSA.txt" & Chr(10)
+                OutStr = OutStr & "TOS_URL=http://ohi.vts-ps2.org/TOS.txt" & Chr(10)
+                'OutStr = OutStr & "NEWS_DATE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+                'OutStr = OutStr & "NEWS_URL=http://ohi.vts-ps2.org/news.txt"
                 OutStr = OutStr & "TOS_TEXT=VTSTech.is.reviving.games_TOS" & Chr(10)
                 OutStr = OutStr & "NEWS_TEXT=VTSTech.is.reviving.games_NEWS" & Chr(10)
                 OutStr = OutStr & "USE_ETOKEN=0" & Chr(10)
@@ -1779,18 +1779,20 @@ For z = 0 To TotalCMD
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "USCH" Then
-            'a = GetParams(msgType, params)
             OutStr = "COUNT=1" & Chr(10)
             OutStr = OutStr & "NAME=" & userNAME & Chr(10)
             OutStr = OutStr & "CRC=0" & Chr(10)
             OutStr = OutStr & "PID=0" & Chr(10)
+            OutStr = OutStr & "STAT=1" & Chr(10)
+            OutStr = OutStr & "RANK=1" & Chr(10)
+            OutStr = OutStr & "ADDR=" & Text5.Text & Chr(10)
+            OutStr = OutStr & "ROOM=" & Chr(10)
+            OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+            OutStr = OutStr & "EXPR=1072566000" & Chr(10)
+            OutStr = OutStr & "SERV=" & Text5.Text & Chr(10)
+            OutStr = OutStr & "MESG=testmsg" & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
-            resp(z) = "USER" & pad & Chr(msgLen) & OutStr & Chr(0)
-            If Winsock1.State = 7 Then
-                Winsock1.SendData uschStr
-            Else
-                resp(z) = uschStr
-            End If
+            resp(z) = "USCH" & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "usld" Then
             'a = GetParams(msgType, params)
             OutStr = "IMGATE=0" & Chr(10)
@@ -1994,7 +1996,7 @@ Public Function Send_Who(Index)
     msgType = "+who"
     OutStr = "N=" & clientNAME & Chr(10)
     OutStr = OutStr & "I=71615" & Chr(10)
-    OutStr = OutStr & "G=1" & Chr(10)
+    OutStr = OutStr & "G=0" & Chr(10)
     OutStr = OutStr & "CL=511" & Chr(10)
     OutStr = OutStr & "LV=1049601" & Chr(10)
     OutStr = OutStr & "MD=0" & Chr(10)
@@ -2269,6 +2271,7 @@ Else
     Print #1, Text5.Text & " ps2burnout05.ea.com"
     Print #1, Text5.Text & " ps3burnout08.ea.com"
     Print #1, Text5.Text & " ps2kok05.ea.com"
+    Print #1, Text5.Text & " ps2lobby02.beta.ea.com"
     Print #1, Text5.Text & " ps2madden05.ea.com"
     Print #1, Text5.Text & " ps2nascar04.ea.com"
     Print #1, Text5.Text & " ps2nbastreet05.ea.com"
@@ -2276,6 +2279,8 @@ Else
     Print #1, Text5.Text & " ps2nfs04.ea.com"
     Print #1, Text5.Text & " ps2nfs05.ea.com"
     Print #1, Text5.Text & " ps2ssx04.ea.com"
+    Print #1, Text5.Text & " msgconn.beta.ea.com"
+    Print #1, Text5.Text & " ohi.vts-ps2.org"
     Close #1
     MsgBox ("HOSTS file written successfully")
 End If
@@ -2315,7 +2320,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R29"
+Build = "0.1-R30"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
