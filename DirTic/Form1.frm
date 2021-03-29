@@ -1372,23 +1372,26 @@ For z = 0 To TotalCMD
                             clientPERS = tmp(4)
                             clientSINCE = tmp(5)
                             'OutStr = "VERS=" & clientVERS & Chr(10)
-                            OutStr = "TOS=1" & Chr(10)
-                            OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+                            OutStr = OutStr & "PASS=" & clientPASS & Chr(10)
                             OutStr = OutStr & "MAIL=" & clientMAIL & Chr(10)
-                            OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
-                            OutStr = OutStr & "GEND=M" & Chr(10)
-                            OutStr = OutStr & "FROM=US" & Chr(10)
-                            OutStr = OutStr & "LANG=enUS" & Chr(10)
                             OutStr = OutStr & "SPAM=NN" & Chr(10)
-                            OutStr = OutStr & "MULTIPERS=1" & Chr(10)
                             OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
+                            OutStr = OutStr & "CPAT=PS2" & Chr(10)
+                            OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+                            OutStr = OutStr & "ADDR=" & Winsock4(Index).RemoteHostIP & Chr(10)
+                            'OutStr = OutStr & "BORN=" & clientBORN & Chr(10)
+                            'OutStr = OutStr & "GEND=M" & Chr(10)
+                            'OutStr = OutStr & "FROM=US" & Chr(10)
+                            'OutStr = OutStr & "LANG=enUS" & Chr(10)
+                            'OutStr = OutStr & "MULTIPERS=1" & Chr(10)
+                            
                             OutStr = OutStr & "LAST=" & clientSINCE & Chr(10)
                             If clientVERS = "BURNOUT5/ISLAND" Then
                                 OutStr = OutStr & "SINCE=" & clientSINCE & Chr(10)
                                 OutStr = OutStr & "ADDR=24.141.39.62" & Chr(10)
                                 OutStr = OutStr & "_LUID=$000000000b32588d" & Chr(10)
                             End If
-                            'OutStr = OutStr & "CPAT=1" & Chr(10)
+                            
                             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
                             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
                             'Winsock4(PlayerCnt).SendData authStr
@@ -1489,6 +1492,15 @@ For z = 0 To TotalCMD
                 OutStr = OutStr & "GitHub: github.com/Veritas83/VTSTech-SRVEmu" & Chr(10)
                 OutStr = OutStr & "Homepage: VTS-Tech.org" & Chr(10)
                 OutStr = OutStr & "Changelog:" & Chr(10)
+                OutStr = OutStr & "R32" & Chr(10) & Chr(10)
+                OutStr = OutStr & "+who, +rom, sviw improvements"
+                OutStr = OutStr & "R31" & Chr(10) & Chr(10)
+                OutStr = OutStr & "Added Need for Speed: Most Wanted mode"
+                OutStr = OutStr & "Thread Counter improvements"
+                OutStr = OutStr & "Added RGET Command handler" & Chr(10)
+                OutStr = OutStr & "sele, skey, auth, pers improvements"
+                OutStr = OutStr & "R30" & Chr(10) & Chr(10)
+                OutStr = OutStr & "news, USCH improvements"
                 OutStr = OutStr & "R29" & Chr(10) & Chr(10)
                 OutStr = OutStr & "Added RADD, SEND, SNAP Command handlers" & Chr(10)
                 OutStr = OutStr & "PERS,NEWS Command improvements" & Chr(10)
@@ -1552,8 +1564,8 @@ For z = 0 To TotalCMD
                 OutStr = OutStr & "BUDDYMSGTIMEOUT=10000" & Chr(10)
             Else
                 OutStr = "BUDDY_URL=http://ohi.vts-ps2.org/" & Chr(10)
-                OutStr = OutStr & "BUDDY_SERVER=" & Text5.Text & Chr(10)
                 OutStr = OutStr & "BUDDY_PORT=" & Winsock3.LocalPort & Chr(10)
+                OutStr = OutStr & "BUDDY_SERVER=" & Text5.Text & Chr(10)
                 OutStr = OutStr & "TOSAC_URL=http://ohi.vts-ps2.org/TOSAC.txt" & Chr(10)
                 'OutStr = OutStr & "TOSA_URL=http://ohi.vts-ps2.org/TOSA.txt" & Chr(10)
                 'OutStr = OutStr & "TOS_URL=http://ohi.vts-ps2.org/TOS.txt" & Chr(10)
@@ -1593,13 +1605,13 @@ For z = 0 To TotalCMD
             'MID=$00041f828759
             'PID=SSX-PS2-2004
             'OutStr = "LOC=en" & Chr(10)
-            OutStr = "PERS=" & clientNAME & Chr(10)
-            OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-            OutStr = OutStr & "PLAST=" & clientSINCE & Chr(10)
-            OutStr = OutStr & "A=" & Text6.Text & Chr(10)
-            OutStr = OutStr & "LA=" & Winsock4(Index).LocalIP & Chr(10)
-            OutStr = OutStr & "MA=" & clientMAC & Chr(10)
-            OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
+            OutStr = "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
+            OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
+            'OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+            'OutStr = OutStr & "PLAST=" & clientSINCE & Chr(10)
+            'OutStr = OutStr & "A=" & Text6.Text & Chr(10)
+            'OutStr = OutStr & "LA=" & Winsock4(Index).LocalIP & Chr(10)
+            'OutStr = OutStr & "MA=" & clientMAC & Chr(10)
             'OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             'OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1645,11 +1657,11 @@ For z = 0 To TotalCMD
                 OutStr = "MORE=0" & Chr(10)
                 OutStr = OutStr & "SLOTS=36" & Chr(10)
                 OutStr = OutStr & "STATS=0" & Chr(10)
-                OutStr = OutStr & "RANKS=0" & Chr(10)
-                OutStr = OutStr & "GAMES=0" & Chr(10)
-                OutStr = OutStr & "ROOMS=0" & Chr(10)
-                OutStr = OutStr & "USERS=1" & Chr(10)
-                OutStr = OutStr & "MESGS=0" & Chr(10)
+                'OutStr = OutStr & "RANKS=0" & Chr(10)
+                'OutStr = OutStr & "GAMES=0" & Chr(10)
+                'OutStr = OutStr & "ROOMS=0" & Chr(10)
+                'OutStr = OutStr & "USERS=1" & Chr(10)
+                'OutStr = OutStr & "MESGS=0" & Chr(10)
                 'OutStr = OutStr & "ASYNC=1" & Chr(10)
                 'OutStr = OutStr & "USERSETS=0" & Chr(10)
                 'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
@@ -1730,10 +1742,10 @@ For z = 0 To TotalCMD
             Else
                 OutStr = "N=5" & Chr(10)
                 OutStr = OutStr & "NAMES=1,2,3,4,5" & Chr(10)
+                OutStr = OutStr & "DESC=1,2,3,4,5" & Chr(10)
                 OutStr = OutStr & "PARAMS=1,1,1,1,1" & Chr(10)
                 OutStr = OutStr & "WIDTHS=1,1,1,1,1" & Chr(10)
-                OutStr = OutStr & "DESC=1,1,1,1,1" & Chr(10)
-                OutStr = OutStr & "SS=65" & Chr(10)
+                'OutStr = OutStr & "SS=65" & Chr(10)
             End If
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
@@ -1789,13 +1801,13 @@ For z = 0 To TotalCMD
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "USCH" Then
-            OutStr = "COUNT=1" & Chr(10)
+            OutStr = "ID=1" & Chr(10)
             OutStr = OutStr & "NAME=" & userNAME & Chr(10)
             OutStr = OutStr & "CRC=0" & Chr(10)
             OutStr = OutStr & "PID=0" & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = "USCH" & pad & Chr(msgLen) & OutStr & Chr(0)
-            OutStr2 = "STAT=1" & Chr(10)
+            OutStr2 = "NAME=" & userNAME & Chr(10)
             OutStr2 = OutStr2 & "RANK=1" & Chr(10)
             OutStr2 = OutStr2 & "ADDR=" & Text5.Text & Chr(10)
             OutStr2 = OutStr2 & "ROOM=" & Chr(10)
@@ -2006,27 +2018,27 @@ Function Send_Mgm(Index)
 End Function
 Public Function Send_Who(Index)
     msgType = "+who"
-    OutStr = "N=" & clientNAME & Chr(10)
-    OutStr = OutStr & "I=71615" & Chr(10)
+    OutStr = "F=U" & Chr(10)
+    OutStr = OutStr & "A=" & Winsock4(Index).RemoteHostIP & Chr(10)
+    OutStr = OutStr & "P=1" & Chr(10)
+    OutStr = OutStr & "S=0" & Chr(10)
+    OutStr = OutStr & "X=0" & Chr(10)
     OutStr = OutStr & "G=0" & Chr(10)
+    OutStr = OutStr & "AT=0" & Chr(10)
     OutStr = OutStr & "CL=511" & Chr(10)
     OutStr = OutStr & "LV=1049601" & Chr(10)
     OutStr = OutStr & "MD=0" & Chr(10)
-    OutStr = OutStr & "T=1" & Chr(10)
-    'OutStr = OutStr & "MA=" & clientMAC & Chr(10)
-    'OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
-    'OutStr = OutStr & "LA=" & Winsock2.RemoteHostIP & Chr(10)
-    'OutStr = OutStr & "P=1" & Chr(10)
-    'OutStr = OutStr & "F=U" & Chr(10)
-    'OutStr = OutStr & "HW=0" & Chr(10)
-    'OutStr = OutStr & "LO=enUS" & Chr(10)
-    'OutStr = OutStr & "PRES=" & Chr(10)
-    'OutStr = OutStr & "SESS=" & clientSESS & Chr(10)
-    'OutStr = OutStr & "RP=0" & Chr(10)
-    'OutStr = OutStr & "S=" & Chr(10)
-    'OutStr = OutStr & "US=0" & Chr(10)
-    'OutStr = OutStr & "VER=5" & Chr(10)
-    'OutStr = OutStr & "X=" & Chr(10)
+    OutStr = OutStr & "WT=0" & Chr(10)
+    OutStr = OutStr & "WI=0" & Chr(10)
+    OutStr = OutStr & "R=0" & Chr(10)
+    OutStr = OutStr & "HW=0" & Chr(10)
+    OutStr = OutStr & "RP=0" & Chr(10)
+    OutStr = OutStr & "MA=" & clientMAC & Chr(10)
+    OutStr = OutStr & "LA=" & Winsock4(Index).RemoteHostIP & Chr(10)
+    OutStr = OutStr & "C=0" & Chr(10)
+    OutStr = OutStr & "RI=0" & Chr(10)
+    OutStr = OutStr & "I=1024" & Chr(10)
+    OutStr = OutStr & "RT=0" & Chr(10)
     msgLen = Len(msgType) + 8 + Len(OutStr) + 1
     whoStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
     If Check4.value = 1 Then
@@ -2043,11 +2055,11 @@ Public Function Send_Rom(Index)
     'OutStr = OutStr & "LIMIT=50" & Chr(10)
     'OutStr = OutStr & "FLAGS=C" & Chr(10)
     OutStr = "I=420" & Chr(10)
-    'OutStr = OutStr & "N=" & clientPERS & Chr(10)
+    OutStr = OutStr & "N=" & clientPERS & Chr(10)
     'OutStr = OutStr & "M=" & clientPERS & Chr(10)
-    OutStr = OutStr & "R=" & roomNAME & Chr(10)
-    OutStr = OutStr & "HW=4" & Chr(10)
-    OutStr = OutStr & "RP=1001" & Chr(10)
+    'OutStr = OutStr & "R=" & roomNAME & Chr(10)
+    'OutStr = OutStr & "HW=4" & Chr(10)
+    'OutStr = OutStr & "RP=1001" & Chr(10)
     'OutStr = OutStr & "F=" & Chr(10)
     'OutStr = OutStr & "A=" & Winsock2.RemoteHostIP & Chr(10)
     'OutStr = OutStr & "S=" & Chr(10)
@@ -2334,7 +2346,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R31"
+Build = "0.1-R32"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
