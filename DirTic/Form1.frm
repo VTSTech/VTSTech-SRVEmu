@@ -1380,6 +1380,7 @@ For z = 0 To TotalCMD
                             OutStr = OutStr & "FROM=US" & Chr(10)
                             OutStr = OutStr & "LANG=enUS" & Chr(10)
                             OutStr = OutStr & "SPAM=NN" & Chr(10)
+                            OutStr = OutStr & "MULTIPERS=1" & Chr(10)
                             OutStr = OutStr & "PERSONAS=" & clientNAME & ",is,reviving,games" & Chr(10)
                             OutStr = OutStr & "LAST=" & clientSINCE & Chr(10)
                             If clientVERS = "BURNOUT5/ISLAND" Then
@@ -1592,10 +1593,12 @@ For z = 0 To TotalCMD
             'MID=$00041f828759
             'PID=SSX-PS2-2004
             'OutStr = "LOC=en" & Chr(10)
-            OutStr = "NAME=" & clientNAME & Chr(10)
-            OutStr = OutStr & "PERS=" & clientNAME & Chr(10)
+            OutStr = "PERS=" & clientNAME & Chr(10)
             OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             OutStr = OutStr & "PLAST=" & clientSINCE & Chr(10)
+            OutStr = OutStr & "A=" & Text6.Text & Chr(10)
+            OutStr = OutStr & "LA=" & Winsock4(Index).LocalIP & Chr(10)
+            OutStr = OutStr & "MA=" & clientMAC & Chr(10)
             OutStr = OutStr & "LKEY=3fcf27540c92935b0a66fd3b0000283c" & Chr(10)
             'OutStr = OutStr & "SINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             'OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
@@ -1639,13 +1642,14 @@ For z = 0 To TotalCMD
                 'msgLen = Len(msgType) + 8 + 1
                 'resp(z) =  msgType & pad & Chr(msgLen) & Chr(0) ' empty response
             Else
-                OutStr = "GAMES=1" & Chr(10)
-                OutStr = OutStr & "ROOMS=1" & Chr(10)
-                OutStr = OutStr & "USERS=1" & Chr(10)
-                OutStr = OutStr & "MESGS=1" & Chr(10)
-                OutStr = OutStr & "RANKS=0" & Chr(10)
-                OutStr = OutStr & "MORE=1" & Chr(10)
+                OutStr = "MORE=0" & Chr(10)
                 OutStr = OutStr & "SLOTS=36" & Chr(10)
+                OutStr = OutStr & "STATS=0" & Chr(10)
+                OutStr = OutStr & "RANKS=0" & Chr(10)
+                OutStr = OutStr & "GAMES=0" & Chr(10)
+                OutStr = OutStr & "ROOMS=0" & Chr(10)
+                OutStr = OutStr & "USERS=1" & Chr(10)
+                OutStr = OutStr & "MESGS=0" & Chr(10)
                 'OutStr = OutStr & "ASYNC=1" & Chr(10)
                 'OutStr = OutStr & "USERSETS=0" & Chr(10)
                 'OutStr = OutStr & "MESGTYPES=100728964" & Chr(10)
@@ -1667,7 +1671,8 @@ For z = 0 To TotalCMD
             'a = GetParams(msgType, params)
             'msgType = "skey"
             OutStr = "SKEY=$37940faf2a8d1381a3b7d0d2f570e6a7" & Chr(10)
-            OutStr = OutStr & "PLATFORM=PS2" & Chr(10)
+            OutStr = OutStr & "DP=PS2" & Chr(10)
+            OutStr = OutStr & "GTAG=VTS" & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             skeyStr = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
             resp(z) = skeyStr
@@ -1753,6 +1758,11 @@ For z = 0 To TotalCMD
             OutStr = "COUNT=0" & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        ElseIf msgType = "RGET" Then
+            'a = GetParams(msgType, params)
+            OutStr = "ID=1" & Chr(10)
+            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "uatr" Then
             OutStr = OutStr & "IDENT=1001" & Chr(10)
             'msgLen = Len(msgType) + 8 + Len(OutStr) + 1
@@ -1783,16 +1793,18 @@ For z = 0 To TotalCMD
             OutStr = OutStr & "NAME=" & userNAME & Chr(10)
             OutStr = OutStr & "CRC=0" & Chr(10)
             OutStr = OutStr & "PID=0" & Chr(10)
-            OutStr = OutStr & "STAT=1" & Chr(10)
-            OutStr = OutStr & "RANK=1" & Chr(10)
-            OutStr = OutStr & "ADDR=" & Text5.Text & Chr(10)
-            OutStr = OutStr & "ROOM=" & Chr(10)
-            OutStr = OutStr & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
-            OutStr = OutStr & "EXPR=1072566000" & Chr(10)
-            OutStr = OutStr & "SERV=" & Text5.Text & Chr(10)
-            OutStr = OutStr & "MESG=testmsg" & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = "USCH" & pad & Chr(msgLen) & OutStr & Chr(0)
+            OutStr2 = "STAT=1" & Chr(10)
+            OutStr2 = OutStr2 & "RANK=1" & Chr(10)
+            OutStr2 = OutStr2 & "ADDR=" & Text5.Text & Chr(10)
+            OutStr2 = OutStr2 & "ROOM=" & Chr(10)
+            OutStr2 = OutStr2 & "LAST=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+            OutStr2 = OutStr2 & "EXPR=1072566000" & Chr(10)
+            OutStr2 = OutStr2 & "SERV=" & Text5.Text & Chr(10)
+            OutStr2 = OutStr2 & "MESG=testmsg" & Chr(10)
+            msgLen = Len(msgType) + 8 + Len(OutStr2) + 1
+            resp(z + 1) = "USER" & pad & Chr(msgLen) & OutStr2 & Chr(0)
         ElseIf msgType = "usld" Then
             'a = GetParams(msgType, params)
             OutStr = "IMGATE=0" & Chr(10)
@@ -2110,10 +2122,12 @@ ElseIf Combo1.ListIndex = 7 Then
 ElseIf Combo1.ListIndex = 8 Then
     Winsock1.LocalPort = 10600
 ElseIf Combo1.ListIndex = 9 Then
-    Winsock1.LocalPort = 10900
+    Winsock1.LocalPort = 30900
 ElseIf Combo1.ListIndex = 10 Then
-    Winsock1.LocalPort = 20900
+    Winsock1.LocalPort = 10900
 ElseIf Combo1.ListIndex = 11 Then
+    Winsock1.LocalPort = 20900
+ElseIf Combo1.ListIndex = 12 Then
     Winsock1.LocalPort = 11000
 End If
 Text1.Text = Winsock1.LocalPort
@@ -2320,7 +2334,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R30"
+Build = "0.1-R31"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
@@ -2343,9 +2357,10 @@ Combo1.AddItem "Fight Night Round 2", 5
 Combo1.AddItem "Madden NFL 05", 6
 Combo1.AddItem "Medal of Honor: Rising Sun", 7
 Combo1.AddItem "NASCAR Thunder 2004", 8
-Combo1.AddItem "Need for Speed: Underground", 9
-Combo1.AddItem "Need for Speed: Underground 2", 10
-Combo1.AddItem "SSX3", 11
+Combo1.AddItem "Need for Speed: Most Wanted", 9
+Combo1.AddItem "Need for Speed: Underground", 10
+Combo1.AddItem "Need for Speed: Underground 2", 11
+Combo1.AddItem "SSX3", 12
 Combo1.Text = Combo1.List(0)
 Text2.Text = ""
 Text3.Text = "Enter data to send in hex (ex: 7e 70 6e 67 00 00 00 2f 00 00 00 14 54 49 4d 45 3d 31 0a 00)"
@@ -2413,7 +2428,19 @@ If Winsock3.State = 0 Then
     Winsock3.Listen
 End If
 
-If (secCNT - pingSEC) > Int(pingTIME) * 10 Then
+For z = 0 To threadCnt
+    If Winsock4(z).State >= 8 Then
+        Winsock4(z).Close
+        threadCnt = threadCnt - 1
+    End If
+    If Winsock4(z).State = 0 Then
+        If theadCnt >= 1 Then
+            threadCnt = threadCnt - 1
+        End If
+    End If
+Next z
+
+If (secCNT - pingSEC) > Int(pingTIME) * 12 Then
     For x = 0 To threadCnt
         If Winsock4(x).State = 7 Then
             a = Send_Png(x)
@@ -2445,9 +2472,8 @@ For x = 0 To threadCnt
         playerExists = True
         Winsock1.Close
         Winsock4(x).Close
-        Sleep (250)
         Winsock4(x).Accept (requestID)
-        threadCnt = threadCnt + 1
+        'threadCnt = threadCnt + 1
         players(x).playerNUM = PlayerCnt
         players(x).playerID = Int(1000 + PlayerCnt)
         players(x).playerIP = Winsock1.RemoteHostIP
