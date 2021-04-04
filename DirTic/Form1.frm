@@ -1071,10 +1071,16 @@ For x = 0 To UBound(params)
                 userNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
             ElseIf msgType = "SEND" Then
                 msgNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+            ElseIf msgType = "PSET" Or msgType = "RGET" Or msgType = "AUTH" Then
+                presNAME = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
             Else
-                clientUSER = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
-                Label9.Caption = "USER " & clientUSER
-                Label9.Visible = True
+                If Len(clientUSER) = 0 Then
+                    clientUSER = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
+                    Label9.Caption = "USER " & clientUSER
+                    Label9.Visible = True
+                Else
+                    clientUSER = clientUSER
+                End If
             End If
         ElseIf Mid(HexToString(Trim(params(x))), y, 5) = "PASS=" Then
             clientPASS = Mid(HexToString(Trim(params(x))), y + 5, Len(HexToString(Trim(params(x)))))
@@ -1406,10 +1412,10 @@ For z = 0 To TotalCMD
                 End If
             End If
         ElseIf msgType = "AUTH" Then
-            OutStr = "NAME=" & clientNAME & Chr(10)
-            OutStr = OutStr & "USER=" & clientNAME & Chr(10)
-            OutStr = OutStr & "PROD=" & clientVERS & Chr(10)
-            OutStr = OutStr & "LKEY=" & clientLKEY & Chr(10)
+            OutStr = "NAME=" & clientNAME & Chr(9)
+            OutStr = OutStr & "USER=" & clientNAME & Chr(9)
+            OutStr = OutStr & "PROD=" & clientVERS & Chr(9)
+            OutStr = OutStr & "LKEY=" & clientLKEY & Chr(9)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             authData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
             resp(z) = authData
@@ -1466,6 +1472,18 @@ For z = 0 To TotalCMD
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             'TEXT=05GkkkkiWxYUsUWOrK1liy3/8s4WdLT1qK2Jbqt6XAP6lhDsb/9/+XDriFxK4pcWuNXHrkVya5UDKpc//f/v/3/7/9/+//f/v/3/4D0B+BAgeP/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/83nJuf/v/y5cA%3d
             resp(z) = "+fup" & pad & Chr(msgLen) & OutStr & Chr(0)
+        ElseIf msgType = "gcre" Then
+            a = Send_Rom(Index)
+            'msgType = "gset"
+            OutStr = "IDENT=1" & Chr(10)
+            OutStr = OutStr & "WHEN=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
+            OutStr = OutStr & "NAME=" & clientNAME & Chr(10)
+            'OutStr = OutStr & "PARAMS=" & Chr(10)
+            OutStr = OutStr & "ROOM=" & clientNAME & Chr(10)
+            'OutStr = "TEXT=05GkkkkiWxYUsUWOrK1liy3/8s4WdLT1qK2Jbqt6XAP6lhDsb/9/+XDriFxK4pcWuNXHrkVya5UDKpc//f/v/3/7/9/+//f/v/3/4D0B+BAgeP/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/83nJuf/v/y5cA%3d"
+            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            'TEXT=05GkkkkiWxYUsUWOrK1liy3/8s4WdLT1qK2Jbqt6XAP6lhDsb/9/+XDriFxK4pcWuNXHrkVya5UDKpc//f/v/3/7/9/+//f/v/3/4D0B+BAgeP/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/9/+//f/v/3/7/83nJuf/v/y5cA%3d
+            resp(z) = "gjoi" & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "gget" Then
             a = Send_Rom(Index)
             'msgType = "gset"
@@ -1482,6 +1500,20 @@ For z = 0 To TotalCMD
             OutStr = "PERS=" & clientNAME & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        ElseIf msgType = "mesg" Then
+            'a = Send_Rom(Index)
+            'Sleep (200)
+            'a = Send_Who(Index)
+            'Sleep (200)
+            'a = Send_usr(Index)
+            Sleep (200)
+            OutStr = "USER=VTSTech" & Chr(9)
+            OutStr = OutStr & "BODY=ohi" & Chr(9)
+            'OutStr = OutStr & "SUBJ=test" & Chr(10)
+            OutStr = OutStr & "SECS=10" & Chr(9)
+            'OutStr = OutStr & "ATTR=C3" & Chr(10)
+            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            resp(z) = "+msg" & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "move" Then
             'a = Send_Rom(Index)
             'Sleep (200)
@@ -1624,11 +1656,6 @@ For z = 0 To TotalCMD
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "pers" Then
-            'PERS=VTSTech
-            'MID=$00041f828759
-            'PID=SSX-PS2-2004
-            'OutStr = "LOC=en" & Chr(10)
-            
             OutStr = "PERS=" & clientNAME & Chr(10)
             'OutStr = OutStr & "A=" & Winsock4(Index).LocalIP & Chr(10)
             'OutStr = OutStr & "LA=" & Winsock4(Index).LocalIP & Chr(10)
@@ -1641,6 +1668,16 @@ For z = 0 To TotalCMD
             'OutStr = OutStr & "PSINCE=" & Format(Date, "YYYY.DD.MM") & "-" & Format(Time, "HH:MM:SS") & Chr(10)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+        ElseIf msgType = "PSET" Then
+            msgType = "PRES"
+            OutStr = "SHOW=CHAT" & Chr(9)
+            OutStr = OutStr & "STAT=" & Chr(34) & "is reviving games" & Chr(34) & Chr(9)
+            OutStr = OutStr & "EX=VTS" & Chr(9)
+            'OutStr = OutStr & "ATTR=C3" & Chr(10)
+            'OutStr = OutStr & "PROD=Online" & Chr(10)
+            msgLen = Len(msgType) + 8 + Len(OutStr) + 1
+            psetData = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
+            resp(z) = psetData
         ElseIf msgType = "RADD" Then
             msgType = "+bud"
             OutStr = "PERS=" & clientUSER & Chr(10)
@@ -1796,7 +1833,7 @@ For z = 0 To TotalCMD
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "RGET" Then
             'a = GetParams(msgType, params)
-            OutStr = "ID=1" & Chr(10)
+            OutStr = "ID=1" & Chr(9)
             msgLen = Len(msgType) + 8 + Len(OutStr) + 1
             resp(z) = msgType & pad & Chr(msgLen) & OutStr & Chr(0)
         ElseIf msgType = "uatr" Then
@@ -2206,6 +2243,7 @@ If Command1.Caption = "Stop" Then
     Winsock1.Close
     Winsock2.Close
     Winsock3.Close
+    clientUSER = ""
     For x = 0 To PlayerCnt
         Winsock4(x).Close
     Next x
@@ -2379,7 +2417,7 @@ Private Sub Form_Load()
 On Error Resume Next
 Set fso = CreateObject("Scripting.FileSystemObject")
 acctDB = VB.App.Path & "\acct.db"
-Build = "0.1-R33"
+Build = "0.1-R34"
 Form1.Caption = "VTSTech-SRVEmu v" & Build
 Text6.Text = "Enter Public IP"
 Text1.Text = 11600
