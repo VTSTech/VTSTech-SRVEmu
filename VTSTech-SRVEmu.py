@@ -659,7 +659,7 @@ def reply_who():
   reply+=whoStr.encode('ascii')+x0A
   whoStr="F=U"
   reply+=whoStr.encode('ascii')+x0A
-  whoStr="G=1"
+  whoStr="G=0"
   reply+=whoStr.encode('ascii')+x0A  
   whoStr="HW=0"
   reply+=whoStr.encode('ascii')+x0A
