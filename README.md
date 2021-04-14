@@ -1,6 +1,6 @@
 # VTSTech-SRVEmu
 
-# This project has been discontinued as 04/14/2021
+# This project has been discontinued as of 04/14/2021
 
 VTSTech-SRVEmu was an ambitious project to be a multi-game server emulator for games utilizing a protocol used in many EA games.
 
