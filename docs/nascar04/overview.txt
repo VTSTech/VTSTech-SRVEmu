@@ -8,104 +8,100 @@ CORE STATE MANAGEMENT SYSTEM
 
 GAME STATE CONTROL:
 
-    GameState_GetCurrent @ 0x00206400 - Returns current game state, defaults to 0x4b1
+    GameState_GetCurrent - Returns current game state, defaults to 0x4b1
 
-    GameState_SetDirect @ 0x00206430 - Direct state setter for DAT_0038333c
+    GameState_SetDirect - Direct state setter for DAT_0038333c
 
-    GameState_ConditionalLobbyEntry @ 0x001e8cf8 - Conditional lobby entry (blocked by DAT_00382eb1)
+    GameState_ConditionalLobbyEntry - Conditional lobby entry (blocked by DAT_00382eb1)
 
-    GameState_ForceLobbyEntry @ 0x002068a8 - Unconditional lobby entry via Protocol_ChannelDispatcher
+    GameState_ForceLobbyEntry - Unconditional lobby entry via Protocol_ChannelDispatcher
 
-    GameState_EnterNetworkInit @ 0x00206de0 - Sets state to NETWORK_INIT (0x4ba)
+    GameState_EnterNetworkInit - Sets state to NETWORK_INIT (0x4ba)
 
-    GameState_BlockConditionalPath @ 0x001c0ce8 - Sets DAT_00382eb1=1, forces Protocol_ChannelDispatcher path
+    GameState_BlockConditionalPath - Sets DAT_00382eb1=1, forces Protocol_ChannelDispatcher path
 
-    GameState_CheckConditionalBlock @ 0x001e8da8 - Checks DAT_00382eb1 condition
+    GameState_CheckConditionalBlock - Checks DAT_00382eb1 condition
 
 AUTHENTICATION STATE MACHINE:
 
-    Authentication_StateMachineMain @ 0x00299330 - Main authentication state machine
+    Authentication_StateMachineMain - Main authentication state machine
 
-    AuthState_InitialHandler @ 0x0029937c - State 0: Initial authentication
+    AuthState_InitialHandler - State 0: Initial authentication
 
-    AuthState_ProcessingHandler @ 0x00299394 - State 1: Processing authentication
+    AuthState_ProcessingHandler - State 1: Processing authentication
 
-    AuthState_ValidatingHandler @ 0x002993ac - State 2: Validating credentials
+    AuthState_ValidatingHandler - State 2: Validating credentials
 
-    AuthState_TransitionHandler1 @ 0x002993c4 - States 4/5 handler (calls AUTH_Caller2)
+    AuthState_TransitionHandler1 - States 4/5 handler (calls AUTH_Caller2)
 
-    AuthState_TransitionHandler2 @ 0x002993dc - States 6/7 handler (calls AUTH_Caller3)
+    AuthState_TransitionHandler2 - States 6/7 handler (calls AUTH_Caller3)
 
-    AuthState_TransitionToComplete @ 0x002992a8 - AUTH_Caller2: Transition to complete
+    AuthState_TransitionToComplete - AUTH_Caller2: Transition to complete
 
-    AuthState_FinalizeComplete @ 0x002992d8 - AUTH_Caller3: Finalize completion
+    AuthState_FinalizeComplete - AUTH_Caller3: Finalize completion
 
-    Authentication_TriggerStateMachine @ 0x00207d48 - Triggers auth state machine
+    Authentication_TriggerStateMachine - Triggers auth state machine
 
-    Authentication_ProcessStateChange @ 0x00207c38 - Processes auth state changes
+    Authentication_ProcessStateChange - Processes auth state changes
 
 NETWORK PROTOCOL DISPATCH SYSTEM
 
 MAIN EVENT FLOW:
-text
 
 PS2 Hardware Interrupt → ConnectionHandler_ChannelX_In functions
-  → PacketReceiver_RawData @ 0x0017f408
-    → Packet_PreProcessor @ 0x00154b20
-    → NetworkReceive_CommandDispatcher @ 0x001012c8
+  → PacketReceiver_RawData
+    → Packet_PreProcessor
+    → NetworkReceive_CommandDispatcher
       → ProtocolCommand_RoutingTable @ 0x00374e14 (little-endian)
         → Protocol Handler Virtual Dispatch
 
 NETWORK EVENT HANDLING:
 
-    NetworkEvent_MainDispatcher @ 0x001c3808 - Main network event handler (interrupt-driven)
+    NetworkEvent_MainDispatcher - Main network event handler (interrupt-driven)
 
-    Protocol_MessageRouter @ 0x001c5e50 - Main protocol message router with dual jump tables
+    Protocol_MessageRouter - Main protocol message router with dual jump tables
 
-    ProtocolEvent_LobbyTrigger @ 0x00206c90 - Handles lobby trigger from Protocol_ChannelDispatcher
+    ProtocolEvent_LobbyTrigger - Handles lobby trigger from Protocol_ChannelDispatcher
 
 JUMP TABLE ARCHITECTURE (COMPLETELY MAPPED)
 
 DUAL JUMP TABLE SYSTEM:
 
 JUMP TABLE 1 @ 0x3B01A0 (A1-BASED ROUTING):
-text
 
-0: ProtocolHandler_Category0 @ 0x001c5e8c
-1: ProtocolHandler_Category1 @ 0x001c5fb8  
-2: ProtocolHandler_Category2 @ 0x001c60cc
-3: ProtocolHandler_Category3 @ 0x001c6168
-4: ProtocolHandler_Category4 @ 0x001c63e4
-5: ProtocolHandler_Category5 @ 0x001c6468
-6: ProtocolHandler_Category6 @ 0x001c651c
-7: ProtocolHandler_Default @ 0x001c6c98
-8: ProtocolHandler_Category8 @ 0x001c6818
-9: ProtocolHandler_Category9 @ 0x001c653c
+0: ProtocolHandler_Category0
+1: ProtocolHandler_Category1  
+2: ProtocolHandler_Category2
+3: ProtocolHandler_Category3
+4: ProtocolHandler_Category4
+5: ProtocolHandler_Category5
+6: ProtocolHandler_Category6
+7: ProtocolHandler_Default
+8: ProtocolHandler_Category8
+9: ProtocolHandler_Category9
 
 JUMP TABLE 2 @ 0x3B04C0 (A2-BASED ROUTING):
-text
 
-0: ProtocolHandler_LobbyStateEntry @ 0x001c6b78  → CALLS: ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry
-1: ProtocolHandler_Index1 @ 0x001c6c20
-2: ProtocolHandler_Default @ 0x001c6c98
-3: ProtocolHandler_AlternatePath @ 0x001c6b90
-4-16: ProtocolHandler_Default @ 0x001c6c98
-17: ProtocolHandler_Index17 @ 0x001c6ba8
-18: ProtocolHandler_Index18 @ 0x001c6bc0
-19: ProtocolHandler_Index19 @ 0x001c6bd8
+0: ProtocolHandler_LobbyStateEntry → CALLS: ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry
+1: ProtocolHandler_Index1
+2: ProtocolHandler_Default
+3: ProtocolHandler_AlternatePath
+4-16: ProtocolHandler_Default
+17: ProtocolHandler_Index17
+18: ProtocolHandler_Index18
+19: ProtocolHandler_Index19
 
 CRITICAL LOBBY STATE TRANSITION DISCOVERY
 
 LOBBY ENTRY MECHANISM (SOLVED):
-text
 
 NetworkEvent_MainDispatcher called via hardware interrupt with a2 parameter
   ↓
-If a2 == 0: Protocol_MessageRouter jumps to ProtocolHandler_LobbyStateEntry @ 0x1c6b78
+If a2 == 0: Protocol_MessageRouter jumps to ProtocolHandler_LobbyStateEntry
   ↓
-Calls ProtocolEvent_LobbyTrigger @ 0x00206c90
+Calls ProtocolEvent_LobbyTrigger
   ↓
-Calls GameState_ForceLobbyEntry @ 0x002068a8
+Calls GameState_ForceLobbyEntry
   ↓
 Sets DAT_0038333c = 0x4b1 (MULTIPLAYER_LOBBY)
   ↓
@@ -132,44 +128,42 @@ AUTHENTICATION SYSTEM (CORRECTED)
     Server must NOT send AUTH_STATE field in auth response
 
 CORRECT AUTHENTICATION FLOW:
-text
 
 1. Client: auth command (NAME, USER, PASS, PERS, TOS)
 2. Server: STATUS=1 + SESS + NAME + USER + PERSONAS
 3. Server: Automatic pers response (auto-triggered)
-4. Client: Authentication_TriggerStateMachine @ 0x00207d48
-5. Client: Authentication_ProcessStateChange @ 0x00207c38
-6. Client: Authentication_StateMachineMain @ 0x00299330
+4. Client: Authentication_TriggerStateMachine
+5. Client: Authentication_ProcessStateChange
+6. Client: Authentication_StateMachineMain
 7. Client: AuthState_TransitionToComplete sets state to 3
 8. Client: AuthState_FinalizeComplete finalizes auth
 
 AUTHENTICATION STATE JUMP TABLE (CONFIRMED):
 Address: 0x003d9df0
 
-    State 0 → AuthState_InitialHandler @ 0x0029937c
+    State 0 → AuthState_InitialHandler
 
-    State 1 → AuthState_ProcessingHandler @ 0x00299394
+    State 1 → AuthState_ProcessingHandler
 
-    State 2 → AuthState_ValidatingHandler @ 0x002993ac
+    State 2 → AuthState_ValidatingHandler
 
-    State 4/5 → AuthState_TransitionHandler1 @ 0x002993c4
+    State 4/5 → AuthState_TransitionHandler1
 
-    State 6/7 → AuthState_TransitionHandler2 @ 0x002993dc
+    State 6/7 → AuthState_TransitionHandler2
 
 CHALLENGE SYSTEM ARCHITECTURE (VALIDATED)
 
 CHALLENGE SYSTEM INITIALIZATION:
 
-    ChallengeSystem_InitializeNetwork @ 0x00283d38 - Main challenge system init
+    ChallengeSystem_InitializeNetwork - Main challenge system init
 
-    ChallengeSystem_SendRegistration @ 0x00283be8 - Sends CHAL command to server
+    ChallengeSystem_SendRegistration - Sends CHAL command to server
 
-    ChallengeCallback_RegisterHandler @ 0x00289778 - Registers challenge callbacks
+    ChallengeCallback_RegisterHandler - Registers challenge callbacks
 
-    ChallengeCallback_HandlerMain @ 0x00283388 - Main challenge callback handler
+    ChallengeCallback_HandlerMain - Main challenge callback handler
 
 CHALLENGE REGISTRATION FLOW:
-text
 
 1. Client enters MULTIPLAYER_LOBBY state (0x4b1)
 2. ChallengeSystem_InitializeNetwork called
@@ -187,16 +181,15 @@ MULTIPLAYER SYSTEM INTEGRATION
 
 MULTIPLAYER ENTRY POINT:
 
-    Multiplayer_MainEntryPoint @ 0x0028f1f0 - Entry point for multiplayer system
+    Multiplayer_MainEntryPoint - Entry point for multiplayer system
 
-    NetworkSystem_InitializePhase2 @ 0x00327678 - Second phase network init
+    NetworkSystem_InitializePhase2 - Second phase network init
 
-    MultiplayerSystem_Activate @ 0x00327708 - Transitions to active state
+    MultiplayerSystem_Activate - Transitions to active state
 
-    BuddySystem_InitializeCallback @ 0x003273d0 - Initializes buddy system
+    BuddySystem_InitializeCallback - Initializes buddy system
 
 MULTIPLAYER ACTIVATION CHAIN:
-text
 
 Multiplayer_MainEntryPoint (callback-triggered)
   → MultiplayerMode_Check
@@ -209,7 +202,7 @@ MEMORY STRUCTURE MAPPING
 
 CRITICAL GLOBAL VARIABLES:
 
-    DAT_0038333c @ 0x0038333c - Current game state
+    DAT_0038333c - Current game state
 
         0x4b1 = MULTIPLAYER_LOBBY
 
@@ -217,15 +210,15 @@ CRITICAL GLOBAL VARIABLES:
 
         0xffffffff = SHUTDOWN/ERROR
 
-    DAT_00382eb1 @ 0x00382eb1 - Conditional lobby block
+    DAT_00382eb1 - Conditional lobby block
 
         Set to 1 by GameState_BlockConditionalPath
 
         Blocks GameState_ConditionalLobbyEntry
 
-    switchdataD_003b04c0 @ 0x3b04c0 - A2-based jump table
+    switchdataD_003b04c0 - A2-based jump table
 
-    switchdataD_003b01a0 @ 0x3b01a0 - A1-based jump table
+    switchdataD_003b01a0 - A1-based jump table
 
 AUTHENTICATION STRUCTURE:
 
@@ -237,48 +230,47 @@ AUTHENTICATION STRUCTURE:
 
 CHALLENGE SYSTEM MEMORY:
 
-    g_ChallengeSystem @ 0x0038b838 - Main challenge structure (300 bytes)
+    g_ChallengeSystem - Main challenge structure (300 bytes)
 
-    g_ChallengerNameStorage @ 0x004e2008 - Challenger name storage
+    g_ChallengerNameStorage - Challenger name storage
 
-    SystemReady_StateFlag @ 0x0038b84c - System ready state control
+    SystemReady_StateFlag - System ready state control
 
 PROTOCOL COMMAND PROCESSING
 
 FIELD EXTRACTION SYSTEM:
 
-    TagFieldFind @ 0x0031ddd0 (125 callers) - Main field parser
+    TagFieldFind - Main field parser
 
-    TagFieldGetString @ 0x0031ed10 (55 callers) - String field extraction
+    TagFieldGetString - String field extraction
 
-    TagFieldGetNumber @ 0x0031e8b0 (40 callers) - Numeric field extraction
+    TagFieldGetNumber - Numeric field extraction
 
-    TagFieldGetFlags @ 0x0031e938 (6 callers) - Flag field extraction
+    TagFieldGetFlags - Flag field extraction
 
 COMMAND HANDLER MAPPING:
 
-    CommandHandler_AUTH_PERS @ 0x00287838 - Handles auth and pers commands
+    CommandHandler_AUTH_PERS - Handles auth and pers commands
 
-    ProtocolHandler_ROOM @ 0x00287af8 - Handles sele and room commands
+    ProtocolHandler_ROOM - Handles sele and room commands
 
-    CommandHandler_PERS_USER @ 0x00288080 - Handles pers and user commands
+    CommandHandler_PERS_USER - Handles pers and user commands
 
-    CommandHandler_AUXI @ 0x00289528 - Challenge initiation with cryptographic processing
+    CommandHandler_AUXI - Challenge initiation with cryptographic processing
 
-    CommandHandler_CHAL @ 0x00289080 - Challenge system registration
+    CommandHandler_CHAL - Challenge system registration
 
-    CommandHandler_MESG @ 0x00288668 - Challenge notifications and responses
+    CommandHandler_MESG - Challenge notifications and responses
 
 SYSTEM COMMAND ARCHITECTURE
 
 SYSTEM COMMAND DISPATCH:
 
-    System_CommandDispatcher @ 0x00284c88 - Main system command dispatcher
+    System_CommandDispatcher - Main system command dispatcher
 
-    System_CommandDispatcher2 @ 0x002080a8 - Secondary command dispatcher
+    System_CommandDispatcher2 - Secondary command dispatcher
 
 CHALLENGE-RELATED SYSTEM COMMANDS:
-text
 
 0xE:    System_AUXI_Dispatcher - Routes AUXI processing
 0x34:   CommandHandler_AUXI2 - Secondary AUXI handler
@@ -329,7 +321,6 @@ SERVER EMULATOR UPDATES REQUIRED:
     Test lobby state trigger with zero-flag messages
 
 CLIENT TRIGGER SEQUENCE:
-python
 
 # After successful auth:
 1. Server sends zero-flag message to trigger a2=0
@@ -337,16 +328,6 @@ python
 3. Client sends CHAL command (challenge system registration)
 4. Server responds with STATUS=1
 5. Challenge system becomes active
-
-RECOMMENDED SERVER MESSAGES FOR TESTING
-python
-
-# Test messages to trigger a2=0 (lobby state):
-1. send("+msg FROM=Server TEXT=LOBBY_READY F=0")
-2. send("+usr I=1 N=Username F=0 A=192.168.1.100")
-3. send("+rom I=1 N=Lobby H=Main L=8 A=Server T=0 F=0")
-4. send("~png REF=1 TIME=0 SESS=SESSION_ID STATUS=0")
-5. send("+who F=0 N=Username RI=0 RT=0 R=0 RF=0")
 
 FINAL ARCHITECTURE SUMMARY
 
