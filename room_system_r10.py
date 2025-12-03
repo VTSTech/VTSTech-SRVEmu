@@ -391,7 +391,7 @@ class RoomHandlers:
         room_population = "0/50"
         for room_data in self.room_manager.active_rooms.values():
             if room_data['room_id'] == current_room_id:
-                room_population = f"{room_data['usercount']}/{room_data['maxusers']}"; break
+                room_population = f"{room_data['usercount']}:{room_data['maxusers']}"; break
         print(f"+POP: Room {current_room_id} population {room_population}")
         return self.create_packet('+pop', '', f"Z={room_population}\n")
     

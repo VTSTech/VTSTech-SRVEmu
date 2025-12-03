@@ -436,7 +436,13 @@ def update_game_state(session, new_state):
 def parse_data(data, session):
     if not data: return
     
-    lines = data.split(b'\x0A')
+    # Store original data as bytes
+    if isinstance(data, bytes):
+        data_bytes = data
+    else:
+        data_bytes = str(data).encode('latin1')
+    
+    lines = data_bytes.split(b'\x0A')
     
     if session.msgType == b'news':
         session.NEWS_PAYLOAD = next((line.decode('latin1')[5:] for line in lines if line.startswith(b'NAME')), '')
@@ -464,21 +470,21 @@ def parse_data(data, session):
             if text.startswith("FROM"): session.FROM = text[5:]
             elif text.startswith("TO"): session.TO = text[3:]
     elif session.msgType == b'mesg':
-        data_str = data.decode('latin1') if data else ""
+        # Convert to string for debugging
+        data_str = data_bytes.decode('latin1', errors='ignore') if data_bytes else ""
         print(f"MESG DEBUG from {session.clientNAME}:")
         print(f"  Raw data: {data_str}")
         
         # Check if it's a challenge response
         if 'T=ACPT' in data_str or 'T=DECL' in data_str or 'T=BLOC' in data_str:
             print(f"  CHALLENGE RESPONSE DETECTED!")
-            
+        
         # Parse and log all fields
-        lines = data_str.split('\n')
         for line in lines:
             if line.strip():
-                print(f"  Field: {line}")
+                print(f"  Field: {line.decode('latin1', errors='ignore')}")
         for line in lines:
-            text = line.decode('latin1')
+            text = line.decode('latin1', errors='ignore')
             if text.startswith("N"): 
                 session.mesg_target = text[2:]
             elif text.startswith("T"): session.TEXT = text[2:]
@@ -633,7 +639,21 @@ def send_multiplayer_initialization(session):
     print(f"=== MULTIPLAYER INIT COMPLETE ===\n")    
     session.multiplayer_initialized = True
     session.expecting_chal = True
+
+def handle_mesg_command(data, session):
+    """Route mesg commands: challenge messages -> challenge system, others -> message system"""
     
+    # First try challenge system
+    challenge_response = challenge_system.handle_mesg(data, session)
+    
+    if challenge_response is None:
+        # Not a challenge message, send to message system
+        print(f"MESG: Routing to message system (non-challenge message)")
+        return message_handlers.handle_mesg(data, session)
+    else:
+        # Challenge system handled it
+        return challenge_response
+            
 def build_reply(data, session):
     global challenge_system, auth_handlers, network_handlers, ping_manager, room_handlers
     global message_handlers, ranking_handlers, buddy_handlers
@@ -669,7 +689,7 @@ def build_reply(data, session):
         
         'chal': lambda d, s: challenge_system.handle_chal(d, s),
         'auxi': lambda d, s: challenge_system.handle_auxi(d, s),
-        'mesg': lambda d, s: challenge_system.handle_mesg(d, s),
+        'mesg': lambda d, s: handle_mesg_command(d, s),  # Special handling for mesg
         'play': reply_play,
         
         'sysc': lambda d, s: challenge_system.handle_system_command(d, s),

@@ -9,45 +9,37 @@ class MessageHandlers:
         print(f"MESSAGE: Handler initialized with challenge system: {challenge_system_ref is not None}")
     
     def handle_mesg(self, data, session):
-		    data_str = data.decode('latin1') if data else ""
-		    print(f"MESG: Message data: {data_str}")
+		    """Handle regular (non-challenge) MESG commands"""
+		    # Handle both bytes and string input
+		    if isinstance(data, bytes):
+		        data_str = data.decode('latin1')
+		    else:
+		        data_str = str(data)
+		    
+		    print(f"MESG (Regular): Message data: {data_str}")
 		    
 		    target_user = None
 		    message_text = ""
 		    message_flags = 0
 		    
 		    for line in data_str.split('\n'):
-		        if line.startswith('N='):
-		            target_user = line[2:]
-		        elif line.startswith('T='):
-		            message_text = line[2:]
-		        elif line.startswith('F='):
+		        if line.startswith('PRIV=') or line.startswith('N='):
+		            target_user = line.split('=', 1)[1]
+		        elif line.startswith('TEXT=') or line.startswith('T='):
+		            message_text = line.split('=', 1)[1]
+		        elif line.startswith('ATTR=') or line.startswith('F='):
 		            try:
-		                message_flags = int(line[2:])
+		                message_flags = int(line.split('=', 1)[1])
 		            except:
 		                pass
 		    
-		    # SPECIAL CASE: If this is a challenge response (ACPT/DECL/BLOC) without target,
-		    # assume it's for the current challenger
-		    if message_text in ['BLOC', 'DECL', 'ACPT'] and not target_user:
-		        if hasattr(session, 'challenger') and session.challenger:
-		            target_user = session.challenger
-		            print(f"CHALLENGE MESG: Auto-targeting challenger {target_user} for response '{message_text}'")
-		    
-		    # Check for challenge responses
-		    if message_text in ['BLOC', 'DECL', 'ACPT'] and target_user:
-		        print(f"CHALLENGE MESG: Challenge response '{message_text}' from {session.clientNAME} to {target_user}")
-		        return self.handle_challenge_response(session, target_user, message_text)
-		    
-		    # Handle regular messages
+		    # Handle regular private messages
 		    if target_user and message_text:
-		        print(f"MESG: {session.clientNAME} -> {target_user}: '{message_text}'")
+		        print(f"MESG (Regular): {session.clientNAME} -> {target_user}: '{message_text}'")
 		        return self.send_private_message(session, target_user, message_text, message_flags)
 		    else:
-		        print(f"MESG: Invalid message format - target: {target_user}, text: {message_text}")
-		        response = "STATUS=0\nERROR=Invalid message format\n"
-		    
-		    return self.create_packet('mesg', '', response)
+		        print(f"MESG (Regular): Invalid message format")
+		        return self.create_packet('mesg', '', "STATUS=0\nERROR=Invalid message format\n")
 
     def handle_challenge_response(self, session, target_user, message_text):
 		    """Handle challenge responses - update both clients"""

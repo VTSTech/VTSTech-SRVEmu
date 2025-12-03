@@ -51,26 +51,70 @@ class ChallengeSystem:
         return self.create_packet('auxi', '', "STATUS=1\n")
 
     def handle_mesg(self, data, session):
-        """Handle MESG command - challenge responses and messages"""
-        if not data:
-            return self.create_packet('mesg', '', "STATUS=1\n")
-        
-        data_str = data.decode('latin1')
-        target_user = None
-        message_text = ""
-        
-        # Parse MESG fields
-        for line in data_str.split('\n'):
-            if line.startswith('N='):
-                target_user = line[2:]
-            elif line.startswith('T='):
-                message_text = line[2:]
-        
-        # Handle challenge responses
-        if message_text in ['BLOC', 'DECL', 'ACPT']:
-            return self.handle_challenge_response(session, target_user, message_text)
-        
-        return self.create_packet('mesg', '', "STATUS=1\n")
+		    """Handle MESG command - challenge messages only"""
+		    if not data:
+		        return self.create_packet('mesg', '', "STATUS=1\n")
+		    
+		    # Handle both bytes and string input
+		    if isinstance(data, bytes):
+		        data_str = data.decode('latin1')
+		    else:
+		        data_str = str(data)
+		    
+		    print(f"[CHALLENGE MESG] from {session.clientNAME}: {data_str}")
+		    
+		    target_user = None
+		    message_text = ""
+		    attr_value = 0
+		    
+		    # Parse MESG fields
+		    for line in data_str.split('\n'):
+		        if line.startswith('PRIV=') or line.startswith('N='):
+		            target_user = line.split('=', 1)[1]
+		        elif line.startswith('TEXT=') or line.startswith('T='):
+		            message_text = line.split('=', 1)[1]
+		        elif line.startswith('ATTR=') or line.startswith('F='):
+		            try:
+		                attr_value = int(line.split('=', 1)[1])
+		            except:
+		                pass
+		    
+		    # Check if this is a challenge message
+		    # Challenge messages have ATTR=3 and token-like TEXT
+		    is_challenge = (attr_value == 3 and message_text and 
+		                   '_' in message_text)  # Token usually has underscores
+		    
+		    # Also check for challenge responses
+		    is_response = (message_text in ['BLOC', 'DECL', 'ACPT'])
+		    
+		    if not (is_challenge or is_response):
+		        print(f"[CHALLENGE MESG] Not a challenge message, forwarding to message system")
+		        return None  # Return None to indicate this should go to message system
+		    
+		    # Handle challenge responses
+		    if is_response:
+		        print(f"[CHALLENGE] {session.clientNAME} responded: {message_text} to {target_user}")
+		        return self.handle_challenge_response(session, target_user, message_text)
+		    
+		    # Handle challenge initiation
+		    if is_challenge and target_user:
+		        print(f"[CHALLENGE] Challenge from {session.clientNAME} to {target_user}: {message_text}")
+		        
+		        # Find target session
+		        target_session = self.find_user_session(target_user)
+		        if target_session:
+		            # Update challenge states
+		            session.challenge_state = 1
+		            session.challenger = session.clientNAME  # Challenger is self
+		            target_session.challenge_state = 1
+		            target_session.challenger = session.clientNAME
+		            
+		            # Send challenge notification to target
+		            self.send_challenge_notification(session.clientNAME, message_text, target_session)
+		        else:
+		            print(f"[CHALLENGE] Target {target_user} not found")
+		    
+		    return self.create_packet('mesg', '', "STATUS=1\n")
 
     def handle_chal(self, data, session):
         """Handle CHAL command - challenge state registration"""
