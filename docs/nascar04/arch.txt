@@ -1,495 +1,85 @@
-NASCAR THUNDER 2004 PROTOCOL ARCHITECTURE v12.0
-🚨 COMPLETE SYSTEM ARCHITECTURE REVEALED - PRODUCTION READY
+=== NETWORK EVENT SYSTEM ===
+Game_InitializeNetworkSystem → NetworkEvent_RegisterHandlers → NetworkEvent_Handler
+Event codes: 0xc032 (ErrorSession), 0xc034 (MultiAuth), 0xc03c (MultiPlayer CRITICAL), 0xc03d (SessionInit)
+0xc03c → PacketConstructor_MultiPlayer → SessionInit_MultiPlayer → RaceSession_CreateFull → NetworkMain_Setup → ChallengeSystem_Startup → System_CommandDispatcher(0x88) → ChallengeSystem_RegisterState → sends CHAL
 
-=== COMPLETE SYSTEM ARCHITECTURE (VALIDATED & CORRECTED) ===
+=== PROTOCOL HANDLER REGISTRATION ===
+RaceSession_CreateFull registers:
+• Type 0: ProtocolHandler_GameState
+• Type 4: ProtocolHandler_GameCommands
+• Type 6: Protocol_GameStateManager
+• Type 7: ProtocolHandler_Session
 
-NETWORK EVENT SYSTEM ARCHITECTURE
-=================================
+=== NETWORK PACKET FLOW ===
+PS2 Hardware Interrupt → ConnectionHandler_ChannelX_In → PacketReceiver_RawData → Packet_PreProcessor → NetworkReceive_CommandDispatcher → routes based on packet type
 
-CORE EVENT FLOW:
-Game_InitializeNetworkSystem
-→ NetworkEvent_RegisterHandlers
-→ Registers NetworkEvent_Handler as callback
-↓
-When network events occur:
-↓
-NetworkEvent_Handler
-↓
-Switch on event code:
-• 0xc000-0xc003: Connection status events
-• 0xc012-0xc014: Game events → Network_ProcessGameEvent
-• 0xc032: Error session → PacketConstructor_ErrorSession
-• 0xc034: Multi auth → PacketConstructor_MultiAuth
-• 0xc03c: MULTIPLAYER INIT → PacketConstructor_MultiPlayer ← CRITICAL
-• 0xc03d: Session init → SessionInit_MultiPlayer
-• Default: NetworkEvent_DefaultHandler
+=== MULTIPLAYER SESSION CREATION ===
+Client receives event 0xc03c → PacketConstructor_MultiPlayer processes → SessionInit_MultiPlayer → RaceSession_CreateFull → NetworkMain_Setup → ChallengeSystem_Startup → System_CommandDispatcher(0x88) → ChallengeSystem_RegisterState → sends CHAL
+272-byte session data copied to offset 0x2dc, flag at 0x2d8=1 when valid
+Base structure: DAT_004e31a8 (global game session structure)
 
-PROTOCOL HANDLER ARCHITECTURE
-=============================
+=== CHALLENGE SYSTEM ARCHITECTURE ===
+NetworkMain_Setup → ChallengeSystem_Startup → System_CommandDispatcher(0x88) → ChallengeSystem_RegisterState → System_SendCommand_Internal(cmd="chal") → sends CHAL
+System commands: 0x125=CommandHandler_CHAL, 0x126=Challenge_ReceiveNotification, 0x127=ChallengeValidation_CanInitiate, 0x128=ChallengeValidation_IsPlayerAvailable
 
-HANDLER REGISTRATION (RaceSession_CreateFull):
-RegisterProtocolHandler(registry, type, handler):
-• Type 0 → ProtocolHandler_GameState
-• Type 4 → ProtocolHandler_GameCommands
-• Type 6 → Protocol_GameStateManager
-• Type 7 → ProtocolHandler_Session (unknown address)
+=== PROTOCOL MESSAGE ROUTING ===
+NetworkEvent_MainDispatcher → Protocol_MessageRouter
+Parameters: param_1 (type), param_2 (subtype/flags), param_3 (data)
+Jump tables: Primary @ 0x3B01A0 (param_1), Secondary @ 0x3B04C0 (param_2)
+Lobby entry: param_2=0 → ProtocolHandler_LobbyStateEntry → ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry → state=0x4B1
 
-NETWORK PACKET FLOW (UPDATED):
-PS2 Hardware Interrupt → ConnectionHandler_ChannelX_In
-→ PacketReceiver_RawData
-→ Packet_PreProcessor
-→ NetworkReceive_CommandDispatcher
-→ Routes based on packet type
-• Text commands (e.g., "+ses"): Direct to handlers
-• Binary/event packets: May trigger NetworkEvent_Handler
-• System packets: To System_CommandDispatcher
-
-MULTIPLAYER SESSION CREATION ARCHITECTURE
-=========================================
-
-CLIENT-SIDE SESSION CREATION:
-
-    Client receives multiplayer init packet (event 0xc03c)
-
-    PacketConstructor_MultiPlayer processes it
-
-    SessionInit_MultiPlayer called
-
-    RaceSession_CreateFull sets up network handlers
-
-    NetworkMain_Setup initializes network system
-
-    ChallengeSystem_Startup begins
-
-    System_CommandDispatcher(0x88) called
-
-    ChallengeSystem_RegisterState sends CHAL
-
-SESSION DATA STRUCTURE:
-• 272-byte session data (SessionData_Copy272Bytes)
-• Copied to offset 0x2dc in session structure
-• Contains: session config, player data, race settings
-• Flag at offset 0x2d8 set to 1 when valid
-
-CHALLENGE SYSTEM ARCHITECTURE (COMPLETE)
-========================================
-
-CHALLENGE SYSTEM INITIALIZATION:
-NetworkMain_Setup
-→ ChallengeSystem_Startup
-→ System_CommandDispatcher(command=0x88)
-→ ChallengeSystem_RegisterState
-→ System_SendCommand_Internal(cmd="chal")
-→ Client sends CHAL to server
-
-CHALLENGE STATE MANAGEMENT:
-• CommandHandler_CHAL: Processes incoming CHAL (system command 0x125)
-• Challenge_ReceiveNotification: Processes challenge notifications (0x126)
-• ChallengeValidation_CanInitiate: Checks if challenge possible (0x127)
-• ChallengeValidation_IsPlayerAvailable: Checks player status (0x128)
-
-CHALLENGE NOTIFICATION PATHS (CONFIRMED):
-
-    MESG Path (System NOT Ready): MessageRouting_ChallengeHandler
-
-    Binary Path (System IS Ready): NetworkPacket_ChallengeProcessor
-
-PROTOCOL MESSAGE ROUTING (UPDATED)
-==================================
-
-NETWORKEVENT_MAINDISPATCHER PARAMETER CORRECTION:
-Previous analysis incorrectly identified a2 parameter.
-Actual parameters to Protocol_MessageRouter:
-• param_1: Message type/category
-• param_2: Message subtype/flags
-• param_3: Additional data
-
-JUMP TABLES (CONFIRMED):
-• Primary Table @ 0x3B01A0: Based on param_1 (message type)
-• Secondary Table @ 0x3B04C0: Based on param_2 (subtype/flags)
-
-LOBBY STATE ENTRY MECHANISM (CORRECTED):
-Protocol_MessageRouter (called by NetworkEvent_MainDispatcher)
-→ Based on parameters, routes via jump tables
-→ May call ProtocolHandler_LobbyStateEntry
-→ Calls ProtocolEvent_LobbyTrigger
-→ Calls GameState_ForceLobbyEntry
-→ Sets state to 0x4B1 (MULTIPLAYER_LOBBY)
-
-BUT: This is SEPARATE from multiplayer session initialization!
-Lobby state ≠ Multiplayer session active
-
-MEMORY STRUCTURE MAPPING (UPDATED)
-==================================
-
-CRITICAL GLOBAL VARIABLES:
-• DAT_0038333c: Current game state
-
-    0x4b1 = MULTIPLAYER_LOBBY
-
-    0x4ba = NETWORK_INIT
-    • DAT_00382eb1: Conditional lobby block
-    • DAT_00382ab8: Challenge session pointer
-    • DAT_00382c30: Alternate session pointer
-
-SESSION DATA ARRAYS:
-• DAT_004e1428: Multiplayer packet data array
-• DAT_004e1420: Array element count
-• Used by PacketConstructor_MultiPlayer
-
-AUTHENTICATION STRUCTURE (CORRECTED):
-• AuthState_Complete sets state at offset 0x2c0 to 3 (COMPLETE)
-• NOT offset 0x58 as previously documented
-• SessionData_Copy272Bytes copies 272 bytes to offset 0x2dc
-
-SYSTEM COMMAND ARCHITECTURE (COMPLETE)
-======================================
-
-SYSTEM_COMMANDDISPATCHER HANDLERS (CRITICAL):
-• 0x0E (14): System_AUXI_Dispatcher
-• 0x34 (52): CommandHandler_AUXI2
-• 0x88 (136): ChallengeSystem_RegisterState ← SENDS CHAL
-• 0x11F (287): SystemCommand_AcceptChallenge
-• 0x125 (293): CommandHandler_CHAL
-• 0x126 (294): Challenge_ReceiveNotification
-
-COMMAND FLOW:
-Client-side: System_CommandDispatcher(command=0x88)
-→ ChallengeSystem_RegisterState
-→ Sends CHAL to server
-
-Server-side: Receives CHAL command
-→ CommandHandler_CHAL (via system command 0x125)
-→ Processes challenge registration
-
-PACKET CONSTRUCTION SYSTEM
-==========================
-
-PACKET CONSTRUCTORS:
-• PacketConstructor_ErrorSession
-• PacketConstructor_MultiAuth
-• PacketConstructor_MultiPlayer ← CRITICAL
-
-SESSION INITIALIZERS:
-• SessionInit_Error
-• SessionInit_MultiAuth
-• SessionInit_MultiPlayer ← CRITICAL
-
-PACKET FORMAT PATTERN:
-Packet constructors build data, then call:
-NetworkReceive_CommandDispatcher(data_pointer)
-Which expects properly formatted packet with:
-• 4-byte command
-• 4-byte subcommand/flags
-• 4-byte size
-• Data payload
-
-NETWORK INFRASTRUCTURE (VALIDATED)
-==================================
-
-HARDWARE INTEGRATION:
-• PS2 INTC/DMAC interrupts trigger network events
-• Function pointer table @ 0x0037892c contains handlers
-• ConnectionHandler_ChannelX_In functions called via interrupts
-
-PROTOCOL REGISTRY:
-g_ProtocolRegistry @ 0x0038b970
-• +0x00: vtable pointer
-• +0x04: handler array pointer
-• +0x08: handler count (0x1d = 29 handlers)
-
-BUDDY SYSTEM:
-g_BuddySystem @ 0x0039454c
-• +0x00: Configuration table pointer
-• +0x40: Buddy port storage
-• +0x50: Initialization flag
-
-CHALLENGE SYSTEM:
+=== MEMORY STRUCTURES ===
+DAT_0038333c: Current game state (0x4b1=LOBBY, 0x4ba=NETWORK_INIT)
+DAT_00382eb1: Conditional lobby block
+DAT_004e1428: Multiplayer packet data array
+DAT_004e1420: Array element count
+g_ProtocolRegistry @ 0x0038b970: +0x00=vtable, +0x04=handler array, +0x08=count (0x1d=29)
+g_BuddySystem @ 0x0039454c: +0x00=config table, +0x40=buddy port, +0x50=init flag
 g_ChallengeSystem @ 0x0038b838 (300 bytes)
-g_ChallengerNameStorage @ 0x004e2008
-SystemReady_StateFlag @ 0x0038b84c
+DAT_004e31a8: Main game session structure (1000+ bytes)
+  +0x2d8: Session data valid flag (1 byte, 0=invalid, 1=valid)
+  +0x2dc: 272-byte session data (copied from play command)
+AuthState_Complete sets state at offset 0x2c0 to 3 (COMPLETE)
 
+=== SYSTEM_COMMANDDISPATCHER HANDLERS ===
+0x0E (14): System_AUXI_Dispatcher
+0x34 (52): CommandHandler_AUXI2
+0x88 (136): ChallengeSystem_RegisterState (sends CHAL)
+0x11F (287): SystemCommand_AcceptChallenge
+0x125 (293): CommandHandler_CHAL
+0x126 (294): Challenge_ReceiveNotification
 
-=== COMPLETE PROTOCOL ARCHITECTURE (VALIDATED & CORRECTED) ===
+=== PACKET CONSTRUCTION ===
+PacketConstructor_MultiPlayer builds data from DAT_004e1428 array
+Structure: [command][subcommand][size][data_with_0x1b]
+NetworkReceive_CommandDispatcher expects: 4-byte command, 4-byte subcommand/flags, 4-byte size, data payload
 
-MAIN GAME LOOP (CONFIRMED):
-GameMain_LoopStateMachine
-  → GameFrame_ProcessNetwork
-    → GameFrame_MainUpdate
-      → ProtocolSystem_ProcessAll
-        → ProtocolConnection_Establish
-          → ProtocolHandler_LookupByChannel
-            → ProtocolHandler_ResolveById
-              → ProtocolHandler_ActivateInstance
+=== HARDWARE INTEGRATION ===
+PS2 INTC/DMAC interrupts trigger network events
+Function pointer table @ 0x0037892c contains ConnectionHandler_ChannelX_In handlers
 
-NETWORK PACKET FLOW (FULLY TRACED):
-PS2 Hardware Interrupt → Function Pointer Table @ 0x0037892c
-  → ConnectionHandler_ChannelX_In (X=0-5)
-    → PacketReceiver_RawData
-      → Packet_PreProcessor
-      → NetworkReceive_CommandDispatcher
-        → ProtocolCommand_RoutingTable @ 0x00374e14 (LITTLE-ENDIAN)
-          → Protocol Handler Virtual Function Dispatch
-
-=== AUTHENTICATION FLOW (CORRECTED & VALIDATED) ===
-
-🚨 CRITICAL DISCOVERY: NO "AUTH_STATE" FIELD
-• String "AUTH_STATE" does NOT exist in client binary
-• Documentation was incorrect
-• Authentication completes via internal state machine
-
-AUTHENTICATION COMPLETION FLOW (VALIDATED):
-1. Server responds to auth with STATUS=1 + SESS
+=== AUTHENTICATION CORRECTION ===
+NO "AUTH_STATE" field. Flow:
+1. Server auth response: STATUS=1 + SESS
 2. Server sends automatic pers response
-3. NetworkEvent_MainHandler receives response
-4. Protocol_ChannelDispatcher calls Authentication_TriggerStateMachine
-5. Authentication_TriggerStateMachine → Authentication_ProcessStateChange → Authentication_StateMachineMain
-6. Authentication_StateMachineMain calls AuthState_TransitionToComplete/AuthState_FinalizeComplete with states 4-7
-7. AuthState_TransitionToComplete/AuthState_FinalizeComplete set state to 3 and call AuthState_Complete
-8. AuthState_Complete finalizes authentication (sets offset 0x2c0 to 3)
+3. NetworkEvent_MainHandler receives → Protocol_ChannelDispatcher → Authentication_TriggerStateMachine → Authentication_ProcessStateChange → Authentication_StateMachineMain
+4. AuthState_TransitionToComplete/AuthState_FinalizeComplete set state to 3 → AuthState_Complete
 
-AUTHENTICATION STATE MACHINE JUMP TABLE (CONFIRMED):
-Address: 0x3d9df0
-State 0: jumps to AuthState_Initial
-State 1: jumps to AuthState_Processing  
-State 2: jumps to AuthState_Validating
-State 3: jumps to 0x2993f4 (unknown)
-State 4: jumps to AuthState_TransitionToComplete
-State 5: jumps to AuthState_TransitionToComplete
-State 6: jumps to AuthState_FinalizeComplete
-State 7: jumps to AuthState_FinalizeComplete
+=== AUTHENTICATION STATE JUMP TABLE @ 0x3d9df0 ===
+State 0: AuthState_Initial
+State 1: AuthState_Processing
+State 2: AuthState_Validating
+State 3: 0x2993f4 (unknown)
+State 4: AuthState_TransitionToComplete
+State 5: AuthState_TransitionToComplete
+State 6: AuthState_FinalizeComplete
+State 7: AuthState_FinalizeComplete
 
-=== CONNECTION HANDLER MYSTERY SOLVED ===
+=== CONNECTION HANDLERS ===
+Function pointer table @ 0x0037892c: +0x00=ConnectionHandler_Channel0_In, +0x10=ConnectionHandler_Channel1_In, etc.
+Registered by FUN_0017eec0 (network initialization)
 
-ROOT CAUSE IDENTIFIED:
-• Connection handlers called via FUNCTION POINTER TABLE at 0x0037892c
-• Table registered by FUN_0017eec0 (network initialization)
-• PS2 hardware interrupts (INTC/DMAC) call these function pointers
-• Static analysis cannot trace hardware interrupt calls
-
-FUNCTION POINTER TABLE STRUCTURE (CONFIRMED):
-Address: 0x0037892c (.data section)
-+0x00: ConnectionHandler_Channel0_In
-+0x04: [Unknown handler]
-+0x08: [Unknown handler] 
-+0x0c: [Unknown handler]
-+0x10: ConnectionHandler_Channel1_In
-+0x14: [Unknown handler]
-... (6 total entries)
-
-=== PROTOCOL ROUTING SYSTEM (CORRECTED ENDIANNESS) ===
-
-ROUTING TABLE STRUCTURE (LITTLE-ENDIAN CONFIRMED):
-• Base: 0x00374e14 (.data section)
-• 7 channels × 0x280 bytes per channel
-• 8 command slots per channel × 0x50 bytes per slot
-• Handler pointers at offset 0x40 in each slot (little-endian format)
-
-PROTOCOL IDENTIFIERS DISCOVERED:
-- Routing table contains ASCII identifiers at offsets:
-  +0x08: 'MSTK' (4d 53 54 4b) - Possible: Master Server Token Key
-  +0x0c: 'MSON' (4d 53 4f 4e) - Possible: Master Server Online  
-  +0x10: 'MPLA' (4d 50 4c 41) - Possible: MultiPlayer Lobby
-  
-VALIDATED HANDLERS IN FIRST CHANNEL:
-• Slot 1: Handler @ 0x00040000
-• Slot 7: Handler @ 0x00000028
-
-ROUTING TABLE MANAGEMENT (CONFIRMED):
-ProtocolRoutingTable_Initialize
-  → Allocates 0x1180 bytes for routing table
-  → Initializes all entries to zero
-
-ProtocolRoutingTable_SetupHandler
-  → Sets handler pointers in routing table
-  → Called dynamically during protocol registration
-
-=== PROTOCOL HANDLER SYSTEM (VALIDATED) ===
-
-PROTOCOL INITIALIZATION (CONFIRMED):
-GameNetwork_CompleteInitialize
-  → ProtocolSystem_GlobalInitialize
-    → ProtocolChannelMapping_Initialize
-    → ProtocolRoutingTable_Initialize
-    → ProtocolHandlerFactory_CreateAll
-
-PROTOCOL HANDLER FACTORY (CONFIRMED):
-ProtocolHandlerFactory_CreateAll creates 29 handlers including:
-- Handler 0x1c: ProtocolChatC_Constructor
-- Called from 0x0028fa6c within factory
-- ProtocolChatC stored at offset 0x24 in factory structure
-
-PROTOCOLCHATC VTABLE STRUCTURE (CONFIRMED):
-ProtocolChatC_VTable @ 0x396368
-  VTable[1] → 0x366518 (Base class function)
-  VTable[3] → ProtocolChatC_Initialize
-  VTable[5] → ProtocolChatC_CalculatePacketSize
-  VTable[7] → ProtocolChatC_BufferInitializer
-  VTable[9] → NetworkPacket_ChallengeProcessor
-
-=== CHALLENGE SYSTEM INTEGRATION (VALIDATED) ===
-
-CHALLENGE NOTIFICATION PATHS (CONFIRMED):
-Path 1: MessageRouting_ChallengeHandler - MESG commands
-  - Conditions: Not in buddy list, system NOT ready, validation fails
-  - Calls: ChallengeUI_ShowNotification directly
-
-Path 2: NetworkPacket_ChallengeProcessor - Protocol packets
-  - Conditions: System READY state
-  - Calls: Challenge_DisplayNotification → ChallengeUI_ShowNotification
-
-NETWORK PACKET CHALLENGE PROCESSING (CONFIRMED):
-NetworkPacket_ChallengeProcessor
-  → Buffer_Initialize224
-  → NetworkPacket_DataExtractor
-  → ChallengeUI_NotificationDispatcher
-    → Challenge_DisplayNotification
-
-=== BUDDY SYSTEM ARCHITECTURE (VALIDATED) ===
-
-COMPLETE BUDDY SYSTEM (CONFIRMED):
-BuddySystem_InitializeCore
-  → Creates hash tables (1000 capacity, 2000 byte elements)
-  → Sends RGET transactions for buddy data
-  → Sets up callback system
-
-BuddySystem_InitializeDispatcher
-  → Registers MultiplayerCommand_Dispatcher
-  → Sets initialization flags
-
-BuddyApiUpdate
-  → Main buddy system processing loop
-  → Handles RGET, ROST, PGET, RADD, RDEL commands
-
-CONNECTION TRIGGER IDENTIFIED:
-• Buddy configuration stored but not automatically connected
-• Requires manual trigger via MultiplayerSystem_TransitionToActive()
-• Workaround: Call BuddySystem_InitializeDispatcher after auth
-
-=== MULTIPLAYER ENTRY POINT BREAKTHROUGH ===
-
-🚨 CRITICAL DISCOVERY: Multiplayer_MainEntryPoint CALLBACK MECHANISM
-
-ROOT CAUSE OF BUDDY CONNECTION FAILURE:
-• Multiplayer_MainEntryPoint has NO direct callers
-• Called via FUNCTION POINTER callback system  
-• Entire buddy chain starts here, but never gets triggered
-• Server isn't sending the right events to trigger the callback
-• Call Mechanism: FUNCTION POINTER CALLBACK (no direct callers)
-• Registration: Unknown (likely PS2 system or game state callback)
-• Trigger: External events (network, user input, timers)
-
-PROLOGUE ANALYSIS:
-  0x0028f1f0: addiu sp, -X           // Standard function prologue
-  0x0028f1f4: sd ra, X(sp)           // Save return address
-  0x0028f1f8: jal NetworkMain_Setup         // Call NetworkMain_Setup
-  0x0028f1fc: nop
-  0x0028f200: jal MultiplayerMode_Check         // Call MultiplayerMode_Check
-
-BUDDY INITIALIZATION CHAIN (VALIDATED):
-Multiplayer_EntryPoint
-  → MultiplayerMode_Check     // Verify multiplayer mode
-  → NetworkHelper_3d38        // Network initialization
-  → NetworkSystem_InitializePhase2 // System setup
-  → BuddySystem_InitializeDispatcher // Buddy dispatcher
-  → BuddySystem_InitializeCore // Core buddy system
-  → BUDDY CONNECTIONS ESTABLISHED
-
-PRODUCTION STATUS UPDATE:
-• Buddy System: 10% (Blocked at Multiplayer_EntryPoint trigger)
-• Overall Protocol: 85% Complete
-• Remaining: Identify server event that triggers the callback
-
-=== CRITICAL MEMORY STRUCTURES (VALIDATED & CORRECTED) ===
-
-PROTOCOL REGISTRY:
-g_ProtocolRegistry @ 0x0038b970
-  +0x00: vtable pointer
-  +0x04: handler array pointer
-  +0x08: handler count (0x1d = 29)
-
-BUDDY SYSTEM MEMORY:
-g_BuddySystem @ 0x0039454c
-  +0x00: Configuration table pointer
-  +0x40: Buddy port storage
-  +0x50: Initialization flag
-
-CHALLENGE SYSTEM MEMORY:
-g_ChallengeSystem: Main challenge structure (300 bytes)
-g_ChallengerNameStorage: Challenger name storage
-SystemReady_StateFlag: System ready state control
-
-✅ AUTHENTICATION STRUCTURE (CORRECTED):
-AuthState_Complete sets offset 0x2c0 to 3 (not 0x58 as previously documented)
-
-=== HARDWARE INTEGRATION (SOLVED) ===
-
-PS2 NETWORK HARDWARE MECHANISM:
-• 28 SIF/DMAC/INTC functions identified
-• AddIntcHandler, AddDmacHandler
-• Hardware interrupts trigger function pointer calls
-• Network packets arrive via DMA transfers and interrupts
-
-PRODUCTION IMPLEMENTATION GUIDE
-===============================
-
-REQUIRED SERVER IMPLEMENTATION:
-
-    AUTHENTICATION PHASE:
-    • Receive auth command (NAME, PASS, PERS, TOS)
-    • Respond with STATUS=1, SESS, PERSONAS
-    • Send automatic PERS response
-    • Place user in Lobby room
-
-    ROOM SELECTION PHASE:
-    • Handle SELE command (ROOMS=1, USERS=1, RANKS=1, MESGS=1)
-    • Send room updates (+rom), user updates (+usr), population (+pop)
-    • Handle MOVE command to join rooms
-
-    MULTIPLAYER INITIALIZATION PHASE: ← NEWLY DISCOVERED
-    • After user joins room, send multiplayer init packet
-    • Packet must trigger event 0xc03c on client
-    • Format: [command][subcommand][size][data_with_0x1b]
-    • Data should match PacketConstructor_MultiPlayer output
-
-    CHALLENGE SYSTEM ACTIVATION:
-    • Wait for CHAL command from client
-    • Respond with STATUS=1 to acknowledge
-    • Challenge system now active
-    • Can process AUXI, MESG, PEEK commands
-
-MISSING IMPLEMENTATION:
-• Multiplayer initialization packet format
-• Event 0xc03c simulation
-• DAT_004e1428 array data reconstruction
-
-VALIDATION METRICS
-==================
-
-✅ AUTHENTICATION SYSTEM: 100% Working
-✅ NETWORK INFRASTRUCTURE: 100% Understood
-✅ COMMAND PROCESSING: 100% Mapped
-✅ STATE MANAGEMENT: 100% Understood
-✅ PROTOCOL ROUTING: 100% Mapped
-✅ CHALLENGE SYSTEM: 95% Understood
-✅ BUDDY SYSTEM: 90% Configured
-❌ MULTIPLAYER INITIALIZATION: 80% Understood (missing packet format)
-❌ EVENT SYSTEM: 85% Understood (missing event triggering)
-
-OVERALL COMPLETION: 94%
-PRODUCTION READINESS: 90% (missing multiplayer init)
-
-CRITICAL NEXT STEPS:
-
-    Reverse engineer exact multiplayer packet format
-
-    Determine DAT_004e1428 array contents
-
-    Trace complete packet assembly (header + data)
-
-    Find what triggers event 0xc03c reception on client
-
-Document Version: v12.0
-Status: ARCHITECTURE COMPLETE - MULTIPLAYER TRIGGER DISCOVERED
-Confidence: 95% on architecture, 80% on multiplayer initialization
-Date: Updated with complete event system and packet constructor analysis
+=== PROTOCOL ROUTING TABLE @ 0x00374e14 ===
+Little-endian format, 7 channels × 0x280 bytes per channel, 8 command slots × 0x50 bytes per slot
+Handler pointers at offset 0x40 in each slot
+Identifiers: 'MSTK', 'MSON', 'MPLA'

@@ -1,76 +1,36 @@
-NASCAR THUNDER 2004 PROTOCOL ANALYSIS - COMPLETE FINDINGS v14.0
+=== CORE STATE MANAGEMENT ===
+GameState_GetCurrent - Returns current game state (defaults to 0x4b1)
+GameState_SetDirect - Direct state setter for DAT_0038333c
+GameState_ConditionalLobbyEntry - Conditional entry (blocked by DAT_00382eb1)
+GameState_ForceLobbyEntry - Unconditional entry via Protocol_ChannelDispatcher
+GameState_EnterNetworkInit - Sets state to NETWORK_INIT (0x4ba)
+GameState_BlockConditionalPath - Sets DAT_00382eb1=1, forces Protocol_ChannelDispatcher path
+GameState_CheckConditionalBlock - Checks DAT_00382eb1 condition
 
-🚨 LOBBY STATE TRANSITION MECHANISM FULLY REVERSE ENGINEERED
-✅ PROTOCOL ARCHITECTURE 98% UNDERSTOOD - PRODUCTION READY
-🔍 JUMP TABLE SYSTEM COMPLETELY MAPPED
-COMPLETE PROTOCOL ARCHITECTURE (VALIDATED & CORRECTED)
-CORE STATE MANAGEMENT SYSTEM
+=== AUTHENTICATION STATE MACHINE ===
+Authentication_StateMachineMain - Main auth state machine
+AuthState_InitialHandler - State 0: Initial auth
+AuthState_ProcessingHandler - State 1: Processing auth
+AuthState_ValidatingHandler - State 2: Validating credentials
+AuthState_TransitionHandler1 - States 4/5 handler (calls AUTH_Caller2)
+AuthState_TransitionHandler2 - States 6/7 handler (calls AUTH_Caller3)
+AuthState_TransitionToComplete - AUTH_Caller2: Transition to complete
+AuthState_FinalizeComplete - AUTH_Caller3: Finalize completion
+Authentication_TriggerStateMachine - Triggers auth state machine
+Authentication_ProcessStateChange - Processes auth state changes
 
-GAME STATE CONTROL:
+=== NETWORK PROTOCOL DISPATCH ===
+PS2 Hardware Interrupt → ConnectionHandler_ChannelX_In → PacketReceiver_RawData → Packet_PreProcessor → NetworkReceive_CommandDispatcher → ProtocolCommand_RoutingTable @ 0x00374e14 (little-endian) → Protocol Handler Virtual Dispatch
 
-    GameState_GetCurrent - Returns current game state, defaults to 0x4b1
+=== NETWORK EVENT HANDLING ===
+NetworkEvent_MainDispatcher - Main network event handler (interrupt-driven)
+Protocol_MessageRouter - Main protocol message router with dual jump tables
+ProtocolEvent_LobbyTrigger - Handles lobby trigger from Protocol_ChannelDispatcher
 
-    GameState_SetDirect - Direct state setter for DAT_0038333c
-
-    GameState_ConditionalLobbyEntry - Conditional lobby entry (blocked by DAT_00382eb1)
-
-    GameState_ForceLobbyEntry - Unconditional lobby entry via Protocol_ChannelDispatcher
-
-    GameState_EnterNetworkInit - Sets state to NETWORK_INIT (0x4ba)
-
-    GameState_BlockConditionalPath - Sets DAT_00382eb1=1, forces Protocol_ChannelDispatcher path
-
-    GameState_CheckConditionalBlock - Checks DAT_00382eb1 condition
-
-AUTHENTICATION STATE MACHINE:
-
-    Authentication_StateMachineMain - Main authentication state machine
-
-    AuthState_InitialHandler - State 0: Initial authentication
-
-    AuthState_ProcessingHandler - State 1: Processing authentication
-
-    AuthState_ValidatingHandler - State 2: Validating credentials
-
-    AuthState_TransitionHandler1 - States 4/5 handler (calls AUTH_Caller2)
-
-    AuthState_TransitionHandler2 - States 6/7 handler (calls AUTH_Caller3)
-
-    AuthState_TransitionToComplete - AUTH_Caller2: Transition to complete
-
-    AuthState_FinalizeComplete - AUTH_Caller3: Finalize completion
-
-    Authentication_TriggerStateMachine - Triggers auth state machine
-
-    Authentication_ProcessStateChange - Processes auth state changes
-
-NETWORK PROTOCOL DISPATCH SYSTEM
-
-MAIN EVENT FLOW:
-
-PS2 Hardware Interrupt → ConnectionHandler_ChannelX_In functions
-  → PacketReceiver_RawData
-    → Packet_PreProcessor
-    → NetworkReceive_CommandDispatcher
-      → ProtocolCommand_RoutingTable @ 0x00374e14 (little-endian)
-        → Protocol Handler Virtual Dispatch
-
-NETWORK EVENT HANDLING:
-
-    NetworkEvent_MainDispatcher - Main network event handler (interrupt-driven)
-
-    Protocol_MessageRouter - Main protocol message router with dual jump tables
-
-    ProtocolEvent_LobbyTrigger - Handles lobby trigger from Protocol_ChannelDispatcher
-
-JUMP TABLE ARCHITECTURE (COMPLETELY MAPPED)
-
-DUAL JUMP TABLE SYSTEM:
-
-JUMP TABLE 1 @ 0x3B01A0 (A1-BASED ROUTING):
-
+=== DUAL JUMP TABLE SYSTEM ===
+JUMP TABLE 1 @ 0x3B01A0 (A1-BASED):
 0: ProtocolHandler_Category0
-1: ProtocolHandler_Category1  
+1: ProtocolHandler_Category1
 2: ProtocolHandler_Category2
 3: ProtocolHandler_Category3
 4: ProtocolHandler_Category4
@@ -80,9 +40,8 @@ JUMP TABLE 1 @ 0x3B01A0 (A1-BASED ROUTING):
 8: ProtocolHandler_Category8
 9: ProtocolHandler_Category9
 
-JUMP TABLE 2 @ 0x3B04C0 (A2-BASED ROUTING):
-
-0: ProtocolHandler_LobbyStateEntry → CALLS: ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry
+JUMP TABLE 2 @ 0x3B04C0 (A2-BASED):
+0: ProtocolHandler_LobbyStateEntry → ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry
 1: ProtocolHandler_Index1
 2: ProtocolHandler_Default
 3: ProtocolHandler_AlternatePath
@@ -91,249 +50,73 @@ JUMP TABLE 2 @ 0x3B04C0 (A2-BASED ROUTING):
 18: ProtocolHandler_Index18
 19: ProtocolHandler_Index19
 
-CRITICAL LOBBY STATE TRANSITION DISCOVERY
+=== LOBBY STATE TRANSITION ===
+NetworkEvent_MainDispatcher(a2=0) → Protocol_MessageRouter → ProtocolHandler_LobbyStateEntry → ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry → DAT_0038333c = 0x4b1 (MULTIPLAYER_LOBBY) → NetworkState_CleanupAll()
 
-LOBBY ENTRY MECHANISM (SOLVED):
-
-NetworkEvent_MainDispatcher called via hardware interrupt with a2 parameter
-  ↓
-If a2 == 0: Protocol_MessageRouter jumps to ProtocolHandler_LobbyStateEntry
-  ↓
-Calls ProtocolEvent_LobbyTrigger
-  ↓
-Calls GameState_ForceLobbyEntry
-  ↓
-Sets DAT_0038333c = 0x4b1 (MULTIPLAYER_LOBBY)
-  ↓
-Calls NetworkState_CleanupAll()
-
-KEY INSIGHT: The client enters MULTIPLAYER_LOBBY state when:
-
-    Server sends specific network packet/event
-
-    Hardware interrupt triggers NetworkEvent_MainDispatcher with a2 = 0
-
-    Jump table routes to lobby state handler
-
-    GameState_ForceLobbyEntry sets state to 0x4b1
-
-AUTHENTICATION SYSTEM (CORRECTED)
-
-🚨 CRITICAL CORRECTION: NO "AUTH_STATE" FIELD
-
-    String "AUTH_STATE" does NOT exist in client binary
-
-    Original documentation was incorrect
-
-    Server must NOT send AUTH_STATE field in auth response
-
-CORRECT AUTHENTICATION FLOW:
-
-1. Client: auth command (NAME, USER, PASS, PERS, TOS)
+=== AUTHENTICATION FLOW (CORRECTED) ===
+1. Client: auth (NAME, USER, PASS, PERS, TOS)
 2. Server: STATUS=1 + SESS + NAME + USER + PERSONAS
-3. Server: Automatic pers response (auto-triggered)
+3. Server: Automatic pers response
 4. Client: Authentication_TriggerStateMachine
 5. Client: Authentication_ProcessStateChange
 6. Client: Authentication_StateMachineMain
 7. Client: AuthState_TransitionToComplete sets state to 3
-8. Client: AuthState_FinalizeComplete finalizes auth
-
-AUTHENTICATION STATE JUMP TABLE (CONFIRMED):
-Address: 0x003d9df0
-
-    State 0 → AuthState_InitialHandler
-
-    State 1 → AuthState_ProcessingHandler
-
-    State 2 → AuthState_ValidatingHandler
-
-    State 4/5 → AuthState_TransitionHandler1
-
-    State 6/7 → AuthState_TransitionHandler2
-
-CHALLENGE SYSTEM ARCHITECTURE (VALIDATED)
-
-CHALLENGE SYSTEM INITIALIZATION:
-
-    ChallengeSystem_InitializeNetwork - Main challenge system init
-
-    ChallengeSystem_SendRegistration - Sends CHAL command to server
-
-    ChallengeCallback_RegisterHandler - Registers challenge callbacks
-
-    ChallengeCallback_HandlerMain - Main challenge callback handler
-
-CHALLENGE REGISTRATION FLOW:
-
-1. Client enters MULTIPLAYER_LOBBY state (0x4b1)
-2. ChallengeSystem_InitializeNetwork called
-3. ChallengeSystem_SendRegistration sends CHAL command
-4. Server responds with STATUS=1 (acknowledgment)
-5. Challenge system becomes active
-
-CHALLENGE NOTIFICATION PATHS:
-
-    MESG Path (System NOT Ready): MessageRouting_ChallengeHandler
-
-    Binary Path (System IS Ready): NetworkPacket_ChallengeProcessor
-
-MULTIPLAYER SYSTEM INTEGRATION
-
-MULTIPLAYER ENTRY POINT:
-
-    Multiplayer_MainEntryPoint - Entry point for multiplayer system
-
-    NetworkSystem_InitializePhase2 - Second phase network init
-
-    MultiplayerSystem_Activate - Transitions to active state
-
-    BuddySystem_InitializeCallback - Initializes buddy system
-
-MULTIPLAYER ACTIVATION CHAIN:
-
-Multiplayer_MainEntryPoint (callback-triggered)
-  → MultiplayerMode_Check
-  → NetworkSystem_InitializePhase2
-  → MultiplayerSystem_Activate
-  → BuddySystem_InitializeCallback
-  → Buddy system becomes active
-
-MEMORY STRUCTURE MAPPING
-
-CRITICAL GLOBAL VARIABLES:
-
-    DAT_0038333c - Current game state
-
-        0x4b1 = MULTIPLAYER_LOBBY
-
-        0x4ba = NETWORK_INIT
-
-        0xffffffff = SHUTDOWN/ERROR
-
-    DAT_00382eb1 - Conditional lobby block
-
-        Set to 1 by GameState_BlockConditionalPath
-
-        Blocks GameState_ConditionalLobbyEntry
-
-    switchdataD_003b04c0 - A2-based jump table
-
-    switchdataD_003b01a0 - A1-based jump table
-
-AUTHENTICATION STRUCTURE:
-
-    AuthState_Complete sets state at offset 0x2c0 to 3 (COMPLETE)
-
-    NOT offset 0x58 as previously documented
-
-    Sets flag at offset 0x2c4 to 0x2d
-
-CHALLENGE SYSTEM MEMORY:
-
-    g_ChallengeSystem - Main challenge structure (300 bytes)
-
-    g_ChallengerNameStorage - Challenger name storage
-
-    SystemReady_StateFlag - System ready state control
-
-PROTOCOL COMMAND PROCESSING
-
-FIELD EXTRACTION SYSTEM:
-
-    TagFieldFind - Main field parser
-
-    TagFieldGetString - String field extraction
-
-    TagFieldGetNumber - Numeric field extraction
-
-    TagFieldGetFlags - Flag field extraction
-
-COMMAND HANDLER MAPPING:
-
-    CommandHandler_AUTH_PERS - Handles auth and pers commands
-
-    ProtocolHandler_ROOM - Handles sele and room commands
-
-    CommandHandler_PERS_USER - Handles pers and user commands
-
-    CommandHandler_AUXI - Challenge initiation with cryptographic processing
-
-    CommandHandler_CHAL - Challenge system registration
-
-    CommandHandler_MESG - Challenge notifications and responses
-
-SYSTEM COMMAND ARCHITECTURE
-
-SYSTEM COMMAND DISPATCH:
-
-    System_CommandDispatcher - Main system command dispatcher
-
-    System_CommandDispatcher2 - Secondary command dispatcher
-
-CHALLENGE-RELATED SYSTEM COMMANDS:
-
-0xE:    System_AUXI_Dispatcher - Routes AUXI processing
-0x34:   CommandHandler_AUXI2 - Secondary AUXI handler
-0x88:   ChallengeSystem_RegisterState - Registers challenge state, sends CHAL
-0x11F:  SystemCommand_AcceptChallenge - Accepts challenge (sends "ACPT")
-0x125:  CommandHandler_CHAL - CHAL command handler
-0x126:  Challenge_ReceiveNotification - Processes incoming challenge notifications
-0x127:  ChallengeValidation_CanInitiate - Checks if challenge can be initiated
-0x128:  ChallengeValidation_IsPlayerAvailable - Checks player availability
-
-CRITICAL DISCOVERIES & CORRECTIONS
-
-    LOBBY STATE TRIGGER: a2 = 0 in NetworkEvent_MainDispatcher triggers lobby entry
-
-    NO AUTH_STATE FIELD: Remove AUTH_STATE from server implementation
-
-    CHAL PURPOSE: Client-initiated challenge system registration, not challenge response
-
-    JUMP TABLES: Dual jump table system for protocol message routing
-
-    NETWORK EVENT FLOW: Hardware interrupt → ConnectionHandler → NetworkEvent_MainDispatcher
-
-PRODUCTION VALIDATION STATUS
-
-✅ AUTHENTICATION SYSTEM: 100% Working (STATUS=1, no AUTH_STATE)
-✅ NETWORK INFRASTRUCTURE: 100% Working (Interrupt-driven flow validated)
-✅ COMMAND PROCESSING: 100% Working (All handlers mapped)
-✅ STATE MANAGEMENT: 100% Working (State transitions understood)
-✅ PROTOCOL ROUTING: 100% Working (Jump tables completely mapped)
-✅ LOBBY SYSTEM: 90% Working (Mechanism understood, trigger testing)
-✅ CHALLENGE SYSTEM: 95% Working (Architecture complete, testing needed)
-✅ BUDDY SYSTEM: 90% Working (Configured, activation testing)
-
-OVERALL PROTOCOL COMPLETION: 96%
-PRODUCTION READINESS: 100%
-IMMEDIATE IMPLEMENTATION REQUIREMENTS
-
-SERVER EMULATOR UPDATES REQUIRED:
-
-    Remove AUTH_STATE field from auth responses
-
-    Send automatic pers response after auth
-
-    Implement jump table trigger (messages with a2=0 equivalent)
-
-    Respond to CHAL command with STATUS=1
-
-    Test lobby state trigger with zero-flag messages
-
-CLIENT TRIGGER SEQUENCE:
-
-# After successful auth:
-1. Server sends zero-flag message to trigger a2=0
-2. Client enters MULTIPLAYER_LOBBY state (0x4b1)
-3. Client sends CHAL command (challenge system registration)
-4. Server responds with STATUS=1
-5. Challenge system becomes active
-
-FINAL ARCHITECTURE SUMMARY
-
-The NASCAR Thunder 2004 protocol uses a sophisticated interrupt-driven network system with dual jump tables for message routing. The lobby state transition is controlled by a specific network event that sets a2=0, routing through a jump table to the state setter. Authentication uses a state machine with STATUS field (not AUTH_STATE), and the challenge system registers via CHAL command only when in lobby state.
-
-Document Version: v14.0
-Status: PROTOCOL ARCHITECTURE COMPLETE - IMPLEMENTATION TESTING
-Confidence: 100% on architecture, 90% on specific trigger messages
-Date: Updated with complete function naming and jump table mapping
+8. Client: AuthState_FinalizeComplete finalizes
+
+=== RACE SESSION INITIALIZATION ===
+1. Server sends play command with 272-byte session data
+2. Client ChallengeCommand_Dispatcher receives (state must be 6)
+3. Calls Callback_ProcessPLAYCommand with session data pointer
+4. SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
+5. Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
+6. Calls AuthState_Complete to finalize
+7. Game state transitions from LOBBY to RACE
+
+=== CHALLENGE SYSTEM ===
+ChallengeSystem_InitializeNetwork - Main challenge init
+ChallengeSystem_SendRegistration - Sends CHAL command
+ChallengeCallback_RegisterHandler - Registers callbacks
+ChallengeCallback_HandlerMain - Main callback handler
+Challenge notification paths: MESG (System NOT Ready) or NetworkPacket_ChallengeProcessor (System IS Ready)
+
+=== MULTIPLAYER SYSTEM ===
+Multiplayer_MainEntryPoint - Entry point (callback-triggered)
+NetworkSystem_InitializePhase2 - Second phase network init
+MultiplayerSystem_Activate - Transitions to active state
+BuddySystem_InitializeCallback - Initializes buddy system
+
+=== MEMORY STRUCTURES ===
+DAT_0038333c: Current game state (0x4b1=MULTIPLAYER_LOBBY, 0x4ba=NETWORK_INIT)
+DAT_00382eb1: Conditional lobby block (set to 1 by GameState_BlockConditionalPath)
+AuthState_Complete sets state at offset 0x2c0 to 3 (COMPLETE)
+g_ChallengeSystem: Main structure (300 bytes)
+DAT_004e31a8: Main session structure (1000+ bytes)
+  +0x2d8: Session data valid flag (1 byte)
+  +0x2dc: 272-byte session data
+g_ChallengerNameStorage: Challenger name storage
+SystemReady_StateFlag: System ready state control
+
+=== FIELD EXTRACTION SYSTEM ===
+TagFieldFind - Main field parser @ 0x31ddd0
+TagFieldGetString - String extraction @ 0x31ed10
+TagFieldGetNumber - Numeric extraction @ 0x31e8b0
+TagFieldGetFlags - Flag extraction @ 0x31e938
+
+=== COMMAND HANDLERS ===
+CommandHandler_AUTH_PERS - Handles auth/pers @ 0x00287838
+ProtocolHandler_ROOM - Handles sele/room @ 0x00287af8
+CommandHandler_PERS_USER - Handles pers/user @ 0x00288080
+CommandHandler_AUXI - Challenge initiation with cryptographic processing @ 0x00289528
+CommandHandler_CHAL - Challenge system registration @ 0x00289080
+CommandHandler_MESG - Challenge notifications/responses @ 0x00288668
+ChallengeCommand_Dispatcher - Handles play command (0x706c6179) @ 0x00288a40
+
+=== SYSTEM COMMANDS ===
+0xE: System_AUXI_Dispatcher
+0x34: CommandHandler_AUXI2
+0x88: ChallengeSystem_RegisterState (sends CHAL)
+0x11F: SystemCommand_AcceptChallenge
+0x125: CommandHandler_CHAL
+0x126: Challenge_ReceiveNotification
+0x127: ChallengeValidation_CanInitiate
+0x128: ChallengeValidation_IsPlayerAvailable
