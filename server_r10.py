@@ -498,24 +498,8 @@ def send_multiplayer_initialization(session):
     session_data = create_272_byte_session_data(session)
     ses_packet = create_packet('+ses', '', session_data)
     session.connection.sendall(ses_packet)
-    time.sleep(0.5)
-    
-    # 2. Send F=0 protocol commands
-    #print("  Step 2: Sending F=0 lobby state triggers")
-    #f_zero_cmds = [
-        #("+usr", f"I=1\nN={session.clientNAME}\nF=0\nA={SERVER_IP}\n"),
-        #("+rom", f"I=1\nN={session.current_room}\nH=Race Lobby\nL=8\nA=Server\nT=0\nF=0\n"),
-        #("+msg", f"FROM=Server\nTEXT=LOBBY_ACTIVE\nF=0\n"),
-    #]
-    
-    #for cmd, payload in f_zero_cmds:
-        #packet = create_packet(cmd, '', payload)
-        #session.connection.sendall(packet)
-        #print(f"    Sent {cmd} with F=0")
-        #time.sleep(0.3)
-    
-    print(f"=== MULTIPLAYER INIT COMPLETE ===\n")
-    
+    time.sleep(0.5)    
+    print(f"=== MULTIPLAYER INIT COMPLETE ===\n")    
     session.multiplayer_initialized = True
     session.expecting_chal = True
     
