@@ -1,0 +1,240 @@
+=== NASCAR THUNDER 2004 PROTOCOL STRING CONSTANTS - UPDATED ===
+
+=== IMPORTANT DISCOVERY ===
+? "AUTH_STATE" string does NOT exist in the binary
+? Authentication uses STATUS field instead
+? Working authentication field: STATUS=1
+
+=== ALL STRINGS VERIFIED IN .SDATA SECTION (0x003e2900-0x003e3533) ===
+
+=== BUDDY_ LABELS ===
+BUDDY_UsernameField = 0x003e3478 -> 'USER'
+BUDDY_DefaultString = 0x003e3480
+BUDDY_FieldType = 0x003e34f0 -> 'ID'
+BUDDY_GroupField = 0x003e3500 -> 'GROUP'
+BUDDY_RequestType = 0x003e3520 -> 'SIZE'
+BUDDY_NicknameField = 0x003e3528 -> 'FUSR'
+Total BUDDY_ labels: 6
+
+=== CFG_ LABELS ===
+CFG_DefaultValue = 0x003e3328
+CFG_Field1 = 0x003e3330 -> 'USER'
+CFG_Field2 = 0x003e3338 -> 'TYPE'
+CFG_CompareString = 0x003e3340 -> 'C'
+CFG_Field3 = 0x003e3348 -> 'BODY'
+CFG_Field4 = 0x003e3350 -> 'TIME'
+Total CFG_ labels: 6
+
+=== LOBBY_ LABELS ===
+LOBBY_DirectField = 0x003e3010 -> 'DIRECT'
+LOBBY_PortField = 0x003e3018 -> 'PORT'
+LOBBY_SessionField = 0x003e3020 -> 'SESS'
+LOBBY_ServerField = 0x003e3028 -> 'DOWN'
+LOBBY_PublicKeyField = 0x003e3030 -> 'SKEY'
+LOBBY_SlotsField = 0x003e3038 -> 'MORE'
+LOBBY_MaxSlotsField = 0x003e3040 -> 'SLOTS'
+LOBBY_PersonaField = 0x003e3048 -> 'PERS'
+Total LOBBY_ labels: 8
+
+=== NET_ LABELS ===
+NET_Field1 = 0x003e2f78 -> 'ORIG'
+NET_Field2 = 0x003e2f80 -> 'NAME'
+NET_DefaultValue = 0x003e2f88
+NET_Field3 = 0x003e2f90 -> 'ADDR'
+NET_Field4 = 0x003e2f98 -> 'PING'
+NET_IPFormat = 0x003e2fa0 -> '%dms'
+NET_AuthField = 0x003e2fd8 -> 'PASS'
+NET_StatusField = 0x003e2fe0 -> 'MASK'
+NET_SnapField = 0x003e2fe8 -> 'CHAN'
+NET_PingField = 0x003e3008 -> 'TIME'
+Total NET_ labels: 10
+
+=== STR_ LABELS ===
+STR_N = 0x003d82b8 -> 'N'
+STR_T = 0x003d82c8 -> 'T'
+STR_NAME2 = 0x003d82f8 -> 'NAME'
+STR_PASS2 = 0x003d8300 -> 'PASS'
+STR_PERS2 = 0x003d8308 -> 'PERS'
+STR_DESC = 0x003d8310 -> 'DESC'
+STR_MAX = 0x003d8320 -> 'MAX'
+STR_ADDR = 0x003d8378 -> 'ADDR'
+STR_ROOM = 0x003d8380 -> 'ROOM'
+STR_PRIV = 0x003d8390 -> 'PRIV'
+STR_TEXT = 0x003d8398 -> 'TEXT'
+STR_ATTR = 0x003d83a0 -> 'ATTR'
+STR_PERS = 0x003d83a8 -> 'PERS'
+STR_HOST = 0x003d83b0 -> 'HOST'
+STR_BLOC = 0x003d83b8 -> 'BLOC'
+STR_DECL = 0x003d83c0 -> 'DECL'
+STR_ACPT = 0x003d83c8 -> 'ACPT'
+STR_CHAL_Format = 0x003d83f8 -> '*'
+STR_TEXT = 0x003d84d8 -> 'TEXT'
+STR_PRIV = 0x003d84e0 -> 'PRIV'
+STR_None = 0x003e3238 -> 'None'
+STR_NAME = 0x003e3270 -> 'NAME'
+STR_MAIL = 0x003e3280 -> 'MAIL'
+STR_SPAM = 0x003e3288 -> 'SPAM'
+STR_CPAT = 0x003e3290 -> 'CPAT'
+STR_TOS = 0x003e3298 -> 'TOS'
+STR_PASS = 0x003e32a0 -> 'PASS'
+STR_ALTS = 0x003e32a8 -> 'ALTS'
+STR_BORN = 0x003e32b0 -> 'BORN'
+STR_GEND = 0x003e32b8 -> 'GEND'
+STR_CHNG = 0x003e32d0 -> 'CHNG'
+Total STR_ labels: 31
+
+=== USER_ LABELS ===
+USER_Field1 = 0x003e3050 -> 'SELF'
+USER_Field2 = 0x003e3058 -> 'HOST'
+USER_Field3 = 0x003e3060 -> 'OPPO'
+USER_Field4 = 0x003e3068 -> 'P1'
+USER_Field5 = 0x003e3070 -> 'P2'
+USER_Field6 = 0x003e3078 -> 'P3'
+USER_Field7 = 0x003e3080 -> 'P4'
+USER_Field8 = 0x003e3088 -> 'AUTH'
+USER_Field9 = 0x003e3090 -> 'FROM'
+USER_Field10 = 0x003e3098 -> 'SEED'
+USER_Field11 = 0x003e30a0 -> 'WHEN'
+Total USER_ labels: 11
+
+=== STATUS FIELD DISCOVERY ===
+? Found "STAT" string at 0x003e34a8 -> 'STAT'
+? This is likely used for STATUS field in responses
+? NOT FOUND: "AUTH_STATE" string anywhere in binary
+
+=== BUDDY LABEL DETAILS ===
+BUDDY_UsernameField = 0x003e3478 -> 'USER'
+BUDDY_DefaultString = 0x003e3480
+BUDDY_FieldType = 0x003e34f0 -> 'ID'
+BUDDY_GroupField = 0x003e3500 -> 'GROUP'
+BUDDY_RequestType = 0x003e3520 -> 'SIZE'
+BUDDY_NicknameField = 0x003e3528 -> 'FUSR'
+
+=== NET LABEL DETAILS ===
+NET_Field1 = 0x003e2f78 -> 'ORIG'
+NET_Field2 = 0x003e2f80 -> 'NAME'
+NET_DefaultValue = 0x003e2f88
+NET_Field3 = 0x003e2f90 -> 'ADDR'
+NET_Field4 = 0x003e2f98 -> 'PING'
+NET_IPFormat = 0x003e2fa0 -> '%dms'
+NET_AuthField = 0x003e2fd8 -> 'PASS'
+NET_StatusField = 0x003e2fe0 -> 'MASK'
+NET_SnapField = 0x003e2fe8 -> 'CHAN'
+NET_PingField = 0x003e3008 -> 'TIME'
+
+=== LOBBY LABEL DETAILS ===
+LOBBY_DirectField = 0x003e3010 -> 'DIRECT'
+LOBBY_PortField = 0x003e3018 -> 'PORT'
+LOBBY_SessionField = 0x003e3020 -> 'SESS'
+LOBBY_ServerField = 0x003e3028 -> 'DOWN'
+LOBBY_PublicKeyField = 0x003e3030 -> 'SKEY'
+LOBBY_SlotsField = 0x003e3038 -> 'MORE'
+LOBBY_MaxSlotsField = 0x003e3040 -> 'SLOTS'
+LOBBY_PersonaField = 0x003e3048 -> 'PERS'
+
+=== USER LABEL DETAILS ===
+USER_Field1 = 0x003e3050 -> 'SELF'
+USER_Field2 = 0x003e3058 -> 'HOST'
+USER_Field3 = 0x003e3060 -> 'OPPO'
+USER_Field4 = 0x003e3068 -> 'P1'
+USER_Field5 = 0x003e3070 -> 'P2'
+USER_Field6 = 0x003e3078 -> 'P3'
+USER_Field7 = 0x003e3080 -> 'P4'
+USER_Field8 = 0x003e3088 -> 'AUTH'
+USER_Field9 = 0x003e3090 -> 'FROM'
+USER_Field10 = 0x003e3098 -> 'SEED'
+USER_Field11 = 0x003e30a0 -> 'WHEN'
+
+=== CFG LABEL DETAILS ===
+CFG_DefaultValue = 0x003e3328
+CFG_Field1 = 0x003e3330 -> 'USER'
+CFG_Field2 = 0x003e3338 -> 'TYPE'
+CFG_CompareString = 0x003e3340 -> 'C'
+CFG_Field3 = 0x003e3348 -> 'BODY'
+CFG_Field4 = 0x003e3350 -> 'TIME'
+
+=== STR LABEL DETAILS ===
+STR_N = 0x003d82b8 -> 'N'
+STR_T = 0x003d82c8 -> 'T'
+STR_NAME2 = 0x003d82f8 -> 'NAME'
+STR_PASS2 = 0x003d8300 -> 'PASS'
+STR_PERS2 = 0x003d8308 -> 'PERS'
+STR_DESC = 0x003d8310 -> 'DESC'
+STR_MAX = 0x003d8320 -> 'MAX'
+STR_ADDR = 0x003d8378 -> 'ADDR'
+STR_ROOM = 0x003d8380 -> 'ROOM'
+STR_PRIV = 0x003d8390 -> 'PRIV'
+STR_TEXT = 0x003d8398 -> 'TEXT'
+STR_ATTR = 0x003d83a0 -> 'ATTR'
+STR_PERS = 0x003d83a8 -> 'PERS'
+STR_HOST = 0x003d83b0 -> 'HOST'
+STR_BLOC = 0x003d83b8 -> 'BLOC'
+STR_DECL = 0x003d83c0 -> 'DECL'
+STR_ACPT = 0x003d83c8 -> 'ACPT'
+STR_CHAL_Format = 0x003d83f8 -> '*'
+STR_TEXT = 0x003d84d8 -> 'TEXT'
+STR_PRIV = 0x003d84e0 -> 'PRIV'
+STR_None = 0x003e3238 -> 'None'
+STR_NAME = 0x003e3270 -> 'NAME'
+STR_MAIL = 0x003e3280 -> 'MAIL'
+STR_SPAM = 0x003e3288 -> 'SPAM'
+STR_CPAT = 0x003e3290 -> 'CPAT'
+STR_TOS = 0x003e3298 -> 'TOS'
+STR_PASS = 0x003e32a0 -> 'PASS'
+STR_ALTS = 0x003e32a8 -> 'ALTS'
+STR_BORN = 0x003e32b0 -> 'BORN'
+STR_GEND = 0x003e32b8 -> 'GEND'
+STR_CHNG = 0x003e32d0 -> 'CHNG'
+
+=== CFG LABEL DETAILS ===
+ROOM_Caller = 0x002076b8 [FUNCTION: ROOM_Caller]
+ROOM_IDField = 0x003e30d8 -> 'I'
+ROOM_DescriptionField = 0x003e30e0 -> 'H'
+ROOM_HostField = 0x003e30e8 -> 'A'
+ROOM_PlayerCountField = 0x003e30f0 -> 'T'
+ROOM_MaxPlayersField = 0x003e30f8 -> 'L'
+ROOM_PasswordField = 0x003e3110 -> 'P'
+ROOM_DefaultPassword = 0x003e3118 -> '---'
+ROOM_PasswordFormat = 0x003e3120 -> '~%dms'
+ROOM_PopulationField = 0x003e3128 -> 'Z'
+
+=== INDEX/RANGE SYSTEM ===
+INDEX_Field = 0x003d9128 -> 'INDEX'
+RANGE_Field = 0x003d9130 -> 'RANGE'
+
+=== ACCOUNT CREATION FIELDS ===
+MINAGE_Field = 0x003e32c0 -> 'MINAGE'
+PMAIL_Field = 0x003e32c8 -> 'PMAIL'
+
+=== PERSONA SYSTEM ===
+PERSONAS_Field = 0x003e0410 -> 'PERSONAS'
+TITLE_Field = 0x003d8358 -> 'TITLE'
+
+=== RANKING SYSTEM ===
+RACETIME_Field = 0x003d9b28 -> 'RACETIME'
+
+=== NETWORK DEBUG/UTILITY ===
+ASYNC_Field = 0x003e2d90 -> 'ASYNC'
+COUNT_Field = 0x003e3160 -> 'COUNT'
+FLAGS_Field = 0x003e3168 -> 'FLAGS'
+FMVOBJ_Field = 0x003e2ea8 -> 'FMVOBJ'
+IDENT_Field = 0x003e3158 -> 'IDENT'
+LCOUNT_Field = 0x003e3150 -> 'LCOUNT'
+LIDENT_Field = 0x003e3148 -> 'LIDENT'
+ERROR_Field = 0x0039b888 -> 'ERROR'
+
+=== FORMAT STRINGS ===
+FORMAT_Users = 0x003e2fc0 -> 'USERS='
+FORMAT_Dash = 0x003e3308 -> '%d- %s'
+
+=== DEBUG STRINGS ===
+DEBUG_Bogus = 0x003e2ff8 -> 'bogus'
+DEBUG_Server = 0x003e3000 -> '@server'
+DEBUG_Recv = 0x003e3518 -> 'recv: '
+DEBUG_Send = 0x003e3470 -> 'send: '
+DEBUG_Slogin = 0x003e3380 -> 'slogin'
+
+=== CRITICAL STRING MISSING ===
+? NOT FOUND: "AUTH_STATE" anywhere in binary
+? Authentication uses: STATUS field (found "STAT" at 0x003e34a8)
+? Working authentication: Server sends STATUS=1, not AUTH_STATE=3
