@@ -99,26 +99,31 @@ class NetworkHandlers:
 		    # Build identifier: "new0", "new1", etc.
 		    identifier = f"new{name_value}"
 		    
-		    if name_value == 0:
-		        response_lines = [
-		            f"BUDDY_URL={self.server_ip}", 
-		            f"BUDDY_PORT={self.ports['buddy']}",		             
-		            "STATUS=1"
-		        ]
-		    elif name_value == 1:
-		        response_lines = [
-		            "NEWS_TEXT=VTSTech NASCAR Server Online",
-		            "NEWS_TEXT=Buddy System Active", 
-		            "NEWS_TEXT=Challenge System Ready",
-		            "NEWS_TEXT=Room Creation Available",
-		            "COUNT=4",
-		            "STATUS=1"
-		        ]
+		    # Get game-specific news response
+		    if hasattr(self, 'game_handlers') and self.game_handlers:
+		        response_lines = self.game_handlers.get_news_response(name_value)
 		    else:
-		        response_lines = [
-		            f"STATUS=0",
-		            f"ERROR=Unknown news type {name_value}"
-		        ]
+		        # Default response
+		        if name_value == 0:
+		            response_lines = [
+		                f"BUDDY_URL={self.server_ip}", 
+		                f"BUDDY_PORT={self.ports['buddy']}",		             
+		                "STATUS=1"
+		            ]
+		        elif name_value == 1:
+		            response_lines = [
+		                "NEWS_TEXT=VTSTech Server Online",
+		                "NEWS_TEXT=Multiplayer System Active", 
+		                "NEWS_TEXT=Challenge System Ready",
+		                "NEWS_TEXT=Room Creation Available",
+		                "COUNT=4",
+		                "STATUS=1"
+		            ]
+		        else:
+		            response_lines = [
+		                f"STATUS=0",
+		                f"ERROR=Unknown news type {name_value}"
+		            ]
 		    
 		    # Combine identifier and response
 		    full_response = identifier + '\n' + '\n'.join(response_lines) + '\n'

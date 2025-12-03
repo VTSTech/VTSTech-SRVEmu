@@ -14,7 +14,6 @@ from authentication_system_r10 import AuthenticationHandlers
 from session_system_r10 import SessionManager, NetworkHandlers, PingManager, DataServerManager
 from room_system_r10 import RoomManager, RoomHandlers
 from message_system_r10 import MessageHandlers
-from ranking_system_r10 import RankingHandlers
 from buddy_system_r10 import BuddyHandlers
 
 from state_trigger import StateTrigger
@@ -228,7 +227,6 @@ data_server_manager = None
 room_manager = None
 room_handlers = None
 message_handlers = None
-ranking_handlers = None
 buddy_handlers = None
 
 def send_online_status(session):
@@ -277,16 +275,26 @@ def handle_game_specific_command(cmd_str, data, session):
             return game_handlers.handle_rank(data, session)
     
     elif current_game_mode == 'nbav3':
-        if cmd_str == 'gpro':
-            return game_handlers.handle_gpro(data, session)
-        elif cmd_str == 'cbal':
-            return game_handlers.handle_cbal(data, session)
-        elif cmd_str == 'uatr':
-            return game_handlers.handle_uatr(data, session)
-        elif cmd_str == 'usld':
-            return game_handlers.handle_usld(data, session)
-        elif cmd_str == 'ccrt':
-            return game_handlers.handle_ccrt(data, session)    
+        # Map commands to handlers
+        command_map = {
+            'gpro': game_handlers.handle_gpro,
+            'usld': game_handlers.handle_usld,
+            'uatr': game_handlers.handle_uatr,
+            'cbal': game_handlers.handle_cbal,
+            'ccrt': game_handlers.handle_ccrt,
+            'gqwk': game_handlers.handle_gqwk,
+            'glea': game_handlers.handle_glea,
+            'set%': game_handlers.handle_set_percent,
+        }
+        
+        # Check direct mapping first
+        if cmd_str in command_map:
+            return command_map[cmd_str](data, session)
+        
+        # Check if it's a data chunk
+        elif game_handlers.is_hex_continuation(cmd_str):
+            return game_handlers.handle_data_chunk(cmd_str, data, session)
+    
     return None
 
 def update_game_state(session, new_state):
@@ -553,7 +561,11 @@ def build_reply(data, session):
         'onln': handle_onln,
         'snap': handle_snap,
         'rept': handle_rept,
-        
+
+        'gqwk': lambda d, s: handle_game_specific_command('gqwk', d, s),
+        'glea': lambda d, s: handle_game_specific_command('glea', d, s),
+        'ccrt': lambda d, s: handle_game_specific_command('ccrt', d, s),
+        	        
         # Buddy API commands
         'RGET': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
         'ROST': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
@@ -562,10 +574,6 @@ def build_reply(data, session):
         'RDEL': lambda d, s: buddy_handlers.handle_buddy_command(d, s),        
         'BLOC': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
     }
-    
-    # Add game-specific command to handlers if needed
-    if current_game_mode == 'nascar' and 'rank' not in handlers:
-        handlers['rank'] = lambda d, s: GAME_MODES['nascar']['handlers'].handle_rank(d, s)
     
     if cmd_str in handlers:
         parse_data(data, session)
@@ -905,10 +913,6 @@ def initialize_systems(game_mode=None):
     
     message_handlers = MessageHandlers(create_packet, room_manager.active_users, challenge_system)
     print("MESSAGE: Message system initialized")
-    
-    if game_mode == 'nascar':
-        ranking_handlers = RankingHandlers(create_packet)
-        print("RANKING: Ranking system initialized")
     
     print(f"INIT: All systems initialized successfully for {game_mode}")
     

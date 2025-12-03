@@ -1,36 +1,61 @@
 # nascar_module.py - NASCAR Thunder 2004 specific handlers
 import time
 import struct
+import random
 
 class NascarHandlers:
     def __init__(self, create_packet_func, server_ip):
         self.create_packet = create_packet_func
         self.server_ip = server_ip
-        
+        self.rankings = {}  # user -> rank data
+    
     def handle_rank(self, data, session):
-        """Handle rank command (race configuration)"""
-        print(f"RANK: Race configuration from {session.clientNAME}")
+        """Handle RANK command - ranking and statistics"""
+        data_str = data.decode('latin1') if data else ""
+        print(f"RANK: Ranking request from {session.clientNAME}")
         
-        # Parse race settings
-        race_config = {}
-        if data:
-            data_str = data.decode('latin1') if data else ""
+        # Parse configuration fields
+        config = {}
+        if data_str:
             for line in data_str.split('\n'):
                 if '=' in line:
                     key, value = line.split('=', 1)
-                    race_config[key] = value
+                    config[key] = value
         
         # Store race config in session
         for key in ['SET_TRACK', 'SET_RACELEN', 'SET_AIDIFF', 'SET_DAMAGE', 
                     'SET_RANKED', 'SET_SETUPS', 'SET_NUMAI', 'SET_ASSISTS',
                     'SET_CAUTIONS', 'SET_CONSUME', 'SET_TRACKID']:
-            if key in race_config:
-                setattr(session, key, race_config[key])
+            if key in config:
+                setattr(session, key, config[key])
         
-        session.race_config = race_config
-        print(f"RANK: Race config saved: {list(race_config.keys())}")
+        session.race_config = config
+        print(f"RANK: Race config saved: {list(config.keys())}")
         
-        return self.create_packet('rank', '', "STATUS=1\n")
+        # Generate ranking response
+        username = session.clientNAME
+        if username not in self.rankings:
+            self.rankings[username] = {
+                'rank': random.randint(500, 2000),
+                'wins': random.randint(0, 50),
+                'losses': random.randint(0, 30),
+                'rating': random.randint(1000, 2500)
+            }
+        
+        rank_data = self.rankings[username]
+        
+        response_lines = [
+            f"USER={username}",
+            f"RANK={rank_data['rank']}",
+            f"WINS={rank_data['wins']}",
+            f"LOSS={rank_data['losses']}",
+            f"RATING={rank_data['rating']}",
+            f"TRACK={config.get('SET_TRACK', 'DAYTONA')}",
+            f"LAPS={config.get('SET_RACELEN', '10')}",
+            "STATUS=1"
+        ]
+        
+        return self.create_packet('rank', '', '\n'.join(response_lines) + '\n')
     
     def create_272_byte_session_data(self, session):
         """Create 272-byte session data for NASCAR"""
