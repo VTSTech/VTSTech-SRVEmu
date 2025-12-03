@@ -34,25 +34,114 @@ except ImportError:
 
 # Configuration
 BUILD = "0.10-Modular"
-SERVER_IP = None
+PORT_NFSU_PS2 = 10900   # ps2nfs04.ea.com:10900
+PORT_NFSU2_PS2 = 20900  # ps2nfs05.ea.com:10900
+PORT_BO3U_PS2 = 21800   # ps2burnout05.ea.com:21800
+PORT_BO3R_PS2 = 21840   # ps2lobby02.beta.ea.com:21840
+PORT_NFL05_PS2 = 20000  # ps2madden05.ea.com:20000
+PORT_BOP_PS3 = 21870    # ps3burnout08.ea.com:21870
+PORT_BOP_PC = 21840     # pcburnout08.ea.com:21871
+PORT_SSX3_PS2 = 11000   # ps2ssx04.ea.com:11000
+PORT_NC04_PS2 = 10600   # ps2nascar04.ea.com:10600
+PORT_NBAV3_PS2 = 21000  # ps2nbastreet05.ea.com:21000
+
+# Update the PORTS dictionary
 PORTS = {
-    'nc04': 10600, 
-    'listener': 10901, 
-    'buddy': 10899, 
-    'data_start': 11000, 
-    'nbav3': 21000
+    'nc04': PORT_NC04_PS2,
+    'listener': PORT_NFSU_PS2,  # Using NFSU port as default listener
+    'buddy': 10899,
+    'data_start': 11000,
+    'nbav3': PORT_NBAV3_PS2,
+    'nfsu': PORT_NFSU_PS2,
+    'nfsu2': PORT_NFSU2_PS2,
+    'bo3u': PORT_BO3U_PS2,
+    'bo3r': PORT_BO3R_PS2,
+    'nfl05': PORT_NFL05_PS2,
+    'bop_ps3': PORT_BOP_PS3,
+    'bop_pc': PORT_BOP_PC,
+    'ssx3': PORT_SSX3_PS2
 }
 
-# Game modes
+# Update GAME_MODES dictionary (around line 35)
 GAME_MODES = {
     'nascar': {
-        'port': PORTS['nc04'],
+        'port': PORT_NC04_PS2,
         'name': 'NASCAR Thunder 2004',
         'module': None,
         'handlers': None
     },
     'nbav3': {
-        'port': PORTS['nbav3'],
+        'port': PORT_NBAV3_PS2,
+        'name': 'NBA Street v3',
+        'module': None,
+        'handlers': None
+    },
+    'nfsu': {
+        'port': PORT_NFSU_PS2,
+        'name': 'Need for Speed Underground',
+        'module': None,
+        'handlers': None
+    },
+    'nfsu2': {
+        'port': PORT_NFSU2_PS2,
+        'name': 'Need for Speed Underground 2',
+        'module': None,
+        'handlers': None
+    },
+    'bo3u': {
+        'port': PORT_BO3U_PS2,
+        'name': 'Burnout 3: Takedown (Update)',
+        'module': None,
+        'handlers': None
+    },
+    'bo3r': {
+        'port': PORT_BO3R_PS2,
+        'name': 'Burnout 3: Takedown (Release)',
+        'module': None,
+        'handlers': None
+    },
+    'nfl05': {
+        'port': PORT_NFL05_PS2,
+        'name': 'Madden NFL 2005',
+        'module': None,
+        'handlers': None
+    },
+    'bop_ps3': {
+        'port': PORT_BOP_PS3,
+        'name': 'Burnout Paradise (PS3)',
+        'module': None,
+        'handlers': None
+    },
+    'bop_pc': {
+        'port': PORT_BOP_PC,
+        'name': 'Burnout Paradise (PC)',
+        'module': None,
+        'handlers': None
+    },
+    'ssx3': {
+        'port': PORT_SSX3_PS2,
+        'name': 'SSX 3',
+        'module': None,
+        'handlers': None
+    }
+}
+SERVER_IP = None
+PORTS = {
+    'listener': 10901, 
+    'buddy': 10899, 
+    'data_start': 11000, 
+}
+
+# Game modes
+GAME_MODES = {
+    'nascar': {
+        'port': PORT_NC04_PS2,
+        'name': 'NASCAR Thunder 2004',
+        'module': None,
+        'handlers': None
+    },
+    'nbav3': {
+        'port': PORT_NBAV3_PS2,
         'name': 'NBA Street v3',
         'module': None,
         'handlers': None
@@ -123,21 +212,55 @@ class ClientSession:
         self.buddy_connected = False
         self.buddy_list = []        
         
-        # Race/Game state
+        # Game-specific state initialization
         if game_mode == 'nascar':
-            self.race_state = 'INACTIVE'; self.race_track = 'DAYTONA'; self.race_laps = '10'
-            self.race_difficulty = '2'; self.race_start_time = 0; self.lap_times = []; self.race_position = 1
+            # NASCAR Thunder 2004
+            self.race_state = 'INACTIVE'
+            self.race_track = 'DAYTONA'
+            self.race_laps = '10'
+            self.race_difficulty = '2'
+            self.race_start_time = 0
+            self.lap_times = []
+            self.race_position = 1
             self.race_config = {}
+            
         elif game_mode == 'nbav3':
-            # NBA Street v3 specific attributes
+            # NBA Street v3
             self.street_rank = 1
             self.game_mode = 'STREET'
             self.character_data = {}
-        
+            
+        elif game_mode in ['nfsu', 'nfsu2']:
+            # Need for Speed Underground
+            self.car_data = {}
+            self.current_car = 'default'
+            self.race_type = 'circuit'
+            self.drift_score = 0
+            
+        elif game_mode in ['bo3u', 'bo3r', 'bop_ps3', 'bop_pc']:
+            # Burnout series
+            self.crash_mode = False
+            self.takedown_count = 0
+            self.vehicle_type = 'car'
+            
+        elif game_mode == 'nfl05':
+            # Madden NFL 2005
+            self.team_name = 'Unknown'
+            self.playbook = 'default'
+            self.quarter_length = 5
+            
+        elif game_mode == 'ssx3':
+            # SSX 3
+            self.boarder_name = 'Unknown'
+            self.trick_score = 0
+            self.current_mountain = 'peak'
+            
         # Protocol state
         self.client_state = 0x72646972
         self.client_flags = 0
-        self.direct_address = 0; self.direct_port = 0; self.server_address = ""
+        self.direct_address = 0
+        self.direct_port = 0
+        self.server_address = ""
         self.public_key_sent = self.room_flags = 0
         
         # Game state tracking
@@ -160,14 +283,22 @@ class ClientSession:
                  'roomDESC', 'roomMAX', 'moveNAME', 'movePASS', 'NEWS_PAYLOAD', 'pingREF', 'pingTIME',
                  'FROM', 'TO', 'WHEN', 'TEXT']
         
-        # NASCAR specific fields
+        # Game-specific fields
         if game_mode == 'nascar':
             fields.extend(['SET_TRACK', 'SET_RACELEN', 'SET_AIDIFF', 'SET_DAMAGE',
                           'SET_RANKED', 'SET_SETUPS', 'SET_NUMAI', 'SET_ASSISTS',
                           'SET_CAUTIONS', 'SET_CONSUME', 'SET_TRACKID'])
+        elif game_mode in ['nfsu', 'nfsu2']:
+            fields.extend(['CAR_MODEL', 'CAR_TUNE', 'RACE_TYPE', 'NITROUS_LEVEL'])
+        elif game_mode in ['bo3u', 'bo3r', 'bop_ps3', 'bop_pc']:
+            fields.extend(['VEHICLE', 'SPEED', 'CRASH_MODE', 'TAKEDOWNS'])
+        elif game_mode == 'nfl05':
+            fields.extend(['TEAM', 'PLAYBOOK', 'QUARTER_LENGTH', 'DIFFICULTY'])
+        elif game_mode == 'ssx3':
+            fields.extend(['BOARDER', 'TRICK_SCORE', 'MOUNTAIN', 'BOOST_LEVEL'])
         
         for field in fields:
-            attr_name = f"client{field}" if not field.startswith(('room', 'move', 'NEWS', 'ping', 'SET_', 'FROM', 'TO', 'WHEN', 'TEXT')) else field
+            attr_name = f"client{field}" if not field.startswith(('room', 'move', 'NEWS', 'ping', 'SET_', 'FROM', 'TO', 'WHEN', 'TEXT', 'CAR_', 'NITROUS_', 'VEHICLE', 'SPEED', 'CRASH_', 'TAKEDOWNS', 'TEAM', 'PLAYBOOK', 'QUARTER_', 'DIFFICULTY', 'BOARDER', 'TRICK_', 'MOUNTAIN', 'BOOST_')) else field
             setattr(self, attr_name, '')
 
     def update_client_state(self, new_state):
@@ -909,12 +1040,44 @@ def bind_server():
     for i, arg in enumerate(sys.argv[1:], 1):
         if arg == "-nc04": 
             game_mode = 'nascar'
-            game_port = PORTS['nc04']
+            game_port = PORT_NC04_PS2
             print(f"Now running in {GAME_MODES['nascar']['name']} Mode\n")
         elif arg == "-nbav3": 
             game_mode = 'nbav3'
-            game_port = PORTS['nbav3']
+            game_port = PORT_NBAV3_PS2
             print(f"Now running in {GAME_MODES['nbav3']['name']} Mode\n")
+        elif arg == "-nfsu":
+            game_mode = 'nfsu'
+            game_port = PORT_NFSU_PS2
+            print(f"Now running in {GAME_MODES['nfsu']['name']} Mode\n")
+        elif arg == "-nfsu2":
+            game_mode = 'nfsu2'
+            game_port = PORT_NFSU2_PS2
+            print(f"Now running in {GAME_MODES['nfsu2']['name']} Mode\n")
+        elif arg == "-bo3u":
+            game_mode = 'bo3u'
+            game_port = PORT_BO3U_PS2
+            print(f"Now running in {GAME_MODES['bo3u']['name']} Mode\n")
+        elif arg == "-bo3r":
+            game_mode = 'bo3r'
+            game_port = PORT_BO3R_PS2
+            print(f"Now running in {GAME_MODES['bo3r']['name']} Mode\n")
+        elif arg == "-nfl05":
+            game_mode = 'nfl05'
+            game_port = PORT_NFL05_PS2
+            print(f"Now running in {GAME_MODES['nfl05']['name']} Mode\n")
+        elif arg == "-bop_ps3":
+            game_mode = 'bop_ps3'
+            game_port = PORT_BOP_PS3
+            print(f"Now running in {GAME_MODES['bop_ps3']['name']} Mode\n")
+        elif arg == "-bop_pc":
+            game_mode = 'bop_pc'
+            game_port = PORT_BOP_PC
+            print(f"Now running in {GAME_MODES['bop_pc']['name']} Mode\n")
+        elif arg == "-ssx3":
+            game_mode = 'ssx3'
+            game_port = PORT_SSX3_PS2
+            print(f"Now running in {GAME_MODES['ssx3']['name']} Mode\n")
         elif arg == "-p" and i + 1 < len(sys.argv): 
             game_port = int(sys.argv[i + 1])
             print("Now running in Custom Game Mode\n")
@@ -937,7 +1100,14 @@ def bind_server():
         current_game_mode = game_mode
     
     for name, sock in sockets.items():
-        port = game_port if name == 'game' else PORTS[name]
+        if name == 'game':
+            port = game_port
+        elif name in PORTS:
+            port = PORTS[name]
+        else:
+            # Default to listener port for non-game sockets
+            port = PORTS['listener']
+            
         sock.bind((SERVER_IP, port))
         print(f"Socket {name}: {SERVER_IP}:{port}")
         sock.listen(8)
@@ -947,10 +1117,18 @@ def bind_server():
 
 def usage():
     print("Usage:")
-    print("-nc04  Run in NASCAR Thunder 04 Mode (PS2)")
-    print("-nbav3 Run in NBA Street v3 Mode (PS2)")
-    print("-p 123 Run in Custom Game Mode on this TCP Port")
-    print("-i ip  Run on this IPv4 Address (REQUIRED)")
+    print("-nc04    Run in NASCAR Thunder 04 Mode (PS2)")
+    print("-nbav3   Run in NBA Street v3 Mode (PS2)")
+    print("-nfsu    Run in Need for Speed Underground Mode (PS2)")
+    print("-nfsu2   Run in Need for Speed Underground 2 Mode (PS2)")
+    print("-bo3u    Run in Burnout 3: Takedown (Update) Mode (PS2)")
+    print("-bo3r    Run in Burnout 3: Takedown (Release) Mode (PS2)")
+    print("-nfl05   Run in Madden NFL 2005 Mode (PS2)")
+    print("-bop_ps3 Run in Burnout Paradise (PS3) Mode")
+    print("-bop_pc  Run in Burnout Paradise (PC) Mode")
+    print("-ssx3    Run in SSX 3 Mode (PS2)")
+    print("-p 123   Run in Custom Game Mode on this TCP Port")
+    print("-i ip    Run on this IPv4 Address (REQUIRED)")
     print("\nExample: python server_r10.py -nc04 -i 192.168.1.100")
     quit()
 
