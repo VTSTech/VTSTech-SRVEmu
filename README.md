@@ -14,7 +14,8 @@ Other games will likely 'just work' for connection, authentication and persona m
 <img src="https://i.gyazo.com/821d439552c7df6569b1ac3f4c6161ba.png">
 <img src="https://i.gyazo.com/2e202390d0b73fa02dec0a17a19c1e5e.png">
 <img src="https://i.gyazo.com/0fec572d13e7ca51d0c50179b20d9551.png">
-<img src="https://i.gyazo.com/9940a7f8b5d02c492e61fbe149c605a7.png">
+<img width="518" height="346" alt="image" src="https://github.com/user-attachments/assets/f0c95670-6dd9-4215-8a64-b99730a05c98" />
+
 
 Written by Veritas/VTSTech (Nigel Todman)
 Veritas Technical Solutions (www.VTS-Tech.org)
@@ -29,3 +30,4 @@ TeknoGods/eaEmu & HarpyWar/nfsuserver & riperiperi/Breakin-In
 
 
 With contributions from: No23, iAmLupo
+
