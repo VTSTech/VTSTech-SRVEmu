@@ -1,0 +1,27 @@
+Authentication Sequence:
+  1. @tic ? @dir ? addr ? skey ? auth ? pers
+  2. gpro ? usld ? uatr ? sele
+
+Multiplayer Sequence:
+  1. room ? gqwk ? [matchmaking] ? game start
+  2. chal ? auxi ? mesg ? play ? [game session]
+
+Command Reference:
+  @tic    - Encryption ticket (ignored with patch)
+  @dir    - Directory setup (VERS, SKU, SLUS, LANG, MID)
+  addr    - Connection establishment
+  skey    - Key exchange (ignored)
+  auth    - Authentication (NAME, PASS, TOS, MAC)
+  pers    - Persona selection
+  gpro    - Get Profile (binary: INFO+STAT fields)
+  usld    - User Session Load
+  uatr    - User Attributes (HWFLAG, HWMASK)
+  sele    - Select session data
+  room    - Room creation/join
+  gqwk    - Game Quick match
+  glea    - Game Leave
+  chal    - Challenge
+  auxi    - Auxiliary data
+  mesg    - Message
+  play    - Game play start
+  cbal    - Character Balance (binary: RECIPE, BDATA, BLOCK)

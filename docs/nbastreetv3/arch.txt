@@ -1,0 +1,369 @@
+NBA Street Vol. 3 Network Protocol Architecture
+VTSTech Reverse Engineering Project
+PROTOCOL OVERVIEW
+text
+
+Game: NBA Street Vol. 3 (PS2)
+Engine: EA Sports Online (ProtoAries)
+Encryption: RC4+MD5-V2 (Patched)
+Ports: 21000 (plaintext), 21001 (encrypted)
+Status: Encryption bypassed, Core protocol functional
+
+PROTOCOL LAYERS
+1. TRANSPORT LAYER (Lowest)
+text
+
+ProtoAries Layer:
+  - ProtoAriesCreate()      [0x004d49e8]
+  - ProtoAriesConnect()     [0x004d4ba8]
+  - ProtoAriesSend()        [0x004d4f28]
+  - ProtoAriesRecv()        [0x004d5258]
+  - ProtoAriesSecure()      [0x004d53a8] - ENCRYPTION (Patched)
+  - ProtoAriesStatus()      [0x004d4d90]
+
+RPC Layer:
+  - RpcCall()              [0x004d2ec0]
+  - RpcBind()              [0x004d2ef0]
+  - RpcElapsed()           [0x004d3040]
+
+2. COMMAND LAYER (Core Protocol)
+text
+
+Authentication Sequence:
+  1. @tic ? @dir ? addr ? skey ? auth ? pers
+  2. gpro ? usld ? uatr ? sele
+
+Multiplayer Sequence:
+  1. room ? gqwk ? [matchmaking] ? game start
+  2. chal ? auxi ? mesg ? play ? [game session]
+
+Command Reference:
+  @tic    - Encryption ticket (ignored with patch)
+  @dir    - Directory setup (VERS, SKU, SLUS, LANG, MID)
+  addr    - Connection establishment
+  skey    - Key exchange (ignored)
+  auth    - Authentication (NAME, PASS, TOS, MAC)
+  pers    - Persona selection
+  gpro    - Get Profile (binary: INFO+STAT fields)
+  usld    - User Session Load
+  uatr    - User Attributes (HWFLAG, HWMASK)
+  sele    - Select session data
+  room    - Room creation/join
+  gqwk    - Game Quick match
+  glea    - Game Leave
+  chal    - Challenge
+  auxi    - Auxiliary data
+  mesg    - Message
+  play    - Game play start
+  cbal    - Character Balance (binary: RECIPE, BDATA, BLOCK)
+
+3. DATA FORMAT LAYER
+text
+
+TagField System:
+  - TagFieldSetNumber()    [0x004e2270]
+  - TagFieldSetString()    [0x004e25b8]
+  - TagFieldSetBinary()    [0x004e27a0]
+  - TagFieldGetNumber()    [0x004e31b8]
+  - TagFieldGetString()    [0x004e3608]
+  - TagFieldFind()         [0x004e1f70]
+  - TagFieldDupl()         [0x004e2228]
+
+Format String Parser (FUN_004e3a58):
+  Syntax: "#"=skip to '=', numbers=length/size
+  Types: a=align, b=byte, w=word, l=long, s=string
+  Example: "16s16s16s16s16s16sl*" = 6x16-byte strings + variable longs
+
+Key Format Strings:
+  0x60bd68 = "l*"           - GPRO response format (array of longs)
+  0x60bd88 = "16s16s16s16s16s16sl*" - Complex data format
+
+DATA STRUCTURES
+GPRO Profile Data (620 + 64 bytes)
+text
+
+INFO Field (620 bytes @ 0x2a38):
+  Format: "l*" = 155 x 4-byte integers
+  Contains: Player stats, attributes, level, points
+
+STAT Field (64 bytes @ 0x2ce4):
+  Format: "l*" = 16 x 4-byte integers  
+  Contains: Additional stats/flags
+
+Field Names:
+  0x60c2d0 = "INFO" - Main profile data
+  0x60c2d8 = "STAT" - Additional stats
+
+CBAL Character Data
+text
+
+Fields:
+  0x60c258 = "BVER" - Binary version
+  0x60c400 = "BNEW" - New character flag
+  0x60c408 = "ATTR0" - Attribute 0
+  0x60c410 = "ATTR1" - Attribute 1
+  ... ATTR2-ATTRn
+  0x60c260 = "RECIPE" - Character recipe
+  0x60c268 = "BDATA" - Binary data
+  0x60c270 = "BLOCK" - Block data
+
+UATR Hardware Data
+text
+
+Fields:
+  0x63afc8 = "HWFLAG" - Hardware flags
+  0x63afd0 = "HWMASK" - Hardware mask
+
+SERVER ARCHITECTURE (VTSTech-SRVEmu)
+Core Systems
+text
+
+SessionManager        - Client connection/session tracking
+NetworkHandlers       - @dir, addr, skey, news commands
+AuthenticationHandlers- auth, acct, pers, user, edit
+RoomManager           - Room creation, user presence
+RoomHandlers          - room, move, sele commands
+ChallengeSystem       - chal, auxi, mesg, play
+BuddyHandlers         - RGET, ROST, PGET, RADD, RDEL
+MessageHandlers       - mesg command processing
+RankingHandlers       - rank command
+PingManager           - ~png ping/pong
+DataServerManager     - Data port connections
+
+Protocol State Machine
+text
+
+States (hex values):
+  0x72646972 = STATE_DIRECTORY      (@dir)
+  0x636f6e6e = STATE_CONNECTED      (addr)
+  0x736b6579 = STATE_KEY_EXCHANGE   (skey)
+  0x69646c65 = STATE_IDLE           (auth complete)
+  0x61757468 = STATE_AUTH           (authentication)
+  0x61636374 = STATE_ACCOUNT        (acct)
+  0x74696d65 = STATE_TIMEOUT        (timeout)
+  0x7465726d = STATE_TERMINATED     (terminated)
+  0x6f66666c = STATE_OFFLINE        (offline)
+  0xfefefefe = STATE_ERROR          (error)
+
+Packet Format
+text
+
+Header (12 bytes):
+  [0:4]   Command (4 chars, e.g., "auth")
+  [4:8]   Subcommand (4 chars, often empty)
+  [8:12]  Total size (including header)
+
+Payload:
+  Text:   Key=Value\n format
+  Binary: TagField binary data for gpro/cbal
+
+KEY FUNCTIONS IDENTIFIED
+Network Handlers
+text
+
+0x002de4e8  NetworkHandler_Lobby_2DE4E8L   - General network send
+0x002e5108  NetworkHandler_Lobby_2E5108L   - GPRO response handler
+0x002e5178  FUN_002e5178                   - GPRO response parser
+0x002e5258  FUN_002e5258                   - GPRO request sender
+0x002e63f0  FUN_002e63f0                   - CBAL command handler
+0x004d7d90  LobbyApiUpdate                 - Main protocol handler
+0x004e4268  NetworkHandler_Lobby_4E4268L   - USLD handler
+0x004f7278  NetworkHandler_Lobby_4F7278L   - UATR handler
+
+API Layer
+text
+
+0x004d66b0  LobbyApiListUpdate
+0x004d7298  LobbyApiListAlloc
+0x004d76e0  LobbyApiRequestCB
+0x004e4190  FUN_004e4190                   - USLD callback
+0x004e3a58  FUN_004e3a58                   - Format string parser
+
+Data Management
+text
+
+0x004dbc80  DispListCreate
+0x004dbea0  DispListGet
+0x004dc1f0  HasherCreate
+0x004dc438  HashStrHash
+0x004dc5e8  HashStrFind
+0x004dc7e8  HashTable_Lookup
+
+PATCHES APPLIED
+Encryption Bypass
+text
+
+Address     Original          Patched           Purpose
+0x004D7DF4  beq s0,zero       beq zero,zero    Force no-encryption path
+0x004D7E08  beql v0,zero      nop              Skip encryption check
+
+Alternative patches tested:
+0x004D53A8  ProtoAriesSecure return immediate
+0x004D5428  @tic response handler return
+0x004D8134  @tic send NOP
+
+PROTOCOL FLOW (Verified)
+Phase 1: Connection & Authentication
+text
+
+1. Client connects to port 21000 (patched no-encryption)
+2. Sends @tic with "RC4+MD5-V2" (ignored)
+3. Sends @dir with game info (VERS, SKU, SLUS, LANG, MID, FROM)
+4. Server responds with data port assignment
+5. Client connects to data port
+6. Sends addr command (connection establishment)
+7. Sends skey command (key exchange - handled without encryption)
+8. Sends auth command (authentication)
+9. Sends pers command (persona switching)
+
+Phase 2: Profile & Session Loading
+text
+
+10. Sends gpro command (get profile - binary response needed)
+11. Sends usld command (user session load)
+12. Sends uatr command (user attributes)
+13. Sends sele command (session data selection)
+
+Phase 3: Multiplayer
+text
+
+14. Sends room command (room creation/join)
+15. Sends gqwk command (quick match request)
+16. [If match found] Game session starts
+17. Sends glea command (leave match/room)
+
+CURRENT IMPLEMENTATION STATUS
+? COMPLETE
+
+    Encryption bypass
+
+    Basic authentication flow
+
+    Session management
+
+    Room system
+
+    Ping/pong system
+
+?? PARTIAL
+
+    [~] GPRO handler (binary format known, needs testing)
+
+    [~] USLD handler (basic response, needs format)
+
+    [~] UATR handler (basic response, needs exact flags)
+
+    [~] Matchmaking (gqwk/glea stubbed)
+
+? NOT STARTED
+
+    Game session hosting
+
+    Character data storage (cbal)
+
+    Buddy system integration
+
+    Ranking system
+
+    Tournament support
+
+KNOWN ISSUES & NEXT STEPS
+Immediate Issues
+
+    GPRO binary format - Need exact structure of 620-byte INFO data
+
+    Matchmaking - gqwk needs actual queue/match logic
+
+    Game sessions - play command and 272-byte session data
+
+Reverse Engineering Priorities
+
+    Map exact GPRO data structure (620 bytes @ 0x2a38)
+
+    Find game session structures (play command)
+
+    Analyze matchmaking state machine
+
+    Document all ATTR fields for character creation
+
+Server Development Priorities
+
+    Implement proper GPRO binary responses
+
+    Create matchmaking queue system
+
+    Handle game session initialization
+
+    Store/retrieve character data (cbal)
+
+TOOLS & METHODS
+Reverse Engineering Tools
+
+    Ghidra for binary analysis
+
+    Function hash exporter for cross-game comparison
+
+    Network protocol analyzer
+
+    Automated function renamer
+
+Testing Methodology
+
+    Patch encryption at LobbyApiUpdate
+
+    Capture network traffic with modified server
+
+    Iteratively implement command handlers
+
+    Test with actual game client
+
+    Adjust based on game behavior
+
+CROSS-GAME COMPATIBILITY
+Similar Games (EA Sports Online Engine)
+
+    NASCAR Thunder 2004 (NC04) - Same core protocol
+
+    Other EA Sports PS2 online games
+
+    Shared ProtoAries/RPC layer
+
+    Similar authentication flow
+
+Differences in NBA Street v3
+
+    Game-specific commands: gpro, usld, uatr, cbal
+
+    Character creation system (cbal with RECIPE/BDATA/BLOCK)
+
+    Basketball-specific stats in profiles
+
+    Different matchmaking parameters
+
+APPENDIX: MEMORY ADDRESSES
+Critical Strings
+text
+
+0x0060bf38  "PERS"
+0x0060bd68  "l*"                    (GPRO format)
+0x0060bd88  "16s16s16s16s16s16sl*" (Complex format)
+0x0063afc8  "HWFLAG"
+0x0063afd0  "HWMASK"
+0x0060c2d0  "INFO"                  (GPRO main data)
+0x0060c2d8  "STAT"                  (GPRO extra data)
+0x0060c258  "BVER"                  (CBAL version)
+0x0060c400  "BNEW"                  (CBAL new flag)
+
+Key Function Addresses
+text
+
+0x004e3a58  Format string parser (FUN_004e3a58)
+0x004e4190  USLD callback (FUN_004e4190)
+0x004e27a0  TagFieldSetBinary
+0x004e31b8  TagFieldGetNumber
+0x004e3608  TagFieldGetString
+0x004e1f70  TagFieldFind
+0x004e2228  TagFieldDupl
+
+*Document Version: 1.1 - Based on VTSTech Reverse Engineering Session*
+Last Updated: Analysis of gqwk/glea commands, GPRO field names identified
