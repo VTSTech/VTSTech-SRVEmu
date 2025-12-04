@@ -122,8 +122,8 @@ NetworkEvent_DefaultHandler -> 0x0027a9f0
 NetworkEvent_Handler -> 0x0027aa60
 NetworkEvent_RegisterHandlers -> 0x0027ad40
 Network_ProcessGameEvent -> 0x0027b0c8
-NetworkHelper_d328 -> 0x0027d328
-NetworkHelper_d3b0 -> 0x0027d3b0
+NetworkSystem_SetState -> 0x0027d328
+NetworkSystem_GetConnectionStatus -> 0x0027d3b0
 NetworkSystem_Setup -> 0x00281438
 NetworkSystem_Init -> 0x002814e8
 ProtocolCallback_Register -> 0x00281538
@@ -131,7 +131,7 @@ ProtocolHandler_800000XX_Range1 -> 0x00281700
 ProtocolHandler_800000XX_Range2 -> 0x002818b0
 ProtocolHandler_800000XX_Range3 -> 0x00281958
 ProtocolHandler_ConnectionTrigger -> 0x00281b38
-NetworkHelper_2440 -> 0x00282440
+NetworkSystem_InitializeConfigAndLobby -> 0x00282440
 NetworkHelper_2528 -> 0x00282528
 Protocol_CommandDispatcher -> 0x00282570
 ChallengeSystem_ValidateTarget -> 0x00282c50
@@ -153,7 +153,7 @@ ChallengeSystem_GetTimeoutValue -> 0x00283b48
 ChallengeCallback_Cleanup -> 0x00283b58
 ChallengeCallback_Register -> 0x00283ba8
 ChallengeSystem_SendRegistration -> 0x00283be8
-NetworkHelper_3c30 -> 0x00283c30
+NetworkSystem_InitializeMultiplayer -> 0x00283c30
 MultiplayerSystem_CleanupWithChallenge -> 0x00283cb0
 MultiplayerSession_CleanupWithMessage -> 0x00283cd8
 ChallengeSystem_InitializeNetwork -> 0x00283d38
@@ -168,7 +168,8 @@ NetworkConnection_Setup -> 0x00285138
 MessageRouting_ChallengeHandler -> 0x00286ed8
 Callback_GenerateMESGResponse -> 0x00287120
 NetworkConfig_InitializeAndSELEct -> 0x00287180
-NetworkHelper_7438 -> 0x00287438
+DisplayList_SortCallback -> 0x00287338
+NetworkSystem_RegisterProtocolHandlers -> 0x00287438
 Util_AllocateMemory -> 0x00287518
 Util_FreeMemory -> 0x00287538
 NetworkMain_Setup -> 0x00287568
@@ -177,6 +178,7 @@ NetworkSystem_IsInitialized -> 0x00287680
 NetworkConnection_Setup2 -> 0x002876a0
 NetworkInit_Caller -> 0x002877c0
 CommandHandler_AUTH_PERS -> 0x00287838
+NetworkConfig_ProcessSessionData -> 0x00287980
 NetworkCommandBuffer_Allocate -> 0x002879e0
 System_SendCommand_Internal -> 0x00287a48
 ProtocolHandler_ROOM -> 0x00287af8
@@ -305,9 +307,16 @@ ChallengeText_ValidateCryptographic -> 0x0029a610
 ChallengeToken_ProcessCryptographic -> 0x0029a768
 NetworkHelper_a978 -> 0x0029a978
 CryptographicConstants_Initialize -> 0x0029a9d8
+Math_FloatConverter -> 0x0029db28
 memset -> 0x002b8b60
 memcpy -> 0x002b8be8
 Util_CompareMemory -> 0x002b8c80
+StringHelper_FormatInteger -> 0x002b8e98
+StringHelper_FormatFloat -> 0x002b8f78
+StringHelper_FormatScientific -> 0x002b9150
+StringHelper_FormatHexParam -> 0x002b93e8
+StringHelper_FormatStringParam -> 0x002b9498
+StringHelper_FormatWithVarArgs -> 0x002b95a0
 StringHelper_CopyWithParams -> 0x002b9910
 Util_FormatIPString -> 0x002b9950
 StringHelper_CopyToBuffer -> 0x002b99a0
@@ -447,6 +456,7 @@ NetworkData_ProcessIncoming -> 0x0031abd0
 Lobby_SetState -> 0x0031af10
 System_CreateNetworkThread -> 0x0031af90
 NetworkHelper_b060 -> 0x0031b060
+NetworkThread_RegisterCallback -> 0x0031b1f0
 NetworkConnection_MainHandler -> 0x0031b208
 LobbySystem_InitializeList -> 0x0031b318
 LobbySystem_AddUserToList -> 0x0031b4a8
@@ -493,6 +503,7 @@ Buddy_RemoveUser -> 0x00320220
 HashTable_Insert -> 0x003202b8
 HashTable_Lookup -> 0x00320390
 HashTable_Remove -> 0x003203e8
+Network_GetLocalIP -> 0x00320c58
 Auth_EncryptData -> 0x00320fe0
 System_LoadResource -> 0x00321160
 Memory_ValidateBuffer -> 0x00321298
@@ -520,14 +531,18 @@ System_ResetHardware -> 0x003230c0
 System_GetHardwareStatus -> 0x003230e0
 ProtocolDispatcher_Main -> 0x003230f0
 LogSystem_ProcessEntry -> 0x00323130
+NetworkThread_EventDispatcher -> 0x003231b8
 ProtocolLogInfo -> 0x003231f0
 System_ProcessConfigString -> 0x00323278
+NetworkThread_SetConfigFlag -> 0x00323358
 System_SetupNetworkThread -> 0x00323408
 NetworkThread_Init -> 0x003234a8
 System_RegisterProtocolCallback -> 0x00323510
 System_CheckNetworkThread -> 0x00323628
 System_CheckNetworkReady -> 0x00323638
+NetworkConfig_GetConnectionData -> 0x003236a0
 System_NetworkHelper -> 0x00323758
+NetworkConfig_InitializeState -> 0x00323808
 Network_FormatIPAddress -> 0x003238d0
 NetworkConfig_GetStatus -> 0x00323998
 NetworkConfig_Reset -> 0x00323a50
@@ -539,6 +554,7 @@ NetworkConfig_CheckOnline -> 0x00323bf0
 CircularBuffer_RemoveElement -> 0x00323cd0
 CircularBuffer_FindElement -> 0x00323e78
 CircularBuffer_IsInitialized -> 0x00323f00
+NetworkThread_RegisterProtocols -> 0x00324078
 ProtocolCleanup -> 0x00324120
 System_SendCommand -> 0x00324150
 NetworkResource_Cleanup -> 0x00324250
@@ -600,6 +616,8 @@ MultiplayerSystem_Shutdown -> 0x003275a0
 MultiplayerSession_EndWithStatus -> 0x00327600
 NetworkSystem_InitializePhase2 -> 0x00327678
 MultiplayerSystem_Activate -> 0x00327708
+ChallengeTarget_StoreConnectionInfo -> 0x00327778
+NetworkConfig_StoreFormattedLKEY -> 0x003277c0
 BuddySystem_CountByPermission -> 0x003277d8
 ChallengeSystem_GetBuddyCount -> 0x003278a0
 MultiplayerMode_Check -> 0x003278f8
@@ -624,6 +642,7 @@ BuddyList_GetGroupIndex -> 0x00327fd8
 BuddyList_SetUserIndex -> 0x00327fe0
 BuddySystem_ResetAllIndices -> 0x00328020
 BuddyList_MarkSlotAvailable -> 0x003280f0
+MultiplayerSystem_InitializeComponents -> 0x00328138
 Config_ProcessNumericValue -> 0x00328298
 BuddySystem_RemoveUserFromList -> 0x00328468
 ChallengeSystem_StoreTargetFromBuddy -> 0x00328508
@@ -637,6 +656,8 @@ Network_HandleReceive -> 0x003616b0
 Network_SendPlayerData -> 0x003617e8
 Network_TimeoutCheck -> 0x00361a80
 Buddy_PrepareSend -> 0x00361b70
+BuddySystem_CreateInstance -> 0x00361c28
+BuddySystem_InitializeConfig -> 0x00361d18
 NetworkConnection_InitializeSession -> 0x00361de8
 Network_AuthComplete -> 0x00362050
 BuddySystem_InitializeCore -> 0x00362190
@@ -645,6 +666,7 @@ BuddySystem_AddOrUpdateUser -> 0x00362338
 BuddySystem_RemoveUserFlags -> 0x00362708
 BuddySystem_FindUserData -> 0x003629e8
 Buddy_ProcessSendCommand -> 0x00362bd0
+BuddySystem_RegisterDispatcher -> 0x00362cc0
 BuddyApiUpdate -> 0x00362cd0
 NetworkSocket_AllocateAndBind -> 0x00364a38
 NetworkConnection_CreateSocket -> 0x00364b08

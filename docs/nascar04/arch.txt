@@ -1,85 +1,329 @@
-=== NETWORK EVENT SYSTEM ===
-Game_InitializeNetworkSystem → NetworkEvent_RegisterHandlers → NetworkEvent_Handler
-Event codes: 0xc032 (ErrorSession), 0xc034 (MultiAuth), 0xc03c (MultiPlayer CRITICAL), 0xc03d (SessionInit)
-0xc03c → PacketConstructor_MultiPlayer → SessionInit_MultiPlayer → RaceSession_CreateFull → NetworkMain_Setup → ChallengeSystem_Startup → System_CommandDispatcher(0x88) → ChallengeSystem_RegisterState → sends CHAL
+UPDATED NETWORK ARCHITECTURE DOCUMENTATION
+NETWORK EVENT SYSTEM
+text
 
-=== PROTOCOL HANDLER REGISTRATION ===
+Game_InitializeNetworkSystem (0x001b5a78) → 
+NetworkEvent_RegisterHandlers (0x0027ad40) → 
+NetworkEvent_Handler (0x0027aa60)
+
+Event codes:
+• 0xc032 (ErrorSession) → PacketConstructor_ErrorSession (0x00277bb0) → SessionInit_Error (0x00277c60)
+• 0xc034 (MultiAuth) → PacketConstructor_MultiAuth (0x00277d98) → SessionInit_MultiAuth (0x00277e38)
+• 0xc03c (MultiPlayer CRITICAL) → PacketConstructor_MultiPlayer (0x00277f08) → SessionInit_MultiPlayer (0x00277fa8)
+• 0xc03d (SessionInit)
+
+0xc03c CRITICAL PATH:
+PacketConstructor_MultiPlayer → 
+SessionInit_MultiPlayer → 
+RaceSession_CreateFull (0x001c02f0) → 
+NetworkMain_Setup (0x00287568) → 
+ChallengeSystem_Startup (0x00284b28) → 
+System_CommandDispatcher (0x00284c88) with command 0x88 → 
+ChallengeSystem_RegisterState (0x00289628) → 
+System_SendCommand_Internal (0x00287a48) → sends CHAL command
+
+PROTOCOL HANDLER REGISTRATION
+text
+
 RaceSession_CreateFull registers:
-• Type 0: ProtocolHandler_GameState
-• Type 4: ProtocolHandler_GameCommands
-• Type 6: Protocol_GameStateManager
-• Type 7: ProtocolHandler_Session
+• Type 0: ProtocolHandler_GameState (0x00308b08)
+• Type 4: ProtocolHandler_GameCommands (0x001c7db0)
+• Type 6: Protocol_GameStateManager (0x0030b5a8)
+• Type 7: ProtocolHandler_Session (0x0030c630)
 
-=== NETWORK PACKET FLOW ===
-PS2 Hardware Interrupt → ConnectionHandler_ChannelX_In → PacketReceiver_RawData → Packet_PreProcessor → NetworkReceive_CommandDispatcher → routes based on packet type
+NETWORK PACKET FLOW
+text
 
-=== MULTIPLAYER SESSION CREATION ===
-Client receives event 0xc03c → PacketConstructor_MultiPlayer processes → SessionInit_MultiPlayer → RaceSession_CreateFull → NetworkMain_Setup → ChallengeSystem_Startup → System_CommandDispatcher(0x88) → ChallengeSystem_RegisterState → sends CHAL
-272-byte session data copied to offset 0x2dc, flag at 0x2d8=1 when valid
-Base structure: DAT_004e31a8 (global game session structure)
+PS2 Hardware Interrupt → 
+ConnectionHandler_ChannelX_In (0x0017f580-0x0017f6c0) → 
+PacketReceiver_RawData (0x0017f408) → 
+Packet_PreProcessor (0x00154b20) → 
+NetworkReceive_CommandDispatcher (0x001012c8) → 
+Routes based on packet type to appropriate handler
 
-=== CHALLENGE SYSTEM ARCHITECTURE ===
-NetworkMain_Setup → ChallengeSystem_Startup → System_CommandDispatcher(0x88) → ChallengeSystem_RegisterState → System_SendCommand_Internal(cmd="chal") → sends CHAL
-System commands: 0x125=CommandHandler_CHAL, 0x126=Challenge_ReceiveNotification, 0x127=ChallengeValidation_CanInitiate, 0x128=ChallengeValidation_IsPlayerAvailable
+Hardware Integration:
+• PS2 INTC/DMAC interrupts trigger network events
+• Function pointer table @ 0x0037892c contains ConnectionHandler_ChannelX_In handlers
+• Registered by Network_Initialize_SessionSetup (0x00101470)
 
-=== PROTOCOL MESSAGE ROUTING ===
-NetworkEvent_MainDispatcher → Protocol_MessageRouter
+MULTIPLAYER SESSION CREATION
+text
+
+Client receives event 0xc03c → 
+PacketConstructor_MultiPlayer processes → 
+SessionInit_MultiPlayer → 
+RaceSession_CreateFull → 
+NetworkMain_Setup → 
+ChallengeSystem_Startup → 
+System_CommandDispatcher(0x88) → 
+ChallengeSystem_RegisterState → 
+System_SendCommand_Internal(cmd="chal") → sends CHAL
+
+272-byte session data handling:
+• Copied by SessionData_Copy272Bytes (0x00299048) to DAT_004e31a8 + 0x2dc
+• Flag at DAT_004e31a8 + 0x2d8 set to 1 when valid
+• Base structure: DAT_004e31a8 (global game session structure, 1000+ bytes)
+
+CHALLENGE SYSTEM ARCHITECTURE
+text
+
+NetworkMain_Setup → 
+ChallengeSystem_Startup → 
+System_CommandDispatcher(0x88) → 
+ChallengeSystem_RegisterState → 
+System_SendCommand_Internal(cmd="chal") → sends CHAL
+
+Challenge System Command Mapping:
+• 0x0E (14): System_AUXI_Dispatcher (0x00284bd0)
+• 0x34 (52): CommandHandler_AUXI2 (0x002895b8)
+• 0x88 (136): ChallengeSystem_RegisterState (0x00289628) - sends CHAL
+• 0x11F (287): SystemCommand_AcceptChallenge
+• 0x125 (293): CommandHandler_CHAL (0x00289080) - challenge registration
+• 0x126 (294): Challenge_ReceiveNotification (0x00288f70)
+• 0x127 (295): ChallengeValidation_CanInitiate (0x00289390)
+• 0x128 (296): ChallengeValidation_IsPlayerAvailable (0x00289458)
+
+Challenge Token Processing:
+• ChallengeToken_PrepareProcessing (0x0029a130) - generates token
+• ChallengeToken_ProcessCryptographic (0x0029a768) - processes token cryptographically
+• Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
+
+PROTOCOL MESSAGE ROUTING
+text
+
+NetworkEvent_MainDispatcher (0x001c3808) → 
+Protocol_MessageRouter (0x001c5e50)
+
 Parameters: param_1 (type), param_2 (subtype/flags), param_3 (data)
-Jump tables: Primary @ 0x3B01A0 (param_1), Secondary @ 0x3B04C0 (param_2)
-Lobby entry: param_2=0 → ProtocolHandler_LobbyStateEntry → ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry → state=0x4B1
 
-=== MEMORY STRUCTURES ===
-DAT_0038333c: Current game state (0x4b1=LOBBY, 0x4ba=NETWORK_INIT)
-DAT_00382eb1: Conditional lobby block
+Jump Tables:
+• Primary @ 0x3B01A0 (param_1 based)
+• Secondary @ 0x3B04C0 (param_2 based)
+
+Lobby Entry Path:
+param_2=0 → ProtocolHandler_LobbyStateEntry → 
+ProtocolEvent_LobbyTrigger (0x00206c90) → 
+GameState_ForceLobbyEntry (0x002068a8) → 
+state=0x4B1 (MULTIPLAYER_LOBBY)
+
+AUTHENTICATION STATE MACHINE
+text
+
+Authentication_StateMachineMain (0x00299330) - Main auth state machine
+
+Authentication State Jump Table @ 0x3d9df0:
+• State 0: AuthState_Initial (0x00298d08)
+• State 1: AuthState_Processing (0x00298df8)
+• State 2: AuthState_Validating (0x00298f10)
+• State 3: 0x2993f4 (unknown)
+• State 4: AuthState_TransitionToComplete (0x002992a8)
+• State 5: AuthState_TransitionToComplete
+• State 6: AuthState_FinalizeComplete (0x002992d8)
+• State 7: AuthState_FinalizeComplete
+
+Final: AuthState_Complete (0x00299148) sets state at offset 0x2c0 to 3 (COMPLETE)
+
+CRITICAL CORRECTION: NO "AUTH_STATE" field in protocol
+Flow: Server auth response → automatic pers response → Authentication_TriggerStateMachine
+
+NETWORK CONNECTION & LKEY PROCESSING
+text
+
+LKEY Discovery:
+• Server includes LKEY=value in @dir response
+• Extracted by NetworkConfig_InitializeAndSELEct (0x00287180)
+• Formatted as host:port$LKEY using StringHelper_CopyWithParams (0x002b9910)
+• Stored by NetworkConfig_StoreFormattedLKEY (0x003277c0)
+• Used by NetworkConnection_InitializeSession (0x00361de8) for buddy system
+
+NetworkConfig_InitializeAndSELEct Flow:
+1. Calls TagFieldFind(..., "LKEY") to extract LKEY from server response
+2. Uses TagFieldGetString to get LKEY value
+3. Formats with StringHelper_CopyWithParams using "%s:$%s" format (0x003d82e8)
+4. Result: param_1+0x22 (host:port) + ":$" + LKEY = "host:port$LKEY"
+5. Calls NetworkConfig_StoreFormattedLKEY to store result
+
+NetworkConnection_InitializeSession:
+• Processes param_5 string for ":$LKEY" pattern
+• If found, formats "LKEY=value" into connection buffer
+• Used for buddy system authentication
+
+MEMORY STRUCTURES
+text
+
+DAT_0038333c: Current game state
+• 0x4ba = NETWORK_INIT
+• 0x4b1 = MULTIPLAYER_LOBBY
+• ???? = RACE_STATE (needs identification)
+
+DAT_00382eb1: Conditional lobby block (set to 1 by GameState_BlockConditionalPath)
+
 DAT_004e1428: Multiplayer packet data array
 DAT_004e1420: Array element count
-g_ProtocolRegistry @ 0x0038b970: +0x00=vtable, +0x04=handler array, +0x08=count (0x1d=29)
-g_BuddySystem @ 0x0039454c: +0x00=config table, +0x40=buddy port, +0x50=init flag
-g_ChallengeSystem @ 0x0038b838 (300 bytes)
+
 DAT_004e31a8: Main game session structure (1000+ bytes)
-  +0x2d8: Session data valid flag (1 byte, 0=invalid, 1=valid)
-  +0x2dc: 272-byte session data (copied from play command)
-AuthState_Complete sets state at offset 0x2c0 to 3 (COMPLETE)
+• +0x2d8: Session data valid flag (1 byte, 0=invalid, 1=valid)
+• +0x2dc: 272-byte session data (copied from play command)
 
-=== SYSTEM_COMMANDDISPATCHER HANDLERS ===
-0x0E (14): System_AUXI_Dispatcher
-0x34 (52): CommandHandler_AUXI2
-0x88 (136): ChallengeSystem_RegisterState (sends CHAL)
-0x11F (287): SystemCommand_AcceptChallenge
-0x125 (293): CommandHandler_CHAL
-0x126 (294): Challenge_ReceiveNotification
+g_ProtocolRegistry @ 0x0038b970:
+• +0x00: vtable
+• +0x04: handler array
+• +0x08: count (0x1d = 29 handlers)
 
-=== PACKET CONSTRUCTION ===
-PacketConstructor_MultiPlayer builds data from DAT_004e1428 array
-Structure: [command][subcommand][size][data_with_0x1b]
-NetworkReceive_CommandDispatcher expects: 4-byte command, 4-byte subcommand/flags, 4-byte size, data payload
+g_BuddySystem @ 0x0039454c:
+• +0x00: config table
+• +0x40: buddy port
+• +0x50: init flag
 
-=== HARDWARE INTEGRATION ===
-PS2 INTC/DMAC interrupts trigger network events
-Function pointer table @ 0x0037892c contains ConnectionHandler_ChannelX_In handlers
+g_ChallengeSystem @ 0x0038b838 (300 bytes)
 
-=== AUTHENTICATION CORRECTION ===
-NO "AUTH_STATE" field. Flow:
-1. Server auth response: STATUS=1 + SESS
-2. Server sends automatic pers response
-3. NetworkEvent_MainHandler receives → Protocol_ChannelDispatcher → Authentication_TriggerStateMachine → Authentication_ProcessStateChange → Authentication_StateMachineMain
-4. AuthState_TransitionToComplete/AuthState_FinalizeComplete set state to 3 → AuthState_Complete
+DAT_003945b8: Stores formatted LKEY connection string (host:port$LKEY)
 
-=== AUTHENTICATION STATE JUMP TABLE @ 0x3d9df0 ===
-State 0: AuthState_Initial
-State 1: AuthState_Processing
-State 2: AuthState_Validating
-State 3: 0x2993f4 (unknown)
-State 4: AuthState_TransitionToComplete
-State 5: AuthState_TransitionToComplete
-State 6: AuthState_FinalizeComplete
-State 7: AuthState_FinalizeComplete
+PROTOCOL ROUTING INFRASTRUCTURE
+text
 
-=== CONNECTION HANDLERS ===
-Function pointer table @ 0x0037892c: +0x00=ConnectionHandler_Channel0_In, +0x10=ConnectionHandler_Channel1_In, etc.
-Registered by FUN_0017eec0 (network initialization)
+ProtocolRoutingTable_Initialize (0x00101210)
+ProtocolRoutingTable_SetupHandler (0x00101530)
 
-=== PROTOCOL ROUTING TABLE @ 0x00374e14 ===
-Little-endian format, 7 channels × 0x280 bytes per channel, 8 command slots × 0x50 bytes per slot
-Handler pointers at offset 0x40 in each slot
-Identifiers: 'MSTK', 'MSON', 'MPLA'
+Protocol Routing Table @ 0x00374e14:
+• Little-endian format
+• 7 channels × 0x280 bytes per channel
+• 8 command slots × 0x50 bytes per slot
+• Handler pointers at offset 0x40 in each slot
+• Identifiers: 'MSTK', 'MSON', 'MPLA'
+
+ProtocolHandler Registration:
+• ProtocolRegistry_Initialize (0x00291968)
+• ProtocolRegistry_RegisterHandler (0x002919c0)
+• RegisterProtocolCallback (0x00321858)
+
+SYSTEM INITIALIZATION CHAIN
+text
+
+NetworkSystem_Setup (0x00281438) → 
+System_SetupNetworkThread (0x00323408) → 
+Stores config in DAT_003e31bc → 
+Later retrieved by NetworkConfig_GetConnectionData (0x003236a0)
+
+System_CheckNetworkCondition (0x00327450):
+1. Calls NetworkConfig_GetConnectionData (gets config from DAT_003e31bc)
+2. Calls BuddySystem_CreateInstance (0x00361c28)
+3. Calls BuddySystem_InitializeConfig (0x00361d18) with config string
+4. Calls BuddySystem_RegisterDispatcher (0x00362cc0)
+5. Initializes multiplayer system components
+
+CONNECTION HANDLERS
+text
+
+Function pointer table @ 0x0037892c:
+• +0x00: ConnectionHandler_Channel0_In (0x0017f580)
+• +0x10: ConnectionHandler_Channel1_In (0x0017f5c0)
+• +0x20: ConnectionHandler_Channel2_In (0x0017f600)
+• +0x30: ConnectionHandler_Channel3_In (0x0017f640)
+• +0x40: ConnectionHandler_Channel4_In (0x0017f680)
+• +0x50: ConnectionHandler_Channel5_In (0x0017f6c0)
+
+Registered by NetworkInitialize_SessionSetup (0x00101470)
+
+PACKET CONSTRUCTION & PROCESSING
+text
+
+PacketConstructor_MultiPlayer:
+• Builds data from DAT_004e1428 array
+• Structure: [command][subcommand][size][data_with_0x1b]
+• Used for multiplayer session initialization
+
+NetworkReceive_CommandDispatcher expects:
+• 4-byte command
+• 4-byte subcommand/flags  
+• 4-byte size (big-endian)
+• Data payload
+
+Field Extraction System:
+• TagFieldFind @ 0x31ddd0 - Main field parser
+• TagFieldGetString @ 0x31ed10 - String extraction
+• TagFieldGetNumber @ 0x31e8b0 - Numeric extraction
+• TagFieldGetFlags @ 0x31e938 - Flag extraction
+
+BUDDY SYSTEM INTEGRATION
+text
+
+Buddy System Initialization:
+1. Server sends news command with BUDDY_URL and BUDDY_PORT
+2. ProtocolHandler_NEWS (0x00206bd0) extracts and stores info
+3. MultiplayerSystem_Activate (0x00327708) triggers
+4. NetworkConnection_InitializeSession uses stored LKEY
+5. Buddy system connects using host:port$LKEY format
+
+Critical Functions:
+• BuddySystem_InitializeCallback (0x003273d0)
+• BuddySystem_GlobalInitialize (0x00206678)
+• BuddySystem_Scheduler (0x00326950)
+• _BuddyApiStatus (called from NetworkConnection_InitializeSession)
+
+MULTIPLAYER MODE MANAGEMENT
+text
+
+Multiplayer Mode States (DAT_MultiplayerMode):
+• 0 = Disabled
+• 1 = Initializing (set by System_CheckNetworkCondition)
+• 2 = Active (set by MultiplayerSystem_Activate)
+
+State Checks:
+• MultiplayerMode_Check (0x003278f8)
+• MultiplayerMode_IsLobby (0x00327908)
+• GameState_CheckMultiplayer (0x00206598)
+
+State Transitions:
+• GameState_EnterNetworkInit (0x00206de0) → state = 0x4ba
+• GameState_ForceLobbyEntry → state = 0x4b1
+• GameState_ConditionalLobbyEntry (0x001e8cf8) - blocked by DAT_00382eb1
+
+CHALLENGE STATE MANAGEMENT
+text
+
+Challenge System States:
+0 = INACTIVE
+1 = PENDING
+2 = DECLINED
+3 = BLOCKED
+4 = ACCEPTED
+6 = READY (for play command)
+7 = NETWORK_VERIFYING
+9 = EXPIRED
+
+State Management:
+• ChallengeState_Get (0x00289228)
+• ChallengeState_Progress (0x0028a2c0)
+• ChallengeStateMachine_Advance (0x00288cc8)
+
+Validation:
+• ChallengeValidation_CanInitiate (0x00289390)
+• ChallengeValidation_IsPlayerAvailable (0x00289458)
+• ChallengeValidation_PlayerExists (0x002894b8)
+
+NETWORK CONFIGURATION PROCESSING
+text
+
+System_ProcessConfigString (0x00323278):
+• Builds configuration string from NASCAR config structure
+• Format strings:
+  - 0x3e0340: "%s-%s-%s" → "NASCAR-PS2-2"
+  - 0x3e0350: "%s/%s-%s" → "PS2/XXX-Jul 2 2003"
+  - 0x3e0360: "Jul 2 2003" (build date)
+• Server replaces "XXX" with actual key in VERS field
+
+NASCAR Config Structure @ 0x0038b7d0:
+• "NASCAR", "PS2", "XXX", "2", "e", "BASLUS-20824"
+
+CRITICAL PATH SUMMARY
+
+    Initial Connection: @dir → LKEY extraction → host:port$LKEY formatting
+
+    Lobby Entry: +who → ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry
+
+    Challenge: auxi → ChallengeToken_ProcessCryptographic → +msg notification
+
+    Race Start: play → SessionData_Copy272Bytes → valid flag set → race state
+
+This architecture reflects the complete network system with LKEY integration discovered through binary analysis.
