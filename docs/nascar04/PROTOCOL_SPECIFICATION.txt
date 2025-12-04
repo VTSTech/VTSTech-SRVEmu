@@ -1,0 +1,128 @@
+================================================================================
+EA SPORTS NASCAR THUNDER 2004 - COMPLETE PROTOCOL SPECIFICATION
+================================================================================
+
+PROTOCOL VERSION: EA Sports Online v2.0 (2003-2004)
+TRANSPORT: TCP with async UDP for game data
+ENCODING: ASCII text with key-value pairs
+ENDIANNESS: Big-endian for sizes, little-endian for PS2 data
+
+PACKET FORMAT:
+==================================================
+struct NetworkPacket {
+    char command[4];      // 4-byte command type
+    char subcommand[4];   // Usually zeros or sequence
+    uint32_t size;        // Big-endian packet size (incl. header)
+    char payload[];       // Null-terminated key-value pairs
+};
+
+COMMAND SEQUENCES:
+==================================================
+
+1. INITIAL CONNECTION SEQUENCE:
+   Client -> Server: @dir (Directory setup)
+   Server -> Client: ADDR=ip PORT=port SESS=session_id
+   Client -> Server: skey (Encryption key exchange)
+   Server -> Client: SKEY=encryption_key
+
+2. AUTHENTICATION SEQUENCE:
+   Client -> Server: auth NAME=username PASS=password_hash ...
+   Server -> Client: TOS=1 NAME=username PERSONAS=persona1,persona2 SESS=session_id
+   Client -> Server: pers PERS=selected_persona
+   Server -> Client: PERS=persona STATUS=1 LAST=timestamp
+   Server -> Client: +who F=U N=persona RI=1 RT=1 R=0 RF=1
+
+3. LOBBY OPERATIONS:
+   Client -> Server: sele ROOMS=1 USERS=1 RANKS=1
+   Server -> Client: ROOMS=1 COUNT=2 ROOM0=East ROOM0_DESC=... USERS=1 ...
+   Server -> Client: +rom I=1 N=East H=East Coast Racers A=ip T=1 L=50 F=0
+   Server -> Client: +usr I=1 N=OtherUser F=U A=ip
+   Server -> Client: +pop Z=1/25 2/15
+
+4. ROOM MANAGEMENT:
+   Client -> Server: room NAME=room_name PASS=password DESC=description MAX=50
+   Server -> Client: I=room_id L=50 T=1 F=0 H=description A=ip STATUS=1
+   Client -> Server: move NAME=room_name
+   Server -> Client: I=room_id N=room_name T=1 F=0
+   Server -> Client: +pop Z=room_id/user_count (broadcast)
+   Server -> Client: +usr I=room_id N=username F=flags A=ip (broadcast)
+
+5. CHALLENGE SYSTEM:
+   Client -> Server: chal FROM=username TO=target_user
+   Server -> Client: FROM=username SEED=token WHEN=timestamp STATUS=1
+   Server -> Client: +msg N=username T=Race challenge! (to target)
+   Target -> Server: mesg N=challenger T=ACPT (accept)
+   Server -> Client: auxi TEXT=challenge_token
+   Server -> Client: play STATUS=1 (start race)
+
+PARAMETER REFERENCE:
+==================================================
+
+Room Management:
+  N=name
+  H=description
+  A=ip_address
+  T=type
+  L=limit
+  F=flags
+
+Statistics:
+  INDEX=index
+  CHAN=channel
+  START=start
+  RANGE=range
+  COUNT=count
+  DATA=stats_data
+  WINS=wins
+  POINTS=points
+  RANK=rank
+  TEAM=team
+  CAR=car_number
+
+Game Play:
+  FROM=challenger
+  TO=target
+  SEED=random_seed
+  WHEN=timestamp
+  TEXT=message
+  SET_TRACK=track_name
+  SET_RACELEN=laps
+  SET_AIDIFF=difficulty
+  TRACKID=track_id
+  RACETIME=time
+
+Authentication:
+  NAME=username
+  PASS=md5_hash
+  USER=user_id
+  PERS=persona_name
+  SESS=session_id
+  MAC=mac_address
+  VERS=client_version
+  ALTS=alt_count
+
+User Presence:
+  I=room_id
+  N=persona_name
+  F=flags
+  A=ip_address
+  RI=room_info
+  RT=room_type
+  R=reserved
+  RF=room_flags
+
+RESPONSE CODES:
+==================================================
+STATUS=1  - Success
+STATUS=0  - Failure
+TOS=1     - Terms of Service accepted
+CONFIG=1  - Configuration accepted
+AUTH=1    - Authentication successful
+
+FLAGS:
+==================================================
+F=U - User is available
+F=B - User is busy
+F=A - User is away
+F=0 - No special flags
+
