@@ -50,6 +50,7 @@ PhysicsSession_SetTimestep -> 0x001c1288
 PlayerSession_ConfigureConnections -> 0x001c16a0
 GameState_Cleanup -> 0x001c1ac0
 NetworkEvent_MainDispatcher -> 0x001c3808
+StringHelper_FormatOrdinal -> 0x001c4d90
 ChallengeTarget_Setup -> 0x001c5d18
 Protocol_MessageRouter -> 0x001c5e50
 ProtocolHandler_GameCommands -> 0x001c7db0
@@ -158,6 +159,7 @@ MultiplayerSystem_CleanupWithChallenge -> 0x00283cb0
 MultiplayerSession_CleanupWithMessage -> 0x00283cd8
 ChallengeSystem_InitializeNetwork -> 0x00283d38
 ChallengeSystem_CommandDispatcher -> 0x00283da0
+NetworkUser_ConnectAndValidate -> 0x002840d8
 NetworkConfig_GetAndFormatStatus -> 0x002842d0
 SystemCommand_GameStateCheck -> 0x00284788
 ChallengeSystem_Startup -> 0x00284b28
@@ -463,7 +465,7 @@ LobbySystem_AddUserToList -> 0x0031b4a8
 Buddy_NetworkLookup -> 0x0031b768
 LogSystem_GetNextEntry -> 0x0031b7b0
 LogSystem_RemoveEntry -> 0x0031b838
-NetworkHelper_b850 -> 0x0031b850
+NetworkAuth_ProcessResponse -> 0x0031b850
 Lobby_UpdateConnection -> 0x0031bdd0
 LobbyApiUpdate -> 0x0031bdf0
 String_CopyAndAppendEquals -> 0x0031da38
@@ -483,6 +485,7 @@ TagFieldGetAddress -> 0x0031e988
 Data_ExtractIndexedField -> 0x0031ea90
 TagFieldGetString -> 0x0031ed10
 TagFieldGetBinary -> 0x0031ef10
+Data_ParseFormattedField -> 0x0031f010
 TagFieldGetEpoch -> 0x0031f328
 Buddy_CreateUserEntry -> 0x0031f948
 Buddy_UpdateUserData -> 0x0031fa00
@@ -582,6 +585,7 @@ CommandHandler_CPER -> 0x003259c8
 CommandHandler_PERS_REQ -> 0x00325a60
 CommandHandler_DPER -> 0x00325ad0
 Data_ParseUserMultiValueField -> 0x00325b50
+Config_GetOptionsValue -> 0x00325c38
 ProtocolHandler_PERS2 -> 0x00325cd0
 ConnectionTrigger_Setup -> 0x00325da8
 ConnectionTrigger_Init -> 0x00325e10
