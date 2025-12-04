@@ -1,14 +1,14 @@
-================================================================================
-EA SPORTS NASCAR THUNDER 2004 - COMPLETE PROTOCOL SPECIFICATION
-================================================================================
+EA SPORTS NASCAR THUNDER 2004 - COMPLETE PROTOCOL SPECIFICATION v3.0
+Updated with Binary Analysis Findings
+PROTOCOL BASICS
 
-PROTOCOL VERSION: EA Sports Online v2.0 (2003-2004)
-TRANSPORT: TCP with async UDP for game data
-ENCODING: ASCII text with key-value pairs
-ENDIANNESS: Big-endian for sizes, little-endian for PS2 data
+Transport: TCP with async UDP for game data
+Encoding: ASCII text with key-value pairs
+Endianness: Big-endian for sizes, little-endian for PS2 data
+Game ID: BASLUS-20824 (PS2 North America)
+PACKET FORMAT
+c
 
-PACKET FORMAT:
-==================================================
 struct NetworkPacket {
     char command[4];      // 4-byte command type
     char subcommand[4];   // Usually zeros or sequence
@@ -16,44 +16,358 @@ struct NetworkPacket {
     char payload[];       // Null-terminated key-value pairs
 };
 
-COMMAND SEQUENCES:
-==================================================
+INITIAL CONNECTION & AUTHENTICATION
+1. DIRECTORY SETUP (@dir)
 
-1. INITIAL CONNECTION SEQUENCE:
-   Client -> Server: @dir (Directory setup)
-   Server -> Client: ADDR=ip PORT=port SESS=session_id
-   Client -> Server: skey (Encryption key exchange)
-   Server -> Client: SKEY=encryption_key
+Client ? Server:
+text
 
-2. AUTHENTICATION SEQUENCE:
-   Client -> Server: auth NAME=username PASS=password_hash ...
-   Server -> Client: TOS=1 NAME=username PERSONAS=persona1,persona2 SESS=session_id
-   Client -> Server: pers PERS=selected_persona
-   Server -> Client: PERS=persona STATUS=1 LAST=timestamp
-   Server -> Client: +who F=U N=persona RI=1 RT=1 R=0 RF=1
+@dir VERS="PS2/XXX-Jul  2 2003" PROD=NASCAR-PS2-2004 LANG=en SLUS=BASLUS-20824
 
-3. LOBBY OPERATIONS:
-   Client -> Server: sele ROOMS=1 USERS=1 RANKS=1
-   Server -> Client: ROOMS=1 COUNT=2 ROOM0=East ROOM0_DESC=... USERS=1 ...
-   Server -> Client: +rom I=1 N=East H=East Coast Racers A=ip T=1 L=50 F=0
-   Server -> Client: +usr I=1 N=OtherUser F=U A=ip
-   Server -> Client: +pop Z=1/25 2/15
+Note: "XXX" is placeholder replaced by server
 
-4. ROOM MANAGEMENT:
-   Client -> Server: room NAME=room_name PASS=password DESC=description MAX=50
-   Server -> Client: I=room_id L=50 T=1 F=0 H=description A=ip STATUS=1
-   Client -> Server: move NAME=room_name
-   Server -> Client: I=room_id N=room_name T=1 F=0
-   Server -> Client: +pop Z=room_id/user_count (broadcast)
-   Server -> Client: +usr I=room_id N=username F=flags A=ip (broadcast)
+Server ? Client:
+text
 
-5. CHALLENGE SYSTEM:
-   Client -> Server: chal FROM=username TO=target_user
-   Server -> Client: FROM=username SEED=token WHEN=timestamp STATUS=1
-   Server -> Client: +msg N=username T=Race challenge! (to target)
-   Target -> Server: mesg N=challenger T=ACPT (accept)
-   Server -> Client: auxi TEXT=challenge_token
-   Server -> Client: play STATUS=1 (start race)
+ADDR=server_ip PORT=game_port SESS=session_id 
+MASK=netmask DIRECT=direct_flag STATUS=1 LKEY=server_generated_key
+
+NEW: LKEY field added - server-generated key for buddy system
+2. ENCRYPTION KEY EXCHANGE (skey)
+
+Client ? Server: skey
+Server ? Client: SKEY=encryption_key STATUS=1
+3. AUTHENTICATION (auth)
+
+Client ? Server:
+text
+
+auth NAME=username PASS=md5_hash USER=user_id PERS=persona TOS=1 
+MID=$machine_id HWFLAG=4 HWMASK=hardware_mask
+VERS="PS2/XXX-Jul  2 2003" PROD=NASCAR-PS2-2004 LANG=en SLUS=BASLUS-20824
+
+Server ? Client:
+text
+
+auth STATUS=1 SESS=session_id NAME=username USER=user_id 
+PERSONAS=persona1,persona2 VERS="PS2/XXX-Jul  2 2003"
+
+4. AUTOMATIC PERSONA RESPONSE
+
+Server ? Client: pers PERS=persona STATUS=1 LAST=timestamp
+No client pers command needed!
+5. LOBBY ENTRY TRIGGER
+
+Server ? Client: +who F=U N=persona RI=1 RT=1 R=0 RF=1
+Triggers lobby state transition
+STATE MANAGEMENT (BINARY ANALYSIS)
+Game States:
+
+    0x4ba = NETWORK_INIT
+
+    0x4b1 = MULTIPLAYER_LOBBY
+
+    ? = RACE_STATE (needs identification)
+
+Memory Structures:
+
+    DAT_0038333c: Current game state
+
+    DAT_00382eb1: Conditional lobby block (1=blocked)
+
+    DAT_004e31a8: Main session structure (1000+ bytes)
+
+        +0x2d8: Session data valid flag (1=race ready)
+
+        +0x2dc: 272-byte race session data
+
+Authentication State Machine:
+text
+
+State 0: AuthState_InitialHandler
+State 1: AuthState_ProcessingHandler  
+State 2: AuthState_ValidatingHandler
+State 3: Unknown (0x2993f4)
+State 4-5: AuthState_TransitionToComplete
+State 6-7: AuthState_FinalizeComplete
+Final: AuthState_Complete sets offset 0x2c0 to 3 (COMPLETE)
+
+LOBBY OPERATIONS
+1. LOBBY DATA REQUEST (sele)
+
+Client ? Server: sele ROOMS=1 USERS=1 RANKS=1 MESGS=1
+
+Server Responses:
+
+    +rom I=room_id N=name H=desc A=host T=type L=max F=flags
+
+    +usr I=room_id N=persona F=flags A=ip
+
+    +pop Z=room_id:count,room_id:count,... CORRECTED FORMAT
+
+2. ROOM MANAGEMENT
+
+Create Room: room NAME=name PASS=password DESC=description MAX=50
+Move to Room: move NAME=room_name
+Room Updates: Broadcast via +rom, +pop, +usr
+3. USER OPERATIONS
+
+User Selection: peek NAME=target_user
+User Updates: +usr I=room_id N=persona F=flags A=ip
+CHALLENGE SYSTEM (CORRECTED)
+CHALLENGE INITIATION:
+
+    User Selection: Client sends peek NAME=target
+
+    Challenge Token: Client generates TIMESTAMP_RANDOM_CHALLENGER_TARGET
+
+    Initiation: Client sends auxi TEXT=challenge_token NOT CHAL
+
+    Notification: Server sends +msg N=challenger TEXT=token ATTR=3
+
+    Response: Target sends mesg N=challenger TEXT=ACPT (or DECL/BLOC)
+
+CHALLENGE STATES:
+text
+
+0 = INACTIVE
+1 = PENDING  
+2 = DECLINED
+3 = BLOCKED
+4 = ACCEPTED
+6 = READY (for play command)
+7 = NETWORK_VERIFYING
+9 = EXPIRED
+
+CRITICAL CORRECTION:
+
+    auxi = User-initiated challenge (cryptographic token processing)
+
+    chal = System registration only (internal, not user-initiated)
+
+    mesg = Challenge response handling
+
+SYSTEM COMMAND MAPPING:
+text
+
+0x0E: System_AUXI_Dispatcher (auxi command)
+0x34: CommandHandler_AUXI2
+0x88: ChallengeSystem_RegisterState (sends CHAL)
+0x11F: SystemCommand_AcceptChallenge
+0x125: CommandHandler_CHAL (registration only)
+0x126: Challenge_ReceiveNotification
+0x127: ChallengeValidation_CanInitiate
+0x128: ChallengeValidation_IsPlayerAvailable
+
+RACE INITIALIZATION
+PLAY COMMAND (race start):
+
+Server ? Both Clients:
+text
+
+play SELF=self_data HOST=host_data OPPO=opponent_data 
+P1=player1 P2=player2 P3=player3 P4=player4
+AUTH=auth_data FROM=challenger SEED=seed WHEN=timestamp
+
+*PLUS 272-byte binary session data appended*
+SESSION DATA PROCESSING:
+
+    ChallengeCommand_Dispatcher receives play command (state must be 6)
+
+    Calls Callback_ProcessPLAYCommand with session data pointer
+
+    SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
+
+    Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
+
+    Game transitions from LOBBY to RACE state
+
+RACE CONFIGURATION (rank command):
+text
+
+rank SET_TRACK=track_name SET_RACELEN=laps SET_AIDIFF=difficulty
+SET_DAMAGE=damage SET_RANKED=ranked SET_SETUPS=setups
+SET_NUMAI=ai_count SET_ASSISTS=assists SET_CAUTIONS=cautions
+SET_CONSUME=consumables RACETIME=time
+USER=username RANK=rank WINS=wins LOSS=losses RATING=rating
+TRACK=track_name LAPS=laps
+
+BUDDY SYSTEM & NETWORK CONFIGURATION
+NEWS COMMAND (server configuration):
+
+Server ? Client:
+text
+
+news BUDDY_URL=hostname BUDDY_PORT=port NEWS0-3=news_text 
+COUNT=news_count STATUS=1
+
+BUDDY SYSTEM INITIALIZATION:
+
+    Server sends news with BUDDY_URL and BUDDY_PORT
+
+    Client calls ProtocolHandler_NEWS ? extracts buddy info
+
+    MultiplayerSystem_Activate ? NetworkConnection_InitializeSession
+
+    LKEY Processing: Formats host:port$LKEY from @dir response
+
+    Buddy connection established using formatted string
+
+LKEY HANDLING FLOW:
+text
+
+@dir response ? LKEY=server_generated_value
+               ?
+NetworkConfig_InitializeAndSELEct extracts LKEY
+               ?
+Formats: param_1+0x22 + ":$" + LKEY = "host:port$LKEY"
+               ?
+FUN_003277c0 processes formatted string
+               ?
+Stored for buddy system connections
+
+FIELD EXTRACTION SYSTEM
+
+    TagFieldFind @ 0x31ddd0 - Main field parser
+
+    TagFieldGetString @ 0x31ed10 - String extraction
+
+    TagFieldGetNumber @ 0x31e8b0 - Numeric extraction
+
+    TagFieldGetFlags @ 0x31e938 - Flag extraction
+
+COMMAND HANDLERS:
+text
+
+0x00287838: CommandHandler_AUTH_PERS (auth/pers)
+0x00287af8: ProtocolHandler_ROOM (sele/room)  
+0x00288080: CommandHandler_PERS_USER (pers/user)
+0x00289528: CommandHandler_AUXI (challenge initiation)
+0x00289080: CommandHandler_CHAL (challenge registration)
+0x00288668: CommandHandler_MESG (challenge notifications)
+0x00288a40: ChallengeCommand_Dispatcher (play command)
+
+NETWORK ARCHITECTURE
+PACKET FLOW:
+text
+
+PS2 Hardware Interrupt ? ConnectionHandler_ChannelX_In ? 
+PacketReceiver_RawData ? Packet_PreProcessor ?
+NetworkReceive_CommandDispatcher ? ProtocolCommand_RoutingTable @ 0x00374e14 ?
+Protocol Handler Virtual Dispatch
+
+DUAL JUMP TABLE SYSTEM:
+
+JUMP TABLE 1 @ 0x3B01A0 (A1-based):
+text
+
+0: ProtocolHandler_Category0
+1: ProtocolHandler_Category1
+...
+7: ProtocolHandler_Default
+
+JUMP TABLE 2 @ 0x3B04C0 (A2-based):
+text
+
+0: ProtocolHandler_LobbyStateEntry ? ProtocolEvent_LobbyTrigger ? GameState_ForceLobbyEntry
+1-19: Various protocol handlers
+
+LOBBY STATE TRANSITION:
+text
+
+NetworkEvent_MainDispatcher(a2=0) ? Protocol_MessageRouter ?
+ProtocolHandler_LobbyStateEntry ? ProtocolEvent_LobbyTrigger ?
+GameState_ForceLobbyEntry ? DAT_0038333c = 0x4b1 ?
+NetworkState_CleanupAll()
+
+CRITICAL UPDATES FROM BINARY ANALYSIS
+1. AUTHENTICATION CORRECTION:
+
+    Server sends automatic pers response after auth
+
+    Client's Authentication_StateMachineMain handles transitions
+
+2. CHALLENGE SYSTEM CORRECTION:
+
+    auxi for challenge initiation (not chal)
+
+    Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
+
+    Processed by ChallengeToken_ProcessCryptographic @ 0x0029a768
+
+    Server sends +msg with ATTR=3 for notifications
+
+3. 272-BYTE SESSION DATA:
+
+    Exact size required (0x110 bytes)
+
+    Copied to DAT_004e31a8 + 0x2dc
+
+    Valid flag at +0x2d8 must be 1 for race to start
+
+4. LKEY DISCOVERY:
+
+    Server-generated in @dir response
+
+    Extracted with TagFieldFind("LKEY")
+
+    Stored for buddy connections
+
+5. FIELD FORMAT CORRECTIONS:
+
+    +pop format: Z=room_id:count,room_id:count (colon separator)
+
+    play includes 272-byte data (not separate +ses command)
+
+DEBUGGING & TESTING
+KEY BREAKPOINTS:
+text
+
+0x0029a130: ChallengeToken_PrepareProcessing
+0x00289528: CommandHandler_AUXI (challenge initiation)
+0x00288668: CommandHandler_MESG (response handling)  
+0x00288a40: ChallengeCommand_Dispatcher (play command)
+0x00299048: SessionData_Copy272Bytes
+0x00287244: LKEY extraction and formatting
+
+TESTING SEQUENCE:
+
+    Complete auth ? Lobby entry (+who)
+
+    Send +usr broadcasts ? Populate user list
+
+    Client peek ? User selection
+
+    Client auxi ? Challenge initiation
+
+    Server +msg ? Challenge notification
+
+    Target mesg ? Challenge response
+
+    Server play ? Race start
+
+    Verify DAT_004e31a8 + 0x2d8 = 1 ? Race valid
+
+IMPLEMENTATION NOTES
+SERVER REQUIREMENTS:
+
+    Generate unique LKEY per session in @dir response
+
+    Support auxi command for challenge initiation
+
+    Send +msg with ATTR=3 for challenge notifications
+
+    Include 272-byte session data in play command
+
+CLIENT EXPECTATIONS:
+
+    Parse LKEY from @dir response
+
+    Use auxi (not chal) for user challenges
+
+    Expect automatic pers response after auth
+
+    Validate 272-byte session data before race start
 
 PARAMETER REFERENCE:
 ==================================================
@@ -100,6 +414,7 @@ Authentication:
   MAC=mac_address
   VERS=client_version
   ALTS=alt_count
+  LKEY=123456789012
 
 User Presence:
   I=room_id
@@ -126,3 +441,4 @@ F=B - User is busy
 F=A - User is away
 F=0 - No special flags
 
+Version 3.0 - Updated with complete binary analysis findings including LKEY discovery, challenge system corrections, and protocol handler mappings.

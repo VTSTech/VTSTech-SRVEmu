@@ -157,7 +157,7 @@ class PersonaManager:
         else: 
             session.current_persona = session.available_personas[0] if session.available_personas else session.clientNAME
         
-        return create_packet_func('pers', '', f"PERS={session.current_persona}\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
+        return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=3fcf27540c92935b0a66fd3b0000283c\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
 
 class AuthenticationHandlers:
     def __init__(self, create_packet_func):
@@ -191,7 +191,7 @@ class AuthenticationHandlers:
 				    f"PRIV={getattr(session, 'clientPRIV', '1')}",
 				    f"LAST={getattr(session, 'clientLAST', time.strftime('%Y.%m.%d-%H:%M:%S'))}", 
 				    f"SESS={session.clientSESS}",
-				    "AUTH=1",
+				    "STAT=3",
 				    "STATUS=1"  # Keep this, might be important
 				]
         

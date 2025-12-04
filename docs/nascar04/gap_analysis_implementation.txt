@@ -31,8 +31,16 @@ PRACTICAL IMPLEMENTATION GUIDE:
 ==================================================
 
 1. PACKET HEADER IMPLEMENTATION:
-   Python struct format: '>4s4sL' for header
-   Example: struct.pack('>4s4sL', b'auth', b'\x00\x00\x00\x00', packet_size)
+PACKET FORMAT
+c
+
+struct NetworkPacket {
+    char command[4];      // 4-byte command type
+    char subcommand[4];   // Usually zeros or sequence
+    uint32_t size;        // Big-endian packet size (incl. header)
+    char payload[];       // Null-terminated key-value pairs
+};
+
 
 2. AUTHENTICATION WORKFLOW:
    Step 1: Client connects, sends @dir

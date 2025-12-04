@@ -54,8 +54,9 @@ class NetworkHandlers:
         session.data_port = self.get_next_data_port()
         
         dir_fields = [
-            f"ADDR={self.server_ip}", f"PORT={self.ports['listener']}",
-            f"SESS={session.clientSESS}", f"MASK={random.randint(1000, 9999)}f3f70ecb1757cd7001b9a7a{random.randint(1000, 9999)}"
+            f"ADDR={self.server_ip}", f"PORT={self.ports['listener']}","LKEY=$IGOTURLKEY",
+            f"SESS={session.clientSESS}", f"MASK={random.randint(1000, 9999)}f3f70ecb1757cd7001b9a7a{random.randint(1000, 9999)}",
+            
         ]
         
         dir_response = '\n'.join(dir_fields) + '\n'
