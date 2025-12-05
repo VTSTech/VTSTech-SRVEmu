@@ -1,3 +1,4 @@
+entry -> 0x00100008
 Memory_AllocateNetworkAligned -> 0x00100360
 ProtocolRoutingTable_Initialize -> 0x00101210
 NetworkReceive_CommandDispatcher -> 0x001012c8
@@ -213,10 +214,12 @@ CommandHandler_SendPing -> 0x00209640
 ProtocolChannelMapping_Initialize -> 0x0022a208
 ProtocolSystem_GlobalInitialize -> 0x0022a420
 ProtocolHandler_LookupByChannel -> 0x0022a6b8
+ProtocolObject_Cleanup -> 0x0022a8b0
 PlayerSession_DefaultConfig -> 0x0022a9a0
 ProtocolConnection_Establish -> 0x0022ada0
+ProtocolObject_GetPosition -> 0x0022afa0
 NetworkConnectionTable_Reset -> 0x0022b110
-ProtocolSystem_ProcessAll -> 0x0022b200
+ProtocolPhysics_UpdateAll -> 0x0022b200
 NetworkRouter_Main -> 0x0022b4c0
 NetworkReceive_MainHandler -> 0x0022b4f8
 NetworkEvent_Loop -> 0x0022ca08
@@ -238,6 +241,8 @@ NetworkEvent_RegisterHandlers -> 0x0027ad40
 Network_ProcessGameEvent -> 0x0027b0c8
 NetworkSystem_SetState -> 0x0027d328
 NetworkSystem_GetConnectionStatus -> 0x0027d3b0
+CommandHandler_MultiParamCopy -> 0x00281298
+System_CleanupNetwork -> 0x002813d8
 NetworkSystem_Setup -> 0x00281438
 NetworkSystem_Init -> 0x002814e8
 ProtocolCallback_Register -> 0x00281538
@@ -248,6 +253,7 @@ ProtocolHandler_800000XX_Range3 -> 0x00281958
 ProtocolHandler_800000XX_Range5 -> 0x00281a70
 ProtocolHandler_ConnectionTrigger -> 0x00281b38
 ProtocolHandler_Validation -> 0x00281d48
+CommandHandler_CommonOperation -> 0x00281da0
 NetworkSystem_InitializeConfigAndLobby -> 0x00282440
 NetworkHelper_2528 -> 0x00282528
 Protocol_CommandDispatcher -> 0x00282570
@@ -449,16 +455,23 @@ Util_CompareStrings -> 0x002b9e60
 StringHelper_CompareN -> 0x002b9e80
 ChallengeTarget_StoreSelected -> 0x002b9ef0
 SetGsCrt -> 0x002c5ca0
+_Exit -> 0x002c5cc0
+_LoadExecPS2 -> 0x002c5ce0
 AddIntcHandler -> 0x002c5d80
 AddIntcHandler -> 0x002c5d90
 RemoveIntcHandler -> 0x002c5da0
 AddDmacHandler -> 0x002c5db0
 AddDmacHandler -> 0x002c5dc0
 RemoveDmacHandler -> 0x002c5dd0
+_EnableIntc -> 0x002c5de0
+_DisableIntc -> 0x002c5df0
+_EnableDmac -> 0x002c5e00
+_DisableDmac -> 0x002c5e10
 SetAlarm -> 0x002c5e20
 iSetAlarm -> 0x002c5e80
 CreateThread -> 0x002c5ea0
 DeleteThread -> 0x002c5eb0
+_StartThread -> 0x002c5ec0
 ExitDeleteThread -> 0x002c5ee0
 TerminateThread -> 0x002c5ef0
 ChangeThreadPriority -> 0x002c5f30
@@ -467,6 +480,7 @@ GetThreadId -> 0x002c5f90
 ReferThreadStatus -> 0x002c5fa0
 SleepThread -> 0x002c5fc0
 WakeupThread -> 0x002c5fd0
+_iWakeupThread -> 0x002c5fe0
 SuspendThread -> 0x002c6010
 CreateSema -> 0x002c60a0
 DeleteSema -> 0x002c60b0
@@ -493,6 +507,7 @@ sceSifSetReg -> 0x002c64a0
 sceSifGetReg -> 0x002c64b0
 Deci2Call -> 0x002c64d0
 GetMemorySize -> 0x002c6500
+_InitTLB -> 0x002c6510
 InvalidDCache -> 0x002c66f8
 RFU116_SetSyscall -> 0x002c9cb0
 RFU116_SetSyscall2 -> 0x002c9d00
@@ -530,6 +545,7 @@ MemoryManager_GetAvailableSize -> 0x002eb058
 Memory_AllocateNetwork -> 0x002eb100
 MemoryManager_AllocateBlock -> 0x002eb128
 Memory_FreeNetwork -> 0x002eb3d0
+CommandHandler_CheckSystemFlag -> 0x002ecf60
 CreateVertexBuffer -> 0x002ef9c8
 ConfigureVertexBuffer -> 0x002efad0
 AllocateVertexData -> 0x002efca0
@@ -557,7 +573,10 @@ ProtocolHandler_Session -> 0x0030c630
 String_FormatConnection -> 0x0030edb0
 RegisterNetworkEventHandler -> 0x003103c8
 RegisterProtocolHandler -> 0x003103f8
+Vector3_Length -> 0x00315df8
 MathHelper_5f98 -> 0x00315f98
+Vector3_Add -> 0x00316330
+Vector3_Subtract -> 0x00316390
 MathHelper_6658 -> 0x00316658
 CreateGraphicsContext -> 0x00316a48
 GraphicsSession_SetRenderTarget -> 0x00316be8
@@ -612,6 +631,7 @@ Buddy_FreeUserData -> 0x0031faa0
 Buddy_ConfigGetCount -> 0x0031fb90
 NetworkConfig_GetValue -> 0x0031fb98
 DispListSort -> 0x0031fbd8
+_getRost -> 0x0031fbf8
 Buddy_ConfigUpdate -> 0x0031fc18
 DispListOrder -> 0x0031fc38
 HashTable_Create -> 0x0031fd98
@@ -711,11 +731,13 @@ CommandHandler_EDIT -> 0x003254e0
 Data_ParseMultiValueField -> 0x00325668
 Data_ExtractSingleField -> 0x00325700
 PersonaSlot_ValidateAndStore -> 0x00325798
+CommandHandler_SetPersonaSlot -> 0x00325870
 ProtocolHandler_PERS1 -> 0x003258f0
 CommandHandler_CPER -> 0x003259c8
 CommandHandler_PERS_REQ -> 0x00325a60
 CommandHandler_DPER -> 0x00325ad0
 Data_ParseUserMultiValueField -> 0x00325b50
+CommandHandler_CopyPersonaData -> 0x00325be8
 Config_GetOptionsValue -> 0x00325c38
 ProtocolHandler_PERS2 -> 0x00325cd0
 ConnectionTrigger_Setup -> 0x00325da8
@@ -726,6 +748,7 @@ ConnectionTrigger_Complete -> 0x00325f50
 ConnectionTrigger_Status -> 0x00325fc0
 ConnectionTrigger_Check -> 0x00325fe8
 NetworkConnection_Alt -> 0x00326070
+CommandHandler_FinalOperation -> 0x00326138
 Handshake_ProcessPort -> 0x00326160
 Connection_CleanupResources -> 0x003261b8
 Handshake_ProcessWrapper -> 0x00326200
@@ -735,10 +758,13 @@ ServerStatus_CheckMaintenance -> 0x003262c0
 NetworkSystem_ForceShutdown -> 0x003263b8
 Network_EnableSystem -> 0x003265e0
 EA_LoginSystem_Initialize -> 0x003266d0
+System_GetInitializedState -> 0x00326708
 ConnectionData_CopyFromPrimaryTable -> 0x00326758
 ConnectionData_CopyFromSecondaryTable -> 0x003267b0
+System_InitializeComponents -> 0x00326808
 System_FinalValidation -> 0x00326858
 SystemUtility_Placeholder -> 0x003268e8
+EA_Login_ProcessCallback -> 0x00326930
 BuddySystem_Scheduler -> 0x00326950
 ProtocolHandler_PERS4 -> 0x00326980
 MultiplayerCommand_Dispatcher -> 0x00326a30
@@ -789,15 +815,23 @@ MultiplayerSystem_InitializeComponents -> 0x00328138
 Config_ProcessNumericValue -> 0x00328298
 BuddySystem_RemoveUserFromList -> 0x00328468
 ChallengeSystem_StoreTargetFromBuddy -> 0x00328508
+ResourceManager_ProcessById -> 0x00337618
 SystemHelper_9e68 -> 0x00339e68
+Resource_CleanupType2 -> 0x003400c8
+LinkedList_InsertFront -> 0x003404a0
+Resource_CleanupType3 -> 0x00343b10
+ResourceManager_RemoveAndCleanup -> 0x00345688
 Interrupt_RegisterHandler -> 0x003534f0
 Auth_HashData -> 0x00361230
 BuddyConfig_LookupAndFormat -> 0x00361330
 ProtoAriesSecure -> 0x003613e0
+_BuddyApiDebug -> 0x00361440
+_BuddyApiTransact -> 0x003615f0
 Buddy_ProcessUsername -> 0x00361668
 Network_HandleReceive -> 0x003616b0
 Network_SendPlayerData -> 0x003617e8
 Network_TimeoutCheck -> 0x00361a80
+_BuddyApiStatus -> 0x00361b28
 Buddy_PrepareSend -> 0x00361b70
 BuddySystem_CreateInstance -> 0x00361c28
 BuddySystem_InitializeConfig -> 0x00361d18
@@ -814,3 +848,10 @@ BuddyApiUpdate -> 0x00362cd0
 NetworkSocket_AllocateAndBind -> 0x00364a38
 NetworkConnection_CreateSocket -> 0x00364b08
 NetworkConnections_ProbeReset -> 0x00366aa8
+
+================================================================================
+SUMMARY:
+Total functions: 11752
+Renamed functions: 850
+Unnamed functions: 10902
+================================================================================
