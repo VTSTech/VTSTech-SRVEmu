@@ -1,7 +1,5 @@
-# authentication_system_r08.py - CLEANED & OPTIMIZED
-import time
-import random
-import hashlib
+# authentication_system_r11.py - CLEANED & OPTIMIZED
+import time, random, hashlib
 
 class AuthenticationSlot:
     def __init__(self, slot_id):
@@ -32,23 +30,24 @@ class AuthenticationStateMachine:
         self.process_authentication(session)
         
     def process_authentication(self, session):
-        """Process authentication through all states"""
-        session.auth_state = 0
-        print(f"AUTH: State 0 - Initializing {self.max_slots} authentication slots")
+        states = [
+            (0, f"Initializing {self.max_slots} authentication slots"),
+            (1, "Processing authentication data"),
+            (2, "Validating credentials"),
+            (3, "Authentication complete")
+        ]
         
-        session.auth_state = 1
-        print("AUTH: State 1 - Processing authentication data")
-        
-        session.auth_timestamp = int(time.time())
-        session.auth_state = 2
-        print("AUTH: State 2 - Validating credentials")
-        
-        session.validation_code1 = 0x3039
-        session.validation_code2 = 0x4d2
-        session.auth_state = 3
-        session.auth_complete = True
-        session.client_flags |= 4
-        print("AUTH: State 3 - Authentication complete")
+        for state_num, msg in states:
+            session.auth_state = state_num
+            print(f"AUTH: State {state_num} - {msg}")
+            
+            if state_num == 1:
+                session.auth_timestamp = int(time.time())
+            elif state_num == 2:
+                session.validation_code1, session.validation_code2 = 0x3039, 0x4d2
+            elif state_num == 3:
+                session.auth_complete = True
+                session.client_flags |= 4
 
 class AccountManager:
     @staticmethod
@@ -56,7 +55,7 @@ class AccountManager:
         required_fields = ['NAME', 'USER', 'PASS', 'BORN', 'MAIL']
         for field in required_fields:
             if not getattr(session, f'client{field}', ''):
-                return create_packet_func('acct', '', "STATUS=0\nERROR=Missing required fields\n")
+                return create_packet_func('acct', '', f"STATUS=0\nERROR=Missing required fields\n")
         
         md5_hash = hashlib.md5(session.clientPASS.encode('ascii')).hexdigest()
         timestamp = time.strftime('%Y.%m.%d %I:%M:%S')
@@ -110,7 +109,7 @@ class AccountManager:
                         return parts[6].split(',')
         except FileNotFoundError: 
             pass
-        return [username]  # Default persona
+        return [username]
 
 class PersonaManager:
     @staticmethod
@@ -150,35 +149,32 @@ class PersonaManager:
     
     @staticmethod
     def switch_persona(session, create_packet_func):
-		    selected_persona = getattr(session, 'clientPERS', '')
-		    if selected_persona and selected_persona in session.available_personas:
-		        session.current_persona = selected_persona
-		        print(f"PERS: Switched to persona '{selected_persona}'")
-		    else: 
-		        session.current_persona = session.available_personas[0] if session.available_personas else session.clientNAME
-		    
-		    # FIX: Update user presence with new persona
-		    try:
-		        import __main__
-		        if hasattr(__main__, 'room_manager'):
-		            current_room = getattr(session, 'current_room', 'Lobby')
-		            current_room_id = getattr(session, 'current_room_id', 0)
-		            
-		            __main__.room_manager.update_user_presence(
-		                session.connection_id,
-		                session.authenticated_username,
-		                session.current_persona,
-		                current_room,
-		                current_room_id,
-		                True,  # Connected
-		                True   # Is self
-		            )
-		            print(f"PERS: Updated presence for {session.authenticated_username} as '{session.current_persona}'")
-		    except Exception as e:
-		        print(f"PERS: Error updating presence: {e}")
-		    
-		    return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
-		    	
+        selected_persona = getattr(session, 'clientPERS', '')
+        session.current_persona = selected_persona if selected_persona and selected_persona in session.available_personas else (session.available_personas[0] if session.available_personas else session.clientNAME)
+        
+        print(f"PERS: Switched to persona '{session.current_persona}'")
+        
+        try:
+            import __main__
+            if hasattr(__main__, 'room_manager'):
+                current_room = getattr(session, 'current_room', 'Lobby')
+                current_room_id = getattr(session, 'current_room_id', 0)
+                
+                __main__.room_manager.update_user_presence(
+                    session.connection_id,
+                    session.authenticated_username,
+                    session.current_persona,
+                    current_room,
+                    current_room_id,
+                    True,
+                    True
+                )
+                print(f"PERS: Updated presence for {session.authenticated_username} as '{session.current_persona}'")
+        except Exception as e:
+            print(f"PERS: Error updating presence: {e}")
+        
+        return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
+
 class AuthenticationHandlers:
     def __init__(self, create_packet_func, active_users=None, client_sessions=None):
         self.create_packet = create_packet_func
@@ -187,72 +183,68 @@ class AuthenticationHandlers:
         self.auth_machine = AuthenticationStateMachine()
     
     def handle_auth(self, data, session):
-		    session.authsent = 1
-		    session.update_client_state(0x61757468)
-		    
-		    authenticated_username = getattr(session, 'clientNAME', '') or getattr(session, 'clientUSER', 'UnknownUser')
-		    print(f"AUTH: Starting authentication for '{authenticated_username}'")
-		    
-		    self.auth_machine.initialize(session)
-		    
-		    if not hasattr(session, 'clientSESS') or not session.clientSESS:
-		        session.clientSESS = f"{int(time.time()) % 1000000}{random.randint(100000, 999999)}"
-		        print(f"AUTH: Generated SESS = {session.clientSESS}")
-		    
-		    account_personas = AccountManager.load_account_personas(authenticated_username)
-		    session.available_personas = account_personas
-		    session.current_persona = account_personas[0]
-		    session.persona_count = len(account_personas)
-		    session.authenticated_username = authenticated_username
-		    
-		    # FIX: Initialize user presence - add to active users
-		    # We need to import the room_manager to update presence
-		    try:
-		        import __main__
-		        if hasattr(__main__, 'room_manager'):
-		            # Add user to Lobby (room_id 0) after authentication
-		            __main__.room_manager.update_user_presence(
-		                session.connection_id,
-		                authenticated_username,
-		                session.current_persona,
-		                'Lobby',  # Default room
-		                0,        # Room ID 0 = Lobby
-		                True,     # Connected
-		                True      # Is self
-		            )
-		            print(f"AUTH: Added {authenticated_username} to active users")
-		    except Exception as e:
-		        print(f"AUTH: Error updating user presence: {e}")
-		    
-		    response_lines = [
-		        "TOS=1", 
-		        f"NAME={authenticated_username}", 
-		        f"USER={getattr(session, 'clientUSER', authenticated_username)}",
-		        f"PERSONAS={','.join(account_personas)}", 
-		        f"PRIV={getattr(session, 'clientPRIV', '1')}",
-		        f"LAST={getattr(session, 'clientLAST', time.strftime('%Y.%m.%d-%H:%M:%S'))}", 
-		        f"SESS={session.clientSESS}",
-		        "STAT=3",
-		        "STATUS=1"
-		    ]
-		    
-		    session.client_flags |= 0x2
-		    session.auth_complete = True
-		    session.client_state = 0x69646c65
-		    session.protocol_timeout = int(time.time() * 1000) + 300000
-		    
-		    print(f"PROTOCOL: {session.connection_id} -> STATE_IDLE, flags = {session.client_flags:08x}")
-		    
-		    # Update buddy status
-		    try:
-		        import __main__
-		        if hasattr(__main__, 'buddy_handlers'):
-		            __main__.buddy_handlers.update_buddy_status(authenticated_username, True)
-		            print(f"BUDDY: Updated online status for {authenticated_username}")
-		    except Exception as e:
-		        print(f"BUDDY: Could not update status for {authenticated_username}: {e}")
-		    
-		    return self.create_packet('auth', '', '\n'.join(response_lines) + '\n')
+        session.authsent = 1
+        session.update_client_state(0x61757468)
+        
+        authenticated_username = getattr(session, 'clientNAME', '') or getattr(session, 'clientUSER', 'UnknownUser')
+        print(f"AUTH: Starting authentication for '{authenticated_username}'")
+        
+        self.auth_machine.initialize(session)
+        
+        if not hasattr(session, 'clientSESS') or not session.clientSESS:
+            session.clientSESS = f"{int(time.time()) % 1000000}{random.randint(100000, 999999)}"
+            print(f"AUTH: Generated SESS = {session.clientSESS}")
+        
+        account_personas = AccountManager.load_account_personas(authenticated_username)
+        session.available_personas = account_personas
+        session.current_persona = account_personas[0]
+        session.persona_count = len(account_personas)
+        session.authenticated_username = authenticated_username
+        
+        try:
+            import __main__
+            if hasattr(__main__, 'room_manager'):
+                __main__.room_manager.update_user_presence(
+                    session.connection_id,
+                    authenticated_username,
+                    session.current_persona,
+                    'Lobby',
+                    0,
+                    True,
+                    True
+                )
+                print(f"AUTH: Added {authenticated_username} to active users")
+        except Exception as e:
+            print(f"AUTH: Error updating user presence: {e}")
+        
+        response_lines = [
+            "TOS=1", 
+            f"NAME={authenticated_username}", 
+            f"USER={getattr(session, 'clientUSER', authenticated_username)}",
+            f"PERSONAS={','.join(account_personas)}", 
+            f"PRIV={getattr(session, 'clientPRIV', '1')}",
+            f"LAST={getattr(session, 'clientLAST', time.strftime('%Y.%m.%d-%H:%M:%S'))}", 
+            f"SESS={session.clientSESS}",
+            "STAT=3",
+            "STATUS=1"
+        ]
+        
+        session.client_flags |= 0x2
+        session.auth_complete = True
+        session.client_state = 0x69646c65
+        session.protocol_timeout = int(time.time() * 1000) + 300000
+        
+        print(f"PROTOCOL: {session.connection_id} -> STATE_IDLE, flags = {session.client_flags:08x}")
+        
+        try:
+            import __main__
+            if hasattr(__main__, 'buddy_handlers'):
+                __main__.buddy_handlers.update_buddy_status(authenticated_username, True)
+                print(f"BUDDY: Updated online status for {authenticated_username}")
+        except Exception as e:
+            print(f"BUDDY: Could not update status for {authenticated_username}: {e}")
+        
+        return self.create_packet('auth', '', '\n'.join(response_lines) + '\n')
     
     def handle_acct(self, data, session):
         return AccountManager.create_account(session, self.create_packet)
@@ -267,54 +259,39 @@ class AuthenticationHandlers:
         return PersonaManager.switch_persona(session, self.create_packet)
     
     def handle_user(self, data, session):
-		    """Handle user command - target selection for challenges"""
-		    data_str = data.decode('latin1') if data else ""
-		    print(f"USER: Target selection: {data_str}")
-		    
-		    # Parse the target user/persona
-		    target_persona = ""
-		    for line in data_str.split('\n'):
-		        if line.startswith('PERS='):
-		            target_persona = line[5:].strip()
-		            break
-		    
-		    if not target_persona:
-		        # No target specified
-		        return self.create_packet('user', '', "STATUS=0\nERROR=No target specified\n")
-		    
-		    print(f"USER: {session.clientNAME} selected target: {target_persona}")
-		    
-		    # Store the selected target for challenge initiation
-		    session.selected_target = target_persona
-		    
-		    # Find the target user in active users
-		    target_found = False
-		    target_conn_id = None
-		    
-		    # Try to find by persona first
-		    for conn_id, user_data in self.active_users.items():
-		        if user_data.get('persona') == target_persona:
-		            target_found = True
-		            target_conn_id = conn_id
-		            break
-		    
-		    # If not found by persona, try by username
-		    if not target_found:
-		        for conn_id, user_data in self.active_users.items():
-		            if user_data.get('username') == target_persona:
-		                target_found = True
-		                target_conn_id = conn_id
-		                break
-		    
-		    if target_found and target_conn_id in self.client_sessions:
-		        target_session = self.client_sessions[target_conn_id]
-		        response = f"PERS={target_persona}\nTITLE=1\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
-		        print(f"USER: Found target {target_persona} in room {target_session.current_room}")
-		    else:
-		        response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
-		        print(f"USER: Target {target_persona} not found")
-		    
-		    return self.create_packet('user', '', response)
+        data_str = data.decode('latin1') if data else ""
+        print(f"USER: Target selection: {data_str}")
+        
+        target_persona = ""
+        for line in data_str.split('\n'):
+            if line.startswith('PERS='):
+                target_persona = line[5:].strip()
+                break
+        
+        if not target_persona:
+            return self.create_packet('user', '', "STATUS=0\nERROR=No target specified\n")
+        
+        print(f"USER: {session.clientNAME} selected target: {target_persona}")
+        session.selected_target = target_persona
+        
+        target_found = False
+        target_conn_id = None
+        
+        for conn_id, user_data in self.active_users.items():
+            if user_data.get('persona') == target_persona or user_data.get('username') == target_persona:
+                target_found = True
+                target_conn_id = conn_id
+                break
+        
+        if target_found and target_conn_id in self.client_sessions:
+            target_session = self.client_sessions[target_conn_id]
+            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+            print(f"USER: Found target {target_persona} in room {target_session.current_room}")
+        else:
+            response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
+            print(f"USER: Target {target_persona} not found")
+        
+        return self.create_packet('user', '', response)
     
     def handle_edit(self, data, session):
         data_str = data.decode('latin1') if data else ""

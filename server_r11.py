@@ -1,11 +1,5 @@
 # server_r10.py - CLEANED & OPTIMIZED
-import sys
-import socket
-import struct
-import time
-import threading
-import random
-import uuid
+import sys, socket, struct, time, threading, random, uuid
 from _thread import *
 
 # Import modular systems
@@ -46,20 +40,10 @@ PORT_NC04_PS2 = 10600   # ps2nascar04.ea.com:10600
 PORT_NBAV3_PS2 = 21000  # ps2nbastreet05.ea.com:21000
 
 # Update the PORTS dictionary
-PORTS = {
-    'nc04': PORT_NC04_PS2,
-    'listener': PORT_NFSU_PS2,  # Using NFSU port as default listener
-    'buddy': 10899,
-    'data_start': 11000,
-    'nbav3': PORT_NBAV3_PS2,
-    'nfsu': PORT_NFSU_PS2,
-    'nfsu2': PORT_NFSU2_PS2,
-    'bo3u': PORT_BO3U_PS2,
-    'bo3r': PORT_BO3R_PS2,
-    'nfl05': PORT_NFL05_PS2,
-    'bop_ps3': PORT_BOP_PS3,
-    'bop_pc': PORT_BOP_PC,
-    'ssx3': PORT_SSX3_PS2
+GAME_PORTS = {
+    'nc04': 10600, 'nbav3': 21000, 'nfsu': 10900, 'nfsu2': 20900,
+    'bo3u': 21800, 'bo3r': 21840, 'nfl05': 20000, 'bop_ps3': 21870,
+    'bop_pc': 21840, 'ssx3': 11000
 }
 
 # Update GAME_MODES dictionary (around line 35)
@@ -167,10 +151,23 @@ PROTOCOL_STATES = {
     0xfefefefe: "STATE_ERROR"
 }
 
+# Update the imports section to be more concise
+import sys, socket, struct, time, threading, random, uuid
+from _thread import *
+
+# Consolidated game ports
+GAME_PORTS = {
+    'nc04': 10600, 'nbav3': 21000, 'nfsu': 10900, 'nfsu2': 20900,
+    'bo3u': 21800, 'bo3r': 21840, 'nfl05': 20000, 'bop_ps3': 21870,
+    'bop_pc': 21840, 'ssx3': 11000
+}
+
+# Update ClientSession field initialization to be more concise
 class ClientSession:
     def __init__(self, connection_id, game_mode=None):
         self.connection_id = connection_id
-        self.game_mode = game_mode  # Store which game mode this session is for
+        self.game_mode = game_mode
+        # Consolidate initialization
         self.connection = self.ping_timer = None
         self.data_port = 0
         self.msgType = b''; self.msgSize = 0
@@ -180,29 +177,23 @@ class ClientSession:
         self.last_ping_time = 0; self.ping_interval = 5.0
         self.ping_initiated = False
         
-        # User identity
-        self.clientNAME = 'Unknown'
-        self.clientUSER = 'Unknown'
-        self.current_persona = 'Unknown'
-        self.authenticated_username = 'Unknown'
+        # User identity - consolidated
+        for attr in ['clientNAME', 'clientUSER', 'current_persona', 'authenticated_username']:
+            setattr(self, attr, 'Unknown')
         
         self.available_personas = []; self.persona_count = 0
         self.current_room = "Lobby"; self.current_room_id = 0
         
-        # Authentication
+        # Authentication - consolidated
         self.auth_state = 0
         self.auth_complete = False
         self.auth_slots = []
-        self.validation_code1 = 0
-        self.validation_code2 = 0
-        self.validation_code3 = 0
+        self.validation_code1 = self.validation_code2 = self.validation_code3 = 0
         self.auth_timestamp = 0
         
-        # Challenge system
+        # Challenge system - consolidated
         self.challenge_state = 0
-        self.challenger = ''
-        self.challenge_target = ''
-        self.challenge_seed = ''
+        self.challenger = self.challenge_target = self.challenge_seed = ''
         self.challenge_timeout = 0
         self.last_challenge_state = 0
         self.system_command_sent = False
@@ -210,96 +201,81 @@ class ClientSession:
         # Buddy system
         self.buddy_socket = None
         self.buddy_connected = False
-        self.buddy_list = []        
+        self.buddy_list = []
         
-        # Game-specific state initialization
-        if game_mode == 'nascar':
-            # NASCAR Thunder 2004
-            self.race_state = 'INACTIVE'
-            self.race_track = 'DAYTONA'
-            self.race_laps = '10'
-            self.race_difficulty = '2'
-            self.race_start_time = 0
-            self.lap_times = []
-            self.race_position = 1
-            self.race_config = {}
-            
-        elif game_mode == 'nbav3':
-            # NBA Street v3
-            self.street_rank = 1
-            self.game_mode = 'STREET'
-            self.character_data = {}
-            
-        elif game_mode in ['nfsu', 'nfsu2']:
-            # Need for Speed Underground
-            self.car_data = {}
-            self.current_car = 'default'
-            self.race_type = 'circuit'
-            self.drift_score = 0
-            
-        elif game_mode in ['bo3u', 'bo3r', 'bop_ps3', 'bop_pc']:
-            # Burnout series
-            self.crash_mode = False
-            self.takedown_count = 0
-            self.vehicle_type = 'car'
-            
-        elif game_mode == 'nfl05':
-            # Madden NFL 2005
-            self.team_name = 'Unknown'
-            self.playbook = 'default'
-            self.quarter_length = 5
-            
-        elif game_mode == 'ssx3':
-            # SSX 3
-            self.boarder_name = 'Unknown'
-            self.trick_score = 0
-            self.current_mountain = 'peak'
-            
-        # Protocol state
+        # Consolidated game-specific setup
+        game_init_map = {
+            'nascar': self._init_nascar,
+            'nbav3': self._init_nbav3,
+            'nfsu': self._init_nfsu,
+            'nfsu2': self._init_nfsu,
+            'bo3u': self._init_burnout,
+            'bo3r': self._init_burnout,
+            'bop_ps3': self._init_burnout,
+            'bop_pc': self._init_burnout,
+            'nfl05': self._init_madden,
+            'ssx3': self._init_ssx3
+        }
+        
+        if game_mode in game_init_map:
+            game_init_map[game_mode]()
+        
+        # Protocol state - consolidated
         self.client_state = 0x72646972
-        self.client_flags = 0
-        self.direct_address = 0
-        self.direct_port = 0
+        self.client_flags = self.direct_address = self.direct_port = self.public_key_sent = self.room_flags = 0
         self.server_address = ""
-        self.public_key_sent = self.room_flags = 0
-        
-        # Game state tracking
-        self.game_state = 0x4b1  # MULTIPLAYER_LOBBY
-        
-        # Protocol management
+        self.game_state = 0x4b1
         self.protocol_timeout = 0
         self.last_protocol_activity = time.time()
+        self.buddy_config_sent = self.multiplayer_initialized = self.expecting_chal = False
         
-        # Multiplayer initialization tracking
-        self.buddy_config_sent = False
-        self.multiplayer_initialized = False
-        self.expecting_chal = False
+        # Consolidated client fields initialization
+        base_fields = ['ALTS', 'VERS', 'MAC', 'SKU', 'PERS', 'LAST', 'LKEY', 'PLAST', 'MAIL', 
+                      'ADDR', 'MADDR', 'BORN', 'PASS', 'PROD', 'SESS', 'SLUS', 'MINSIZE', 'MAXSIZE',
+                      'CUSTFLAGS', 'PARAMS', 'PRIV', 'PERSONAS', 'SEED', 'SYSFLAGS', 'HWFLAG', 'HWMASK', 
+                      'DEFPER', 'SDKVER', 'PID', 'CHAN', 'INDEX', 'START', 'RANGE', 'roomNAME', 'roomPASS',
+                      'roomDESC', 'roomMAX', 'moveNAME', 'movePASS', 'NEWS_PAYLOAD', 'pingREF', 'pingTIME',
+                      'FROM', 'TO', 'WHEN', 'TEXT']
         
-        # Initialize client data fields
-        fields = ['ALTS', 'VERS', 'MAC', 'SKU', 'PERS', 'LAST', 'LKEY', 'PLAST', 'MAIL', 
-                 'ADDR', 'MADDR', 'BORN', 'PASS', 'PROD', 'SESS', 'SLUS', 'MINSIZE', 'MAXSIZE',
-                 'CUSTFLAGS', 'PARAMS', 'PRIV', 'PERSONAS', 'SEED', 'SYSFLAGS', 'HWFLAG', 'HWMASK', 
-                 'DEFPER', 'SDKVER', 'PID', 'CHAN', 'INDEX', 'START', 'RANGE', 'roomNAME', 'roomPASS',
-                 'roomDESC', 'roomMAX', 'moveNAME', 'movePASS', 'NEWS_PAYLOAD', 'pingREF', 'pingTIME',
-                 'FROM', 'TO', 'WHEN', 'TEXT']
-        
-        # Game-specific fields
-        if game_mode == 'nascar':
-            fields.extend(['SET_TRACK', 'SET_RACELEN', 'SET_AIDIFF', 'SET_DAMAGE',
-                          'SET_RANKED', 'SET_SETUPS', 'SET_NUMAI', 'SET_ASSISTS',
-                          'SET_CAUTIONS', 'SET_CONSUME', 'SET_TRACKID'])
-        elif game_mode in ['nfsu', 'nfsu2']:
-            fields.extend(['CAR_MODEL', 'CAR_TUNE', 'RACE_TYPE', 'NITROUS_LEVEL'])
-        elif game_mode in ['bo3u', 'bo3r', 'bop_ps3', 'bop_pc']:
-            fields.extend(['VEHICLE', 'SPEED', 'CRASH_MODE', 'TAKEDOWNS'])
-        elif game_mode == 'nfl05':
-            fields.extend(['TEAM', 'PLAYBOOK', 'QUARTER_LENGTH', 'DIFFICULTY'])
-        elif game_mode == 'ssx3':
-            fields.extend(['BOARDER', 'TRICK_SCORE', 'MOUNTAIN', 'BOOST_LEVEL'])
-        
-        for field in fields:
-            attr_name = f"client{field}" if not field.startswith(('room', 'move', 'NEWS', 'ping', 'SET_', 'FROM', 'TO', 'WHEN', 'TEXT', 'CAR_', 'NITROUS_', 'VEHICLE', 'SPEED', 'CRASH_', 'TAKEDOWNS', 'TEAM', 'PLAYBOOK', 'QUARTER_', 'DIFFICULTY', 'BOARDER', 'TRICK_', 'MOUNTAIN', 'BOOST_')) else field
+        for field in base_fields:
+            attr_name = f"client{field}" if not field.startswith(('room', 'move', 'NEWS', 'ping', 'FROM', 'TO', 'WHEN', 'TEXT')) else field
             setattr(self, attr_name, '')
+    
+    def _init_nascar(self):
+        self.race_state = 'INACTIVE'
+        self.race_track = 'DAYTONA'
+        self.race_laps = '10'
+        self.race_difficulty = '2'
+        self.race_start_time = 0
+        self.lap_times = []
+        self.race_position = 1
+        self.race_config = {}
+    
+    def _init_nbav3(self):
+        self.street_rank = 1
+        self.game_mode = 'STREET'
+        self.character_data = {}
+    
+    def _init_nfsu(self):
+        self.car_data = {}
+        self.current_car = 'default'
+        self.race_type = 'circuit'
+        self.drift_score = 0
+    
+    def _init_burnout(self):
+        self.crash_mode = False
+        self.takedown_count = 0
+        self.vehicle_type = 'car'
+    
+    def _init_madden(self):
+        self.team_name = 'Unknown'
+        self.playbook = 'default'
+        self.quarter_length = 5
+    
+    def _init_ssx3(self):
+        self.boarder_name = 'Unknown'
+        self.trick_score = 0
+        self.current_mountain = 'peak'
 
     def update_client_state(self, new_state):
         old_state = self.client_state
@@ -667,17 +643,12 @@ def handle_mesg_command(data, session):
         return challenge_response
             
 def build_reply(data, session):
-    global challenge_system, auth_handlers, network_handlers, ping_manager, room_handlers
-    global message_handlers, ranking_handlers, buddy_handlers
-    
     cmd_str = session.msgType.decode('latin1') if isinstance(session.msgType, bytes) else str(session.msgType)
     
-    # First, try game-specific handlers
     game_response = handle_game_specific_command(cmd_str, data, session)
     if game_response:
         return game_response
     
-    # Common handlers (shared across games)
     handlers = {
         '@dir': lambda d, s: network_handlers.handle_dir_command(d, s),
         '@tic': handle_tic,
@@ -686,7 +657,6 @@ def build_reply(data, session):
         'skey': lambda d, s: network_handlers.handle_skey(s),
         'news': lambda d, s: network_handlers.handle_news(d, s),
         '~png': lambda d, s: ping_manager.handle_ping(d, s),
-        
         'auth': lambda d, s: auth_handlers.handle_auth(d, s),
         'acct': lambda d, s: auth_handlers.handle_acct(d, s),
         'cper': lambda d, s: auth_handlers.handle_cper(d, s),
@@ -694,38 +664,32 @@ def build_reply(data, session):
         'pers': lambda d, s: auth_handlers.handle_pers(d, s),
         'user': lambda d, s: challenge_system.handle_user(d, s),
         'edit': lambda d, s: auth_handlers.handle_edit(d, s),
-        
         'sele': lambda d, s: room_handlers.handle_sele(d, s),
         'room': lambda d, s: room_handlers.handle_room(d, s),
         'move': lambda d, s: room_handlers.handle_move(d, s),
-        
         'chal': lambda d, s: challenge_system.handle_chal(d, s),
         'auxi': lambda d, s: challenge_system.handle_auxi(d, s),
-        'mesg': lambda d, s: challenge_system.handle_mesg(d, s),  # Special handling for mesg
+        'mesg': lambda d, s: challenge_system.handle_mesg(d, s),
         'play': reply_play,
-        
         'sysc': lambda d, s: challenge_system.handle_system_command(d, s),
         'onln': handle_onln,
         'snap': handle_snap,
         'rept': handle_rept,
-
         'gqwk': lambda d, s: handle_game_specific_command('gqwk', d, s),
         'glea': lambda d, s: handle_game_specific_command('glea', d, s),
         'ccrt': lambda d, s: handle_game_specific_command('ccrt', d, s),
-        	        
-        # Buddy API commands
         'RGET': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
         'ROST': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
         'PGET': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
         'RADD': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
-        'RDEL': lambda d, s: buddy_handlers.handle_buddy_command(d, s),        
+        'RDEL': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
         'BLOC': lambda d, s: buddy_handlers.handle_buddy_command(d, s),
     }
     
     if cmd_str in handlers:
         parse_data(data, session)
         return handlers[cmd_str](data, session)
-                     
+    
     print(f"UNKNOWN COMMAND: {cmd_str}")
     return create_packet(cmd_str, '', "STATUS=1\n")
     
@@ -1091,61 +1055,36 @@ def bind_server():
     game_mode = None
     game_port = None
     
+    arg_map = {
+        '-nc04': ('nascar', GAME_PORTS['nc04']),
+        '-nbav3': ('nbav3', GAME_PORTS['nbav3']),
+        '-nfsu': ('nfsu', GAME_PORTS['nfsu']),
+        '-nfsu2': ('nfsu2', GAME_PORTS['nfsu2']),
+        '-bo3u': ('bo3u', GAME_PORTS['bo3u']),
+        '-bo3r': ('bo3r', GAME_PORTS['bo3r']),
+        '-nfl05': ('nfl05', GAME_PORTS['nfl05']),
+        '-bop_ps3': ('bop_ps3', GAME_PORTS['bop_ps3']),
+        '-bop_pc': ('bop_pc', GAME_PORTS['bop_pc']),
+        '-ssx3': ('ssx3', GAME_PORTS['ssx3'])
+    }
+    
     for i, arg in enumerate(sys.argv[1:], 1):
-        if arg == "-nc04": 
-            game_mode = 'nascar'
-            game_port = PORT_NC04_PS2
-            print(f"Now running in {GAME_MODES['nascar']['name']} Mode\n")
-        elif arg == "-nbav3": 
-            game_mode = 'nbav3'
-            game_port = PORT_NBAV3_PS2
-            print(f"Now running in {GAME_MODES['nbav3']['name']} Mode\n")
-        elif arg == "-nfsu":
-            game_mode = 'nfsu'
-            game_port = PORT_NFSU_PS2
-            print(f"Now running in {GAME_MODES['nfsu']['name']} Mode\n")
-        elif arg == "-nfsu2":
-            game_mode = 'nfsu2'
-            game_port = PORT_NFSU2_PS2
-            print(f"Now running in {GAME_MODES['nfsu2']['name']} Mode\n")
-        elif arg == "-bo3u":
-            game_mode = 'bo3u'
-            game_port = PORT_BO3U_PS2
-            print(f"Now running in {GAME_MODES['bo3u']['name']} Mode\n")
-        elif arg == "-bo3r":
-            game_mode = 'bo3r'
-            game_port = PORT_BO3R_PS2
-            print(f"Now running in {GAME_MODES['bo3r']['name']} Mode\n")
-        elif arg == "-nfl05":
-            game_mode = 'nfl05'
-            game_port = PORT_NFL05_PS2
-            print(f"Now running in {GAME_MODES['nfl05']['name']} Mode\n")
-        elif arg == "-bop_ps3":
-            game_mode = 'bop_ps3'
-            game_port = PORT_BOP_PS3
-            print(f"Now running in {GAME_MODES['bop_ps3']['name']} Mode\n")
-        elif arg == "-bop_pc":
-            game_mode = 'bop_pc'
-            game_port = PORT_BOP_PC
-            print(f"Now running in {GAME_MODES['bop_pc']['name']} Mode\n")
-        elif arg == "-ssx3":
-            game_mode = 'ssx3'
-            game_port = PORT_SSX3_PS2
-            print(f"Now running in {GAME_MODES['ssx3']['name']} Mode\n")
-        elif arg == "-p" and i + 1 < len(sys.argv): 
+        if arg in arg_map:
+            game_mode, game_port = arg_map[arg]
+            print(f"Now running in {GAME_MODES[game_mode]['name']} Mode\n")
+        elif arg == "-p" and i + 1 < len(sys.argv):
             game_port = int(sys.argv[i + 1])
             print("Now running in Custom Game Mode\n")
-        elif arg == "-i" and i + 1 < len(sys.argv): 
+        elif arg == "-i" and i + 1 < len(sys.argv):
             global SERVER_IP
             SERVER_IP = sys.argv[i + 1]
-            
-     # ADD: Check if SERVER_IP was provided
+    
     if not SERVER_IP:
         print("ERROR: Server IP must be specified with -i argument!")
         usage()
         return
-           
-    if not game_port: 
+    
+    if not game_port:
         print("No game mode specified!")
         usage()
         return
@@ -1154,14 +1093,7 @@ def bind_server():
         current_game_mode = game_mode
     
     for name, sock in sockets.items():
-        if name == 'game':
-            port = game_port
-        elif name in PORTS:
-            port = PORTS[name]
-        else:
-            # Default to listener port for non-game sockets
-            port = PORTS['listener']
-            
+        port = game_port if name == 'game' else PORTS.get(name, PORTS['listener'])
         sock.bind((SERVER_IP, port))
         print(f"Socket {name}: {SERVER_IP}:{port}")
         sock.listen(8)

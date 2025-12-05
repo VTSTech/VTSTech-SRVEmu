@@ -1,9 +1,5 @@
-# session_system_r11.py - CLEANED & OPTIMIZED
-import time
-import random
-import threading
-import socket
-import struct
+# session_system_r11.py - OPTIMIZED
+import time, random, threading, socket, struct
 from _thread import *
 
 class SessionManager:
@@ -17,8 +13,6 @@ class SessionManager:
         self.session_lock = threading.Lock()
     
     def create_session(self, connection_id):
-        # Pass through to client session class constructor
-        # The constructor will handle game_mode if needed
         return self.ClientSession(connection_id)
     
     def add_session(self, connection_id, session):
@@ -56,7 +50,6 @@ class NetworkHandlers:
         dir_fields = [
             f"ADDR={self.server_ip}", f"PORT={self.ports['listener']}","LKEY=0",
             f"SESS={session.clientSESS}", f"MASK={random.randint(1000, 9999)}f3f70ecb1757cd7001b9a7a{random.randint(1000, 9999)}",
-            
         ]
         
         dir_response = '\n'.join(dir_fields) + '\n'
@@ -80,57 +73,47 @@ class NetworkHandlers:
         return self.create_packet('skey', '', "SKEY=0\n")
             
     def handle_news(self, data, session):
-		    # Parse NAME field
-		    name_value = 0
-		    if data:
-		        try:
-		            data_str = data.decode('latin1', errors='ignore')
-		            for line in data_str.split('\n'):
-		                if line.startswith('NAME='):
-		                    try:
-		                        name_value = int(line[5:].strip())
-		                    except:
-		                        name_value = 0
-		                    break
-		        except:
-		            pass
-		    
-		    print(f"NEWS: Client requested NAME={name_value}")
-		    
-		    # Build identifier based on name_value
-		    identifier = f"new{name_value}"
-		    
-		    # Build response
-		    if name_value == 0:
-		        response_lines = [
-		            f"BUDDY_URL={self.server_ip}",
-		            f"BUDDY_PORT={self.ports['buddy']}",
-		            "STATUS=1"
-		        ]
-		    elif name_value == 1:
-		        response_lines = [
-		            "TEXT=Welcome to VTSTech Server",
-		            "NEWS_TEXT=Multiplayer System Active", 
-		            "NEW1_TEXT=Challenge System Ready", 
-		            "Room Creation Available",
-		            "COUNT=4",
-		            "STATUS=1"
-		        ]
-		    else:
-		        response_lines = [
-		            f"STATUS=0",
-		            f"ERROR=Unknown news type {name_value}"
-		        ]
-		    
-		    # Combine identifier and response
-		    full_response = identifier + '\n' + '\n'.join(response_lines) + '\n'
-		    
-		    # Use appropriate subcommand (may need to be 4-byte little-endian)
-		    # For now, use empty string since create_packet expects string
-		    subcmd = ""
-		    
-		    print(f"NEWS: Sending response with identifier '{identifier}'")
-		    return self.create_packet('news', subcmd, full_response)
+        name_value = 0
+        if data:
+            try:
+                data_str = data.decode('latin1', errors='ignore')
+                for line in data_str.split('\n'):
+                    if line.startswith('NAME='):
+                        try:
+                            name_value = int(line[5:].strip())
+                        except:
+                            name_value = 0
+                        break
+            except:
+                pass
+        
+        print(f"NEWS: Client requested NAME={name_value}")
+        identifier = f"new{name_value}"
+        
+        if name_value == 0:
+            response_lines = [
+                f"BUDDY_URL={self.server_ip}",
+                f"BUDDY_PORT={self.ports['buddy']}",
+                "STATUS=1"
+            ]
+        elif name_value == 1:
+            response_lines = [
+                "TEXT=Welcome to VTSTech Server",
+                "NEWS_TEXT=Multiplayer System Active", 
+                "NEW1_TEXT=Challenge System Ready", 
+                "Room Creation Available",
+                "COUNT=4",
+                "STATUS=1"
+            ]
+        else:
+            response_lines = [
+                f"STATUS=0",
+                f"ERROR=Unknown news type {name_value}"
+            ]
+        
+        full_response = identifier + '\n' + '\n'.join(response_lines) + '\n'
+        print(f"NEWS: Sending response with identifier '{identifier}'")
+        return self.create_packet('news', "", full_response)
 
 class PingManager:
     def __init__(self, create_packet_func):
@@ -198,7 +181,6 @@ class DataServerManager:
                 print(f"DATA: No connection on port {session.data_port} (normal)")
             except Exception as e:
                 print(f"DATA: Accept error: {e}")
-                
         except Exception as e: 
             print(f"DATA: Setup error on port {session.data_port}: {e}")
         finally: 
