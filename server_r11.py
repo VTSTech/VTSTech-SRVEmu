@@ -583,13 +583,6 @@ def handle_rept(data, session):
 def handle_tic(data, session):
 		pass
 
-def create_272_byte_session_data(session):
-    session_data = bytearray(272)
-    session_data[0:4] = struct.pack(">I", 1)
-    session_data[4:8] = struct.pack(">I", session.current_room_id or 1)
-    session.session_data_ready = True
-    return bytes(session_data)
-
 def reply_play(data, session):
     parse_data(data, session)
     print(f"PLAY: Race start for {session.clientNAME}, state={session.challenge_state}")
@@ -632,11 +625,30 @@ def send_multiplayer_initialization(session):
     
     # 1. Send 272-byte session data
     print("  Step 1: Sending 272-byte session data (+ses)")
-    session_data = create_272_byte_session_data(session)
-    ses_packet = create_packet('+ses', '', session_data)
-    session.connection.sendall(ses_packet)
-    time.sleep(0.5)    
-    print(f"=== MULTIPLAYER INIT COMPLETE ===\n")    
+    
+    # Use challenge_system's method
+    if challenge_system and hasattr(challenge_system, 'create_272_byte_session_data'):
+        session_data = challenge_system.create_272_byte_session_data(session, session)
+    else:
+        # Fallback to local function (you'll need to define it or keep it)
+        session_data = create_272_byte_session_data(session, session)
+    
+    if session_data:
+        ses_packet = create_packet('+ses', '', session_data)
+        try:
+            session.connection.sendall(ses_packet)
+            print(f"  Success: Sent 272-byte session data to {session.clientNAME}")
+        except Exception as e:
+            print(f"  Error sending session data: {e}")
+            return
+    else:
+        print(f"  Error: Failed to create session data")
+        return
+    
+    time.sleep(0.5)
+    
+    print(f"=== MULTIPLAYER INIT COMPLETE ===\n")
+    
     session.multiplayer_initialized = True
     session.expecting_chal = True
 
@@ -680,7 +692,7 @@ def build_reply(data, session):
         'cper': lambda d, s: auth_handlers.handle_cper(d, s),
         'dper': lambda d, s: auth_handlers.handle_dper(d, s),
         'pers': lambda d, s: auth_handlers.handle_pers(d, s),
-        'user': lambda d, s: auth_handlers.handle_user(d, s),
+        'user': lambda d, s: challenge_system.handle_user(d, s),
         'edit': lambda d, s: auth_handlers.handle_edit(d, s),
         
         'sele': lambda d, s: room_handlers.handle_sele(d, s),
@@ -689,7 +701,7 @@ def build_reply(data, session):
         
         'chal': lambda d, s: challenge_system.handle_chal(d, s),
         'auxi': lambda d, s: challenge_system.handle_auxi(d, s),
-        'mesg': lambda d, s: handle_mesg_command(d, s),  # Special handling for mesg
+        'mesg': lambda d, s: challenge_system.handle_mesg(d, s),  # Special handling for mesg
         'play': reply_play,
         
         'sysc': lambda d, s: challenge_system.handle_system_command(d, s),
@@ -820,6 +832,7 @@ def threaded_client(connection, address, socket_type):
                         print(f"CHALLENGE STATE: {session.connection_id} -> {state_name}")
                         session.last_challenge_state = current_state
                     
+                    # Update challenge state (handles timeouts)
                     challenge_system.update_challenge_state(session)
                     
                 try: 
@@ -891,18 +904,18 @@ def threaded_client(connection, address, socket_type):
                     # IMPORTANT: Update user presence BEFORE sending PERS response
                     username = getattr(session, 'authenticated_username', session.clientNAME)
                     persona_name = current_persona
-								    
+                    
                     # Update presence in room manager
                     if room_manager:
                         room_manager.update_user_presence(
-								            connection_id,
-								            username,
-								            persona_name,
-								            'Lobby',  # Default to Lobby
-								            0,        # Room ID 0 = Lobby
-								            True,     # Connected
-								            True      # Is self
-								        )
+                            connection_id,
+                            username,
+                            persona_name,
+                            'Lobby',  # Default to Lobby
+                            0,        # Room ID 0 = Lobby
+                            True,     # Connected
+                            True      # Is self
+                        )
                         print(f"AUTH: Updated presence for {username} in Lobby")
                     response = f"PERS={current_persona}\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
                     try:
@@ -1040,7 +1053,7 @@ def initialize_systems(game_mode=None):
     data_server_manager = DataServerManager(SERVER_IP)
     print("INIT: Network components initialized")
     
-    auth_handlers = AuthenticationHandlers(create_packet)
+    auth_handlers = AuthenticationHandlers(create_packet,room_manager.active_users, session_manager.client_sessions)
     print("INIT: Authentication handlers initialized")
     
     buddy_handlers = BuddyHandlers(create_packet, room_manager.active_users)
@@ -1057,9 +1070,14 @@ def initialize_systems(game_mode=None):
         GAME_MODES['nbav3']['handlers'] = NBAv3Handlers(create_packet, SERVER_IP)
     
     # FIXED: Pass room_manager to ChallengeSystem
-    challenge_system = ChallengeSystem(create_packet, room_manager.active_users, 
-                                       session_manager.client_sessions, 
-                                       session_manager, room_manager)
+    challenge_system = ChallengeSystem(
+		    create_packet, 
+		    room_manager.active_users, 
+		    session_manager.client_sessions, 
+		    session_manager, 
+		    room_manager,
+		    message_handlers  # Add this
+		)
     print("CHALLENGE: Challenge system initialized")
     
     message_handlers = MessageHandlers(create_packet, room_manager.active_users, challenge_system)

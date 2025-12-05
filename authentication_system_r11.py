@@ -180,8 +180,10 @@ class PersonaManager:
 		    return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
 		    	
 class AuthenticationHandlers:
-    def __init__(self, create_packet_func):
+    def __init__(self, create_packet_func, active_users=None, client_sessions=None):
         self.create_packet = create_packet_func
+        self.active_users = active_users or {}
+        self.client_sessions = client_sessions or {}
         self.auth_machine = AuthenticationStateMachine()
     
     def handle_auth(self, data, session):
@@ -265,9 +267,54 @@ class AuthenticationHandlers:
         return PersonaManager.switch_persona(session, self.create_packet)
     
     def handle_user(self, data, session):
-        print(f"USER: Validated user {session.clientNAME}")
-        response = f"PERS={session.clientPERS}\nTITLE=1\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
-        return self.create_packet('user', '', response)
+		    """Handle user command - target selection for challenges"""
+		    data_str = data.decode('latin1') if data else ""
+		    print(f"USER: Target selection: {data_str}")
+		    
+		    # Parse the target user/persona
+		    target_persona = ""
+		    for line in data_str.split('\n'):
+		        if line.startswith('PERS='):
+		            target_persona = line[5:].strip()
+		            break
+		    
+		    if not target_persona:
+		        # No target specified
+		        return self.create_packet('user', '', "STATUS=0\nERROR=No target specified\n")
+		    
+		    print(f"USER: {session.clientNAME} selected target: {target_persona}")
+		    
+		    # Store the selected target for challenge initiation
+		    session.selected_target = target_persona
+		    
+		    # Find the target user in active users
+		    target_found = False
+		    target_conn_id = None
+		    
+		    # Try to find by persona first
+		    for conn_id, user_data in self.active_users.items():
+		        if user_data.get('persona') == target_persona:
+		            target_found = True
+		            target_conn_id = conn_id
+		            break
+		    
+		    # If not found by persona, try by username
+		    if not target_found:
+		        for conn_id, user_data in self.active_users.items():
+		            if user_data.get('username') == target_persona:
+		                target_found = True
+		                target_conn_id = conn_id
+		                break
+		    
+		    if target_found and target_conn_id in self.client_sessions:
+		        target_session = self.client_sessions[target_conn_id]
+		        response = f"PERS={target_persona}\nTITLE=1\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+		        print(f"USER: Found target {target_persona} in room {target_session.current_room}")
+		    else:
+		        response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
+		        print(f"USER: Target {target_persona} not found")
+		    
+		    return self.create_packet('user', '', response)
     
     def handle_edit(self, data, session):
         data_str = data.decode('latin1') if data else ""
