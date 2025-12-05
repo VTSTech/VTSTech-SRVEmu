@@ -24,7 +24,7 @@ CORRECTED MULTIPLAYER FLOW:
 5. Server → Client: auth STATUS=1 SESS=... NAME=... USER=... PERSONAS=...
 6. Server → Client: Automatic pers response (no client pers needed!)
 7. Client: Authentication_StateMachineMain triggers (state 3 handles pers response)
-8. Server → Client: +who F=U N=persona RI=1 RT=1 R=0 RF=1
+8. Server → Client: +who F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
 9. Client: Enters lobby (DAT_0038333c = 0x4b1)
 
 === LOBBY OPERATIONS ===

@@ -40,7 +40,7 @@ rept - Report: PERS, STATUS
 +usr - User updates: I (room), N (persona), F (flags), A (address)
 +rom - Room updates: I (ID), N (name), H (desc), A (host), T (type), L (max), F (flags)
 +pop - Population: Z (room_id:count,room_id:count,...)  # FORMAT CORRECTED
-+who - User list: F (flags), N (persona), RI, RT, R, RF
++who - User list: F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
 +ses - Session: 272-byte binary (part of play command, not separate)
 
 === PING/PONG ===
