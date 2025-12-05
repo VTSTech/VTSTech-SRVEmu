@@ -2,7 +2,6 @@ UPDATED CORE STATE MANAGEMENT OVERVIEW
 Updated with Binary Analysis Findings
 CORE STATE MANAGEMENT
 Game State Functions:
-text
 
 GameState_GetCurrent (0x00206400) - Returns current game state (defaults to 0x4b1)
 GameState_SetDirect (0x00206430) - Direct state setter for DAT_0038333c
@@ -15,15 +14,14 @@ GameState_NetworkEventHandler (0x0028a5f8) - Handles network events for state tr
 GameState_NetworkWait (0x001c0868) - Waits for network state changes
 
 Game State Values:
-text
 
+0x4b0 = NETWORK_IDLE
 0x4ba = NETWORK_INIT
 0x4b1 = MULTIPLAYER_LOBBY
 ???? = RACE_STATE (needs identification)
 
 AUTHENTICATION STATE MACHINE
 Main Authentication Flow:
-text
 
 Authentication_StateMachineMain (0x00299330) - Main auth state machine
 Authentication_TriggerStateMachine (0x00207d48) - Triggers auth state machine
@@ -33,7 +31,6 @@ CRITICAL: NO "AUTH_STATE" field in client binary
 Authentication completes via: auth → pers → internal state machine
 
 State Handlers (Jump Table @ 0x3d9df0):
-text
 
 AuthState_InitialHandler (0x00298d08) - State 0: Initial auth
 AuthState_ProcessingHandler (0x00298df8) - State 1: Processing auth  
@@ -48,7 +45,6 @@ AuthState_Complete (0x00299148) - Sets state at offset 0x2c0 to 3 (COMPLETE)
 AuthState_CheckResult (0x00299188) - Validates authentication result
 
 Authentication Flow (Corrected):
-text
 
 1. Client: auth (NAME, USER, PASS, PERS, TOS, VERS="PS2/XXX-Jul  2 2003")
 2. Server: STATUS=1 + SESS + NAME + USER + PERSONAS + VERS with actual key
@@ -60,9 +56,37 @@ text
 8. Client: AuthState_FinalizeComplete finalizes
 9. Client: AuthState_Complete sets completion flag
 
+AUTHENTICATION ENCRYPTION FLOW - VERIFIED:
+
+AuthCommand_SendWithEncryption (0x0031b9bc) - Main encryption handler
+• Called for commands: auth (0x61757468), acct (0x61636374), pass (0x70617373), snap (0x736e6175)
+• Uses NET_AuthField = "PASS" for password field
+• Only encrypts if param_1[9] != 0 (password field exists)
+
+Encryption Logic:
+if (*(char *)(param_1 + 9) == '\0') {
+    // No password - send plaintext
+    Auth_UpdateField(abStack_290, 0x200, NET_AuthField, param_1[0x12f], abStack_8f);
+} else {
+    // Encrypt password
+    Auth_EncryptData(abStack_8f, 0x1f, abStack_8f, param_1[9], 0x10, 0x10);
+}
+
+Key Parameters to Auth_EncryptData:
+• Output buffer: abStack_8f (31 bytes)
+• Buffer size: 0x1f (31 bytes)
+• Input data: abStack_8f (password extracted via TagFieldGetString)
+• Key: param_1[9] (16-byte key from authentication structure)
+• Key length params: 0x10, 0x10 (16, 16)
+
+GLOBAL RC4 STATE:
+DAT_0050a8d0 = Global RC4 state buffer
+• Used in Auth_EncryptData: Crypt_RC4_KeySetup(0x50a8d0, ...)
+• Initialized with negated key parameter
+• Re-keyed with "ru paranoid?" string
+
 NETWORK CONFIGURATION & LKEY PROCESSING
 Network Configuration Functions:
-text
 
 NetworkConfig_InitializeAndSELEct (0x00287180) - Main config initialization
 NetworkConfig_ProcessSessionData (0x00287980) - Processes session data
@@ -73,7 +97,6 @@ NetworkConfig_CheckOnline (0x00323bf0) - Checks online status
 NetworkConfig_Reset (0x00323a50) - Resets network configuration
 
 LKEY Processing Flow:
-text
 
 1. Server @dir response includes LKEY=server_generated_value
 2. NetworkConfig_InitializeAndSELEct extracts LKEY using TagFieldFind("LKEY")
@@ -82,7 +105,6 @@ text
 5. NetworkConnection_InitializeSession uses it for buddy system connections
 
 Network Connection Functions:
-text
 
 NetworkConnection_InitializeSession (0x00361de8) - Initializes network session with LKEY
 NetworkConnection_CreateSocket (0x00364b08) - Creates network socket
@@ -93,7 +115,6 @@ NetworkConnection_Setup2 (0x002876a0) - Secondary setup function
 NetworkConnection_Cleanup (0x0028a880) - Cleans up connection resources
 
 NETWORK PROTOCOL DISPATCH
-text
 
 PS2 Hardware Interrupt → 
 ConnectionHandler_ChannelX_In (0x0017f580-0x0017f6c0) → 
@@ -104,7 +125,6 @@ ProtocolCommand_RoutingTable @ 0x00374e14 (little-endian) →
 Protocol Handler Virtual Dispatch
 
 NETWORK EVENT HANDLING
-text
 
 NetworkEvent_MainDispatcher (0x001c3808) - Main network event handler (interrupt-driven)
 Protocol_MessageRouter (0x001c5e50) - Main protocol message router with dual jump tables
@@ -115,7 +135,6 @@ NetworkEvent_RegisterHandlers (0x0027ad40) - Registers event handlers
 NetworkEvent_Loop (0x0022ca08) - Main network event loop
 
 DUAL JUMP TABLE SYSTEM
-text
 
 JUMP TABLE 1 @ 0x3B01A0 (A1-BASED):
 0: ProtocolHandler_Category0
@@ -140,7 +159,6 @@ JUMP TABLE 2 @ 0x3B04C0 (A2-BASED):
 19: ProtocolHandler_Index19
 
 LOBBY STATE TRANSITION
-text
 
 NetworkEvent_MainDispatcher(a2=0) → 
 Protocol_MessageRouter → 
@@ -151,7 +169,6 @@ DAT_0038333c = 0x4b1 (MULTIPLAYER_LOBBY) →
 NetworkState_CleanupAll (0x002913e0)
 
 RACE SESSION INITIALIZATION
-text
 
 1. Server sends play command with 272-byte session data
 2. ChallengeCommand_Dispatcher (0x00288a40) receives (state must be 6)
@@ -163,7 +180,6 @@ text
 
 CHALLENGE SYSTEM
 Core Challenge Functions:
-text
 
 ChallengeSystem_InitializeNetwork (0x00283d38) - Main challenge init
 ChallengeSystem_SendRegistration (0x00283be8) - Sends CHAL command
@@ -181,7 +197,6 @@ Challenge Token Processing:
 • ChallengeToken_ProcessCryptographic (0x0029a768) - Processes token cryptographically
 
 Challenge States:
-text
 
 0 = INACTIVE
 1 = PENDING
@@ -193,7 +208,6 @@ text
 9 = EXPIRED
 
 MULTIPLAYER SYSTEM
-text
 
 Multiplayer_MainEntryPoint (0x0028f1f0) - Entry point (callback-triggered)
 MultiplayerSystem_Activate (0x00327708) - Transitions to active state
@@ -204,7 +218,6 @@ MultiplayerSystem_QuickInit (0x0028f238) - Quick initialization
 MultiplayerSystem_Shutdown (0x003275a0) - Shuts down multiplayer
 
 SYSTEM CONTROL FUNCTIONS
-text
 
 System_CheckNetworkCondition (0x00327450) - Checks network conditions
 System_SetupNetworkThread (0x00323408) - Sets up network thread
@@ -217,7 +230,6 @@ System_CheckNetworkReady (0x00323638) - Checks if network is ready
 System_CheckReadyState (0x00207f08) - Checks system ready state
 
 MEMORY STRUCTURES
-text
 
 DAT_0038333c: Current game state (0x4b1=MULTIPLAYER_LOBBY, 0x4ba=NETWORK_INIT)
 DAT_00382eb1: Conditional lobby block (set to 1 by GameState_BlockConditionalPath)
@@ -240,7 +252,6 @@ g_ChallengerNameStorage: Challenger name storage
 SystemReady_StateFlag: System ready state control
 
 FIELD EXTRACTION SYSTEM
-text
 
 TagFieldFind (0x0031ddd0) - Main field parser
 TagFieldGetString (0x0031ed10) - String extraction
@@ -251,7 +262,6 @@ TagFieldGetAddress (0x0031e988) - Address extraction
 TagFieldGetBinary (0x0031ef10) - Binary data extraction
 
 COMMAND HANDLERS
-text
 
 CommandHandler_AUTH_PERS (0x00287838) - Handles auth/pers
 ProtocolHandler_ROOM (0x00287af8) - Handles sele/room
@@ -269,7 +279,6 @@ CommandHandler_CPER (0x003259c8) - Handles persona creation
 CommandHandler_DPER (0x00325ad0) - Handles persona deletion
 
 SYSTEM COMMANDS & DISPATCHERS
-text
 
 0xE: System_AUXI_Dispatcher (0x00284bd0)
 0x34: CommandHandler_AUXI2 (0x002895b8)
@@ -285,7 +294,6 @@ ChallengeSystem_CommandDispatcher (0x00283da0) - Challenge system dispatcher
 Protocol_CommandDispatcher (0x00282570) - Protocol command dispatcher
 
 STRING & FORMATTING FUNCTIONS
-text
 
 StringHelper_FormatString (0x0031e3a0) - Formats strings with key-value pairs
 StringHelper_CopyWithParams (0x002b9910) - Copies with printf-style formatting
@@ -297,6 +305,7 @@ StringHelper_FormatFloat (0x002b8f78) - Float formatting
 StringHelper_FormatScientific (0x002b9150) - Scientific notation
 StringHelper_FormatHexParam (0x002b93e8) - Hexadecimal formatting
 StringHelper_FormatStringParam (0x002b9498) - String parameter formatting
+StringHelper_FormatOrdinal (0x001c4d90) - Classic English ordinal number formatting
 Util_FindCharInString (0x002b9bc0) - Finds character in string (used for :$ parsing)
 
 KEY INSIGHTS FROM BINARY ANALYSIS

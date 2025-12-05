@@ -1,6 +1,6 @@
 UPDATED NETWORK ARCHITECTURE DOCUMENTATION
 NETWORK EVENT SYSTEM
-text
+
 
 Game_InitializeNetworkSystem (0x001b5a78) → 
 NetworkEvent_RegisterHandlers (0x0027ad40) → 
@@ -23,7 +23,7 @@ ChallengeSystem_RegisterState (0x00289628) →
 System_SendCommand_Internal (0x00287a48) → sends CHAL command
 
 PROTOCOL HANDLER REGISTRATION
-text
+
 
 RaceSession_CreateFull registers:
 • Type 0: ProtocolHandler_GameState (0x00308b08)
@@ -32,7 +32,7 @@ RaceSession_CreateFull registers:
 • Type 7: ProtocolHandler_Session (0x0030c630)
 
 NETWORK PACKET FLOW
-text
+
 
 PS2 Hardware Interrupt → 
 ConnectionHandler_ChannelX_In (0x0017f580-0x0017f6c0) → 
@@ -47,7 +47,7 @@ Hardware Integration:
 • Registered by Network_Initialize_SessionSetup (0x00101470)
 
 MULTIPLAYER SESSION CREATION
-text
+
 
 Client receives event 0xc03c → 
 PacketConstructor_MultiPlayer processes → 
@@ -65,7 +65,7 @@ System_SendCommand_Internal(cmd="chal") → sends CHAL
 • Base structure: DAT_004e31a8 (global game session structure, 1000+ bytes)
 
 CHALLENGE SYSTEM ARCHITECTURE
-text
+
 
 NetworkMain_Setup → 
 ChallengeSystem_Startup → 
@@ -89,7 +89,7 @@ Challenge Token Processing:
 • Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
 
 PROTOCOL MESSAGE ROUTING
-text
+
 
 NetworkEvent_MainDispatcher (0x001c3808) → 
 Protocol_MessageRouter (0x001c5e50)
@@ -97,8 +97,17 @@ Protocol_MessageRouter (0x001c5e50)
 Parameters: param_1 (type), param_2 (subtype/flags), param_3 (data)
 
 Jump Tables:
-• Primary @ 0x3B01A0 (param_1 based)
-• Secondary @ 0x3B04C0 (param_2 based)
+JUMP TABLE 1 @ 0x3B01A0 (A1-BASED):
+- 12 entries (not 10 as previously documented)
+- Most handlers are unnamed functions starting at 0x001c5e8c
+
+JUMP TABLE 2 @ 0x3B04C0 (A2-BASED):
+- 24 entries (not 20 as previously documented)
+- Most entries point to default handler at 0x001c6c98
+
+Table 1 (12 entries): Different handlers for protocol categories
+Table 2 (24 entries): Mostly default handler (0x001c6c98) with a few specific handlers
+Index 0 in Table 2 (0x001c6b78) is likely the actual ProtocolHandler_LobbyStateEntry
 
 Lobby Entry Path:
 param_2=0 → ProtocolHandler_LobbyStateEntry → 
@@ -107,7 +116,7 @@ GameState_ForceLobbyEntry (0x002068a8) →
 state=0x4B1 (MULTIPLAYER_LOBBY)
 
 AUTHENTICATION STATE MACHINE
-text
+
 
 Authentication_StateMachineMain (0x00299330) - Main auth state machine
 
@@ -123,18 +132,69 @@ Authentication State Jump Table @ 0x3d9df0:
 
 Final: AuthState_Complete (0x00299148) sets state at offset 0x2c0 to 3 (COMPLETE)
 
+AUTHENTICATION ENCRYPTION PROTOCOL - DETAILED:
+
+Encrypted Commands:
+1. auth (0x61757468) - Authentication command
+2. acct (0x61636374) - Account creation  
+3. pass (0x70617373) - Password change
+4. snap (0x736e6175) - Snapshot data
+
+Encryption Flow:
+1. Extract password field using TagFieldFind("PASS")
+2. Get password string via TagFieldGetString
+3. If password exists (param_1[9] != 0):
+   - Encrypt with Auth_EncryptData
+   - Key from param_1[9] (16-byte session key)
+   - Output limited to 31 bytes (0x1f)
+4. Format encrypted result with StringHelper_FormatString
+5. Send via ProtoAriesSend
+
+Key Structure:
+param_1[9] = 16-byte encryption key (offset 0x24 in auth structure)
+param_1[0x12f] = Password field pointer? (offset 0x4bc)
+param_1[0x12e] = Status field value (offset 0x4b8)
+
+Global State:
+DAT_0050a8d0 (0x50a8d0) = Persistent RC4 state
+• Used across multiple encryptions
+• Maintains cipher state between operations
+• Located in .data section
+
 CRITICAL CORRECTION: NO "AUTH_STATE" field in protocol
 Flow: Server auth response → automatic pers response → Authentication_TriggerStateMachine
 
-NETWORK CONNECTION & LKEY PROCESSING
+NETWORK CONNECTION & LKEY PROCESSING - VERIFIED:
 text
 
-LKEY Discovery:
+LKEY Processing Verified:
 • Server includes LKEY=value in @dir response
-• Extracted by NetworkConfig_InitializeAndSELEct (0x00287180)
-• Formatted as host:port$LKEY using StringHelper_CopyWithParams (0x002b9910)
-• Stored by NetworkConfig_StoreFormattedLKEY (0x003277c0)
-• Used by NetworkConnection_InitializeSession (0x00361de8) for buddy system
+• Client extracts using TagFieldFind with "LKEY" string at 0x003e34c8
+• References found in NetworkConnection_InitializeSession:
+  - 0x00361ec8: addiu a2,a2,0x34c8 (loading LKEY string address)
+  - 0x00361f70: addiu a2,a2,0x34c8 (second reference)
+• Formatted as host:port$LKEY using StringHelper_CopyWithParams
+• Stored in DAT_003945b8 for buddy system authentication
+
+STRING CONSTANTS LOCATION - VERIFIED & CORRECTED:
+text
+
+Verification confirmed documentation errors:
+• Incorrect: 'LKEY' at 0x003e3470 ❌
+• Correct: 'send: ' at 0x003e3470, 'LKEY' at 0x003e34c8 ✅
+
+.sdata section layout (verified):
+0x003e2f78-0x003e3100: Network field tags (ORIG, NAME, ADDR, PING, etc.)
+0x003e3100-0x003e3140: Room field tags (I, H, A, T, L, P, etc.)
+0x003e3260-0x003e32e0: Authentication strings (CDEV, AGE, NAME, MAIL, etc.)
+0x003e3440-0x003e3470: Status strings (DND, XA, AWAY, CHAT, DISC)
+0x003e3470-0x003e3480: Display strings ('send: ', 'USER')
+0x003e3480-0x003e3530: Protocol strings (DOMN, RSRC, SHOW, PROD, STAT, VERS, PRES, LKEY, etc.)
+
+NEW DISCOVERIES FROM VERIFICATION:
+• Game state 0x4b0 = NETWORK_IDLE (not previously documented)
+• Jump Table sizes: Table1=12 entries, Table2=24 entries (not 10/20)
+• Authentication jump table points to different handlers (0x0029937c range)
 
 NetworkConfig_InitializeAndSELEct Flow:
 1. Calls TagFieldFind(..., "LKEY") to extract LKEY from server response
@@ -149,7 +209,7 @@ NetworkConnection_InitializeSession:
 • Used for buddy system authentication
 
 MEMORY STRUCTURES
-text
+
 
 DAT_0038333c: Current game state
 • 0x4ba = NETWORK_INIT
@@ -180,7 +240,7 @@ g_ChallengeSystem @ 0x0038b838 (300 bytes)
 DAT_003945b8: Stores formatted LKEY connection string (host:port$LKEY)
 
 PROTOCOL ROUTING INFRASTRUCTURE
-text
+
 
 ProtocolRoutingTable_Initialize (0x00101210)
 ProtocolRoutingTable_SetupHandler (0x00101530)
@@ -198,7 +258,7 @@ ProtocolHandler Registration:
 • RegisterProtocolCallback (0x00321858)
 
 SYSTEM INITIALIZATION CHAIN
-text
+
 
 NetworkSystem_Setup (0x00281438) → 
 System_SetupNetworkThread (0x00323408) → 
@@ -213,7 +273,7 @@ System_CheckNetworkCondition (0x00327450):
 5. Initializes multiplayer system components
 
 CONNECTION HANDLERS
-text
+
 
 Function pointer table @ 0x0037892c:
 • +0x00: ConnectionHandler_Channel0_In (0x0017f580)
@@ -226,7 +286,7 @@ Function pointer table @ 0x0037892c:
 Registered by NetworkInitialize_SessionSetup (0x00101470)
 
 PACKET CONSTRUCTION & PROCESSING
-text
+
 
 PacketConstructor_MultiPlayer:
 • Builds data from DAT_004e1428 array
@@ -246,7 +306,7 @@ Field Extraction System:
 • TagFieldGetFlags @ 0x31e938 - Flag extraction
 
 BUDDY SYSTEM INTEGRATION
-text
+
 
 Buddy System Initialization:
 1. Server sends news command with BUDDY_URL and BUDDY_PORT
@@ -262,7 +322,7 @@ Critical Functions:
 • _BuddyApiStatus (called from NetworkConnection_InitializeSession)
 
 MULTIPLAYER MODE MANAGEMENT
-text
+
 
 Multiplayer Mode States (DAT_MultiplayerMode):
 • 0 = Disabled
@@ -280,7 +340,7 @@ State Transitions:
 • GameState_ConditionalLobbyEntry (0x001e8cf8) - blocked by DAT_00382eb1
 
 CHALLENGE STATE MANAGEMENT
-text
+
 
 Challenge System States:
 0 = INACTIVE
@@ -303,7 +363,7 @@ Validation:
 • ChallengeValidation_PlayerExists (0x002894b8)
 
 NETWORK CONFIGURATION PROCESSING
-text
+
 
 System_ProcessConfigString (0x00323278):
 • Builds configuration string from NASCAR config structure

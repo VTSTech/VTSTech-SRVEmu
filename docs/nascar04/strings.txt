@@ -107,3 +107,16 @@ TITLE_Field (0x003d8358): 'TITLE'
 RACETIME_Field (0x003d9b28): 'RACETIME'
 MINAGE_Field (0x003e32c0): 'MINAGE'
 PMAIL_Field (0x003e32c8): 'PMAIL'
+0x003e34c8: 'LKEY'      ? VERIFIED - LKEY extraction string
+
+=== ENCRYPTION-RELATED STRINGS ===
+NET_AuthField (0x003e2fd8): 'PASS' - Password field tag
+NET_StatusField (0x003e2fe0): 'MASK' - Status field tag
+NET_DefaultValue (0x003e2f88): [empty] - Default string value
+"ru paranoid?" - Hardcoded RC4 re-key string (in code)
+
+=== MEMORY STRUCTURES ===
+DAT_0050a8d0: Global RC4 encryption state buffer
+param_1[9]: 16-byte encryption key (offset 0x24)
+param_1[0x12e]: Status field value (offset 0x4b8)
+param_1[0x12f]: Password field pointer (offset 0x4bc)

@@ -156,6 +156,43 @@ Challenge System States (from binary):
 7 = NETWORK_VERIFYING
 9 = EXPIRED
 
+=== GAME STATE DISCOVERIES ===
+- NETWORK_IDLE (0x4b0): New state discovered
+- Referenced in 9 functions including:
+  * FUN_0016fdd0, FUN_00174ed8, FUN_00175010
+  * FUN_0023a788, FUN_0023b348, FUN_0027b668
+  * FUN_0027c910, FUN_0027cd88
+
+=== PASSWORD ENCRYPTION VERIFIED ===
+
+Encryption Confirmed For:
+• Authentication (auth command)
+• Account Creation (acct command)  
+• Password Changes (pass command)
+• Snapshot Data (snap command)
+
+Encryption Details:
+• Password field: "PASS" (NET_AuthField)
+• Max encrypted size: 31 bytes (0x1f)
+• Key: 16-byte value from auth structure offset 0x24
+• Output: Printable ASCII only (0x20-0x7F)
+
+Encryption Algorithm:
+1. Extract password via TagFieldGetString
+2. Encrypt with Auth_EncryptData using 16-byte key
+3. Format as "PASS=encrypted_value"
+4. Send via ProtoAriesSend
+
+NO ENCRYPTION WHEN:
+• Password field is empty (param_1[9] == 0)
+• Uses plaintext password in this case
+
+IMPORTANT FINDINGS:
+1. Passwords ARE encrypted in transit
+2. Encryption key comes from session/auth structure
+3. Uses custom RC4 wrapper for ASCII-safe output
+4. Global RC4 state at 0x50a8d0 persists across sessions
+  
 PROTOCOL IMPLEMENTATION NOTES:
 ==================================================
 
