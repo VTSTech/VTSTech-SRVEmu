@@ -353,13 +353,30 @@ def get_next_data_port():
         current_data_port = PORTS['data_start'] if current_data_port > PORTS['data_start'] + 1000 else current_data_port + 1
         return port
         
-def create_packet(cmd, subcmd, payload):
-    if isinstance(payload, str): 
-        payload = payload.encode('ascii')
-        payload += b'\0'
-    size = len(payload)
-    return struct.pack(">4s4sL%ds" % size, bytearray(cmd, 'ascii'), 
-                      bytearray(subcmd, 'ascii'), size + 12, payload)
+def create_packet(command, subcommand, data):
+    """Create packet with debug logging"""
+    if isinstance(data, str):
+        data_bytes = data.encode('latin1')
+    else:
+        data_bytes = data
+    
+    # Create the packet
+    size = len(data_bytes) + 12  # 12 byte header
+    header = struct.pack(">4s4sL", 
+                         command.encode('ascii'), 
+                         subcommand.encode('ascii'), 
+                         size)
+    
+    packet = header + data_bytes
+    
+    # Debug logging for important commands
+    if command in ['+rom', '+usr', '+pop', '+who']:
+        print(f"\nDEBUG PACKET: {command}")
+        print(f"Header: {header.hex()}")
+        print(f"Data: {repr(data_bytes.decode('latin1', errors='ignore'))}")
+        print("-" * 50)
+    
+    return packet
 
 # Game-specific handler dispatcher
 def handle_game_specific_command(cmd_str, data, session):
@@ -903,6 +920,8 @@ def threaded_client(connection, address, socket_type):
                 elif session.msgType == b'move':
                     # Client joined a room - NOW trigger multiplayer initialization
                     time.sleep(1.0)  # Wait for room system to process
+                    print(f"MOVE DEBUG: moveNAME = '{session.moveNAME}'")
+                    print(f"MOVE DEBUG: active_rooms = {room_manager.active_rooms}")
                     if not session.multiplayer_initialized:
                         print(f"MOVE: {session.clientNAME} joined room, triggering multiplayer init")
                         send_multiplayer_initialization(session)

@@ -118,9 +118,23 @@ class ChallengeSystem:
                     break
             
             if target_session and hasattr(target_session, 'connection'):
-                notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=3\n"
                 try:
+                    notification = f"TEXT={challenge_token}\n"
+                    target_session.connection.sendall(self.create_packet('auxi', '', notification))
+                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
+                    #target_session.connection.sendall(self.create_packet('mesg', '', notification))
+                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
+                    #target_session.connection.sendall(self.create_packet('mesg', '', notification))
+                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
+                    #target_session.connection.sendall(self.create_packet('mesg', '', notification))                                        
+                    notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\nF=4\n"
                     target_session.connection.sendall(self.create_packet('+msg', '', notification))
+                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
+                    #target_session.connection.sendall(self.create_packet('+msg', '', notification))
+                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
+                    #target_session.connection.sendall(self.create_packet('+msg', '', notification))
+                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
+                    #target_session.connection.sendall(self.create_packet('+msg', '', notification))   
                     print(f"MESG: Sent challenge notification to {target_user}")
                     
                     target_session.challenge_state = 1
@@ -195,34 +209,74 @@ class ChallengeSystem:
             return self.create_packet('chal', '', "STATUS=0\n")
     
     def handle_peek(self, data, session):
-        data_str = data.decode('latin1') if data else ""
-        target_name = ""
-        
-        for line in data_str.split('\n'):
-            if line.startswith('NAME='):
-                target_name = line[5:].strip()
-                break
-        
-        print(f"[PEEK] from {session.clientNAME}: NAME='{target_name}'")
-        
-        if not target_name:
-            return self.create_packet('peek', '', "STATUS=1\n")
-        
-        target_session = None
-        for conn_id, user_data in self.active_users.items():
-            if user_data.get('persona') == target_name or user_data.get('username') == target_name:
-                if conn_id in self.client_sessions:
-                    target_session = self.client_sessions[conn_id]
-                    break
-        
-        if target_session:
-            response = f"NAME={target_name}\nROOM={target_session.current_room}\nSTATUS=1\n"
-            print(f"[PEEK] Found {target_name} in room {target_session.current_room}")
-        else:
-            response = f"NAME={target_name}\nSTATUS=0\nERROR=User not found\n"
-            print(f"[PEEK] User {target_name} not found")
-        
-        return self.create_packet('peek', '', response)
+		    """Handle peek command - get users in a specific ROOM"""
+		    data_str = data.decode('latin1') if data else ""
+		    
+		    # Parse NAME field
+		    target_name = ""
+		    for line in data_str.split('\n'):
+		        if line.startswith('NAME='):
+		            target_name = line[5:]
+		            break
+		    
+		    print(f"[PEEK] from {session.clientNAME}: Looking for room '{target_name}'")
+		    
+		    # Find the room by name
+		    target_room_id = None
+		    target_room_data = None
+		    
+		    for room_id, room_data in self.room_manager.active_rooms.items():
+		        if room_data.get('name') == target_name:
+		            target_room_id = room_id
+		            target_room_data = room_data
+		            break
+		    
+		    if target_room_id is None:
+		        print(f"[PEEK] Room '{target_name}' not found")
+		        return self.create_packet('peek', '', "STATUS=0\nERROR=Room not found\n")
+		    
+		    print(f"[PEEK] Found room {target_room_id}: {target_name}")
+		    
+		    # Find all users in this room
+		    users_in_room = []
+		    for conn_id, user_data in self.room_manager.active_users.items():
+		        if user_data.get('room_id') == target_room_id:
+		            users_in_room.append(user_data)
+		    
+		    print(f"[PEEK] Room {target_name} has {len(users_in_room)} users")
+		    
+		    # Build response
+		    response_lines = []
+		    
+		    # Add room info first
+		    response_lines.extend([
+		        f"I={target_room_id}",
+		        f"N={target_name}",
+		        f"H={target_room_data.get('desc', '')}",
+		        f"T={len(users_in_room)}",
+		        f"L={target_room_data.get('maxusers', 50)}",
+		        f"F={target_room_data.get('type', 1)}"
+		    ])
+		    
+		    # Add user list
+		    for i, user_data in enumerate(users_in_room):
+		        persona = user_data.get('persona', '')
+		        is_self = (user_data.get('conn_id') == session.connection_id)
+		        f_flag = '1' if is_self else '0'
+		        
+		        response_lines.extend([
+		            f"USER{i}_N={persona}",
+		            f"USER{i}_F={f_flag}",
+		            f"USER{i}_I={target_room_id}"
+		        ])
+		    
+		    response_lines.append("STATUS=1")
+		    
+		    response = '\n'.join(response_lines) + '\n'
+		    print(f"[PEEK] Response for {target_name}:")
+		    print(response)
+		    
+		    return self.create_packet('peek', '', response)
     
     def handle_challenge_response(self, session, target_user, response):
         print(f"[CHALLENGE] {session.clientNAME} responded: {response} to {target_user}")
