@@ -1,31 +1,254 @@
 EA SPORTS NASCAR THUNDER 2004 - COMPLETE PROTOCOL SPECIFICATION v4.0
 
-Updated with Comprehensive Binary Analysis
-TABLE OF CONTENTS
+VERIFIED UPDATES FROM CODE ANALYSIS
+1. LobbyApiUpdate Structure & Core Logic
 
-    Network Architecture Overview
+Verified:
 
-    Protocol Basics
+    Main lobby structure at DAT_0038b6e4 (piVar24)
 
-    Memory Structures
+    5-second timeout detection (5000ms)
 
-    Command Reference
+    Connection timeout: 60,000ms (line piVar24[4] = uVar2 + 60000)
 
-    Authentication System
+    Ping interval: 30,000ms (line piVar24[6] = uVar2 + 30000)
 
-    Challenge System
+Critical State Management:
+c
 
-    Lobby System
+if (5000 < iVar13) {
+    Lobby_SetState(param_1, 0x74696d65, 0x800);  // 'time' state
+}
 
-    Race System
+2. Command Processing Flow
 
-    Field Extraction System
+Verified Command Handling:
 
-    Error Codes
+    0x7e706e67 ('~png'): Ping/pong with sequence number
 
-    Implementation Guide
+    0x40646972 ('@dir'): Initial connection with LKEY extraction
 
-    Debugging & Testing
+    0x736b6579 ('skey'): Key exchange
+
+    0x61757468 ('auth'): Authentication
+
+    0x2b736573 ('+ses'): 272-byte session data
+
+    0x2b6d7367 ('+msg'): Message notifications
+
+    0x2b77686f ('+who'): User list triggers lobby entry
+
+New Discovery: Hash Table Integration
+c
+
+// Room hash table operations
+if ((iStack_b0 == 0x2b726f6d) && (piVar24[0xc4] != 0)) {
+    // HashTable_Lookup, HashTable_Insert, HashTable_Remove
+}
+
+// User hash table operations  
+if ((iStack_b0 == 0x2b757372) && (piVar24[0xc9] != 0)) {
+    // Buddy_GetUserData, Buddy_UpdateUserData, etc.
+}
+
+3. BuddyApiUpdate - Separate Buddy System
+
+New Discovery: Separate buddy management system with its own:
+
+    Authentication flow (0x41555448)
+
+    User roster management (0x524f5354)
+
+    Player data synchronization (0x50474554)
+
+    Friend list operations (0x52414444 for add, 0x5244454c for delete)
+
+4. Field Constants - VERIFIED & CORRECTED
+
+From the code, I can see the actual string constants being used:
+
+Network Fields (Verified):
+c
+
+NET_Field3 = 0x3e2f90  // "ADDR"
+LOBBY_DirectField = 0x003e3010  // "DIRECT"
+LOBBY_PortField = 0x003e3018  // "PORT"
+LOBBY_SessionField = 0x003e3020  // "SESS"
+NET_StatusField = 0x003e2fe0  // "MASK"
+LOBBY_PublicKeyField = 0x003e3030  // "SKEY"
+LOBBY_PersonaField = 0x003e3048  // "PERS"
+
+Room Fields (Verified):
+c
+
+ROOM_IDField = 0x003e30d8  // "I"
+ROOM_DescriptionField = 0x003e30e0  // "H"
+ROOM_HostField = 0x003e30e8  // "A"
+ROOM_PlayerCountField = 0x003e30f0  // "T"
+ROOM_MaxPlayersField = 0x003e30f8  // "L"
+ROOM_PasswordField = 0x003e3110  // "P"
+ROOM_PopulationField = 0x003e3128  // "Z"
+
+5. Callback Architecture - VERIFIED
+c
+
+// Pre-process callback
+if ((code *)piVar24[0x145] != (code *)0x0) {
+    (*(code *)piVar24[0x145])(param_1, &uStack_310, piVar24[0x146]);
+}
+
+// Message callback (+msg)
+if ((iStack_b0 == 0x2b6d7367) && (piVar24[0x147] != 0)) {
+    // Determine message type
+    if ((uStack_308 & 4) != 0) {  // Broadcast
+        iStack_30c = 0x63617374;  // 'cast'
+    }
+    if ((uStack_308 & 0x10000) != 0) {  // Private
+        iStack_30c = 0x70726976;  // 'priv'
+    }
+    (*(code *)piVar24[0x147])(param_1, &uStack_310, piVar24[0x148]);
+}
+
+// Connection callback
+if ((code *)piVar24[0x14b] != (code *)0x0) {
+    iStack_30c = 0x636f6e6e;  // 'conn'
+    (*(code *)piVar24[0x14b])(param_1, &uStack_310, piVar24[0x14c]);
+}
+
+// Race callback
+if ((code *)piVar24[0x14d] != (code *)0x0) {
+    uStack_310 = 4;
+    iStack_30c = 0x706c6179;  // 'play'
+    (*(code *)piVar24[0x14d])(param_1, &uStack_310, piVar24[0x14e]);
+}
+
+6. Session Data Structure - VERIFIED
+c
+
+if (iStack_b0 == 0x2b736573) {  // '+ses'
+    memset(piVar24 + 0x80, 0, 0x110);  // 272 bytes
+    
+    // Extract fields
+    pbVar4 = TagFieldFind(pbStack_a8, (byte *)NET_Field2);  // "NAME"
+    TagFieldGetString(pbVar4, (byte *)(piVar24 + 0x80), 0x20, (byte *)NET_DefaultValue);
+    
+    pbVar4 = TagFieldFind(pbStack_a8, (byte *)USER_Field1);  // "SELF"
+    TagFieldGetString(pbVar4, (byte *)(piVar24 + 0x88), 0x20, (byte *)NET_DefaultValue);
+    
+    // ... more field extraction
+    
+    piVar24[2] = piVar24[2] | 0x200;  // Set race data present flag
+}
+
+7. Population Format - CORRECTED
+c
+
+if ((iStack_b0 == 0x2b706f70) && (piVar24[0xc4] != 0)) {
+    pbVar8 = TagFieldFind(pbStack_a8, (byte *)ROOM_PopulationField);  // "Z"
+    // Format: Z=room_id:count,room_id:count,...
+    // Colon separator, not slash
+}
+
+8. Memory Allocation Patterns
+
+Verified Memory Functions:
+c
+
+Util_AllocateMemory(0x68);     // Room entry: 104 bytes
+Util_AllocateMemory(0x138);    // User entry: 312 bytes  
+Util_AllocateMemory(0xa8);     // Rank entry: 168 bytes
+Util_AllocateMemory(0xb8);     // Buddy entry: 184 bytes
+
+9. LKEY Processing - VERIFIED
+c
+
+if (iStack_b0 == 0x40646972) {  // '@dir'
+    // Extract LKEY
+    pbVar4 = TagFieldFind(pbStack_a8, (byte *)LOBBY_DirectField);
+    if (pbVar4 == (byte *)0x0) {
+        pbVar4 = TagFieldFind(pbStack_a8, (byte *)NET_Field3);  // "ADDR"
+        uVar16 = TagFieldGetAddress(pbVar4, 0);
+        piVar24[0xed] = uVar16;  // Server IP
+        
+        pbVar4 = TagFieldFind(pbStack_a8, (byte *)LOBBY_PortField);  // "PORT"
+        iVar10 = TagFieldGetNumber(pbVar4, 0);
+        piVar24[0xec] = iVar10;  // Server port
+    }
+    
+    // Format: host:port$LKEY
+    abStack_410[0] = 0;
+    Network_FormatIPAndProcess(abStack_410, 0x100, NET_Field3, piVar24[0x140]);
+    StringHelper_FormatKeyValue(abStack_410, 0x100, LOBBY_PortField, uVar5);
+}
+
+UPDATED PROTOCOL SPECIFICATION v4.1
+Key Corrections:
+
+    Dual System Architecture:
+
+        LobbyApiUpdate: Main lobby/room/challenge management
+
+        BuddyApiUpdate: Separate friend/buddy system management
+
+    Timeout Values Confirmed:
+
+        General: 5 seconds (5000ms)
+
+        Connection: 60 seconds (60000ms)
+
+        Ping: 30 seconds (30000ms)
+
+    Hash Table Structure:
+
+        Rooms: 0x68 bytes (104 bytes)
+
+        Users: 0x138 bytes (312 bytes)
+
+        Ranks: 0xa8 bytes (168 bytes)
+
+        Buddies: 0xb8 bytes (184 bytes)
+
+    Callback Types Verified:
+
+        Pre-process (all commands)
+
+        Message (+msg with type detection)
+
+        Connection ('conn' events)
+
+        Race ('play' events)
+
+    Field Constants Corrected:
+
+        All string constants match the .sdata section
+
+        Population format uses colon separator
+
+        LKEY extraction from '@dir' response
+
+Implementation Requirements:
+
+    Server must:
+
+        Generate unique LKEY per session
+
+        Support colon-separated population format
+
+        Maintain hash tables for rooms/users/ranks
+
+        Send automatic pers response after auth
+
+        Include 272-byte session data in play commands
+
+    Client expects:
+
+        5-second timeout detection
+
+        Hash table-based data management
+
+        Four callback types for event handling
+
+        Buddy system separate from main lobby
 
 NETWORK ARCHITECTURE OVERVIEW
 Core Flow
@@ -246,7 +469,7 @@ Command	Value	Direction	Purpose
 auxi	0x61757869	C?S	Challenge initiation
 chal	0x6368616c	S?C	System registration only
 mesg	0x6d657367	C?S	Challenge response
-peek	0x7065656b	C?S	User selection
+peek	0x7065656b	C?S	Room selection
 Race Commands
 Command	Value	Direction	Purpose
 play	0x706c6179	S?C	Race start (includes 272-byte data)
@@ -330,7 +553,7 @@ Corrected Challenge Flow
 
 CRITICAL UPDATE: User challenges use auxi, NOT chal
 
-    User selection: Client sends peek NAME=target_user
+    User selection: Client sends peek NAME=target_room
 
     Challenge initiation: Client sends auxi TEXT=challenge_token
 
@@ -719,7 +942,7 @@ Testing Sequence
 
     Send +usr broadcasts ? Populate user list
 
-    Client sends peek ? User selection
+    Client sends peek ? Room selection
 
     Client sends auxi ? Challenge initiation
 
