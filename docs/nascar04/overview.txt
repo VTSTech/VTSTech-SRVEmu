@@ -170,7 +170,7 @@ NetworkState_CleanupAll (0x002913e0)
 
 RACE SESSION INITIALIZATION
 
-1. Server sends play command with 272-byte session data
+1. Server sends play command, followed by +ses with 272-byte session data
 2. ChallengeCommand_Dispatcher (0x00288a40) receives (state must be 6)
 3. Calls Callback_ProcessPLAYCommand (0x00299308) with session data pointer
 4. SessionData_Copy272Bytes (0x00299048) copies to DAT_004e31a8 + 0x2dc
@@ -318,14 +318,12 @@ LKEY Discovery:
 • Used by NetworkConnection_InitializeSession
 Authentication Correction:
 
-• NO "AUTH_STATE" field in protocol
-• Server sends automatic pers response after auth
 • Client uses internal Authentication_StateMachineMain
 Challenge System Correction:
 
-• User challenges use AUXI command (not CHAL)
+• User challenges use mesg command
 • CHAL is for system registration only
-• Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
+• Token format: %s_%s_%s
 Critical Memory Offsets:
 
 • Session data: DAT_004e31a8 + 0x2dc (272 bytes)

@@ -22,30 +22,29 @@ CORRECTED MULTIPLAYER FLOW:
 3. Client → Server: skey (key exchange, if required)
 4. Client → Server: auth NAME=... PASS=encrypted_password USER=... PERS=... TOS=1
 5. Server → Client: auth STATUS=1 SESS=... NAME=... USER=... PERSONAS=...
-6. Server → Client: Automatic pers response (no client pers needed!)
-7. Client: Authentication_StateMachineMain triggers (state 3 handles pers response)
-8. Server → Client: +who F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
-9. Client: Enters lobby (DAT_0038333c = 0x4b1)
+6. Client: Authentication_StateMachineMain triggers (state 3 handles pers response)
+7. Server → Client: +who F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
+8. Client: Enters lobby (DAT_0038333c = 0x4b1)
 
 === LOBBY OPERATIONS ===
-10. Client → Server: sele ROOMS=1 USERS=1 RANKS=1
-11. Server → Client: Room list (+rom), user list (+usr), population (+pop)
-12. LobbyApiUpdate processes updates and maintains hash tables
+9. Client → Server: sele ROOMS=1 USERS=1 RANKS=1
+10. Server → Client: Room list (+rom), user list (+usr), population (+pop)
+11. LobbyApiUpdate processes updates and maintains hash tables
 
 === CHALLENGE SYSTEM (CORRECTED) ===
-13. User selects another user → Client sends: peek NAME=target_user
-14. Server responds with user info
-15. User clicks "Challenge" → Client sends: auxi TEXT=challenge_token
-16. Server receives auxi → Processes token → Sends: +msg N=challenger TEXT=token ATTR=3
-17. Target receives notification → Shows challenge UI
-18. Target responds → Client sends: mesg N=challenger TEXT=ACPT (or DECL/BLOC)
-19. Server processes response → If ACCEPTED: sends play command to both clients
+12. User selects room → Client sends: peek NAME=target_room
+13. Server responds with user list for room
+14. Inside Room, User selects player → Client sends: user PERS=target
+15. Client sends chellenge thru UI Challenger Sends: mesg N=challenger TEXT=token ATTR=3
+16. Target receives notification → Shows challenge UI
+17. Target responds → Client sends: mesg N=challenger TEXT=ACPT (or DECL/BLOC)
+18. Server processes response → If ACCEPTED: sends play command to both clients
 
 === RACE INITIALIZATION ===
-20. Server → Both Clients: play SESSION=... (includes 272-byte session data)
-21. Client: SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
-22. Client: Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
-23. Game transitions to RACE state
+19. Server → Both Clients: play, +ses (is a separate command sent after play) (includes 272-byte session data)
+20. Client: SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
+21. Client: Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
+22. Game transitions to RACE state
 
 LOBBY STATE MANAGEMENT - NEW DISCOVERY:
 ================================================================================
@@ -191,16 +190,15 @@ LKEY PROCESSING - COMPLETE FLOW:
 CHALLENGE SYSTEM - CORRECTED FLOW:
 ================================================================================
 
-CORRECTION: User challenges use AUXI command, NOT CHAL
+CORRECTION: User challenges use MESG command, NOT AUXI
 
 Challenge Flow:
-1. peek NAME=target (user selection)
-2. auxi TEXT=challenge_token (initiation)
-   • Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
+1. peek NAME=target (room selection)
+2. mesg PRIV=Challenger TEXT=challenge_token ATTR=3 (initiation)
+   • Token format: %s_%s_%s
    • Processed by ChallengeToken_ProcessCryptographic (0x0029a768)
-3. +msg N=challenger TEXT=token ATTR=3 (notification)
-4. mesg N=challenger TEXT=ACPT/DECL/BLOC (response)
-5. play with 272-byte data (race start)
+3. mesg N=challenger TEXT=ACPT/DECL/BLOC (response)
+4. play,+ses with 272-byte data (race start)
 
 CHAL command is for SYSTEM REGISTRATION ONLY, not user challenges.
 
