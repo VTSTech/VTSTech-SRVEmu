@@ -1,1041 +1,401 @@
-EA SPORTS NASCAR THUNDER 2004 - COMPLETE PROTOCOL SPECIFICATION v4.0
-
-VERIFIED UPDATES FROM CODE ANALYSIS
-1. LobbyApiUpdate Structure & Core Logic
-
-Verified:
-
-    Main lobby structure at DAT_0038b6e4 (piVar24)
-
-    5-second timeout detection (5000ms)
-
-    Connection timeout: 60,000ms (line piVar24[4] = uVar2 + 60000)
-
-    Ping interval: 30,000ms (line piVar24[6] = uVar2 + 30000)
-
-Critical State Management:
-c
-
-if (5000 < iVar13) {
-    Lobby_SetState(param_1, 0x74696d65, 0x800);  // 'time' state
-}
-
-2. Command Processing Flow
-
-Verified Command Handling:
-
-    0x7e706e67 ('~png'): Ping/pong with sequence number
-
-    0x40646972 ('@dir'): Initial connection with LKEY extraction
-
-    0x736b6579 ('skey'): Key exchange
-
-    0x61757468 ('auth'): Authentication
-
-    0x2b736573 ('+ses'): 272-byte session data
-
-    0x2b6d7367 ('+msg'): Message notifications
-
-    0x2b77686f ('+who'): User list triggers lobby entry
-
-New Discovery: Hash Table Integration
-c
-
-// Room hash table operations
-if ((iStack_b0 == 0x2b726f6d) && (piVar24[0xc4] != 0)) {
-    // HashTable_Lookup, HashTable_Insert, HashTable_Remove
-}
-
-// User hash table operations  
-if ((iStack_b0 == 0x2b757372) && (piVar24[0xc9] != 0)) {
-    // Buddy_GetUserData, Buddy_UpdateUserData, etc.
-}
-
-3. BuddyApiUpdate - Separate Buddy System
-
-New Discovery: Separate buddy management system with its own:
-
-    Authentication flow (0x41555448)
-
-    User roster management (0x524f5354)
-
-    Player data synchronization (0x50474554)
-
-    Friend list operations (0x52414444 for add, 0x5244454c for delete)
-
-4. Field Constants - VERIFIED & CORRECTED
-
-From the code, I can see the actual string constants being used:
-
-Network Fields (Verified):
-c
-
-NET_Field3 = 0x3e2f90  // "ADDR"
-LOBBY_DirectField = 0x003e3010  // "DIRECT"
-LOBBY_PortField = 0x003e3018  // "PORT"
-LOBBY_SessionField = 0x003e3020  // "SESS"
-NET_StatusField = 0x003e2fe0  // "MASK"
-LOBBY_PublicKeyField = 0x003e3030  // "SKEY"
-LOBBY_PersonaField = 0x003e3048  // "PERS"
-
-Room Fields (Verified):
-c
-
-ROOM_IDField = 0x003e30d8  // "I"
-ROOM_DescriptionField = 0x003e30e0  // "H"
-ROOM_HostField = 0x003e30e8  // "A"
-ROOM_PlayerCountField = 0x003e30f0  // "T"
-ROOM_MaxPlayersField = 0x003e30f8  // "L"
-ROOM_PasswordField = 0x003e3110  // "P"
-ROOM_PopulationField = 0x003e3128  // "Z"
-
-5. Callback Architecture - VERIFIED
-c
-
-// Pre-process callback
-if ((code *)piVar24[0x145] != (code *)0x0) {
-    (*(code *)piVar24[0x145])(param_1, &uStack_310, piVar24[0x146]);
-}
-
-// Message callback (+msg)
-if ((iStack_b0 == 0x2b6d7367) && (piVar24[0x147] != 0)) {
-    // Determine message type
-    if ((uStack_308 & 4) != 0) {  // Broadcast
-        iStack_30c = 0x63617374;  // 'cast'
-    }
-    if ((uStack_308 & 0x10000) != 0) {  // Private
-        iStack_30c = 0x70726976;  // 'priv'
-    }
-    (*(code *)piVar24[0x147])(param_1, &uStack_310, piVar24[0x148]);
-}
-
-// Connection callback
-if ((code *)piVar24[0x14b] != (code *)0x0) {
-    iStack_30c = 0x636f6e6e;  // 'conn'
-    (*(code *)piVar24[0x14b])(param_1, &uStack_310, piVar24[0x14c]);
-}
-
-// Race callback
-if ((code *)piVar24[0x14d] != (code *)0x0) {
-    uStack_310 = 4;
-    iStack_30c = 0x706c6179;  // 'play'
-    (*(code *)piVar24[0x14d])(param_1, &uStack_310, piVar24[0x14e]);
-}
-
-6. Session Data Structure - VERIFIED
-c
-
-if (iStack_b0 == 0x2b736573) {  // '+ses'
-    memset(piVar24 + 0x80, 0, 0x110);  // 272 bytes
-    
-    // Extract fields
-    pbVar4 = TagFieldFind(pbStack_a8, (byte *)NET_Field2);  // "NAME"
-    TagFieldGetString(pbVar4, (byte *)(piVar24 + 0x80), 0x20, (byte *)NET_DefaultValue);
-    
-    pbVar4 = TagFieldFind(pbStack_a8, (byte *)USER_Field1);  // "SELF"
-    TagFieldGetString(pbVar4, (byte *)(piVar24 + 0x88), 0x20, (byte *)NET_DefaultValue);
-    
-    // ... more field extraction
-    
-    piVar24[2] = piVar24[2] | 0x200;  // Set race data present flag
-}
-
-7. Population Format - CORRECTED
-c
-
-if ((iStack_b0 == 0x2b706f70) && (piVar24[0xc4] != 0)) {
-    pbVar8 = TagFieldFind(pbStack_a8, (byte *)ROOM_PopulationField);  // "Z"
-    // Format: Z=room_id:count,room_id:count,...
-    // Colon separator, not slash
-}
-
-8. Memory Allocation Patterns
-
-Verified Memory Functions:
-c
-
-Util_AllocateMemory(0x68);     // Room entry: 104 bytes
-Util_AllocateMemory(0x138);    // User entry: 312 bytes  
-Util_AllocateMemory(0xa8);     // Rank entry: 168 bytes
-Util_AllocateMemory(0xb8);     // Buddy entry: 184 bytes
-
-9. LKEY Processing - VERIFIED
-c
-
-if (iStack_b0 == 0x40646972) {  // '@dir'
-    // Extract LKEY
-    pbVar4 = TagFieldFind(pbStack_a8, (byte *)LOBBY_DirectField);
-    if (pbVar4 == (byte *)0x0) {
-        pbVar4 = TagFieldFind(pbStack_a8, (byte *)NET_Field3);  // "ADDR"
-        uVar16 = TagFieldGetAddress(pbVar4, 0);
-        piVar24[0xed] = uVar16;  // Server IP
-        
-        pbVar4 = TagFieldFind(pbStack_a8, (byte *)LOBBY_PortField);  // "PORT"
-        iVar10 = TagFieldGetNumber(pbVar4, 0);
-        piVar24[0xec] = iVar10;  // Server port
-    }
-    
-    // Format: host:port$LKEY
-    abStack_410[0] = 0;
-    Network_FormatIPAndProcess(abStack_410, 0x100, NET_Field3, piVar24[0x140]);
-    StringHelper_FormatKeyValue(abStack_410, 0x100, LOBBY_PortField, uVar5);
-}
-
-UPDATED PROTOCOL SPECIFICATION v4.1
-Key Corrections:
-
-    Dual System Architecture:
-
-        LobbyApiUpdate: Main lobby/room/challenge management
-
-        BuddyApiUpdate: Separate friend/buddy system management
-
-    Timeout Values Confirmed:
-
-        General: 5 seconds (5000ms)
-
-        Connection: 60 seconds (60000ms)
-
-        Ping: 30 seconds (30000ms)
-
-    Hash Table Structure:
-
-        Rooms: 0x68 bytes (104 bytes)
-
-        Users: 0x138 bytes (312 bytes)
-
-        Ranks: 0xa8 bytes (168 bytes)
-
-        Buddies: 0xb8 bytes (184 bytes)
-
-    Callback Types Verified:
-
-        Pre-process (all commands)
-
-        Message (+msg with type detection)
-
-        Connection ('conn' events)
-
-        Race ('play' events)
-
-    Field Constants Corrected:
-
-        All string constants match the .sdata section
-
-        Population format uses colon separator
-
-        LKEY extraction from '@dir' response
-
-Implementation Requirements:
-
-    Server must:
-
-        Generate unique LKEY per session
-
-        Support colon-separated population format
-
-        Maintain hash tables for rooms/users/ranks
-
-        Send automatic pers response after auth
-
-        Include 272-byte session data in play commands
-
-    Client expects:
-
-        5-second timeout detection
-
-        Hash table-based data management
-
-        Four callback types for event handling
-
-        Buddy system separate from main lobby
-
-NETWORK ARCHITECTURE OVERVIEW
-Core Flow
+NASCAR Thunder 2004 Protocol Analysis - Critical Documentation
+1. CORE PROTOCOL ARCHITECTURE
+Dual-Layer Protocol System:
 text
 
-PS2 Hardware Interrupt (INTC/DMAC)
-    ?
-ConnectionHandler_ChannelX_In (0x0017f580-0x0017f6c0)
-    ?
-PacketReceiver_RawData (0x0017f408)
-    ?
-Packet_PreProcessor (0x00154b20)
-    ?
-NetworkReceive_CommandDispatcher (0x001012c8)
-    ?
-ProtocolCommand_RoutingTable @ 0x00374e14
-    ?
-LobbyApiUpdate (0x0031bdf0) - MAIN UPDATE LOOP
-    ?
-Command-specific handlers
+Layer 1: LOBBY PROTOCOL (ProtoAries + TLV)
+  - ASCII message types (4-byte)
+  - Tag=Value pairs, backslash delimited
+  - RC4 encryption for passwords
+  - Used for: Login, Room management, Chat
 
-Key Components
+Layer 2: GAME SESSION PROTOCOL (EA Command System)  
+  - Binary command routing (categories/sub-commands)
+  - Parameter arrays with count headers
+  - Used for: Racing, Game state, Real-time updates
 
-    ProtoAries Library: Underlying network transport
-
-    Lobby State Machine: Main connection management
-
-    Hash Table System: Rooms, users, ranks, snapshots
-
-    Callback Architecture: Event-driven processing
-
-    Timeout Management: 5-second timeout detection
-
-Hardware Integration
-
-    Function table: 0x0037892c contains ConnectionHandler_ChannelX_In handlers
-
-    Registered by: NetworkInitialize_SessionSetup (0x00101470)
-
-    Interrupts: PS2 INTC/DMAC trigger network events
-
-PROTOCOL BASICS
-Packet Format
-c
-
-struct NetworkPacket {
-    char command[4];        // 4-byte ASCII command
-    char subcommand[4];     // Usually zeros or sequence
-    uint32_t size;          // Big-endian packet size (includes header)
-    uint16_t checksum;      // XOR checksum at offset 0x0A (NEW)
-    uint8_t channel;        // Channel ID (0-5)
-    uint8_t flags;          // Packet flags
-    char payload[];         // Null-terminated key-value pairs
-};
-
-Transport & Encoding
-
-    Primary: TCP with async UDP for game data
-
-    Encoding: ASCII text with key-value pairs
-
-    Endianness: Big-endian for sizes, little-endian for PS2 data
-
-    Game ID: BASLUS-20824 (PS2 North America)
-
-Connection Flow
+Key Addresses:
 text
 
-1. Client ? Server: @dir (initial connection)
-2. Server ? Client: ADDR, PORT, SESS, MASK, DIRECT, STATUS, LKEY
-3. Client ? Server: skey (key exchange, optional)
-4. Client ? Server: auth (authentication)
-5. Server ? Client: auth STATUS=1 + automatic pers response
-6. Server ? Client: +who (triggers lobby entry)
-7. Client ? Server: sele (lobby data request)
+ProtoAriesSend:       0x00322190
+Protocol_MessageRouter: 0x001c5e50
+System_SendCommand:   0x00324150
+AuthCommand_SendWithEncryption: 0x0031b850
 
-MEMORY STRUCTURES
-Main Lobby Structure (1344+ bytes)
+2. LOBBY PROTOCOL (TLV Format)
+Message Flow:
+text
 
-Base pointer: DAT_0038b6e4 / piVar24 in LobbyApiUpdate
+1. @dir     → Server discovery
+2. addr     → Address confirmation  
+3. skey     → Session key exchange
+4. auth     → Authentication (NAME, PASS$, MID, HWFLAG, etc.)
+5. pers     → Persona selection
+6. sele     → Data selection (rooms, users, ranks, messages)
+7. +rom/+usr/+pop → Real-time updates
+
+Message Types (4-byte ASCII):
 c
 
-struct LobbyState {
-    // Connection & State
-    void* connection_handle;      // +0x000: ProtoAries context
-    uint32_t flags;               // +0x002: State flags (bitfield)
-    uint32_t state;               // +0x003: Current state (ASCII)
-    uint32_t timeout;             // +0x004: Timeout value
-    uint32_t last_tick;           // +0x005: Last network tick
-    uint32_t next_timeout;        // +0x006: Next timeout check
-    int32_t ping_sequence;        // +0x007: Ping sequence (-1 = none)
+// Client → Server
+"@dir" = Directory service
+"addr" = Address confirmation  
+"skey" = Session key exchange
+"auth" = Authentication
+"pers" = Persona selection
+"sele" = Select data
+"room" = Create room
+"move" = Move between rooms
+"peek" = View room details
+"news" = News/announcements
+
+// Server → Client
+"+rom" = Room information
+"+usr" = User information  
+"+pop" = Population counts
+"+who" = Presence information
+"+ses" = Session data (game start)
+"+msg" = Chat messages
+
+Tag Fields:
+c
+
+// Authentication
+"PROD" = Product ID (NASCAR-PS2-2004)
+"VERS" = Version string
+"LANG" = Language (en)
+"SLUS" = PS2 serial (BASLUS-20824)
+"NAME" = Username
+"PASS" = Encrypted password (starts with $)
+"MID"  = Machine ID
+"HWFLAG" = Hardware flags
+"HWMASK" = Hardware mask  
+"MASK" = Status mask
+
+// Rooms
+"I" = Room ID
+"N" = Room Name
+"H" = Room Description
+"A" = Host Address
+"T" = Current users
+"L" = Maximum users
+"F" = Flags
+
+// Users
+"I" = User ID  
+"N" = Username
+"F" = User flags
+"A" = Address
+
+// Population
+"Z" = Map format: "room_id:count,room_id:count"
+
+3. GAME SESSION PROTOCOL (Command Router)
+Routing System:
+text
+
+NetworkEvent_MainDispatcher
+  → Protocol_MessageRouter(param_1, param_2, param_3, ...)
+    - param_1 = Main command (0x80000001-0x80000015)
+    - param_2 = Category (0x00-0x11 = 18 categories)
+    - param_3 = Sub-command within category
+
+Categories (param_2):
+text
+
+0x00: System/Multiplayer Commands
+0x01: System Initialization/Resources
+0x02: Network/Connection Management
+0x03: Hardware/Device Control
+0x04: Graphics/Rendering
+0x05: Audio/Sound System
+0x06: Input/Controller System
+0x08: Game Logic/Simulation
+0x09: UI/Interface System
+0x0A-0x0C: Session Configuration (with flags)
+0x0D: Race/Game Session
+0x0E: Challenge System
+0x0F: Network Lobby
+0x10: Multiplayer Lobby
+0x11: Protocol/Network Events
+
+Multiplayer Commands (Category 0x00):
+c
+
+0x80000001: MultiplayerSystem_FinalizeReady
+0x80000002: Multiplayer_InitializeNetwork
+0x80000003: Multiplayer_GetSessionStatus
+0x80000004: Multiplayer_ConfigureSession
+0x80000005: Multiplayer_CreateChallenge
+0x80000006: Multiplayer_ProcessChallenge
+0x80000007: Multiplayer_ValidateConnection
+0x80000008: Multiplayer_SetReadyState
+0x80000009: Multiplayer_CheckReady
+0x8000000A: Multiplayer_SendNotification
+0x8000000B: Multiplayer_GetConnectionInfo
+0x8000000C: Multiplayer_UpdateUser
+0x8000000D: Multiplayer_CleanupSession
+0x8000000E: Multiplayer_ProcessMessage
+0x8000000F: Multiplayer_CheckPermission
+0x80000010: Multiplayer_GetUserCount
+0x80000011: Multiplayer_FinalCleanup
+0x80000012: Multiplayer_ResetState
+0x80000013: Multiplayer_GetNetworkStatus
+0x80000014: Multiplayer_CheckHardware
+0x80000015: Multiplayer_ValidateSession
+
+4. PACKET STRUCTURES
+ProtoAries Packet:
+text
+
+Offset  Size  Purpose
+0x00    4     Message Type (ASCII, e.g., "auth")
+0x04    4     Subtype/Flags (usually 0)
+0x08    4     Data Length (including null)
+0x0C    N     Payload (null-terminated TLV string)
+
+EA Application Packet (in ProtoAries payload):
+text
+
+Offset  Size  Purpose
+0x00    4     ??? (Header/Sequence)
+0x04    1     Command Byte (routing table index)
+0x05    1     Flags
+0x06    1     Always 1 in outgoing
+0x07    1     Padding
+0x08    4     Main command (becomes param_1)
+0x0C    4     Parameter 2
+0x10    4     Parameter 3
+0x14    4     Parameter 4
+0x18    4     Packet Type (0x17-0x1f)
+0x1C+    N     Optional additional data
+
+Packet Types Mapping:
+text
+
+0x17 → Index 0 (Channel 1)
+0x18 → Index 1 (Channel 2 = MultiAuth)
+0x19 → Index 2 (Channel 3)
+0x1A → Index 3 (Channel 4)
+0x1B → Index 4 (Channel 0 = MultiPlayer)
+0x1C → Index 5 (Channel 5)
+0x1F → Index 6 (ErrorSession)
+
+5. ROUTING TABLE SYSTEM
+ProtocolCommand_RoutingTable:
+c
+
+// Table structure
+Entry = ProtocolCommand_RoutingTable + (packet_type * 0x280) + (command_byte * 0x50)
+
+// Entry layout (0x50 = 80 bytes)
+0x00-0x0F: ??? (16 bytes)
+0x10:      Handler object pointer
+0x14-0x2F: ??? (28 bytes)
+0x30:      Category (Protocol_MessageRouter param_2)
+0x34:      Sub-command (Protocol_MessageRouter param_3)
+0x38:      Flags/Handler type
+0x3C:      ??? (4 bytes)
+0x40:      Protocol object pointer
+0x44-0x4F: ??? (12 bytes)
+
+Setup Function:
+c
+
+ProtocolRoutingTable_SetupHandler(packet_type, command_byte, values_array)
+// Stores values at offsets 0x30, 0x34, 0x38
+
+6. ENCRYPTION SYSTEM
+RC4 Encryption:
+c
+
+// Global state
+DAT_0050a8d0: Global RC4 encryption state buffer
+param_1[9]: 16-byte encryption key (offset 0x24)
+
+// Password format
+"PASS=$hex_data"  // $ indicates encrypted data
+
+// Encryption functions
+Crypt_RC4_KeySetup:    0x00320db8
+Crypt_RC4_EncryptDecrypt: 0x00320f38
+Auth_EncryptData:      0x00320fe0
+
+Encryption Flow:
+text
+
+Plain password → RC4 encrypt → "$" + hex → "PASS=$hex" → Send
+
+7. CRITICAL GLOBAL VARIABLES
+c
+
+// Network state
+DAT_003833f8: g_SendState (0=idle, 1=ready, 2=active)
+DAT_003833fc: g_SendMode (0=normal, 1=special)
+DAT_00383400: g_DataTypeIndex (0-8)
+
+// Lobby state  
+DAT_004e1420-4e1424: Multiplayer data buffers
+DAT_004e14e8: Error session context
+DAT_004e1510: Session index
+DAT_004e177a: System flags
+
+// Protocol routing
+ProtocolCommand_RoutingTable: 0x00374e14
+DAT_00374e10: Routing table initialized flag
+
+8. COMMAND HANDLER FUNCTIONS
+Lobby Handlers:
+c
+
+CommandHandler_AUTH_PERS: 0x00287838
+CommandHandler_USER_SEARCH: 0x002876d8 (calls Protocol_CommandRouter: 0x00207a88)
+CommandHandler_MOVE: 0x00287c18
+CommandHandler_PEEK: 0x00287e60
+CommandHandler_ROOM: 0x00287af8
+CommandHandler_NEWS: 0x002883f0
+CommandHandler_REPT: 0x00288528
+CommandHandler_MESG: 0x00288668
+
+Send Commands:
+c
+
+Protocol_SendData: 0x002092d8
+  - 0x80000001: Protocol_SendInitialize (FUN_00208cf0)
+  - 0x80000002: Protocol_SendCleanup (FUN_002092c8)
+  - 0x80000003: Protocol_SendCommandData (FUN_00208db0)
+  - 0x80000004: Protocol_SendParameterizedData (FUN_00208f00)
+  - 0x80000005: Protocol_SendKeepalive (FUN_00209270)
+  - 0x80000006: Protocol_CheckSendStatus (FUN_00208d48)
+  - 0x80000007: Protocol_SendSnapshot (FUN_00208c48)
+
+9. STATE MACHINE
+Connection States:
+text
+
+OFFLINE (offl) → DIRECTORY (rdir) → CONNECTING (conn) →
+SESSION_KEY (skey) → IDLE (idle) → AUTHENTICATING (auth) →
+ACCOUNT (acct) → PLAYING (+ses)
+
+State Constants (4-char ASCII):
+c
+
+STATE_OFFLINE:     0x6f66666c  // "offl"
+STATE_TIMEOUT:     0x74696d65  // "time"
+STATE_TERMINATED:  0x7465726d  // "term"
+STATE_DIRECTORY:   0x72646972  // "rdir"
+STATE_CONNECTING:  0x636f6e6e  // "conn"
+STATE_SESSION_KEY: 0x736b6579  // "skey"
+STATE_IDLE:        0x69646c65  // "idle"
+STATE_AUTH:        0x61757468  // "auth"
+STATE_ACCOUNT:     0x61636374  // "acct"
+
+10. DATA STRUCTURES
+LobbyContext (0x590 = 1424 bytes):
+c
+
+struct LobbyContext {
+    // Connection Management
+    int socket_handle;           // +0x00: Ares socket handle
+    int flags;                   // +0x04: State flags
+    int state;                   // +0x08: Current state (ASCII code)
+    int timeout_timer;           // +0x0C: Timeout counter
     
-    // Encryption
-    uint8_t encryption_key[16];   // +0x009: 16-byte session key
+    // User Information
+    char username[64];           // +0x4D: Logged in username
+    char persona[64];            // +0x5D: Selected persona
     
-    // User Data
-    char username[64];            // +0x02d: Username
-    char persona[64];             // +0x04d: Persona name
-    uint32_t user_flags;          // +0x06d: User flags
-    uint32_t session_id;          // +0x06e: Session ID
-    uint32_t status_flags;        // +0x06f: Status flags
-    char session_name[64];        // +0x070: Session name
-    
-    // Race Data (272 bytes)
-    uint8_t race_data[272];       // +0x080: Race session data
-    
-    // Race Configuration
-    uint32_t race_host_ip;        // +0x0b0: Host IP
-    uint32_t race_challenger_ip;  // +0x0b1: Challenger IP
-    uint32_t race_seed;           // +0x0b2: Random seed
-    uint32_t race_timestamp;      // +0x0b3: Timestamp
+    // Game Session Data (0x110 bytes)
+    char session_host[32];       // +0x80: Session host name
+    char session_self[32];       // +0x88: Self player name
+    char session_opponent[32];   // +0x90: Opponent name
+    char player1[16];            // +0xA0: Player 1 name
+    char player2[16];            // +0xA4: Player 2 name
+    char player3[16];            // +0xA8: Player 3 name
+    char player4[16];            // +0xAC: Player 4 name
+    int host_ip;                 // +0xB0: Host IP address
+    int from_ip;                 // +0xB1: Message source IP
+    int seed_value;              // +0xB2: Random seed
+    int timestamp;               // +0xB3: Message timestamp
     
     // Hash Tables
-    void* room_table;             // +0x0c4: Room hash table
-    void* room_allocator;         // +0x0c5: Room data allocator
-    void* user_table;             // +0x0c9: User hash table
-    void* user_allocator;         // +0x0ca: User data allocator
-    void* rank_table;             // +0x0ce: Rank hash table
-    void* rank_allocator;         // +0x0cf: Rank data allocator
-    
-    // Server Connection
-    uint32_t server_ip;           // +0x0ed: Server IP address
-    uint32_t server_port;         // +0x0ec: Server port
-    char server_name[256];        // +0x0ee: Server name
-    
-    // Session & Status
-    uint32_t session_number;      // +0x12e: Session number
-    char status_mask[64];         // +0x12f: Status mask string
-    uint32_t user_ip;             // +0x13f: User IP address
-    uint32_t protocol_address;    // +0x140: Protocol address
-    
-    // Configuration
-    uint32_t slot_count;          // +0x141: Available slots
-    uint32_t snapshot_channel;    // +0x142: Snapshot channel (4-7)
-    uint32_t snapshot_counter;    // +0x143: Snapshot counter
-    uint32_t max_slots;           // +0x144: Maximum slots
+    void* room_table;            // +0xC4: HashTable for rooms
+    void* user_table;            // +0xC9: HashTable for users
+    void* rank_table;            // +0xCE: HashTable for rankings
     
     // Callback Functions
-    void (*pre_process_callback)(...);   // +0x145
-    void* pre_process_data;               // +0x146
-    void (*message_callback)(...);        // +0x147
-    void* message_data;                   // +0x148
-    void (*connection_callback)(...);     // +0x14b
-    void* connection_data;                // +0x14c
-    void (*race_callback)(...);           // +0x14d
-    void* race_data_ptr;                  // +0x14e
+    void (*message_callback)();  // +0x147: Incoming message handler
+    void (*connect_callback)();  // +0x14B: Connection state change
+    void (*play_callback)();     // +0x14D: Game session callback
 };
 
-Challenge/User Structure (260+ bytes)
+11. NEXT ANALYSIS PRIORITIES
+Immediate:
 
-Base pointer: DAT_003e3230
+    Game session initiation - Trace +ses message flow
+
+    Race commands - Category 0x0D handlers
+
+    Challenge system - Category 0x0E flow
+
+    Chat system - +msg message handling
+
+Medium:
+
+    Snapshot system - snap command and data streaming
+
+    Ranking system - How ranks are calculated/transmitted
+
+    Buddy system - Friend list management
+
+Long-term:
+
+    Physics synchronization - Race state updates
+
+    Replay system - Race recording/playback
+
+    Tournament system - Multi-race events
+
+12. KEY STRINGS (from strings.txt)
+Critical Tags:
 c
 
-struct ChallengeUserData {
-    uint8_t unknown[17];          // +0x000: Unknown data
-    char primary_username[17];    // +0x011: Primary username storage
-    char secondary_username[17];  // +0x022: Secondary username storage
-    
-    // Persona Slots (4 slots, 16 bytes each)
-    struct {
-        char name[13];           // +0x33, +0x43, +0x53, +0x63
-        uint8_t valid_flag;      // +0x40, +0x50, +0x60, +0x70
-        uint8_t padding[3];      // Padding
-    } personas[4];
-    
-    uint8_t unknown2[146];       // +0x071: Unknown data
-    uint8_t system_flag;         // +0x103: System flag byte
-};
+"ADDR" = Address (0x003d8378)
+"PORT" = Port (0x003e3018)
+"SESS" = Session ID (0x003e3020)
+"NAME" = Name (0x003e3270)
+"PASS" = Password (0x003e32a0)
+"PERS" = Persona (0x003d83a8)
+"HOST" = Host (0x003d83b0)
+"TOS" = Terms of Service (0x003e3298)
+"MASK" = Status mask (0x003e2fe0)
+"CHAN" = Snapshot channel (0x003e2fe8)
 
-State Flags (piVar24[2])
+13. DEBUGGING/TESTING NOTES
+Server Setup:
 text
 
-Bit 0 (0x00000001): Encryption enabled
-Bit 1 (0x00000002): Authentication complete  
-Bit 2 (0x00000004): Unknown
-Bit 3 (0x00000008): Session info updated
-Bit 4 (0x00000010): Unknown
-Bit 5 (0x00000020): Room data updated
-Bit 6 (0x00000040): User data updated
-Bit 7 (0x00000080): Rank data updated
-Bit 8 (0x00000100): Unknown
-Bit 9 (0x00000200): Race data present
+Game port: 10600
+Buddy port: 10899  
+Listener port: 10901
+Data port: 11000 (assigned per connection)
 
-State Values (piVar24[3] - ASCII)
-text
+Test Sequence:
 
-0x72646972 ('rdir'): Waiting for @dir response
-0x636f6e6e ('conn'): Connecting to server
-0x736b6579 ('skey'): Key exchange in progress
-0x69646c65 ('idle'): Idle/connected state
-0x61757468 ('auth'): Authentication in progress
-0x61636374 ('acct'): Account creation
-0x74696d65 ('time'): Timeout occurred
-0x6f66666c ('offl'): Offline/disconnected
-0x7465726d ('term'): Terminated
+    Connect to 10600, send @dir → get data port
 
-COMMAND REFERENCE
-Core Network Commands
-Command	Value	Direction	Purpose
-@dir	0x40646972	C?S	Directory setup/data port
-addr	0x61646472	C?S	Connection establishment
-skey	0x736b6579	C?S	Encryption key exchange
-Authentication Commands
-Command	Value	Direction	Purpose
-auth	0x61757468	C?S	User authentication
-acct	0x61636374	C?S	Account creation
-pers	0x70657273	S?C	Automatic persona response
-cper	0x63706572	C?S	Persona creation
-dper	0x64706572	C?S	Persona deletion
-edit	0x65646974	C?S	Profile editing
-Lobby & Room Commands
-Command	Value	Direction	Purpose
-sele	0x73656c65	C?S	Lobby data request
-room	0x726f6f6d	C?S	Room creation
-move	0x6d6f7665	C?S	Room movement
-Challenge System Commands
-Command	Value	Direction	Purpose
-auxi	0x61757869	C?S	Challenge initiation
-chal	0x6368616c	S?C	System registration only
-mesg	0x6d657367	C?S	Challenge response
-peek	0x7065656b	C?S	Room selection
-Race Commands
-Command	Value	Direction	Purpose
-play	0x706c6179	S?C	Race start (includes 272-byte data)
-rank	0x72616e6b	C?S	Ranking/configuration
-System Commands
-Command	Value	Direction	Purpose
-news	0x6e657773	S?C	Server configuration
-rept	0x72657074	C?S	Report/statistics
-Broadcast Commands
-Command	Value	Direction	Purpose
-+msg	0x2b6d7367	S?C	Messages/notifications
-+usr	0x2b757372	S?C	User updates
-+rom	0x2b726f6d	S?C	Room updates
-+pop	0x2b706f70	S?C	Population updates
-+who	0x2b77686f	S?C	User list
-+ses	0x2b736573	S?C	Race session data
-Ping/Pong
-Command	Value	Direction	Purpose
-~png	0x7e706e67	Both	Health/keepalive
-AUTHENTICATION SYSTEM
-Corrected Authentication Flow
+    Connect to data port, send addr → connection established
 
-CRITICAL UPDATE: NO "AUTH_STATE" field exists in protocol
+    Send skey → key exchange
 
-    Client ? Server: @dir (initial connection)
+    Send auth with credentials → authentication
 
-    Server ? Client: Response includes LKEY=value
+    Send pers → persona selection
 
-    Client ? Server: skey (if encryption required)
+    Send sele → get room/user data
 
-    Client ? Server: auth command:
-    text
+    Use room/move/peek for room management
 
-auth NAME=username PASS=encrypted_password USER=user_id 
-PERS=persona TOS=1 MID=$machine_id HWFLAG=4 
-VERS="PS2/XXX-Jul  2 2003" PROD=NASCAR-PS2-2004 
-LANG=en SLUS=BASLUS-20824
-
-    Server ? Client: auth response with STATUS=1
-
-    Server ? Client: Automatic pers response (no client pers needed!)
-
-    Client: Authentication_StateMachineMain triggers
-
-    Server ? Client: +who (triggers lobby entry)
-
-Authentication State Machine
-
-Main handler: Authentication_StateMachineMain (0x00299330)
-State	Handler	Description
-0	AuthState_Initial (0x00298d08)	Initial state
-1	AuthState_Processing (0x00298df8)	Processing auth
-2	AuthState_Validating (0x00298f10)	Validating credentials
-3	0x002993f4 (undocumented)	Handles automatic pers response
-4-5	AuthState_TransitionToComplete (0x002992a8)	Transition to complete
-6-7	AuthState_FinalizeComplete (0x002992d8)	Finalize completion
-Final	AuthState_Complete (0x00299148)	Sets completion flag
-Password Encryption
-
-Encrypted commands: auth, acct, pass, snap
-c
-
-// Encryption logic in AuthCommand_SendWithEncryption (0x0031b850)
-if (*(char *)(param_1 + 9) == '\0') {
-    // No encryption key - send plaintext
-} else {
-    // Encrypt with 16-byte key from offset 0x24
-    Auth_EncryptData(output, 0x1f, password, key, 0x10, 0x10);
-}
-
-Global RC4 state: DAT_0050a8d0 persists across sessions
-Re-key string: "ru paranoid?" at 0x003d8a20
-LKEY Processing
-
-Server generates: Unique LKEY in @dir response
-Client extracts: Using TagFieldFind("LKEY") (string at 0x003e34c8)
-Format: host:port$LKEY using "%s:$%s" format (0x3d82e8)
-Stored at: DAT_003945b8 for buddy system authentication
-CHALLENGE SYSTEM
-Corrected Challenge Flow
-
-CRITICAL UPDATE: User challenges use auxi, NOT chal
-
-    User selection: Client sends peek NAME=target_room
-
-    Challenge initiation: Client sends auxi TEXT=challenge_token
-
-    Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
-
-    Notification: Server sends +msg N=challenger TEXT=token ATTR=3
-
-    Response: Target sends mesg N=challenger TEXT=ACPT/DECL/BLOC
-
-    Race start: Server sends play with 272-byte session data
-
-Challenge States
-text
-
-0 = INACTIVE
-1 = PENDING
-2 = DECLINED  
-3 = BLOCKED
-4 = ACCEPTED
-6 = READY (for play command)
-7 = NETWORK_VERIFYING
-9 = EXPIRED
-
-Challenge Handlers
-Handler	Address	Purpose
-CommandHandler_AUXI	0x00289528	Challenge initiation
-CommandHandler_AUXI2	0x002895b8	Secondary AUXI handler
-CommandHandler_CHAL	0x00289080	System registration only
-CommandHandler_MESG	0x00288668	Challenge responses
-ChallengeCommand_Dispatcher	0x00288a40	Play command handler
-Token Processing
-
-    Generation: ChallengeToken_PrepareProcessing (0x0029a130)
-
-    Cryptographic: ChallengeToken_ProcessCryptographic (0x0029a768)
-
-    Validation: ChallengeValidation_CanInitiate (0x00289390)
-
-System Command Mapping
-text
-
-0x0E: System_AUXI_Dispatcher (0x00284bd0)
-0x34: CommandHandler_AUXI2 (0x002895b8)
-0x88: ChallengeSystem_RegisterState (0x00289628) - sends CHAL
-0x11F: SystemCommand_AcceptChallenge
-0x125: CommandHandler_CHAL (0x00289080)
-0x126: Challenge_ReceiveNotification (0x00288f70)
-0x127: ChallengeValidation_CanInitiate (0x00289390)
-0x128: ChallengeValidation_IsPlayerAvailable (0x00289458)
-
-LOBBY SYSTEM
-LobbyApiUpdate - Main Loop
-
-Address: 0x0031bdf0
-Called by: ProtocolDispatcher_Main in network thread
-Key Responsibilities
-
-    Timeout management (5-second detection)
-
-    Incoming packet processing via ProtoAriesPeek
-
-    Command dispatch to appropriate handlers
-
-    State machine management
-
-    Callback invocation for events
-
-    Hash table maintenance
-
-Hash Table System
-Table	Pointer	Purpose	Entry Size
-Rooms	piVar24[0xc4]	Room information	0x68 bytes
-Users	piVar24[0xc9]	User data	0x138 bytes
-Ranks	piVar24[0xce]	Ranking data	0xa8 bytes
-Snapshots	piVar24[i*5+0xc4]	Snapshot data	0xa8 bytes
-Callback Architecture
-c
-
-// Pre-process callback (all commands)
-if (piVar24[0x145] != 0) {
-    (*(code *)piVar24[0x145])(param_1, &command_data, piVar24[0x146]);
-}
-
-// Message callback (+msg commands)
-if ((command == 0x2b6d7367) && (piVar24[0x147] != 0)) {
-    // Determine message type
-    if (flags & 4) type = 0x63617374;      // 'cast' broadcast
-    if (flags & 0x10000) type = 0x70726976; // 'priv' private
-    (*(code *)piVar24[0x147])(param_1, &type, piVar24[0x148]);
-}
-
-// Connection callback
-if (piVar24[0x14b] != 0) {
-    type = 0x636f6e6e;  // 'conn'
-    (*(code *)piVar24[0x14b])(param_1, &type, piVar24[0x14c]);
-}
-
-// Race callback (+ses commands)
-if (piVar24[0x14d] != 0) {
-    type = 0x706c6179;  // 'play'
-    (*(code *)piVar24[0x14d])(param_1, &type, piVar24[0x14e]);
-}
-
-Timeout Values
-
-    General timeout: 5 seconds (5000ms)
-
-    Connection timeout: 60 seconds (60000ms)
-
-    Ping interval: 30 seconds (30000ms)
-
-RACE SYSTEM
-Race Session Data
-
-272-byte structure stored at piVar24 + 0x80
-
-Processing flow:
-
-    Server sends play command with 272-byte data
-
-    ChallengeCommand_Dispatcher receives (state must be 6)
-
-    Calls Callback_ProcessPLAYCommand (0x00299308)
-
-    SessionData_Copy272Bytes (0x00299048) copies to DAT_004e31a8 + 0x2dc
-
-    Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
-
-    Game transitions from LOBBY to RACE state
-
-Race Configuration (rank command)
-text
-
-rank SET_TRACK=track_name SET_RACELEN=laps SET_AIDIFF=difficulty
-SET_DAMAGE=damage SET_RANKED=ranked SET_SETUPS=setups
-SET_NUMAI=ai_count SET_ASSISTS=assists SET_CAUTIONS=cautions
-SET_CONSUME=consumables RACETIME=time
-USER=username RANK=rank WINS=wins LOSS=losses RATING=rating
-TRACK=track_name LAPS=laps
-
-Play Command Fields
-
-Extracted by LobbyApiUpdate from +ses:
-
-    NAME: Race name
-
-    SELF: Self player data
-
-    HOST: Host player data
-
-    OPPO: Opponent data
-
-    P1-P4: Player 1-4 data
-
-    AUTH: Authentication data
-
-    FROM: Challenger name
-
-    SEED: Random seed
-
-    WHEN: Timestamp
-
-FIELD EXTRACTION SYSTEM
-Core Functions
-Function	Address	Purpose
-TagFieldFind	0x0031ddd0	Main field parser
-TagFieldGetString	0x0031ed10	String extraction
-TagFieldGetNumber	0x0031e8b0	Numeric extraction
-TagFieldGetFlags	0x0031e938	Flag extraction
-TagFieldGetAddress	0x0031e988	IP address extraction
-TagFieldGetBinary	0x0031ef10	Binary data extraction
-TagFieldGetEpoch	0x0031f328	Timestamp extraction
-TagFieldSetBinary	0x0031e520	Binary data setting
-String Constants (.sdata section)
-
-Base address: 0x003e2900-0x003e3533
-Network Fields
-text
-
-0x003e2f78: "ORIG"
-0x003e2f80: "NAME"
-0x003e2f90: "ADDR"
-0x003e2f98: "PING"
-0x003e2fd8: "PASS" (password field)
-0x003e2fe0: "MASK" (status field)
-0x003e2fe8: "CHAN" (snapshot channel)
-0x003e3008: "TIME"
-
-Lobby Fields
-text
-
-0x003e3010: "DIRECT"
-0x003e3018: "PORT"
-0x003e3020: "SESS" (session)
-0x003e3028: "DOWN" (server)
-0x003e3030: "SKEY" (public key)
-0x003e3038: "MORE" (slots)
-0x003e3040: "SLOTS" (max slots)
-0x003e3048: "PERS" (persona)
-
-Room Fields
-text
-
-0x003e30d8: "I" (room ID)
-0x003e30e0: "H" (description)
-0x003e30e8: "A" (host)
-0x003e30f0: "T" (player count)
-0x003e30f8: "L" (max players)
-0x003e3110: "P" (password)
-0x003e3118: "---" (default password)
-0x003e3128: "Z" (population)
-
-User Fields
-text
-
-0x003e3050: "SELF"
-0x003e3058: "HOST"
-0x003e3060: "OPPO"
-0x003e3068: "P1"
-0x003e3070: "P2"
-0x003e3078: "P3"
-0x003e3080: "P4"
-0x003e3088: "AUTH"
-0x003e3090: "FROM"
-0x003e3098: "SEED"
-0x003e30a0: "WHEN"
-
-Authentication Fields
-text
-
-0x003e3270: "NAME"
-0x003e3280: "MAIL"
-0x003e3288: "SPAM"
-0x003e3290: "CPAT"
-0x003e3298: "TOS"
-0x003e32a0: "PASS"
-0x003e32a8: "ALTS"
-0x003e32b0: "BORN"
-0x003e32b8: "GEND"
-0x003e32c0: "MINAGE"
-0x003e32c8: "PMAIL"
-0x003e32d0: "CHNG"
-
-Protocol Strings
-text
-
-0x003e3470: "send: " (display string)
-0x003e3478: "USER" (buddy username)
-0x003e34a0: "STAT" (status field) - CORRECTED
-0x003e34c8: "LKEY" - VERIFIED location
-
-ERROR CODES
-System Error Codes
-text
-
-0x0b (11): Input too short (username < 4 chars, persona < 3 chars)
-0x0a (10): Input too long (username ? 17 chars, persona ? 13 chars)
-0x18 (24): Slot already in use or invalid slot index
-
-Protocol Status Codes
-text
-
-STATUS=0: General failure
-STATUS=1: Success
-STATUS=100: Authentication failed
-STATUS=101: Invalid session
-STATUS=102: User not found
-STATUS=103: Room full
-STATUS=104: Challenge expired
-STATUS=105: Player busy
-STATUS=106: Invalid token
-
-Size Limits
-
-Username: 4-16 characters (17-byte buffer with null)
-Persona name: 3-12 characters (13-byte buffer with null)
-Persona slots: 4 slots per user
-Buffer standards: 17, 15, 14, 2, 4 ints (16 bytes)
-IMPLEMENTATION GUIDE
-Packet Header Implementation
-c
-
-struct NetworkPacket {
-    char command[4];        // 4-byte command type
-    char subcommand[4];     // Usually zeros or sequence
-    uint32_t size;          // Big-endian packet size (incl. header)
-    uint16_t checksum;      // XOR checksum (NEW)
-    uint8_t channel;        // Channel ID (0-5)
-    uint8_t flags;          // Packet flags
-    char payload[];         // Null-terminated key-value pairs
-};
-
-Authentication Workflow
-
-    Client connects, sends @dir
-
-    Server responds with ports and session ID (includes LKEY)
-
-    Client sends skey request (optional)
-
-    Server sends encryption key
-
-    Client sends auth with credentials
-
-    Server validates and sends persona list
-
-    Server sends automatic pers response
-
-    Server sends +who update (triggers lobby entry)
-
-Room System
-
-Room IDs:
-
-    0: Lobby
-
-    1: East
-
-    2: West
-
-    3: Beginner
-
-    1000+: Custom rooms
-
-Room Types:
-
-    T=1: Public
-
-    T=2: Private
-
-    T=3: Password protected
-
-User Limits: Standard=50, enforce in room creation
-Population Updates: Broadcast +pop when users join/leave
-Challenge System Implementation
-
-Challenge States: 0=Inactive, 1=Pending, 2=Declined, 3=Blocked, 4=Accepted
-SEED Generation: Use timestamp + random value
-Race Configuration: Track IDs, lap counts, difficulty levels
-Critical Implementation Details
-Session Management
-
-    Generate unique session IDs for each connection
-
-    Track user state (lobby/room/challenge/racing)
-
-    Handle disconnections and cleanup
-
-    Manage persona selection and switching
-
-Broadcast System
-
-    +usr updates when users join/leave rooms
-
-    +pop updates for room population changes
-
-    +rom updates for room information
-
-    +msg for challenge notifications
-
-Error Handling
-
-    STATUS=0 for failures with error message
-
-    Handle malformed packets gracefully
-
-    Validate all input parameters
-
-    Timeout handling for stale connections (5 seconds)
-
-DEBUGGING & TESTING
-Key Breakpoints
-text
-
-0x0029a130: ChallengeToken_PrepareProcessing
-0x00289528: CommandHandler_AUXI (challenge initiation)
-0x00288668: CommandHandler_MESG (response handling)
-0x00288a40: ChallengeCommand_Dispatcher (play command)
-0x00299048: SessionData_Copy272Bytes
-0x00287180: NetworkConfig_InitializeAndSELEct (LKEY extraction)
-0x0031bdf0: LobbyApiUpdate (main network loop)
-
-Testing Sequence
-
-    Complete authentication ? Lobby entry (+who)
-
-    Send +usr broadcasts ? Populate user list
-
-    Client sends peek ? Room selection
-
-    Client sends auxi ? Challenge initiation
-
-    Server sends +msg ? Challenge notification
-
-    Target sends mesg ? Challenge response
-
-    Server sends play ? Race start
-
-    Verify DAT_004e31a8 + 0x2d8 = 1 ? Race valid
-
-Unit Tests
-
-    Packet parsing/generation
-
-    Command validation
-
-    Session state transitions
-
-    Room population tracking
-
-Integration Tests
-
-    Complete authentication flow
-
-    Room join/leave sequences
-
-    Challenge initiation/acceptance
-
-    Broadcast update delivery
-
-Compatibility Tests
-
-    PS2 client connectivity
-
-    Multiple concurrent users
-
-    Network latency simulation
-
-    Error condition handling
-
-FUNCTION NAME UPDATES
-Authentication Functions
-text
-
-FUN_00324e88 (0x00324e88) ? SystemFlag_SetChallengeStatus
-FUN_00324c98 (0x00324c98) ? Username_ValidateAndStoreDuplicate
-FUN_00324d30 (0x00324d30) ? Username_CopyFromPrimaryStorage
-FUN_00325798 (0x00325798) ? PersonaSlot_ValidateAndStore
-
-Connection Functions
-text
-
-FUN_00326220 (0x00326220) ? Connection_ParameterValidation
-FUN_003261b8 (0x003261b8) ? Connection_CleanupResources
-FUN_00326758 (0x00326758) ? ConnectionData_CopyFromPrimaryTable
-FUN_003267b0 (0x003267b0) ? ConnectionData_CopyFromSecondaryTable
-
-System Functions
-text
-
-FUN_003266d0 (0x003266d0) ? EA_LoginSystem_Initialize
-FUN_003268e8 (0x003268e8) ? SystemUtility_Placeholder
-FUN_00326858 (0x00326858) ? System_FinalValidation
-FUN_003265e0 (0x003265e0) ? Network_EnableSystem
-
-Protocol Functions
-text
-
-FUN_002817c8 (0x002817c8) ? ProtocolHandler_800000XX_Range4
-FUN_00281a70 (0x00281a70) ? ProtocolHandler_800000XX_Range5
-FUN_00281d48 (0x00281d48) ? ProtocolHandler_Validation
-
-CRITICAL UPDATES FROM BINARY ANALYSIS
-
-    LKEY Discovery: Server-generated in @dir response, used for buddy connections
-
-    Challenge System Correction: User challenges use auxi, not chal
-
-    Authentication Correction: No "AUTH_STATE" field, server sends automatic pers response
-
-    272-byte Session Data: Exact size required, stored at DAT_004e31a8 + 0x2dc
-
-    Hash Table System: Multiple hash tables for rooms, users, ranks, snapshots
-
-    Callback Architecture: Event-driven processing with four callback types
-
-    Lobby State Structure: 1344+ bytes with complex state management
-
-    Timeout Values: 5-second general timeout, 60-second connection timeout
-
-    Encryption System: RC4-based with global state and re-keying
-
-    Field Extraction: Comprehensive system for parsing key-value pairs
-
-Version 4.0 - Complete binary analysis with lobby system, hash tables, callbacks, and corrected protocol flows.
+Last Updated: Analysis based on PS2 binary of NASCAR Thunder 2004 (SLUS-20824)
+Binary Date: Jul 2 2003 (from version string)
+Protocol: EA Sports online system with Sony ProtoAries PS2 networking
