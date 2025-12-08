@@ -1,59 +1,57 @@
 === CORE NETWORK COMMANDS ===
-@dir - Directory setup/data port/session init: ADDR, PORT, DATA_PORT, SESS, MASK, DIRECT, STATUS
-addr - Connection establishment: STATUS
-skey - Encryption key exchange: SKEY, STATUS
+@dir - Directory setup: ADDR, PORT, SESS, LKEY, MASK, DIRECT, STATUS
+addr - Address confirmation: STATUS
+skey - Session key exchange: SKEY, STATUS
 
 === AUTHENTICATION COMMANDS ===
-auth - User auth/persona loading: NAME, USER, PASS, PERS, TOS, PERSONAS, PRIV, LAST, SESS
-acct - Account creation: NAME, USER, PASS, BORN, MAIL, AGE, PERSONAS, SINCE, LAST, PRIV, MINAGE, PMAIL
+auth - User authentication: NAME, USER, PASS$, PERS, TOS, PERSONAS, PRIV, LAST, SESS
+acct - Account creation: NAME, USER, PASS$, BORN, MAIL, AGE, PERSONAS, SINCE, LAST, PRIV, MINAGE, PMAIL
 user - User validation: PERS, TITLE, STATUS, LAST
-pers - Persona switching: PERS, STATUS, LAST (auto after auth)
+pers - Persona switching: PERS, STATUS, LAST (auto server response)
 cper - Persona creation: PERS, ALTS, STATUS
 dper - Persona deletion: PERS, ALTS, STATUS
 edit - Profile editing: MAIL, BORN, GEND, CHNG, STATUS
 
-=== ROOM & LOBBY COMMANDS ===
-sele - Lobby data request: ROOMS=1, USERS=1, RANKS=1, MESGS=1 ? room lists, user lists, rankings
-room - Room creation: NAME, PASS, DESC, MAX ? I (ID), L (max), T (type), F (flags), H (desc), A (host)
-move - Room movement: NAME, PASS ? I (ID), N (name), T (type), F (flags)
+=== LOBBY OPERATIONS ===
+sele - Lobby data request: ROOMS=1, USERS=1, RANKS=1, MESGS=1
+room - Room creation: NAME, PASS, DESC, MAX (returns: I, L, T, F, H, A)
+move - Room movement: NAME, PASS (returns: I, N, T, F)
 
-=== CHALLENGE SYSTEM COMMANDS ===
-auxi - Challenge initiation: TEXT (challenge data)
-chal - Challenge registration: STATUS=1 if INACTIVE, else STATUS=0 and state reset
-mesg - Challenge notifications: N (target), T (text), F (flags) ? responses: "ACPT", "DECL", "BLOC"
+=== CHALLENGE SYSTEM (CORRECTED) ===
+auxi - Challenge initiation: TEXT (challenge token)  [USER CHALLENGES]
+chal - System registration: STATUS=1 if INACTIVE, else STATUS=0  [SYSTEM ONLY]
+mesg - Challenge notifications/responses: N (target), T (text), F (flags)
 peek - User selection: NAME (selected username)
 
 === RACE COMMANDS ===
-play - Race start: SELF, HOST, OPPO, P1-P4, AUTH, FROM, SEED, WHEN ? +ses (272-byte binary)
-  - Handled by ChallengeCommand_Dispatcher when challenge state == 6
-  - Calls Callback_ProcessPLAYCommand ? SessionData_Copy272Bytes
-  - Requires 272-byte session data appended/included
-  - Session data copied to DAT_004e31a8 + 0x2dc, flag set at +0x2d8
-rank - Ranking/config: SET_TRACK, SET_RACELEN, SET_AIDIFF, SET_DAMAGE, SET_RANKED, SET_SETUPS, SET_NUMAI, SET_ASSISTS, SET_CAUTIONS, SET_CONSUME, RACETIME ? USER, RANK, WINS, LOSS, RATING, TRACK, LAPS
+play - Race start: SELF, HOST, OPPO, P1-P4, AUTH, FROM, SEED, WHEN
+  - Includes 272-byte binary session data
+  - Handled by ChallengeCommand_Dispatcher when state == 6
+  - Copies to DAT_004e31a8 + 0x2dc, flag at +0x2d8 = 1
+rank - Ranking/config: SET_TRACK, SET_RACELEN, SET_AIDIFF, etc.
 
 === SYSTEM COMMANDS ===
-news - Server config: BUDDY_URL, BUDDY_PORT, NEWS0-NEWS3, COUNT, STATUS
-rept - Report: PERS, STATUS
+news - Server configuration: BUDDY_URL, BUDDY_PORT, NEWS0-NEWS3, COUNT, STATUS
+rept - Report user: PERS, STATUS
 
-=== BROADCAST COMMANDS ===
-+msg - Messages: FROM, TEXT, F (0x4=broadcast, 0x10000=private)
-+usr - User updates: I (room), N (persona), F (flags), A (address)
-+rom - Room updates: I (ID), N (name), H (desc), A (host), T (type), L (max), F (flags)
-+pop - Population: Z (room_id:count,room_id:count,...)  # FORMAT CORRECTED
-+who - User list: F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
-+ses - Session: 272-byte binary (part of play command, not separate)
+=== SERVER BROADCAST COMMANDS ===
++who - Who is online: F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
++usr - User updates: I (user_id), N (persona), F (flags), A (address)
++rom - Room updates: I (ID), N (name), H (desc), A (host), T (current), L (max), F (flags)
++pop - Population updates: Z=room_id:count,room_id:count,... (colon separator)
++msg - Messages: FROM, TEXT, F (0x4=broadcast, 0x10000=private, 0x3=challenge)
++ses - Session data: 272-byte binary (part of play command)
 
 === PING/PONG ===
-~png - Health: REF (timestamp), TIME (delay), SESS (session), STATUS
+~png - Health check: REF (timestamp), TIME (delay), SESS (session), STATUS
 
 === CRITICAL NOTES ===
-• NO AUTH_STATE field in client binary
-• Auth response: STATUS=1 + SESS + session data
-• Authentication completes via: auth ? pers ? internal state machine
-• BLOC command handler not found in binary
-• Field parsers: TagFieldFind @ 0x31ddd0, TagFieldGetString @ 0x31ed10, TagFieldGetNumber @ 0x31e8b0, TagFieldGetFlags @ 0x31e938
-• MESG called by 5 functions, AUXI by 1
-• ROOM handler serves both 'sele' and 'room'
-• PERS and USER share same handler @ 0x288080
-• +pop format: Z=room_id:count,room_id:count,... (colon separator, not slash)
-• play command includes 272-byte binary session data (not separate +ses command)
+â€¢ NO "AUTH_STATE" field in client binary
+â€¢ Authentication completes via: auth â†’ automatic pers â†’ internal state machine
+â€¢ BLOC command handler not found in binary (likely server-side only)
+â€¢ Field parsers: TagFieldFind @ 0x31ddd0, TagFieldGetString @ 0x31ed10
+â€¢ Challenge initiation uses AUXI, responses use MESG
+â€¢ ROOM handler serves both 'sele' (query) and 'room' (creation)
+â€¢ PERS and USER share same handler @ 0x288080
+â€¢ +pop format: Z=room_id:count,room_id:count (colon separator, not slash)
+â€¢ play command includes 272-byte session data (embedded, not separate +ses)

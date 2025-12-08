@@ -1,7 +1,9 @@
-NASCAR Thunder 2004 Protocol Analysis - Critical Documentation
+NASCAR Thunder 2004 Protocol Analysis - Complete Specification
+================================================================
+
 1. CORE PROTOCOL ARCHITECTURE
+-----------------------------
 Dual-Layer Protocol System:
-text
 
 Layer 1: LOBBY PROTOCOL (ProtoAries + TLV)
   - ASCII message types (4-byte)
@@ -9,68 +11,66 @@ Layer 1: LOBBY PROTOCOL (ProtoAries + TLV)
   - RC4 encryption for passwords
   - Used for: Login, Room management, Chat
 
-Layer 2: GAME SESSION PROTOCOL (EA Command System)  
+Layer 2: GAME SESSION PROTOCOL (EA Command System)
   - Binary command routing (categories/sub-commands)
   - Parameter arrays with count headers
   - Used for: Racing, Game state, Real-time updates
 
 Key Addresses:
-text
-
 ProtoAriesSend:       0x00322190
 Protocol_MessageRouter: 0x001c5e50
 System_SendCommand:   0x00324150
 AuthCommand_SendWithEncryption: 0x0031b850
+LobbyApiUpdate:       0x0031bdf0  [CENTRAL LOOP]
 
 2. LOBBY PROTOCOL (TLV Format)
+------------------------------
 Message Flow:
-text
-
-1. @dir     → Server discovery
-2. addr     → Address confirmation  
-3. skey     → Session key exchange
-4. auth     → Authentication (NAME, PASS$, MID, HWFLAG, etc.)
-5. pers     → Persona selection
-6. sele     → Data selection (rooms, users, ranks, messages)
-7. +rom/+usr/+pop → Real-time updates
+1. @dir     → Server discovery (ADDR, PORT, SESS, LKEY)
+2. addr     → Address confirmation
+3. skey     → Session key exchange (SKEY)
+4. auth     → Authentication (NAME, PASS$, etc.)
+5. pers     → Automatic persona response (server→client)
+6. sele     → Data selection (rooms, users, ranks)
+7. +who     → Lobby entry trigger
+8. +rom/usr/pop → Real-time updates
 
 Message Types (4-byte ASCII):
-c
-
 // Client → Server
-"@dir" = Directory service
-"addr" = Address confirmation  
-"skey" = Session key exchange
-"auth" = Authentication
-"pers" = Persona selection
-"sele" = Select data
-"room" = Create room
-"move" = Move between rooms
-"peek" = View room details
-"news" = News/announcements
+"@dir" (0x40646972) = Directory service
+"addr" (0x61646472) = Address confirmation
+"skey" (0x736b6579) = Session key exchange
+"auth" (0x61757468) = Authentication
+"sele" (0x73656c65) = Select data
+"room" (0x726f6f6d) = Create room
+"move" (0x6d6f7665) = Move between rooms
+"peek" (0x7065656b) = View room details
+"auxi" (0x61757869) = Challenge initiation
 
 // Server → Client
-"+rom" = Room information
-"+usr" = User information  
-"+pop" = Population counts
-"+who" = Presence information
-"+ses" = Session data (game start)
-"+msg" = Chat messages
+"+rom" (0x2b726f6d) = Room information
+"+usr" (0x2b757372) = User information
+"+pop" (0x2b706f70) = Population counts
+"+who" (0x2b77686f) = Presence information
+"+ses" (0x2b736573) = Session data (embedded in play)
+"+msg" (0x2b6d7367) = Chat/Challenge messages
 
 Tag Fields:
-c
-
 // Authentication
-"PROD" = Product ID (NASCAR-PS2-2004)
-"VERS" = Version string
-"LANG" = Language (en)
-"SLUS" = PS2 serial (BASLUS-20824)
+"PROD" = Product ID ("NASCAR-PS2-2004")
+"VERS" = Version ("PS2/XXX-Jul  2 2003")
+"LANG" = Language ("en")
+"SLUS" = PS2 serial ("BASLUS-20824")
 "NAME" = Username
 "PASS" = Encrypted password (starts with $)
 "MID"  = Machine ID
 "HWFLAG" = Hardware flags
-"HWMASK" = Hardware mask  
-"MASK" = Status mask
+
+// Connection
+"ADDR" = IP address
+"PORT" = Port number
+"SESS" = Session ID
+"LKEY" = Lobby key (host:port$LKEY format)
 
 // Rooms
 "I" = Room ID
@@ -80,20 +80,20 @@ c
 "T" = Current users
 "L" = Maximum users
 "F" = Flags
+"P" = Password indicator (0=none, >0=hashed)
 
 // Users
-"I" = User ID  
+"I" = User ID
 "N" = Username
 "F" = User flags
 "A" = Address
 
 // Population
-"Z" = Map format: "room_id:count,room_id:count"
+"Z" = "room_id:count,room_id:count" (colon separator)
 
 3. GAME SESSION PROTOCOL (Command Router)
+-----------------------------------------
 Routing System:
-text
-
 NetworkEvent_MainDispatcher
   → Protocol_MessageRouter(param_1, param_2, param_3, ...)
     - param_1 = Main command (0x80000001-0x80000015)
@@ -101,8 +101,6 @@ NetworkEvent_MainDispatcher
     - param_3 = Sub-command within category
 
 Categories (param_2):
-text
-
 0x00: System/Multiplayer Commands
 0x01: System Initialization/Resources
 0x02: Network/Connection Management
@@ -119,69 +117,41 @@ text
 0x10: Multiplayer Lobby
 0x11: Protocol/Network Events
 
-Multiplayer Commands (Category 0x00):
-c
-
-0x80000001: MultiplayerSystem_FinalizeReady
-0x80000002: Multiplayer_InitializeNetwork
-0x80000003: Multiplayer_GetSessionStatus
-0x80000004: Multiplayer_ConfigureSession
-0x80000005: Multiplayer_CreateChallenge
-0x80000006: Multiplayer_ProcessChallenge
-0x80000007: Multiplayer_ValidateConnection
-0x80000008: Multiplayer_SetReadyState
-0x80000009: Multiplayer_CheckReady
-0x8000000A: Multiplayer_SendNotification
-0x8000000B: Multiplayer_GetConnectionInfo
-0x8000000C: Multiplayer_UpdateUser
-0x8000000D: Multiplayer_CleanupSession
-0x8000000E: Multiplayer_ProcessMessage
-0x8000000F: Multiplayer_CheckPermission
-0x80000010: Multiplayer_GetUserCount
-0x80000011: Multiplayer_FinalCleanup
-0x80000012: Multiplayer_ResetState
-0x80000013: Multiplayer_GetNetworkStatus
-0x80000014: Multiplayer_CheckHardware
-0x80000015: Multiplayer_ValidateSession
-
 4. PACKET STRUCTURES
+--------------------
 ProtoAries Packet:
-text
-
 Offset  Size  Purpose
 0x00    4     Message Type (ASCII, e.g., "auth")
 0x04    4     Subtype/Flags (usually 0)
 0x08    4     Data Length (including null)
 0x0C    N     Payload (null-terminated TLV string)
 
-EA Application Packet (in ProtoAries payload):
-text
+TLV Payload Format:
+"TAG1=VALUE1\TAG2=VALUE2\TAG3=VALUE3\0"
+- Backslash ('\') delimiter
+- Equal sign ('=') separator
+- Null terminator at end
 
-Offset  Size  Purpose
-0x00    4     ??? (Header/Sequence)
-0x04    1     Command Byte (routing table index)
-0x05    1     Flags
-0x06    1     Always 1 in outgoing
-0x07    1     Padding
-0x08    4     Main command (becomes param_1)
-0x0C    4     Parameter 2
-0x10    4     Parameter 3
-0x14    4     Parameter 4
-0x18    4     Packet Type (0x17-0x1f)
-0x1C+    N     Optional additional data
+5. ENCRYPTION SYSTEM
+--------------------
+RC4 Encryption:
+// Global state
+DAT_0050a8d0: Global RC4 encryption state buffer (256 bytes)
+param_1[9]: 16-byte encryption key (offset 0x24)
 
-Packet Types Mapping:
-text
+// Password format
+Plain: "PASS=password"
+Encrypted: "PASS=$hex_data"  // $ indicates encrypted
 
-0x17 → Index 0 (Channel 1)
-0x18 → Index 1 (Channel 2 = MultiAuth)
-0x19 → Index 2 (Channel 3)
-0x1A → Index 3 (Channel 4)
-0x1B → Index 4 (Channel 0 = MultiPlayer)
-0x1C → Index 5 (Channel 5)
-0x1F → Index 6 (ErrorSession)
+// Encryption functions
+Crypt_RC4_KeySetup:    0x00320db8
+Crypt_RC4_EncryptDecrypt: 0x00320f38
+Auth_EncryptData:      0x00320fe0
 
-5. ROUTING TABLE SYSTEM
+Encryption Flow:
+Plain password → RC4 encrypt → "$" + hex → "PASS=$hex" → Send
+
+6. ROUTING TABLE SYSTEM
 ProtocolCommand_RoutingTable:
 c
 
@@ -205,36 +175,14 @@ c
 ProtocolRoutingTable_SetupHandler(packet_type, command_byte, values_array)
 // Stores values at offsets 0x30, 0x34, 0x38
 
-6. ENCRYPTION SYSTEM
-RC4 Encryption:
-c
-
-// Global state
-DAT_0050a8d0: Global RC4 encryption state buffer
-param_1[9]: 16-byte encryption key (offset 0x24)
-
-// Password format
-"PASS=$hex_data"  // $ indicates encrypted data
-
-// Encryption functions
-Crypt_RC4_KeySetup:    0x00320db8
-Crypt_RC4_EncryptDecrypt: 0x00320f38
-Auth_EncryptData:      0x00320fe0
-
-Encryption Flow:
-text
-
-Plain password → RC4 encrypt → "$" + hex → "PASS=$hex" → Send
-
-7. CRITICAL GLOBAL VARIABLES
-c
-
+6. CRITICAL GLOBAL VARIABLES
+----------------------------
 // Network state
 DAT_003833f8: g_SendState (0=idle, 1=ready, 2=active)
 DAT_003833fc: g_SendMode (0=normal, 1=special)
 DAT_00383400: g_DataTypeIndex (0-8)
 
-// Lobby state  
+// Lobby state
 DAT_004e1420-4e1424: Multiplayer data buffers
 DAT_004e14e8: Error session context
 DAT_004e1510: Session index
@@ -244,9 +192,24 @@ DAT_004e177a: System flags
 ProtocolCommand_RoutingTable: 0x00374e14
 DAT_00374e10: Routing table initialized flag
 
+7. STATE MACHINE
+----------------
+Connection States:
+OFFLINE → DIRECTORY → CONNECTING → SESSION_KEY → IDLE → AUTHENTICATING → ACCOUNT → PLAYING
+
+State Constants (4-char ASCII):
+STATE_OFFLINE:     0x6f66666c  // "offl"
+STATE_TIMEOUT:     0x74696d65  // "time"
+STATE_TERMINATED:  0x7465726d  // "term"
+STATE_DIRECTORY:   0x72646972  // "rdir"
+STATE_CONNECTING:  0x636f6e6e  // "conn"
+STATE_SESSION_KEY: 0x736b6579  // "skey"
+STATE_IDLE:        0x69646c65  // "idle"
+STATE_AUTH:        0x61757468  // "auth"
+STATE_ACCOUNT:     0x61636374  // "acct"
+
 8. COMMAND HANDLER FUNCTIONS
 Lobby Handlers:
-c
 
 CommandHandler_AUTH_PERS: 0x00287838
 CommandHandler_USER_SEARCH: 0x002876d8 (calls Protocol_CommandRouter: 0x00207a88)
@@ -258,7 +221,6 @@ CommandHandler_REPT: 0x00288528
 CommandHandler_MESG: 0x00288668
 
 Send Commands:
-c
 
 Protocol_SendData: 0x002092d8
   - 0x80000001: Protocol_SendInitialize (FUN_00208cf0)
@@ -269,17 +231,12 @@ Protocol_SendData: 0x002092d8
   - 0x80000006: Protocol_CheckSendStatus (FUN_00208d48)
   - 0x80000007: Protocol_SendSnapshot (FUN_00208c48)
 
-9. STATE MACHINE
+7. STATE MACHINE
+----------------
 Connection States:
-text
-
-OFFLINE (offl) → DIRECTORY (rdir) → CONNECTING (conn) →
-SESSION_KEY (skey) → IDLE (idle) → AUTHENTICATING (auth) →
-ACCOUNT (acct) → PLAYING (+ses)
+OFFLINE → DIRECTORY → CONNECTING → SESSION_KEY → IDLE → AUTHENTICATING → ACCOUNT → PLAYING
 
 State Constants (4-char ASCII):
-c
-
 STATE_OFFLINE:     0x6f66666c  // "offl"
 STATE_TIMEOUT:     0x74696d65  // "time"
 STATE_TERMINATED:  0x7465726d  // "term"
@@ -290,7 +247,7 @@ STATE_IDLE:        0x69646c65  // "idle"
 STATE_AUTH:        0x61757468  // "auth"
 STATE_ACCOUNT:     0x61636374  // "acct"
 
-10. DATA STRUCTURES
+9. DATA STRUCTURES
 LobbyContext (0x590 = 1424 bytes):
 c
 
@@ -325,11 +282,13 @@ struct LobbyContext {
     
     // Callback Functions
     void (*message_callback)();  // +0x147: Incoming message handler
-    void (*connect_callback)();  // +0x14B: Connection state change
+    void (*connect_callback)();  // +0x52C: piVar24[0x14B]
+    void *connect_callback_data; // +0x530: piVar24[0x14C]
     void (*play_callback)();     // +0x14D: Game session callback
+    // Total size: 0x590 bytes (1424 bytes)
 };
 
-11. NEXT ANALYSIS PRIORITIES
+10. NEXT ANALYSIS PRIORITIES
 Immediate:
 
     Game session initiation - Trace +ses message flow
@@ -356,7 +315,7 @@ Long-term:
 
     Tournament system - Multi-race events
 
-12. KEY STRINGS (from strings.txt)
+11. KEY STRINGS (from strings.txt)
 Critical Tags:
 c
 
@@ -371,31 +330,27 @@ c
 "MASK" = Status mask (0x003e2fe0)
 "CHAN" = Snapshot channel (0x003e2fe8)
 
-13. DEBUGGING/TESTING NOTES
+12. DEBUGGING/TESTING
+--------------------
 Server Setup:
-text
-
 Game port: 10600
-Buddy port: 10899  
+Buddy port: 10899
 Listener port: 10901
 Data port: 11000 (assigned per connection)
 
 Test Sequence:
-
-    Connect to 10600, send @dir → get data port
-
-    Connect to data port, send addr → connection established
-
-    Send skey → key exchange
-
-    Send auth with credentials → authentication
-
-    Send pers → persona selection
-
-    Send sele → get room/user data
-
-    Use room/move/peek for room management
-
+1. Connect to 10600, send @dir → get data port
+2. Connect to data port, send addr → connection
+3. Send skey → key exchange
+4. Send auth with credentials → authentication
+5. Receive automatic pers → persona set
+6. Receive +who → lobby entry
+7. Send sele → get room/user data
+8. Use room/move/peek for room management
+9. Send auxi → challenge initiation
+10. Send mesg → challenge response
+11. Receive play → race start
 Last Updated: Analysis based on PS2 binary of NASCAR Thunder 2004 (SLUS-20824)
+
 Binary Date: Jul 2 2003 (from version string)
 Protocol: EA Sports online system with Sony ProtoAries PS2 networking

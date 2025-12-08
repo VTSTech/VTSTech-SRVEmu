@@ -1,203 +1,102 @@
 UPDATED CORE STATE MANAGEMENT OVERVIEW
-Updated with Binary Analysis Findings
+======================================
+
 CORE STATE MANAGEMENT
+---------------------
 Game State Functions:
+• GameState_GetCurrent (0x00206400) - Returns current game state
+• GameState_SetDirect (0x00206430) - Direct state setter
+• GameState_ConditionalLobbyEntry (0x001e8cf8) - Blocked by DAT_00382eb1
+• GameState_ForceLobbyEntry (0x002068a8) - Unconditional entry
+• GameState_EnterNetworkInit (0x00206de0) - Sets NETWORK_INIT state
+• GameState_BlockConditionalPath (0x001c0ce8) - Sets DAT_00382eb1=1
 
-GameState_GetCurrent (0x00206400) - Returns current game state (defaults to 0x4b1)
-GameState_SetDirect (0x00206430) - Direct state setter for DAT_0038333c
-GameState_ConditionalLobbyEntry (0x001e8cf8) - Conditional entry (blocked by DAT_00382eb1)
-GameState_ForceLobbyEntry (0x002068a8) - Unconditional entry via Protocol_ChannelDispatcher
-GameState_EnterNetworkInit (0x00206de0) - Sets state to NETWORK_INIT (0x4ba)
-GameState_BlockConditionalPath (0x001c0ce8) - Sets DAT_00382eb1=1, forces Protocol_ChannelDispatcher path
-GameState_CheckConditionalBlock (0x001e8da8) - Checks DAT_00382eb1 condition
-GameState_NetworkEventHandler (0x0028a5f8) - Handles network events for state transitions
-GameState_NetworkWait (0x001c0868) - Waits for network state changes
-
-Game State Values:
-
+Game State Values (Verified):
 0x4b0 = NETWORK_IDLE
-0x4ba = NETWORK_INIT
 0x4b1 = MULTIPLAYER_LOBBY
-???? = RACE_STATE (needs identification)
+0x4ba = NETWORK_INIT
+0x4bb = RACE_STATE (newly discovered)
 
-AUTHENTICATION STATE MACHINE
+AUTHENTICATION STATE MACHINE - CORRECTED
+----------------------------------------
 Main Authentication Flow:
+1. Client sends: auth (NAME, USER, PASS, PERS, TOS, VERS="PS2/XXX-Jul  2 2003")
+2. Server responds: STATUS=1 + SESS + NAME + USER + PERSONAS + VERS (with actual key)
+3. Server sends automatic pers response (NO client pers needed!)
+4. Client triggers: Authentication_TriggerStateMachine (0x00207d48)
+5. Processes through: Authentication_StateMachineMain (0x00299330)
+6. Completes with: AuthState_Complete sets offset 0x2c0 to 3
 
-Authentication_StateMachineMain (0x00299330) - Main auth state machine
-Authentication_TriggerStateMachine (0x00207d48) - Triggers auth state machine
-Authentication_ProcessStateChange (0x00207c38) - Processes auth state changes
+CORRECTION: NO "AUTH_STATE" field exists in binary. Authentication completes via internal state machine only.
 
-CRITICAL: NO "AUTH_STATE" field in client binary
-Authentication completes via: auth → pers → internal state machine
+ENCRYPTION FLOW - VERIFIED
+--------------------------
+Encrypted Commands: auth, acct, pass, snap
+Encryption Function: AuthCommand_SendWithEncryption (0x0031b850)
 
-State Handlers (Jump Table @ 0x3d9df0):
-
-AuthState_InitialHandler (0x00298d08) - State 0: Initial auth
-AuthState_ProcessingHandler (0x00298df8) - State 1: Processing auth  
-AuthState_ValidatingHandler (0x00298f10) - State 2: Validating credentials
-AuthState_TransitionHandler1 (0x002992a8) - States 4/5 handler (calls AUTH_Caller2)
-AuthState_TransitionHandler2 (0x002992d8) - States 6/7 handler (calls AUTH_Caller3)
-
-AUTH_Caller1 (0x002991d8) - Unknown helper function
-AuthState_TransitionToComplete (0x002992a8) - AUTH_Caller2: Transition to complete
-AuthState_FinalizeComplete (0x002992d8) - AUTH_Caller3: Finalize completion
-AuthState_Complete (0x00299148) - Sets state at offset 0x2c0 to 3 (COMPLETE)
-AuthState_CheckResult (0x00299188) - Validates authentication result
-
-Authentication Flow (Corrected):
-
-1. Client: auth (NAME, USER, PASS, PERS, TOS, VERS="PS2/XXX-Jul  2 2003")
-2. Server: STATUS=1 + SESS + NAME + USER + PERSONAS + VERS with actual key
-3. Server: Automatic pers response (no client pers needed!)
-4. Client: Authentication_TriggerStateMachine
-5. Client: Authentication_ProcessStateChange
-6. Client: Authentication_StateMachineMain
-7. Client: AuthState_TransitionToComplete sets state to 3
-8. Client: AuthState_FinalizeComplete finalizes
-9. Client: AuthState_Complete sets completion flag
-
-AUTHENTICATION ENCRYPTION FLOW - VERIFIED:
-
-AuthCommand_SendWithEncryption (0x0031b9bc) - Main encryption handler
-• Called for commands: auth (0x61757468), acct (0x61636374), pass (0x70617373), snap (0x736e6175)
-• Uses NET_AuthField = "PASS" for password field
-• Only encrypts if param_1[9] != 0 (password field exists)
-
-Encryption Logic:
+Encryption Logic (from Ghidra):
 if (*(char *)(param_1 + 9) == '\0') {
     // No password - send plaintext
-    Auth_UpdateField(abStack_290, 0x200, NET_AuthField, param_1[0x12f], abStack_8f);
+    Auth_UpdateField(..., NET_AuthField, param_1[0x12f], ...);
 } else {
-    // Encrypt password
-    Auth_EncryptData(abStack_8f, 0x1f, abStack_8f, param_1[9], 0x10, 0x10);
+    // Encrypt password with 16-byte key
+    Auth_EncryptData(output, 0x1f, password, param_1[9], 0x10, 0x10);
 }
 
-Key Parameters to Auth_EncryptData:
-• Output buffer: abStack_8f (31 bytes)
-• Buffer size: 0x1f (31 bytes)
-• Input data: abStack_8f (password extracted via TagFieldGetString)
-• Key: param_1[9] (16-byte key from authentication structure)
-• Key length params: 0x10, 0x10 (16, 16)
-
-GLOBAL RC4 STATE:
-DAT_0050a8d0 = Global RC4 state buffer
-• Used in Auth_EncryptData: Crypt_RC4_KeySetup(0x50a8d0, ...)
-• Initialized with negated key parameter
-• Re-keyed with "ru paranoid?" string
+Key Locations:
+• DAT_0050a8d0: Global RC4 state buffer
+• param_1[9]: 16-byte encryption key (offset 0x24)
+• Re-key string: "ru paranoid?" @ 0x003d8a20
 
 NETWORK CONFIGURATION & LKEY PROCESSING
-Network Configuration Functions:
+---------------------------------------
+LKEY Flow (Verified):
+1. Server @dir response includes: LKEY=server_generated_value
+2. Client extracts via: TagFieldFind("LKEY") using string @ 0x003e34c8
+3. Formats as: host:port$LKEY using "%s:$%s" format @ 0x003d82e8
+4. Stores in: DAT_003945b8
+5. Used by: NetworkConnection_InitializeSession for buddy connections
 
-NetworkConfig_InitializeAndSELEct (0x00287180) - Main config initialization
-NetworkConfig_ProcessSessionData (0x00287980) - Processes session data
-NetworkConfig_GetConnectionData (0x003236a0) - Retrieves connection config
-NetworkConfig_StoreFormattedLKEY (0x003277c0) - Stores formatted LKEY string
-NetworkConfig_GetStatus (0x00323998) - Gets network config status
-NetworkConfig_CheckOnline (0x00323bf0) - Checks online status
-NetworkConfig_Reset (0x00323a50) - Resets network configuration
+Critical Functions:
+• NetworkConfig_InitializeAndSELEct (0x00287180) - Main config init
+• NetworkConfig_StoreFormattedLKEY (0x003277c0) - Stores LKEY string
+• NetworkConnection_InitializeSession (0x00361de8) - Uses LKEY
 
-LKEY Processing Flow:
+LOBBY STATE TRANSITION - CORRECTED
+----------------------------------
+Correct Path:
+1. Server sends: +who F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
+2. Triggers: ProtocolEvent_LobbyTrigger (0x00206c90)
+3. Calls: GameState_ForceLobbyEntry (0x002068a8)
+4. Sets: DAT_0038333c = 0x4b1 (MULTIPLAYER_LOBBY)
+5. Cleans up: NetworkState_CleanupAll (0x002913e0)
 
-1. Server @dir response includes LKEY=server_generated_value
-2. NetworkConfig_InitializeAndSELEct extracts LKEY using TagFieldFind("LKEY")
-3. Formats: param_1+0x22 (host:port) + ":$" + LKEY = "host:port$LKEY"
-4. NetworkConfig_StoreFormattedLKEY stores the formatted string
-5. NetworkConnection_InitializeSession uses it for buddy system connections
+CORRECTION: Lobby entry triggered by +who, NOT by param_2=0 path.
 
-Network Connection Functions:
+RACE SESSION INITIALIZATION - VERIFIED
+--------------------------------------
+Race Start Flow:
+1. Server sends: play command with 272-byte session data
+2. Handled by: ChallengeCommand_Dispatcher (0x00288a40) when state == 6
+3. Calls: Callback_ProcessPLAYCommand (0x00299308) with session data
+4. Copies via: SessionData_Copy272Bytes (0x00299048) to DAT_004e31a8 + 0x2dc
+5. Sets flag: DAT_004e31a8 + 0x2d8 = 1 (valid)
+6. Finalizes: AuthState_Complete
+7. Transition: LOBBY (0x4b1) → RACE (0x4bb)
 
-NetworkConnection_InitializeSession (0x00361de8) - Initializes network session with LKEY
-NetworkConnection_CreateSocket (0x00364b08) - Creates network socket
-NetworkConnection_StartConnect (0x0028a0e0) - Starts connection process
-NetworkConnection_StopConnect (0x0028a190) - Stops connection process
-NetworkConnection_Setup (0x00285138) - Sets up network connection
-NetworkConnection_Setup2 (0x002876a0) - Secondary setup function
-NetworkConnection_Cleanup (0x0028a880) - Cleans up connection resources
+CHALLENGE SYSTEM - CORRECTED
+----------------------------
+User Challenges: Use MESG command, NOT AUXI
+System Registration: Uses CHAL command
 
-NETWORK PROTOCOL DISPATCH
-
-PS2 Hardware Interrupt → 
-ConnectionHandler_ChannelX_In (0x0017f580-0x0017f6c0) → 
-PacketReceiver_RawData (0x0017f408) → 
-Packet_PreProcessor (0x00154b20) → 
-NetworkReceive_CommandDispatcher (0x001012c8) → 
-ProtocolCommand_RoutingTable @ 0x00374e14 (little-endian) → 
-Protocol Handler Virtual Dispatch
-
-NETWORK EVENT HANDLING
-
-NetworkEvent_MainDispatcher (0x001c3808) - Main network event handler (interrupt-driven)
-Protocol_MessageRouter (0x001c5e50) - Main protocol message router with dual jump tables
-ProtocolEvent_LobbyTrigger (0x00206c90) - Handles lobby trigger from Protocol_ChannelDispatcher
-NetworkEvent_Handler (0x0027aa60) - General network event handler
-NetworkEvent_DefaultHandler (0x0027a9f0) - Default event handler
-NetworkEvent_RegisterHandlers (0x0027ad40) - Registers event handlers
-NetworkEvent_Loop (0x0022ca08) - Main network event loop
-
-DUAL JUMP TABLE SYSTEM
-
-JUMP TABLE 1 @ 0x3B01A0 (A1-BASED):
-0: ProtocolHandler_Category0
-1: ProtocolHandler_Category1
-2: ProtocolHandler_Category2
-3: ProtocolHandler_Category3
-4: ProtocolHandler_Category4
-5: ProtocolHandler_Category5
-6: ProtocolHandler_Category6
-7: ProtocolHandler_Default
-8: ProtocolHandler_Category8
-9: ProtocolHandler_Category9
-
-JUMP TABLE 2 @ 0x3B04C0 (A2-BASED):
-0: ProtocolHandler_LobbyStateEntry → ProtocolEvent_LobbyTrigger → GameState_ForceLobbyEntry
-1: ProtocolHandler_Index1
-2: ProtocolHandler_Default
-3: ProtocolHandler_AlternatePath
-4-16: ProtocolHandler_Default
-17: ProtocolHandler_Index17
-18: ProtocolHandler_Index18
-19: ProtocolHandler_Index19
-
-LOBBY STATE TRANSITION
-
-NetworkEvent_MainDispatcher(a2=0) → 
-Protocol_MessageRouter → 
-ProtocolHandler_LobbyStateEntry → 
-ProtocolEvent_LobbyTrigger → 
-GameState_ForceLobbyEntry → 
-DAT_0038333c = 0x4b1 (MULTIPLAYER_LOBBY) → 
-NetworkState_CleanupAll (0x002913e0)
-
-RACE SESSION INITIALIZATION
-
-1. Server sends play command, followed by +ses with 272-byte session data
-2. ChallengeCommand_Dispatcher (0x00288a40) receives (state must be 6)
-3. Calls Callback_ProcessPLAYCommand (0x00299308) with session data pointer
-4. SessionData_Copy272Bytes (0x00299048) copies to DAT_004e31a8 + 0x2dc
-5. Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
-6. Calls AuthState_Complete to finalize
-7. Game state transitions from LOBBY to RACE
-
-CHALLENGE SYSTEM
-Core Challenge Functions:
-
-ChallengeSystem_InitializeNetwork (0x00283d38) - Main challenge init
-ChallengeSystem_SendRegistration (0x00283be8) - Sends CHAL command
-ChallengeCallback_RegisterHandler (0x00289778) - Registers callbacks
-ChallengeCallback_HandlerMain (0x00283388) - Main callback handler
-ChallengeSystem_Startup (0x00284b28) - Starts challenge system
-ChallengeSystem_RegisterState (0x00289628) - Registers challenge state
-
-Challenge notification paths: 
-• MESG (System NOT Ready) 
-• NetworkPacket_ChallengeProcessor (0x002953f8) (System IS Ready)
-
-Challenge Token Processing:
-• ChallengeToken_PrepareProcessing (0x0029a130) - Prepares challenge token
-• ChallengeToken_ProcessCryptographic (0x0029a768) - Processes token cryptographically
+Challenge Flow:
+1. User selects target → Client sends: user PERS=target
+2. Challenge initiation → Client sends: auxi TEXT=token
+3. Notification → Server sends: +msg N=challenger TEXT=token ATTR=3
+4. Response → Client sends: mesg N=challenger TEXT=ACPT/DECL/BLOC
+5. Race start → Server sends: play command
 
 Challenge States:
-
 0 = INACTIVE
 1 = PENDING
 2 = DECLINED
@@ -207,125 +106,76 @@ Challenge States:
 7 = NETWORK_VERIFYING
 9 = EXPIRED
 
-MULTIPLAYER SYSTEM
+MAIN NETWORK LOOP - LobbyApiUpdate
+-----------------------------------
+Central Function: LobbyApiUpdate (0x0031bdf0)
+Called by: ProtocolDispatcher_Main in network thread
+Structure: 1344+ bytes lobby state @ DAT_0038b6e4
 
-Multiplayer_MainEntryPoint (0x0028f1f0) - Entry point (callback-triggered)
-MultiplayerSystem_Activate (0x00327708) - Transitions to active state
-MultiplayerSystem_InitializeComponents (0x00328138) - Initializes components
-NetworkSystem_InitializePhase2 (0x00327678) - Second phase network init
-BuddySystem_InitializeCallback (0x003273d0) - Initializes buddy system
-MultiplayerSystem_QuickInit (0x0028f238) - Quick initialization
-MultiplayerSystem_Shutdown (0x003275a0) - Shuts down multiplayer
+Key Responsibilities:
+1. Timeout management (5-second detection)
+2. Incoming packet processing via ProtoAriesPeek
+3. Command dispatch to handlers
+4. State machine management
+5. Callback invocation
+6. Hash table maintenance (rooms, users, ranks, snapshots)
 
-SYSTEM CONTROL FUNCTIONS
+HASH TABLE SYSTEM
+-----------------
+Four hash tables managed:
+1. Rooms: 0x68 bytes per entry, key = Room ID
+2. Users: 0x138 bytes per entry, key = User ID
+3. Ranks: 0xa8 bytes per entry, key = Rank ID
+4. Snapshots: 0xa8 bytes per entry (channels 4-7)
 
-System_CheckNetworkCondition (0x00327450) - Checks network conditions
-System_SetupNetworkThread (0x00323408) - Sets up network thread
-System_ProcessConfigString (0x00323278) - Processes configuration strings
-System_CommandDispatcher (0x00284c88) - Main command dispatcher
-System_CommandDispatcher2 (0x002080a8) - Secondary command dispatcher
-System_AUXI_Dispatcher (0x00284bd0) - Handles AUXI commands
-System_CheckNetworkThread (0x00323628) - Checks network thread status
-System_CheckNetworkReady (0x00323638) - Checks if network is ready
-System_CheckReadyState (0x00207f08) - Checks system ready state
+CALLBACK ARCHITECTURE
+---------------------
+Four callback types:
+1. Pre-process (offset 0x145): All incoming commands
+2. Message (offset 0x147): +msg commands (chat/cast/priv)
+3. Connection (offset 0x14b): Connection events ('conn')
+4. Race (offset 0x14d): Race data ('play')
 
-MEMORY STRUCTURES
+CRITICAL MEMORY OFFSETS - VERIFIED
+-----------------------------------
+DAT_0038333c: Current game state
+DAT_00382eb1: Conditional lobby block (1 = blocked)
 
-DAT_0038333c: Current game state (0x4b1=MULTIPLAYER_LOBBY, 0x4ba=NETWORK_INIT)
-DAT_00382eb1: Conditional lobby block (set to 1 by GameState_BlockConditionalPath)
-
-AuthState_Complete sets state at offset 0x2c0 to 3 (COMPLETE)
-
-g_ChallengeSystem: Main structure (300 bytes) @ 0x0038b838
-
-DAT_004e31a8: Main session structure (1000+ bytes)
-  +0x2d8: Session data valid flag (1 byte)
+DAT_004e31a8: Main session structure
+  +0x2d8: Session data valid flag (1 byte, 1 = valid)
   +0x2dc: 272-byte session data
 
-DAT_004e1428: Multiplayer packet data array
-DAT_004e1420: Array element count
-
-DAT_003945b8: Stores formatted LKEY connection string (host:port$LKEY)
-DAT_003e31bc: Stores network configuration pointer
-
-g_ChallengerNameStorage: Challenger name storage
-SystemReady_StateFlag: System ready state control
+g_ChallengeSystem: @ 0x0038b838 (300 bytes)
+DAT_003945b8: Formatted LKEY string (host:port$LKEY)
+DAT_003e31bc: Network configuration pointer
 
 FIELD EXTRACTION SYSTEM
+-----------------------
+Core Functions:
+• TagFieldFind (0x0031ddd0) - Main parser
+• TagFieldGetString (0x0031ed10) - String extraction
+• TagFieldGetNumber (0x0031e8b0) - Numeric extraction
+• TagFieldGetFlags (0x0031e938) - Flag extraction
+• TagFieldGetAddress (0x0031e988) - IP extraction
+• TagFieldGetBinary (0x0031ef10) - Binary extraction
+• TagFieldGetEpoch (0x0031f328) - Timestamp extraction
 
-TagFieldFind (0x0031ddd0) - Main field parser
-TagFieldGetString (0x0031ed10) - String extraction
-TagFieldGetNumber (0x0031e8b0) - Numeric extraction
-TagFieldGetFlags (0x0031e938) - Flag extraction
-TagFieldGetEpoch (0x0031f328) - Epoch time extraction
-TagFieldGetAddress (0x0031e988) - Address extraction
-TagFieldGetBinary (0x0031ef10) - Binary data extraction
+COMMAND HANDLER MAPPING
+-----------------------
+• CommandHandler_AUTH_PERS (0x00287838) - auth/pers
+• ProtocolHandler_ROOM (0x00287af8) - sele/room
+• CommandHandler_PERS_USER (0x00288080) - pers/user
+• CommandHandler_AUXI (0x00289528) - Challenge initiation
+• CommandHandler_CHAL (0x00289080) - System registration
+• CommandHandler_MESG (0x00288668) - Challenge responses
+• ChallengeCommand_Dispatcher (0x00288a40) - play command
 
-COMMAND HANDLERS
-
-CommandHandler_AUTH_PERS (0x00287838) - Handles auth/pers
-ProtocolHandler_ROOM (0x00287af8) - Handles sele/room
-CommandHandler_PERS_USER (0x00288080) - Handles pers/user
-CommandHandler_AUXI (0x00289528) - Challenge initiation with cryptographic processing
-CommandHandler_CHAL (0x00289080) - Challenge system registration
-CommandHandler_MESG (0x00288668) - Challenge notifications/responses
-ChallengeCommand_Dispatcher (0x00288a40) - Handles play command (0x706c6179)
-CommandHandler_AUXI2 (0x002895b8) - Secondary AUXI handler
-CommandHandler_NEWS (0x002883f0) - Handles news command
-CommandHandler_REPT (0x00288528) - Handles report command
-CommandHandler_ACCT (0x00325110) - Handles account creation
-CommandHandler_EDIT (0x003254e0) - Handles profile editing
-CommandHandler_CPER (0x003259c8) - Handles persona creation
-CommandHandler_DPER (0x00325ad0) - Handles persona deletion
-
-SYSTEM COMMANDS & DISPATCHERS
-
-0xE: System_AUXI_Dispatcher (0x00284bd0)
-0x34: CommandHandler_AUXI2 (0x002895b8)
-0x88: ChallengeSystem_RegisterState (0x00289628) - sends CHAL
-0x11F: SystemCommand_AcceptChallenge
-0x125: CommandHandler_CHAL (0x00289080)
-0x126: Challenge_ReceiveNotification (0x00288f70)
-0x127: ChallengeValidation_CanInitiate (0x00289390)
-0x128: ChallengeValidation_IsPlayerAvailable (0x00289458)
-
-MultiplayerCommand_Dispatcher (0x00326a30) - Multiplayer command dispatcher
-ChallengeSystem_CommandDispatcher (0x00283da0) - Challenge system dispatcher
-Protocol_CommandDispatcher (0x00282570) - Protocol command dispatcher
-
-STRING & FORMATTING FUNCTIONS
-
-StringHelper_FormatString (0x0031e3a0) - Formats strings with key-value pairs
-StringHelper_CopyWithParams (0x002b9910) - Copies with printf-style formatting
-StringHelper_FormatWithVarArgs (0x002b95a0) - vsprintf-style formatting
-StringHelper_FormatWithLimit (0x0031dff0) - Formats with size limit
-StringHelper_FormatKeyValue (0x0031e040) - Formats key=value pairs
-StringHelper_FormatInteger (0x002b8e98) - Integer formatting
-StringHelper_FormatFloat (0x002b8f78) - Float formatting
-StringHelper_FormatScientific (0x002b9150) - Scientific notation
-StringHelper_FormatHexParam (0x002b93e8) - Hexadecimal formatting
-StringHelper_FormatStringParam (0x002b9498) - String parameter formatting
-StringHelper_FormatOrdinal (0x001c4d90) - Classic English ordinal number formatting
-Util_FindCharInString (0x002b9bc0) - Finds character in string (used for :$ parsing)
-
-KEY INSIGHTS FROM BINARY ANALYSIS
-LKEY Discovery:
-
-• Server generates LKEY in @dir response
-• Extracted via TagFieldFind("LKEY")
-• Formatted as host:port$LKEY for buddy connections
-• Stored in DAT_003945b8
-• Used by NetworkConnection_InitializeSession
-Authentication Correction:
-
-• Client uses internal Authentication_StateMachineMain
-Challenge System Correction:
-
-• User challenges use mesg command
-• CHAL is for system registration only
-• Token format: %s_%s_%s
-Critical Memory Offsets:
-
-• Session data: DAT_004e31a8 + 0x2dc (272 bytes)
-• Valid flag: DAT_004e31a8 + 0x2d8 (1=ready)
-• Auth completion: offset 0x2c0 = 3 (COMPLETE)
+KEY INSIGHTS FROM GHIDRA ANALYSIS
+----------------------------------
+1. LobbyApiUpdate is CENTRAL to all network processing
+2. Hash tables manage rooms/users/ranks in memory
+3. Callback system enables event-driven architecture
+4. Authentication uses internal state machine (no AUTH_STATE field)
+5. LKEY format: host:port$LKEY for buddy connections
+6. Session data: 272 bytes copied to offset 0x2dc
+7. Challenge uses MESG, system uses CHAL

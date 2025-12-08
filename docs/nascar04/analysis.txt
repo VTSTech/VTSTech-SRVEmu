@@ -1,54 +1,51 @@
-================================================================================
-EA SPORTS NASCAR THUNDER 2004 - UPDATED PROTOCOL SPECIFICATION v3.0
-================================================================================
+EA SPORTS NASCAR THUNDER 2004 - COMPLETE PROTOCOL SPECIFICATION v4.0
+====================================================================
 
-KEY UPDATES BASED ON COMPREHENSIVE BINARY ANALYSIS:
-================================================================================
-
-1. CENTRAL NETWORK LOOP: LobbyApiUpdate (0x0031bdf0) handles all network processing
-2. HASH TABLE SYSTEM: Four hash tables for rooms, users, ranks, snapshots
-3. CALLBACK ARCHITECTURE: Event-driven processing with four callback types
+KEY UPDATES FROM GHIDRA ANALYSIS:
+1. CENTRAL NETWORK LOOP: LobbyApiUpdate (0x0031bdf0) handles ALL network processing
+2. HASH TABLE SYSTEM: Four hash tables (rooms, users, ranks, snapshots)
+3. CALLBACK ARCHITECTURE: Four callback types for event-driven processing
 4. LOBBY STATE STRUCTURE: 1344+ bytes with complex state management
-5. CORRECTED COMMAND FLOWS: Challenge uses auxi, not chal
-6. AUTHENTICATION CORRECTION: No "AUTH_STATE" field, automatic pers response
-7. ENHANCED ERROR HANDLING: Timeout management and error codes
+5. CORRECTED COMMANDS: Challenge uses AUXI, not CHAL (CHAL is system-only)
+6. AUTHENTICATION: No "AUTH_STATE" field, uses internal state machine
+7. LKEY PROCESSING: host:port$LKEY format for buddy connections
 
 CORRECTED MULTIPLAYER FLOW:
-================================================================================
+===========================
 
 === AUTHENTICATION TO LOBBY ENTRY ===
 1. Client → Server: @dir (initial connection)
 2. Server → Client: ADDR=ip PORT=port SESS=session_id LKEY=key MASK=mask
-3. Client → Server: skey (key exchange, if required)
-4. Client → Server: auth NAME=... PASS=encrypted_password USER=... PERS=... TOS=1
+3. Client → Server: skey (key exchange)
+4. Client → Server: auth NAME=... PASS=$encrypted USER=... PERS=... TOS=1
 5. Server → Client: auth STATUS=1 SESS=... NAME=... USER=... PERSONAS=...
-6. Client: Authentication_StateMachineMain triggers (state 3 handles pers response)
-7. Server → Client: +who F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
-8. Client: Enters lobby (DAT_0038333c = 0x4b1)
+6. Server → Client: pers PERS=... STATUS=1 (AUTOMATIC - no client request)
+7. Client: Authentication_StateMachineMain processes state 3
+8. Server → Client: +who F=U N=MyPersona RI=room_id RT=player_count R=rank RF=room_flags
+9. Client: Enters lobby (DAT_0038333c = 0x4b1)
 
 === LOBBY OPERATIONS ===
-9. Client → Server: sele ROOMS=1 USERS=1 RANKS=1
-10. Server → Client: Room list (+rom), user list (+usr), population (+pop)
-11. LobbyApiUpdate processes updates and maintains hash tables
+10. Client → Server: sele ROOMS=1 USERS=1 RANKS=1
+11. Server → Client: Room list (+rom), user list (+usr), population (+pop)
+12. LobbyApiUpdate processes updates and maintains hash tables
 
-=== CHALLENGE SYSTEM (CORRECTED) ===
-12. User selects room → Client sends: peek NAME=target_room
-13. Server responds with user list for room
-14. Inside Room, User selects player → Client sends: user PERS=target
-15. Client sends chellenge thru UI Challenger Sends: mesg N=challenger TEXT=token ATTR=3
-16. Target receives notification → Shows challenge UI
-17. Target responds → Client sends: mesg N=challenger TEXT=ACPT (or DECL/BLOC)
-18. Server processes response → If ACCEPTED: sends play command to both clients
+=== CHALLENGE SYSTEM ===
+13. User selects room → Client sends: peek NAME=target_room
+14. Server responds with user list for room
+15. Inside room, user selects player → Client sends: user PERS=target
+16. Challenger sends: auxi TEXT=challenge_token
+17. Server sends: +msg N=challenger TEXT=token ATTR=3 (notification)
+18. Target responds → Client sends: mesg N=challenger TEXT=ACPT/DECL/BLOC
+19. Server processes response → If ACCEPTED: sends play command to both
 
 === RACE INITIALIZATION ===
-19. Server → Both Clients: play, +ses (is a separate command sent after play) (includes 272-byte session data)
-20. Client: SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
-21. Client: Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
-22. Game transitions to RACE state
+20. Server → Both Clients: play (includes 272-byte session data)
+21. Client: SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
+22. Client: Sets valid flag at DAT_004e31a8 + 0x2d8 to 1
+23. Game transitions to RACE state (0x4bb)
 
-LOBBY STATE MANAGEMENT - NEW DISCOVERY:
-================================================================================
-
+LOBBY STATE MANAGEMENT:
+======================
 Main Lobby Structure (1344+ bytes at DAT_0038b6e4):
 
 Key Offsets:
@@ -69,22 +66,19 @@ State Flags (offset 0x002):
 • Bit 7: Rank data updated
 • Bit 9: Race data present
 
-HASH TABLE SYSTEM - DETAILED:
-================================================================================
-
-The lobby system uses four primary hash tables:
+HASH TABLE SYSTEM:
+=================
+Four primary hash tables:
 
 1. ROOM HASH TABLE (offset 0xc4):
    • Entry size: 0x68 bytes
    • Key: Room ID
    • Data: Room information (name, host, max players, etc.)
-   • Managed by: HashTable_Lookup, HashTable_Insert, HashTable_Remove
 
 2. USER HASH TABLE (offset 0xc9):
    • Entry size: 0x138 bytes
    • Key: User ID
    • Data: User information (username, IP, flags, etc.)
-   • Managed by: Buddy_* functions (Buddy_AddUser, Buddy_FindUserByString)
 
 3. RANK HASH TABLE (offset 0xce):
    • Entry size: 0xa8 bytes
@@ -96,10 +90,9 @@ The lobby system uses four primary hash tables:
    • Entry size: 0xa8 bytes
    • Key: Snapshot ID
 
-CALLBACK ARCHITECTURE - DETAILED:
-================================================================================
-
-Four callback types for event-driven processing:
+CALLBACK ARCHITECTURE:
+=====================
+Four callback types:
 
 1. PRE-PROCESS CALLBACK (offset 0x145):
    • Called for ALL incoming commands
@@ -108,11 +101,11 @@ Four callback types for event-driven processing:
 
 2. MESSAGE CALLBACK (offset 0x147):
    • Called for +msg commands (0x2b6d7367)
-   • Determines message type based on flags:
+   • Determines message type:
      - Normal: 'chat' (0x63686174)
      - Broadcast: 'cast' (0x63617374) - flags & 4
      - Private: 'priv' (0x70726976) - flags & 0x10000
-   • Signature: callback(lobby_state, message_type, user_data)
+     - Challenge: ATTR=3
 
 3. CONNECTION CALLBACK (offset 0x14b):
    • Called for connection events
@@ -120,13 +113,12 @@ Four callback types for event-driven processing:
    • Signature: callback(lobby_state, 'conn', user_data)
 
 4. RACE CALLBACK (offset 0x14d):
-   • Called for race data (+ses commands)
+   • Called for race data (play command)
    • Type: 'play' (0x706c6179)
    • Signature: callback(lobby_state, 'play', user_data)
 
 COMMAND PROCESSING IN LobbyApiUpdate:
-================================================================================
-
+=====================================
 For each incoming packet:
 1. ProtoAriesPeek checks for data
 2. Pre-process callback invoked (if registered)
@@ -139,12 +131,11 @@ Critical commands handled specially:
 • ~png (0x7e706e67): Ping response with sequence number
 • skey (0x736b6579): Stores encryption key, sets encryption flag
 • auth (0x61757468): Sets auth state, stores username/IP
-• +ses (0x2b736573): Extracts 272-byte race data, triggers race callback
+• play (0x706c6179): Extracts 272-byte race data, triggers race callback
 • +msg (0x2b6d7367): Triggers message callback with type detection
 
-AUTHENTICATION SYSTEM - CORRECTED & ENHANCED:
-================================================================================
-
+AUTHENTICATION SYSTEM:
+=====================
 CRITICAL: NO "AUTH_STATE" field exists in protocol
 Authentication completes via internal state machine:
 
@@ -160,9 +151,8 @@ Authentication completes via internal state machine:
    • States 6-7: Finalize completion
    • Final: AuthState_Complete sets completion flag
 
-PASSWORD ENCRYPTION - VERIFIED:
-================================================================================
-
+PASSWORD ENCRYPTION:
+===================
 Encrypted Commands: auth, acct, pass, snap
 
 Encryption Logic:
@@ -176,9 +166,8 @@ if (encryption_key_exists) {
 Global RC4 State: DAT_0050a8d0 persists across sessions
 Re-key String: "ru paranoid?" at 0x003d8a20
 
-LKEY PROCESSING - COMPLETE FLOW:
-================================================================================
-
+LKEY PROCESSING:
+===============
 1. Server generates LKEY in @dir response
 2. Client extracts using TagFieldFind("LKEY") (string at 0x003e34c8)
 3. NetworkConfig_InitializeAndSELEct formats: host:port$LKEY
@@ -187,18 +176,18 @@ LKEY PROCESSING - COMPLETE FLOW:
 6. Used by NetworkConnection_InitializeSession for buddy connections
 7. Buddy system connects using formatted string
 
-CHALLENGE SYSTEM - CORRECTED FLOW:
-================================================================================
-
-CORRECTION: User challenges use MESG command, NOT AUXI
+CHALLENGE SYSTEM:
+================
+CORRECTION: User challenges use AUXI command, NOT CHAL
 
 Challenge Flow:
 1. peek NAME=target (room selection)
-2. mesg PRIV=Challenger TEXT=challenge_token ATTR=3 (initiation)
-   • Token format: %s_%s_%s
+2. auxi TEXT=challenge_token (initiation)
+   • Token format: TIMESTAMP_RANDOM_CHALLENGER_TARGET
    • Processed by ChallengeToken_ProcessCryptographic (0x0029a768)
-3. mesg N=challenger TEXT=ACPT/DECL/BLOC (response)
-4. play,+ses with 272-byte data (race start)
+3. +msg N=challenger TEXT=token ATTR=3 (notification)
+4. mesg N=challenger TEXT=ACPT/DECL/BLOC (response)
+5. play with 272-byte data (race start)
 
 CHAL command is for SYSTEM REGISTRATION ONLY, not user challenges.
 
@@ -206,9 +195,8 @@ Challenge States:
 0=INACTIVE, 1=PENDING, 2=DECLINED, 3=BLOCKED, 4=ACCEPTED,
 6=READY (for play), 7=NETWORK_VERIFYING, 9=EXPIRED
 
-CHALLENGE/USER DATA STRUCTURE:
-================================================================================
-
+USER DATA STRUCTURE:
+===================
 DAT_003e3230 (260+ bytes):
 • +0x011: Primary username (17 bytes, 4-16 chars)
 • +0x022: Secondary username (17 bytes, backup)
@@ -226,20 +214,19 @@ Persona validation:
 • Maximum: 12 characters (13-byte buffer with null)
 • 4 slots available (0-3)
 
-RACE SYSTEM - ENHANCED:
-================================================================================
-
+RACE SYSTEM:
+===========
 Race Session Data (272 bytes):
-Stored at lobby structure offset 0x080 (piVar24 + 0x80)
+Stored at lobby structure offset 0x080
 
 Processing:
 1. Server sends play command with 272-byte data
-2. LobbyApiUpdate extracts to piVar24[0x80]
+2. LobbyApiUpdate extracts to offset 0x80
 3. ChallengeCommand_Dispatcher receives (state must be 6)
 4. SessionData_Copy272Bytes copies to DAT_004e31a8 + 0x2dc
 5. Valid flag at DAT_004e31a8 + 0x2d8 set to 1
 6. Race callback invoked (if registered)
-7. Game transitions to RACE state
+7. Game transitions to RACE state (0x4bb)
 
 Play command extracts these fields:
 • NAME: Race name
@@ -252,9 +239,8 @@ Play command extracts these fields:
 • SEED: Random seed
 • WHEN: Timestamp
 
-FIELD EXTRACTION SYSTEM - COMPLETE:
-================================================================================
-
+FIELD EXTRACTION SYSTEM:
+=======================
 Core Functions:
 • TagFieldFind (0x0031ddd0): Main parser
 • TagFieldGetString (0x0031ed10): String extraction
@@ -265,38 +251,8 @@ Core Functions:
 • TagFieldGetEpoch (0x0031f328): Timestamp extraction
 • TagFieldSetBinary (0x0031e520): Binary data setting
 
-STRING CONSTANTS - CRITICAL CORRECTIONS:
-================================================================================
-
-.sdata section (0x003e2900-0x003e3533):
-
-Network Fields:
-0x003e2f78: "ORIG"
-0x003e2f80: "NAME"
-0x003e2f90: "ADDR"
-0x003e2f98: "PING"
-0x003e2fd8: "PASS" (password)
-0x003e2fe0: "MASK" (status)
-0x003e2fe8: "CHAN" (snapshot)
-0x003e3008: "TIME"
-
-Lobby Fields:
-0x003e3010: "DIRECT"
-0x003e3018: "PORT"
-0x003e3020: "SESS" (session)
-0x003e3028: "DOWN" (server)
-0x003e3030: "SKEY" (public key)
-0x003e3038: "MORE" (slots)
-0x003e3040: "SLOTS" (max slots)
-0x003e3048: "PERS" (persona)
-
-CRITICAL CORRECTIONS:
-• STAT field at 0x003e34a0 (not 0x003e34a8)
-• LKEY at 0x003e34c8 (verified)
-
-ERROR CODES AND VALIDATION:
-================================================================================
-
+ERROR CODES:
+===========
 System Error Codes:
 • 0x0b (11): "Input too short" (username < 4, persona < 3)
 • 0x0a (10): "Input too long" (username ≥ 17, persona ≥ 13)
@@ -314,8 +270,7 @@ Protocol Status Codes:
 • STATUS=106: Invalid token
 
 TIMEOUT MANAGEMENT:
-================================================================================
-
+==================
 Managed by LobbyApiUpdate:
 • General timeout: 5 seconds (5000ms)
 • Connection timeout: 60 seconds (60000ms)
@@ -326,15 +281,8 @@ if (5000 < time_since_last_activity) {
     Lobby_SetState(..., 'time', 0x800);
 }
 
-Ping handling:
-if (ping_sequence != -1) {
-    // Include sequence in response
-    StringHelper_FormatKeyValue(buffer, NET_PingField, ping_sequence);
-}
-
-COMMAND REFERENCE - UPDATED:
-================================================================================
-
+COMMAND REFERENCE:
+=================
 === CLIENT TO SERVER ===
 @dir    - Directory setup
 skey    - Encryption key request
@@ -342,7 +290,7 @@ auth    - Authentication (encrypted password)
 acct    - Account creation
 sele    - Lobby data request
 peek    - User selection
-auxi    - Challenge initiation (CORRECTED)
+auxi    - Challenge initiation
 mesg    - Challenge response
 room    - Room creation
 move    - Room movement
@@ -359,19 +307,8 @@ play    - Race start (includes 272-byte data)
 chal    - Challenge system registration (internal only)
 pers    - Automatic persona response (server→client)
 
-FIELD FORMATS - CORRECTED:
-================================================================================
-
-Challenge Token: TEXT=TIMESTAMP_RANDOM_CHALLENGER_TARGET
-Challenge Notification: +msg N=challenger TEXT=token ATTR=3
-Challenge Response: mesg N=challenger TEXT=ACPT/DECL/BLOC
-Population: +pop Z=room_id:count,room_id:count (colon separator)
-Play Command: Includes 272-byte binary data (not separate +ses)
-
-DEBUGGING AND TESTING:
-================================================================================
-
-Key Breakpoints:
+DEBUGGING BREAKPOINTS:
+=====================
 • 0x0031bdf0: LobbyApiUpdate (main network loop)
 • 0x0029a130: ChallengeToken_PrepareProcessing
 • 0x00289528: CommandHandler_AUXI (challenge)
@@ -380,19 +317,8 @@ Key Breakpoints:
 • 0x00299048: SessionData_Copy272Bytes
 • 0x00287180: NetworkConfig_InitializeAndSELEct (LKEY)
 
-Testing Sequence:
-1. Auth → Lobby (+who)
-2. +usr broadcasts → Populate users
-3. peek → User selection
-4. auxi → Challenge initiation
-5. +msg → Challenge notification
-6. mesg → Challenge response
-7. play → Race start
-8. Verify DAT_004e31a8 + 0x2d8 = 1
-
-CRITICAL IMPLEMENTATION NOTES:
-================================================================================
-
+IMPLEMENTATION NOTES:
+====================
 1. SERVER REQUIREMENTS:
    • Generate unique LKEY per session
    • Support auxi for challenge initiation
@@ -412,5 +338,3 @@ CRITICAL IMPLEMENTATION NOTES:
    • Support callback architecture
    • Manage state flags correctly
    • Handle ping/pong with sequence numbers
-
-This updated specification reflects the true protocol behavior with LobbyApiUpdate as the central processing loop, hash table system, callback architecture, and corrected command flows discovered through comprehensive binary analysis.

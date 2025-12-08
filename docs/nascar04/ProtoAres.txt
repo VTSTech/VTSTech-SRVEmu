@@ -1,20 +1,18 @@
 ProtoAries System - Complete Analysis
 Overview
-
+--------
 The ProtoAries* functions implement Sony's Ares networking library for PS2, providing the low-level transport layer for EA's online services. This system handles TCP connections, message framing, and RPC integration with the PS2 hardware.
-Core Architecture
-System Components
-text
 
-ProtoAries Layer (Sony PS2 NDK)
-??? Connection Management (Connect/Disconnect)
-??? Message Framing (Send/Recv/Peek)  
-??? Buffer Management (Circular buffers)
-??? RPC Integration (Hardware acceleration)
-??? DMA Transfers (PS2-specific optimizations)
+Core Architecture
+-----------------
+System Components:
+• Connection Management (Connect/Disconnect)
+• Message Framing (Send/Recv/Peek)
+• Buffer Management (Circular buffers)
+• RPC Integration (Hardware acceleration)
+• DMA Transfers (PS2-specific optimizations)
 
 Memory Layout
-text
 
 Ares Context Structure (approx 40+ bytes)
 +0x00: Socket Handle
@@ -325,15 +323,25 @@ int ProtoAriesConnect(void* socket, uint32_t ip_address, uint16_t port) {
 }
 
 Connection Encoding:
-text
 
-Connection Info Structure (16 bytes):
-+0x00: State (2 = connecting)
-+0x02: Unknown
-+0x04: IP Address (big-endian: byte4.byte3.byte2.byte1)
-+0x08: Port (big-endian)
-+0x0A: Unknown
-... Padding to 16 bytes
+struct ConnectionInfo {
+    uint16_t state;           // +0x00: 0 = idle, 2 = connecting
+    uint16_t unknown1;        // +0x02
+    uint32_t ip_address;      // +0x04: Network byte order (big-endian)
+    uint16_t port;            // +0x08: Network byte order (big-endian)
+    uint16_t unknown2;        // +0x0A
+    uint32_t padding;         // +0x0C: Zero padding to 16 bytes
+};
+struct AresSocket {
+    uint32_t socket_handle;   // +0x00
+    void* connection_info;    // +0x04: Pointer to 16-byte ConnectionInfo
+    uint32_t flags;           // +0x08
+    uint32_t read_pos;        // +0x0C
+    uint32_t write_pos;       // +0x10
+    uint32_t buffer_size;     // +0x14
+    uint8_t* buffer;          // +0x18
+    // ... more fields
+};
 
 RPC System Integration
 RPC Service Architecture
