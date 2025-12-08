@@ -1,4 +1,4 @@
-// Function: Protocol_MessageRouter (0x001c5e50)
+// Function: Game_CommandRouter (0x001c5e50)
 // Parameters:
 // - param_1: Command number/type
 // - param_2: Category selector (0x00-0x11 = 18 categories)
