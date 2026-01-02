@@ -1,0 +1,422 @@
+// ============================================================================
+// GAME SESSION PROTOCOLS - Complete Reference
+// Based on Ghidra analysis of ProtocolHandler_Session and related functions
+// ============================================================================
+
+==================================================
+                OVERVIEW
+==================================================
+The game session protocol system handles real-time multiplayer racing data.
+It's organized into channels (0-8) with specific handlers for different types
+of data. This system manages player positions, game state, commands, and 
+challenge/matchmaking.
+
+==================================================
+            PROTOCOL CHANNEL MAPPING
+==================================================
+// From RaceSession_CreateFull analysis:
+Channel 0: ProtocolHandler_GameState    (0x00308b08)  // Game state updates
+Channel 1: FUN_001c7f70                 // Physics synchronization
+Channel 2: LAB_001c7a28                 // Input handling
+Channel 3: FUN_001c7b28                 // Audio synchronization
+Channel 4: ProtocolHandler_GameCommands (0x001c7db0)  // Game commands
+Channel 5: 0 (Unused)                   // Reserved
+Channel 6: Protocol_GameStateManager    (0x0030b5a8)  // State management
+Channel 7: ProtocolHandler_Session      (0x0030c630)  // Session data (positions)
+Channel 8: LAB_0030e330                 // Unknown (possibly chat/UI)
+
+==================================================
+        PROTOCOLHANDLER_SESSION DETAILS
+==================================================
+// ProtocolHandler_Session (0x0030c630)
+// Handles real-time race data on channel 7
+
+struct SessionContext {          // 0x40+ bytes structure
+    ushort unknown0;             // +0x00
+    ushort unknown1;             // +0x02  
+    ushort unknown2;             // +0x04  // param_1[2]
+    ushort unknown3;             // +0x06  // param_1[3]
+    ushort unknown4;             // +0x08  // param_1[4]
+    ushort unknown5;             // +0x0A  // param_1[5]
+    float  position_data[4];     // +0x0C  // param_1[0xc]-param_1[0x1b]
+    float  unknown_floats[4];    // +0x1C  // param_1[0x1c]-param_1[0x2b]
+    uint   unknown_ints[4];      // +0x2C  // param_1[0x2c]-param_1[0x3b]
+    byte   char_data[4];         // +0x3C  // param_1[0x3c]-param_1[0x3f]
+};
+
+// Message Types (param_2 values):
+#define SESSION_MSG_SET_POSITION       0x00  // Set player position
+#define SESSION_MSG_GET_POSITION       0x01  // Get player position
+#define SESSION_MSG_SET_UNKNOWN_DATA   0x02  // Set 2 integers
+#define SESSION_MSG_GET_UNKNOWN_DATA   0x03  // Get 2 integers
+#define SESSION_MSG_SET_CHAR_DATA      0x04  // Set character data (3 bytes)
+#define SESSION_MSG_GET_CHAR_DATA      0x05  // Get character data
+#define SESSION_MSG_SET_BYTE_VALUE     0x06  // Set byte value
+#define SESSION_MSG_GET_BYTE_VALUE     0x07  // Get byte value
+#define SESSION_MSG_SET_SHORT_VALUE    0x08  // Set short value
+#define SESSION_MSG_GET_SHORT_VALUE    0x09  // Get short value
+#define SESSION_MSG_UPDATE_VIEWPORT    0x0A  // Update viewport/screen
+#define SESSION_MSG_SET_INT_VALUE      0x0C  // Set integer value
+#define SESSION_MSG_SET_PAIR_VALUES    0x0D  // Set indexed pair of integers
+#define SESSION_MSG_GET_PAIR_VALUES    0x0E  // Get indexed pair of integers
+#define SESSION_MSG_UPDATE_SHORTS      0x0F  // Update two short values
+#define SESSION_MSG_CLEANUP            0xFD  // Session cleanup
+#define SESSION_MSG_INITIALIZE         0xFE  // Session initialization
+#define SESSION_MSG_RESET              0xFF  // Session reset
+
+// Message 0x00 (Set Position) format:
+// param_4[0] = player index (0-3)
+// param_4[1] = X position (float)
+// param_4[2] = Y position (float)
+
+// Message 0x0A (Viewport Update) format:
+// param_4[0] = width (short)
+// param_4[1] = height (short)
+
+// Message 0x0F (Update Shorts) format:
+// param_4[0] = first short value
+// param_4[1] = second short value
+
+==================================================
+      PROTOCOLHANDLER_GAMECOMMANDS DETAILS
+==================================================
+// ProtocolHandler_GameCommands (0x001c7db0)
+// Handles game commands on channel 4
+
+struct GameCommandContext {
+    short command_type;          // +0x00 (always 7 for game commands)
+    short subcommand;            // +0x02
+    // ... additional fields
+};
+
+// Command Types (param_2 values):
+#define CMD_CREATE_SESSION      0xFFFFFFFF  // -1: Create new session
+#define CMD_PROCESS_UPDATE      0xFFFFFFFE  // -2: Process session update
+#define CMD_CLEANUP             0xFFFFFFFD  // -3: Cleanup session
+
+// Subcommands (param_1[1] values):
+#define SUB_MP_SESSION          1      // Multiplayer session
+#define SUB_CHALLENGE_START     2      // Challenge system (2-51)
+#define SUB_CHALLENGE_END       51     // Last challenge type
+#define SUB_ALTERNATE_SYSTEM    52     // Alternate system (0x34)
+
+// Flow:
+// CMD_CREATE_SESSION → Creates challenge/multiplayer session
+// CMD_PROCESS_UPDATE → Updates existing session
+// CMD_CLEANUP → Cleans up session resources
+
+==================================================
+          CHALLENGE SYSTEM DETAILS
+==================================================
+// Challenge System State Machine
+#define CHALLENGE_STATE_IDLE       0  // No active challenge
+#define CHALLENGE_STATE_RECEIVED   1  // Challenge received
+#define CHALLENGE_STATE_DECLINED   2  // Challenge declined (DECL)
+#define CHALLENGE_STATE_BLOCKED    3  // Challenge blocked (BLOC)
+#define CHALLENGE_STATE_ACCEPTED   4  // Challenge accepted (ACPT)
+#define CHALLENGE_STATE_RACING_1   6  // Racing (state 1)
+#define CHALLENGE_STATE_RACING_2   7  // Racing (state 2)
+#define CHALLENGE_STATE_ENDED      9  // Challenge ended
+
+// Challenge System Data Structure
+struct ChallengeSystem {
+    char* challenger_name;       // +0x00: Pointer to challenger username
+    char* challenge_text;        // +0x04: Pointer to challenge message
+    void* unknown_ptr;           // +0x08: Unknown pointer
+    void* unknown_ptr2;          // +0x0C: Unknown pointer
+    void* unknown_ptr3;          // +0x10: Unknown pointer
+    byte name_length;            // +0x14: Length of challenger name
+    byte text_length;            // +0x15: Length of challenge text
+    byte unknown1;               // +0x16
+    bool valid_format;           // +0x17: True if text format valid
+};
+
+// Global Variables
+extern ChallengeSystem* g_ChallengeSystem;  // Current challenge data
+extern int g_ChallengeState;                // Current state (0-9)
+extern void (*DAT_ChallengeCallback)();     // Challenge event callback
+
+// Challenge Messages:
+// CHAL - Initiate challenge
+// BLOC - Block challenge
+// DECL - Decline challenge  
+// ACPT - Accept challenge
+
+==================================================
+        RACE SESSION INITIALIZATION
+==================================================
+// RaceSession_CreateFull (0x001c02f0)
+// Complete race session setup
+
+void RaceSession_CreateFull(undefined4 param1, undefined4 param2, float param3, 
+                           int session_index, int param5, int param6, int param7, 
+                           int param8, int param9) {
+    // 1. Graphics initialization
+    // 2. Network resource allocation
+    // 3. Protocol handler registration
+    // 4. Event handler setup
+}
+
+// Registration sequence from decompilation:
+RegisterProtocolHandler(session, 6, Protocol_GameStateManager);
+RegisterProtocolHandler(session, 0, ProtocolHandler_GameState);
+RegisterProtocolHandler(session, 7, ProtocolHandler_Session);
+RegisterProtocolHandler(session, 8, &LAB_0030e330);
+RegisterProtocolHandler(session, 4, ProtocolHandler_GameCommands);
+RegisterProtocolHandler(session, 5, 0);  // Unused channel
+RegisterProtocolHandler(session, 1, FUN_001c7f70);
+RegisterProtocolHandler(session, 2, &LAB_001c7a28);
+RegisterProtocolHandler(session, 3, FUN_001c7b28);
+
+==================================================
+        NETWORK EVENT SYSTEM
+==================================================
+// NetworkEvent_Handler (0x0027aa60)
+// Handles PS2 network hardware events
+
+// Event Types (param_2 values):
+#define NET_EVENT_CONNECTED         0xC000  // Connection established
+#define NET_EVENT_DATA_RECEIVED     0xC001  // Data received (3 integers)
+#define NET_EVENT_DISCONNECTED      0xC002  // Connection closed
+#define NET_EVENT_ERROR             0xC003  // Connection error
+#define NET_EVENT_GAME_0            0xC012  // Game event 0
+#define NET_EVENT_GAME_1            0xC013  // Game event 1
+#define NET_EVENT_GAME_2            0xC014  // Game event 2
+#define NET_EVENT_ERROR_SESSION     0xC032  // Error session packet
+#define NET_EVENT_INIT_ERROR        0xC033  // Error session initialization
+#define NET_EVENT_MULTI_AUTH        0xC034  // Multi-auth packet
+#define NET_EVENT_INIT_MULTI_AUTH   0xC035  // Multi-auth initialization
+#define NET_EVENT_MULTI_PLAYER      0xC03C  // Multi-player packet
+#define NET_EVENT_INIT_MULTI_PLAYER 0xC03D  // Multi-player initialization
+
+// Event Data Structures:
+struct NetworkEventData {
+    short connection_status;      // +0x104: Current connection status
+    int data_buffer1[3];          // +0x2A8: First data buffer (12 bytes)
+    int data_buffer2[3];          // +0x2B8: Second data buffer (12 bytes)
+    uint event_flags;             // +0x2C8: Bitmask of active events
+};
+
+// Event flag bits:
+#define EVENT_FLAG_CONNECTED    0x00000001  // Connection established
+#define EVENT_FLAG_DATA_READY   0x00000002  // Data ready to read
+#define EVENT_FLAG_DISCONNECTED 0x00000004  // Connection lost
+#define EVENT_FLAG_ERROR        0x00000008  // Error occurred
+#define EVENT_FLAG_BUFFER1_FULL 0x00000010  // Buffer 1 has data
+#define EVENT_FLAG_BUFFER2_FULL 0x00000020  // Buffer 2 has data
+
+==================================================
+        ROOM MANAGEMENT SYSTEM
+==================================================
+// Lobby_UpdateRoomPopulation (0x0031aa90)
+// Updates room player counts
+
+void Lobby_UpdateRoomPopulation(LobbyContext* ctx, int room_id, int population) {
+    // 1. Look up room in hash table
+    // 2. Update population count in RoomEntry
+    // 3. Update display string (IP format)
+    // 4. Mark room as changed
+}
+
+// Command_HandleRoomOperations (0x00287af8)
+// Handles room creation
+
+RoomCreationResult Command_HandleRoomOperations(const char* room_name, 
+                                                const char* password) {
+    // Format: "NAME=room_name\PASS=password\DESC=description\MAX=50"
+    // Sends "room" command to server
+    // Returns 0 on success, 5 on error
+}
+
+// CommandHandler_MOVE (0x00287c18)
+// Handles room movement
+
+void CommandHandler_MOVE(const char* room_name, const char* password) {
+    // Format: "NAME=room_name\PASS=password"
+    // Sends "move" command to server
+    // Updates local room tracking
+}
+
+==================================================
+        PROTOCOL HANDLER REGISTRATION
+==================================================
+// RegisterProtocolHandler (0x003103f8)
+// Registers handler for specific channel
+
+void RegisterProtocolHandler(void* session, int channel, void* handler) {
+    // session + 0x4C = handler table pointer
+    // session + 0x48 = handler count
+    // Each channel gets 4-byte slot in table
+}
+
+// ProtocolHandlerFactory_CreateAll (0x0028f9f0)
+// Creates all protocol handlers for session
+
+int ProtocolHandlerFactory_CreateAll(void* session) {
+    // Creates 19+ different protocol handlers
+    // Each allocated with Memory_AllocateNetworkAligned(4)
+    // Returns 1 on success
+}
+
+==================================================
+        IMPLEMENTATION FOR EMULATOR
+==================================================
+
+// Python implementation of ProtocolHandler_Session
+class SessionProtocol:
+    def handle_message(self, msg_type, data):
+        if msg_type == 0x00:  # Set position
+            player_idx = data[0]
+            x = struct.unpack('<f', data[1:5])[0]
+            y = struct.unpack('<f', data[5:9])[0]
+            self.update_position(player_idx, x, y)
+            
+        elif msg_type == 0x04:  # Set character data
+            # 3 bytes: likely character state, color, etc.
+            char_data = data[0:3]
+            self.update_character(data[0], char_data)
+            
+        elif msg_type == 0x0A:  # Viewport update
+            width = struct.unpack('<H', data[0:2])[0]
+            height = struct.unpack('<H', data[2:4])[0]
+            self.update_viewport(width, height)
+            
+        elif msg_type == 0x0F:  # Update shorts
+            val1 = struct.unpack('<H', data[0:2])[0]
+            val2 = struct.unpack('<H', data[2:4])[0]
+            self.update_shorts(val1, val2)
+
+// Python implementation of Challenge System
+class ChallengeSystem:
+    STATES = {
+        0: "IDLE",
+        1: "RECEIVED", 
+        2: "DECLINED",
+        3: "BLOCKED",
+        4: "ACCEPTED",
+        6: "RACING_1",
+        7: "RACING_2",
+        9: "ENDED"
+    }
+    
+    def process_response(self, challenger, response):
+        """Process BLOC/DECL/ACPT response"""
+        current_state = self.get_current_state()
+        
+        if current_state == 1:  # Waiting for response
+            if response == "BLOC":
+                self.state = 3
+            elif response == "DECL":
+                self.state = 2
+            elif response == "ACPT":
+                self.state = 4
+                # Start race session
+                self.start_race_session()
+                
+        elif current_state in [6, 7, 4]:  # Racing or accepted
+            if response in ["BLOC", "DECL"]:
+                self.state = 9  # End challenge
+                
+        return self.state
+
+// Python implementation of Room System
+class RoomManager:
+    def create_room(self, client, name, password, description="", max_players=50):
+        """Create new room matching game's format"""
+        room_id = self.next_room_id
+        self.next_room_id += 1
+        
+        # Store room data
+        room = {
+            'id': room_id,
+            'name': name,
+            'password': password,  # Plaintext - server will hash
+            'description': description,
+            'host': client.username,
+            'max_players': max_players,
+            'current_players': 1,
+            'players': [client],
+            'ip_display': self.format_ip_display(1)
+        }
+        
+        self.rooms[room_id] = room
+        
+        # Send +rom update to all clients
+        room_data = f"I={room_id}\\NAME={name}\\L={max_players}\\T=1\\HOST={client.ip}"
+        self.broadcast_to_lobby('+rom', 0, room_data)
+        
+        return room_id
+    
+    def update_population(self, room_id, new_count):
+        """Update room population count"""
+        room = self.rooms.get(room_id)
+        if room and room['current_players'] != new_count:
+            room['current_players'] = new_count
+            room['ip_display'] = self.format_ip_display(new_count)
+            
+            # Broadcast population update
+            pop_data = f"Z={room_id}:{new_count}"
+            self.broadcast_to_lobby('+pop', 0, pop_data)
+
+==================================================
+        NETWORK PACKET FORMATS
+==================================================
+
+// Challenge Packet Formats:
+// CHAL (Challenge): "CHALLENGE=text"
+// BLOC (Block): "BLOC" 
+// DECL (Decline): "DECL"
+// ACPT (Accept): "ACPT"
+
+// Room Packet Formats:
+// Create: "NAME=name\PASS=pass\DESC=desc\MAX=50"
+// Move: "NAME=name\PASS=pass"
+
+// Session Data Packet Formats:
+// Position: [player_idx:1][x:4][y:4] (9 bytes)
+// Viewport: [width:2][height:2] (4 bytes)
+// Character: [data1:1][data2:1][data3:1] (3 bytes)
+
+==================================================
+        TESTING SCENARIOS
+==================================================
+
+// Test 1: Complete Race Session
+1. Client connects and authenticates
+2. Client creates room: "room" command with NAME/PASS/DESC/MAX
+3. Another client joins room: "move" command with NAME/PASS
+4. Host challenges: "CHAL" command
+5. Client accepts: "ACPT" response
+6. Race starts: +ses packet with player data
+7. Race data: Position updates via channel 7
+8. Race ends: Results submitted
+
+// Test 2: Challenge Scenarios
+1. Player A sends CHAL to Player B
+2. Player B responds with:
+   - BLOC: Challenge blocked
+   - DECL: Challenge declined  
+   - ACPT: Challenge accepted → start race
+
+// Test 3: Room Management
+1. Create room with password
+2. Update population as players join/leave
+3. Move between rooms
+4. Room cleanup when empty
+
+==================================================
+        DEBUGGING TIPS
+==================================================
+
+1. Monitor channel assignments (0-8)
+2. Track challenge state transitions
+3. Log all BLOC/DECL/ACPT responses
+4. Verify position data format (9 bytes)
+5. Check viewport updates during resolution changes
+
+==================================================
+        REVISION HISTORY
+==================================================
+[CURRENT DATE]: Complete protocol documentation
+                 Added Session, GameCommands, Challenge systems
+                 Documented all message types and structures

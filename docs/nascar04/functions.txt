@@ -344,6 +344,7 @@ CommandHandler_USER_SEARCH -> 0x002076d8
 Network_CommandRouter -> 0x00207a88
 Authentication_ProcessStateChange -> 0x00207c38
 Authentication_TriggerStateMachine -> 0x00207d48
+Race_GetDisconnectTime -> 0x00207e00
 System_Cleanup -> 0x00207eb8
 System_ResetState -> 0x00207ee0
 System_CheckReadyState -> 0x00207f08
@@ -362,6 +363,7 @@ Protocol_SendData -> 0x002092d8
 CommandHandler_SendPing -> 0x00209640
 Protocol_ProcessMessage -> 0x00209e58
 Protocol_GetStatus -> 0x0020a0d8
+Race_GetDriverStartPosition -> 0x0020d0a0
 ProtocolChannelMapping_Initialize -> 0x0022a208
 ProtocolSystem_GlobalInitialize -> 0x0022a420
 ProtocolHandler_LookupByChannel -> 0x0022a6b8
@@ -397,6 +399,7 @@ NetworkEvent_RegisterHandlers -> 0x0027ad40
 Network_ProcessGameEvent -> 0x0027b0c8
 NetworkSystem_SetState -> 0x0027d328
 NetworkSystem_GetConnectionStatus -> 0x0027d3b0
+NetworkSystem_ResetConnectionState -> 0x0027d3c0
 System_LogWithParam -> 0x0027e450
 System_LogOperation -> 0x0027e498
 CommandHandler_MultiParamCopy -> 0x00281298
@@ -456,6 +459,7 @@ Callback_GenerateMESGResponse -> 0x00287120
 NetworkConfig_InitializeAndSELEct -> 0x00287180
 DisplayList_SortCallback -> 0x00287338
 NetworkSystem_RegisterProtocolHandlers -> 0x00287438
+NetworkSystem_CleanupProtocolHandlers -> 0x002874e8
 Util_AllocateMemory -> 0x00287518
 Util_FreeMemory -> 0x00287538
 NetworkMain_Setup -> 0x00287568
@@ -463,6 +467,7 @@ NetworkSystem_InitWrapper -> 0x00287600
 NetworkSystem_IsInitialized -> 0x00287680
 NetworkConnection_Setup2 -> 0x002876a0
 CommandHandler_USER_SEARCH2 -> 0x002876d8
+Config_GetPrimaryUsername -> 0x002877b0
 NetworkInit_Caller -> 0x002877c0
 CommandHandler_AUTH_PERS -> 0x00287838
 NetworkConfig_ProcessSessionData -> 0x00287980
@@ -474,6 +479,7 @@ CommandHandler_MOVE -> 0x00287c18
 CommandHandler_PEEK -> 0x00287e60
 RoomConfig_GetParameter -> 0x00287fb8
 System_GetBuildInfo -> 0x00288058
+Config_GetPrimaryPassword -> 0x00288068
 CommandHandler_PERS_USER -> 0x00288080
 CommandHandler_NEWS -> 0x002883f0
 CommandHandler_REPT -> 0x00288528
@@ -515,6 +521,7 @@ Callback_CheckSystemReady -> 0x0028a048
 NetworkConnection_StartConnect -> 0x0028a0e0
 NetworkConnection_StopConnect -> 0x0028a190
 Challenge_AdvanceState -> 0x0028a2c0
+NetworkSystem_PreShutdown -> 0x0028a5e8
 GameState_NetworkEventHandler -> 0x0028a5f8
 ChallengeConnection_Establish -> 0x0028a680
 NetworkResponse_ParseList -> 0x0028a740
@@ -685,7 +692,10 @@ sceSifGetReg -> 0x002c64b0
 Deci2Call -> 0x002c64d0
 GetMemorySize -> 0x002c6500
 _InitTLB -> 0x002c6510
+Cache_InvalidateAlignedRange -> 0x002c6650
 InvalidDCache -> 0x002c66f8
+System_EnableCacheCoherency -> 0x002c9a78
+System_DisableCacheCoherency -> 0x002c9ac0
 RFU116_SetSyscall -> 0x002c9cb0
 RFU116_SetSyscall2 -> 0x002c9d00
 RFU091 -> 0x002c9d58
@@ -764,6 +774,7 @@ CreateGraphicsContext -> 0x00316a48
 GraphicsSession_SetRenderTarget -> 0x00316be8
 InitializeGraphicsPipeline -> 0x00316dc0
 AttachBufferToPipeline -> 0x00316ea8
+RpcDispatcher_Main -> 0x00318ee8
 RpcCall -> 0x00319628
 RpcBind -> 0x00319658
 RpcElapsed -> 0x003197a0
@@ -779,6 +790,7 @@ Lobby_CleanupForTermination -> 0x0031aef8
 Lobby_ChangeConnectionState -> 0x0031af10
 System_CreateNetworkThread -> 0x0031af90
 NetworkHelper_b060 -> 0x0031b060
+NetworkThread_ReleaseResources -> 0x0031b168
 NetworkThread_RegisterCallback -> 0x0031b1f0
 NetworkConnection_MainHandler -> 0x0031b208
 LobbySystem_InitializeList -> 0x0031b318
@@ -800,6 +812,7 @@ Network_FormatIPAndProcess -> 0x0031e1e0
 String_FormatKeyValuePairs -> 0x0031e3a0
 TagFieldSetBinary -> 0x0031e520
 Auth_UpdateField -> 0x0031e5e8
+String_FormatKeyValueTimestamp -> 0x0031e6f8
 Auth_ProcessResponse -> 0x0031e7d8
 TagFieldGetNumber -> 0x0031e8b0
 TagFieldGetFlags -> 0x0031e938
@@ -863,15 +876,18 @@ NetworkThread_EventDispatcher -> 0x003231b8
 ProtocolLogInfo -> 0x003231f0
 System_ProcessConfigString -> 0x00323278
 NetworkThread_SetConfigFlag -> 0x00323358
+NetworkThread_InitializeConfig -> 0x003233d8
 System_SetupNetworkThread -> 0x00323408
 NetworkThread_Init -> 0x003234a8
 System_RegisterProtocolCallback -> 0x00323510
+NetworkSystem_ReleaseGlobalResources -> 0x003235d8
 System_CheckNetworkThread -> 0x00323628
 Network_CheckConnectivity -> 0x00323638
 NetworkConfig_GetConnectionData -> 0x003236a0
 System_NetworkHelper -> 0x00323758
 Network_GetCurrentConfig -> 0x00323800
 NetworkConfig_InitializeState -> 0x00323808
+NetworkSystem_InitializeTable -> 0x00323890
 Network_FormatIPAddress -> 0x003238d0
 NetworkConfig_GetStatus -> 0x00323998
 NetworkConfig_Reset -> 0x00323a50
@@ -887,6 +903,7 @@ CircularBuffer_IsInitialized -> 0x00323f00
 Network_CompleteTransmission -> 0x00323fe8
 Network_TransmitCallback -> 0x00324038
 NetworkThread_RegisterProtocols -> 0x00324078
+NetworkThread_RegisterEventHandlers -> 0x003240e8
 ProtocolCleanup -> 0x00324120
 System_SendCommand -> 0x00324150
 NetworkResource_Cleanup -> 0x00324250
@@ -1068,6 +1085,6 @@ NetworkConnections_ProbeReset -> 0x00366aa8
 ================================================================================
 SUMMARY:
 Total functions: 11756
-Renamed functions: 1066
-Unnamed functions: 10690
+Renamed functions: 1083
+Unnamed functions: 10673
 ================================================================================
