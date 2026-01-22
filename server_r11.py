@@ -340,7 +340,7 @@ def send_online_status(session):
     """Send online status to client after authentication"""
     if session.connection:
         try:
-            online_packet = create_packet('onln', '', f"STATUS=1\nUSER={session.clientNAME}\nROOM={session.current_room}\n")
+            online_packet = create_packet('onln', '', f"STATUS=0\nUSER={session.clientNAME}\nROOM={session.current_room}\n")
             session.connection.sendall(online_packet)
             print(f"ONLN: Sent online status to {session.clientNAME}")
         except Exception as e:
@@ -544,7 +544,7 @@ def handle_system_command(data, session):
 
 def handle_onln(data, session):
     print(f"ONLN: Online status check from {session.clientNAME}")
-    response = f"STATUS=1\nSERVER=VTSTech\nVERSION={BUILD}\nUSERS={len(session_manager.client_sessions)}\n"
+    response = f"STATUS=0\nSERVER=VTSTech\nVERSION={BUILD}\nUSERS={len(session_manager.client_sessions)}\n"
     return create_packet('onln', '', response)
 
 def handle_snap(data, session):
@@ -558,7 +558,7 @@ def handle_snap(data, session):
             config[key] = value
     
     snapshot_type = config.get('CHAN', '0')
-    response = f"CHAN={snapshot_type}\nSTATUS=1\n"
+    response = f"CHAN={snapshot_type}\nSTATUS=0\n"
     return create_packet('snap', '', response)
 
 def handle_rept(data, session):
@@ -571,7 +571,7 @@ def handle_rept(data, session):
             persona = line[5:]
             print(f"REPT: Persona report for {persona}")
     
-    return create_packet('rept', '', "STATUS=1\n")
+    return create_packet('rept', '', "STATUS=0\n")
 
 def handle_tic(data, session):
 		pass
@@ -589,7 +589,7 @@ def reply_play(data, session):
     response_lines = [
         "SELF=1", "HOST=1", "OPPO=0", "P1=1", "P2=0", "P3=0", "P4=0",
         "AUTH=1", f"FROM={session.clientNAME}", 
-        f"SEED={int(time.time())}", f"WHEN={int(time.time())}", "STATUS=1"
+        f"SEED={int(time.time())}", f"WHEN={int(time.time())}", "STATUS=0"
     ]
     
     response = '\n'.join(response_lines) + '\n'
@@ -708,7 +708,7 @@ def build_reply(data, session):
         return handlers[cmd_str](data, session)
     
     print(f"UNKNOWN COMMAND: {cmd_str}")
-    return create_packet(cmd_str, '', "STATUS=1\n")
+    return create_packet(cmd_str, '', "STATUS=0\n")
     
 def threaded_client(connection, address, socket_type):
     global session_manager, ping_manager, data_server_manager, room_manager, challenge_system
@@ -898,7 +898,7 @@ def threaded_client(connection, address, socket_type):
                             True      # Is self
                         )
                         print(f"AUTH: Updated presence for {username} in Lobby")
-                    response = f"PERS={current_persona}\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+                    response = f"PERS={current_persona}\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
                     try:
                         connection.sendall(create_packet('pers', '', response))
                         print(f"AUTH: Sent automatic PERS confirmation for {connection_id}")

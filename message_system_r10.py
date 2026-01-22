@@ -32,21 +32,19 @@ class MessageHandlers:
 		                message_flags = int(line.split('=', 1)[1])
 		            except:
 		                pass
-		    
-		    # Handle regular private messages
-		    if target_user and message_text:
-		        print(f"MESG (Regular): {session.clientNAME} -> {target_user}: '{message_text}'")
-		        return self.send_private_message(session, target_user, message_text, message_flags)
-		    else:
-		        print(f"MESG (Regular): Invalid message format")
-		        return self.create_packet('mesg', '', "STATUS=0\nERROR=Invalid message format\n")
+		            if target_user and message_text:
+		                print(f"MESG (Regular): {session.clientNAME} -> {target_user}: '{message_text}'")
+		                return self.send_private_message(session, target_user, message_text, message_flags)
+		            else:
+		                print(f"MESG (Regular): Invalid message format")
+		                return self.create_packet('mesg', '', "STATUS=0\nERROR=Invalid message format\n")
 
     def handle_challenge_response(self, session, target_user, message_text):
 		    """Handle challenge responses - update both clients"""
 		    print(f"CHALLENGE RESPONSE: {session.clientNAME} responded '{message_text}' to {target_user}")
 		    
 		    if not self.challenge_system:
-		        return self.create_packet('mesg', '', "STATUS=1\n")
+		        return self.create_packet('mesg', '', "STATUS=0\n")
 		    
 		    # Find the challenger session
 		    challenger_session = self.challenge_system.find_user_session(target_user)
@@ -82,15 +80,15 @@ class MessageHandlers:
 		            challenger_session.challenge_state = 3  # Also block challenger
 		        print(f"CHALLENGE: {session.clientNAME} blocked {target_user}")
 		    
-		    return self.create_packet('mesg', '', "STATUS=1\n")
+		    return self.create_packet('mesg', '', "STATUS=0\n")
     def handle_simple_challenge_command(self, session, target_user, command, message_type):
         print(f"SIMPLE CHALLENGE: {session.clientNAME} sent {command} to {target_user}")
         
         if not self.challenge_system:
             print("CHALLENGE WARNING: No challenge system available")
-            return self.create_packet('mesg', '', "STATUS=1\n")
+            return self.create_packet('mesg', '', "STATUS=0\n")
         
-        response = f"STATUS=1\nTYPE={command}\n"
+        response = f"STATUS=0\nTYPE={command}\n"
         return self.create_packet('mesg', '', response)
     
     def send_private_message(self, session, target_user, message_text, flags):
@@ -102,7 +100,7 @@ class MessageHandlers:
                     f"FROM={session.clientNAME}\nTEXT={message_text}\nF={flags}\n")
                 target_session.connection.sendall(private_packet)
                 
-                response = f"FROM={session.clientNAME}\nTEXT={message_text}\nSTATUS=1\nTYPE=PRIVATE\n"
+                response = f"FROM={session.clientNAME}\nTEXT={message_text}\nSTATUS=0\nTYPE=PRIVATE\n"
                 print(f"MESG: Private message delivered to {target_user}")
             except Exception as e:
                 response = "STATUS=0\nERROR=Delivery failed\n"
@@ -113,12 +111,12 @@ class MessageHandlers:
         return self.create_packet('mesg', '', response)
     
     def send_chat_message(self, session, target_user, message_text, flags):
-        response = f"FROM={session.clientNAME}\nTEXT={message_text}\nSTATUS=1\nTYPE=CHAT\n"
+        response = f"FROM={session.clientNAME}\nTEXT={message_text}\nSTATUS=0\nTYPE=CHAT\n"
         print(f"MESG: Chat message from {session.clientNAME}")
         return self.create_packet('mesg', '', response)
     
     def send_system_message(self, session, message_text, flags):
-        response = f"FROM={session.clientNAME}\nTEXT={message_text}\nSTATUS=1\nTYPE=SYSTEM\n"
+        response = f"FROM={session.clientNAME}\nTEXT={message_text}\nSTATUS=0\nTYPE=SYSTEM\n"
         print(f"MESG: System message from {session.clientNAME}")
         return self.create_packet('mesg', '', response)
     

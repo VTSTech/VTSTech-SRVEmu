@@ -295,7 +295,7 @@ class RoomHandlers:
                 "RATING=1500",
                 "WINS=0",
                 "LOSS=0",
-                "STATUS=1"
+                "STATUS=0"
             ]
             return self.create_packet('sele', '', '\n'.join(response_lines) + '\n')
 
@@ -304,14 +304,14 @@ class RoomHandlers:
             response_lines = [
                 "MESGS=1",
                 "COUNT=0",  # No messages
-                "STATUS=1"
+                "STATUS=0"
             ]
             return self.create_packet('sele', '', '\n'.join(response_lines) + '\n')
         
         if not response_lines: 
             response_lines = ["ROOMS=1", "USERS=1", "RANKS=1", "MESGS=1"]
             
-        response_lines.append("STATUS=1")
+        response_lines.append("STATUS=0")
         
         return self.create_packet('sele', '', '\n'.join(response_lines) + '\n')
     
@@ -370,7 +370,7 @@ class RoomHandlers:
 		        f"H={room_desc}", 
 		        f"A={self.room_manager.server_ip}", 
 		        f"N={display_name}",  # Add room name
-		        "STATUS=1"
+		        "STATUS=0"
 		    ]
 		    print(f"ROOM: Created room ID {new_room_id} for {username}")
 		    

@@ -173,7 +173,7 @@ class PersonaManager:
         except Exception as e:
             print(f"PERS: Error updating presence: {e}")
         
-        return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
+        return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
 
 class AuthenticationHandlers:
     def __init__(self, create_packet_func, active_users=None, client_sessions=None):
@@ -225,8 +225,8 @@ class AuthenticationHandlers:
             f"PRIV={getattr(session, 'clientPRIV', '1')}",
             f"LAST={getattr(session, 'clientLAST', time.strftime('%Y.%m.%d-%H:%M:%S'))}", 
             f"SESS={session.clientSESS}",
-            "STAT=3",
-            "STATUS=1"
+            "S=0",
+            "STATUS=0"
         ]
         
         session.client_flags |= 0x2
@@ -285,7 +285,7 @@ class AuthenticationHandlers:
         
         if target_found and target_conn_id in self.client_sessions:
             target_session = self.client_sessions[target_conn_id]
-            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
             print(f"USER: Found target {target_persona} in room {target_session.current_room}")
         else:
             response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
@@ -307,7 +307,7 @@ class AuthenticationHandlers:
         
         if updated_fields:
             print(f"EDIT: Updated fields: {updated_fields}")
-            response = "STATUS=1\n" + '\n'.join([f"{k}={v}" for k, v in updated_fields.items()]) + '\n'
+            response = "STATUS=0\n" + '\n'.join([f"{k}={v}" for k, v in updated_fields.items()]) + '\n'
         else:
             response = "STATUS=0\nERROR=No valid fields\n"
         

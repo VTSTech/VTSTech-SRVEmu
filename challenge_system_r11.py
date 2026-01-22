@@ -62,99 +62,101 @@ class ChallengeSystem:
                 print(f"AUXI: Error sending notification: {e}")
                 return self.create_packet('auxi', '', "STATUS=0\nERROR=Could not send challenge\n")
         
-        response = f"TEXT={challenge_token}\nSTATUS=1\n"
+        response = f"TEXT={challenge_token}\nSTATUS=0\n"
         return self.create_packet('auxi', '', response)
     
     def handle_mesg(self, data, session):
-        data_str = data.decode('latin1') if data else ""
-        
-        is_challenge_response = False
-        response_type = ""
-        response_target = ""
-        
-        for line in data_str.split('\n'):
-            line = line.strip()
-            if line.startswith('PRIV=') or line.startswith('N='):
-                response_target = line.split('=', 1)[1].strip()
-            elif line.startswith('TEXT=') or line.startswith('T='):
-                response_text = line.split('=', 1)[1].strip().upper()
-                if response_text in ['ACPT', 'DECL', 'BLOC']:
-                    is_challenge_response = True
-                    response_type = response_text
-        
-        if is_challenge_response:
-            print(f"MESG: Challenge response from {session.clientNAME}: {response_type} to {response_target}")
-            return self.handle_challenge_response(session, response_target, response_type)
-        
-        is_challenge_initiation = False
-        target_user = ""
-        challenge_token = ""
-        
-        for line in data_str.split('\n'):
-            line = line.strip()
-            if line.startswith('PRIV=') or line.startswith('N='):
-                target_user = line.split('=', 1)[1].strip()
-            elif line.startswith('TEXT='):
-                challenge_token = line.split('=', 1)[1].strip()
-                if challenge_token and challenge_token not in ['ACPT', 'DECL', 'BLOC']:
-                    is_challenge_initiation = True
-            elif line.startswith('ATTR='):
-                if line.split('=', 1)[1].strip() == '3':
-                    is_challenge_initiation = True
-        
-        if is_challenge_initiation and target_user and challenge_token:
-            print(f"MESG: Challenge initiation from {session.clientNAME} to {target_user} with token {challenge_token}")
-            
-            session.challenge_state = 1
-            session.challenger = session.current_persona
-            session.challenge_target = target_user
-            session.challenge_token = challenge_token
-            session.challenge_timeout = time.time() + 30
-            
-            target_session = None
-            for conn_id, other_session in self.client_sessions.items():
-                if hasattr(other_session, 'current_persona') and other_session.current_persona == target_user:
-                    target_session = other_session
-                    break
-            
-            if target_session and hasattr(target_session, 'connection'):
-                try:
-                    notification = f"TEXT={challenge_token}\n"
-                    target_session.connection.sendall(self.create_packet('auxi', '', notification))
-                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
-                    #target_session.connection.sendall(self.create_packet('mesg', '', notification))
-                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
-                    #target_session.connection.sendall(self.create_packet('mesg', '', notification))
-                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
-                    #target_session.connection.sendall(self.create_packet('mesg', '', notification))                                        
-                    notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\nF=4\n"
-                    target_session.connection.sendall(self.create_packet('+msg', '', notification))
-                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
-                    #target_session.connection.sendall(self.create_packet('+msg', '', notification))
-                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
-                    #target_session.connection.sendall(self.create_packet('+msg', '', notification))
-                    #notification = f"N={session.current_persona}\nT={challenge_token}\nATTR=1073741824\n"
-                    #target_session.connection.sendall(self.create_packet('+msg', '', notification))   
-                    print(f"MESG: Sent challenge notification to {target_user}")
-                    
-                    target_session.challenge_state = 1
-                    target_session.challenger = session.current_persona
-                    target_session.challenge_token = challenge_token
-                    target_session.challenge_timeout = time.time() + 30
-                except Exception as e:
-                    print(f"MESG: Error sending notification: {e}")
-                    return self.create_packet('mesg', '', "STATUS=0\nERROR=Could not send challenge\n")
-            
-            response = f"TEXT={challenge_token}\nSTATUS=1\n"
-            return self.create_packet('mesg', '', response)
-        
-        print(f"MESG: Routing to message system (non-challenge message)")
-        
-        if hasattr(self, 'message_handlers'):
-            return self.message_handlers.handle_mesg(data, session)
-        else:
-            print(f"MESG ERROR: No message_handlers available")
-            return self.create_packet('mesg', '', "STATUS=1\n")
+		        data_str = data.decode('latin1') if data else ""
+		        
+		        is_challenge_response = False
+		        response_type = ""
+		        response_target = ""
+		        
+		        # 1. PARSE CHALLENGE RESPONSES (ACPT/DECL/BLOC)
+		        for line in data_str.split('\n'):
+		            line = line.strip()
+		            if line.startswith('PRIV=') or line.startswith('N='):
+		                response_target = line.split('=', 1)[1].strip()
+		            elif line.startswith('TEXT=') or line.startswith('T='):
+		                response_text = line.split('=', 1)[1].strip().upper()
+		                if response_text in ['ACPT', 'DECL', 'BLOC']:
+		                    is_challenge_response = True
+		                    response_type = response_text
+		        
+		        if is_challenge_response:
+		            print(f"MESG: Challenge response from {session.clientNAME}: {response_type} to {response_target}")
+		            return self.handle_challenge_response(session, response_target, response_type)
+		        
+		        # 2. PARSE CHALLENGE INITIATION
+		        is_challenge_initiation = False
+		        target_user = ""
+		        challenge_token = ""
+		        
+		        for line in data_str.split('\n'):
+		            line = line.strip()
+		            if line.startswith('PRIV=') or line.startswith('N='):
+		                target_user = line.split('=', 1)[1].strip()
+		            elif line.startswith('TEXT='):
+		                challenge_token = line.split('=', 1)[1].strip()
+		                # If it's a token and not a response keyword, it's an initiation
+		                if challenge_token and challenge_token not in ['ACPT', 'DECL', 'BLOC']:
+		                    is_challenge_initiation = True
+		            elif line.startswith('ATTR='):
+		                if line.split('=', 1)[1].strip() == '3':
+		                    is_challenge_initiation = True
+		        
+		        # 3. HANDLE CHALLENGE INITIATION
+		        if is_challenge_initiation and target_user and challenge_token:
+		            print(f"MESG: Challenge initiation from {session.clientNAME} to {target_user} with token {challenge_token}")
+		            
+		            # Set Sender State
+		            session.challenge_state = 1 # PENDING
+		            session.challenger = session.current_persona
+		            session.challenge_target = target_user
+		            session.challenge_token = challenge_token
+		            session.challenge_timeout = time.time() + 30
+		            
+		            target_session = None
+		            for conn_id, other_session in self.client_sessions.items():
+		                if hasattr(other_session, 'current_persona') and other_session.current_persona == target_user:
+		                    target_session = other_session
+		                    break
+		            
+		            if target_session and hasattr(target_session, 'connection'):
+		                try:
+		                    # FIX: Deliver UI Trigger to Target
+		                    # We use F=3 and TYPE=CHALLENGE to trigger the Accept/Decline popup
+		                    notification = (
+												            f"I=3\n"                        # The Room ID (Beginner)
+												            f"N={session.current_persona}\n" # The Sender's Name
+												            f"TEXT={challenge_token}\n"      # The Challenge Token
+												            f"TYPE=INVITE\n"                 # The Class Trigger
+												            f"F=3\n"                         # The UI Flag
+												        )
+		                    print(f"[DEBUG]", notification)
+		                    target_session.connection.sendall(self.create_packet('+msg', '', notification))
+		                    print(f"MESG: Sent UI Challenge notification to {target_user}")
+		                    
+		                    # Set Target State
+		                    target_session.challenge_state = 1 # PENDING
+		                    target_session.challenger = session.clientNAME
+		                    target_session.challenge_token = challenge_token
+		                    target_session.challenge_timeout = time.time() + 30
+		                    
+		                except Exception as e:
+		                    print(f"MESG: Error sending notification: {e}")
+		                    return self.create_packet('mesg', '', "STATUS=0\nERROR=Could not send challenge\n")
+		            
+		            # Response back to the Sender (VTSTech)
+		            response = f"TEXT={challenge_token}\nSTATUS=0\n"
+		            return self.create_packet('mesg', '', response)
+		        
+		        # 4. ROUTE TO STANDARD CHAT
+		        print(f"MESG: Routing to message system (non-challenge message)")
+		        if hasattr(self, 'message_handlers'):
+		            return self.message_handlers.handle_mesg(data, session)
+		        else:
+		            return self.create_packet('mesg', '', "STATUS=0\n")
     
     def handle_user(self, data, session):
         data_str = data.decode('latin1') if data else ""
@@ -190,7 +192,7 @@ class ChallengeSystem:
         
         if target_found and target_conn_id in self.client_sessions:
             target_session = self.client_sessions[target_conn_id]
-            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=1\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
             print(f"USER: Found target {target_persona} in room {target_session.current_room}")
         else:
             response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
@@ -202,7 +204,7 @@ class ChallengeSystem:
         current_state = getattr(session, 'challenge_state', 0)
         
         if current_state == 0:
-            return self.create_packet('chal', '', "STATUS=1\n")
+            return self.create_packet('chal', '', "STATUS=0\n")
         else:
             session.challenge_state = 0
             session.challenger = ''
@@ -249,7 +251,7 @@ class ChallengeSystem:
 		        f"T={target_room_data.get('type', 1)}", # Type is usually T or F depending on client
 		        f"L={actual_count}", # FIX: Send active user count instead of a hardcoded limit
 		        f"F=1",
-		        f"STATUS=1"
+		        f"STATUS=0"
 		    ]
 		    
 		    # Add user list for this room
@@ -289,7 +291,7 @@ class ChallengeSystem:
             if response == 'ACPT':
                 self.start_race_between_players(challenger_session, session)
         
-        return self.create_packet('mesg', '', "STATUS=1\n")
+        return self.create_packet('mesg', '', "STATUS=0\n")
     
     def find_user_session(self, username):
         for session in self.client_sessions.values():
@@ -304,7 +306,7 @@ class ChallengeSystem:
         target_session.challenge_state = 6
         
         session_data = self.create_272_byte_session_data(challenger_session, target_session)
-        play_response = f"SELF=1\nHOST=1\nOPPO=0\nP1=1\nP2=0\nP3=0\nP4=0\nAUTH=1\nFROM={challenger_session.current_persona}\nSEED={int(time.time())}\nWHEN={int(time.time())}\nSTATUS=1\n"
+        play_response = f"SELF=1\nHOST=1\nOPPO=0\nP1=1\nP2=0\nP3=0\nP4=0\nAUTH=1\nFROM={challenger_session.current_persona}\nSEED={int(time.time())}\nWHEN={int(time.time())}\nSTATUS=0\n"
         
         try:
             challenger_session.connection.sendall(self.create_packet('play', '', play_response))
