@@ -340,7 +340,7 @@ def send_online_status(session):
     """Send online status to client after authentication"""
     if session.connection:
         try:
-            online_packet = create_packet('onln', '', f"STATUS=0\nUSER={session.clientNAME}\nROOM={session.current_room}\n")
+            online_packet = create_packet('onln', '', f"S=0\nSTATUS=0\nUSER={session.clientNAME}\nROOM={session.current_room}\n")
             session.connection.sendall(online_packet)
             print(f"ONLN: Sent online status to {session.clientNAME}")
         except Exception as e:
@@ -544,22 +544,43 @@ def handle_system_command(data, session):
 
 def handle_onln(data, session):
     print(f"ONLN: Online status check from {session.clientNAME}")
-    response = f"STATUS=0\nSERVER=VTSTech\nVERSION={BUILD}\nUSERS={len(session_manager.client_sessions)}\n"
+    response = f"S=0\nSTATUS=0\nSERVER=VTSTech\nVERSION={BUILD}\nUSERS={len(session_manager.client_sessions)}\n"
     return create_packet('onln', '', response)
 
-def handle_snap(data, session):
-    data_str = data.decode('latin1') if data else ""
-    print(f"SNAP: Snapshot request: {data_str}")
+def handle_snap(data, session): # Removed 'self'
+    # Use the session_manager which is globally available in your script
+    global session_manager 
     
-    config = {}
+    # We need to parse the 'FIND' tag to know who the client is asking about
+    # Since parse_tag isn't global, we do a quick split or use session_manager's helper
+    data_str = data.decode('latin1') if isinstance(data, bytes) else str(data)
+    target_persona = "Unknown"
     for line in data_str.split('\n'):
-        if '=' in line:
-            key, value = line.split('=', 1)
-            config[key] = value
+        if line.startswith('FIND='):
+            target_persona = line[5:].strip()
+
+    print(f"SNAP: {session.current_persona} requesting snapshot of {target_persona}")
+
+    # Based on Ghidra: N=Name, S=Rank, P=Status, V=Vehicle
+    # We must match the 0x80 (128 byte) buffer for V
+    snapshot_data = (
+        f"N={target_persona}\n"
+        f"S=50\n"
+        f"P=0\n"
+        f"V=1,0,0,0,0,0,0,0\n" 
+    )
     
-    snapshot_type = config.get('CHAN', '0')
-    response = f"CHAN={snapshot_type}\nSTATUS=0\n"
-    return create_packet('snap', '', response)
+    # 1. Broadcast the +snp async packet to EVERYONE
+    # This triggers the 'LobbyApiUpdate' logic in Ghidra and sets the 0x80 bit
+    for conn_id, s in session_manager.client_sessions.items():
+        if s.connection:
+            try:
+                s.connection.sendall(create_packet("+snp", "", snapshot_data))
+            except:
+                pass
+    
+    # 2. Return the direct reply to the 'snap' command to satisfy System_SendCommand
+    return create_packet("snap", "", "S=0\nSTATUS=0\n")
 
 def handle_rept(data, session):
     data_str = data.decode('latin1') if data else ""
@@ -571,7 +592,7 @@ def handle_rept(data, session):
             persona = line[5:]
             print(f"REPT: Persona report for {persona}")
     
-    return create_packet('rept', '', "STATUS=0\n")
+    return create_packet('rept', '', "S=0\nSTATUS=0\n")
 
 def handle_tic(data, session):
 		pass
@@ -582,7 +603,7 @@ def reply_play(data, session):
     
     if session.challenge_state != 6:
         print(f"PLAY ERROR: Invalid state {session.challenge_state}, expected 6")
-        return create_packet('play', '', "STATUS=0\nERROR=Invalid state\n")
+        return create_packet('play', '', "S=0\nSTATUS=0\nERROR=Invalid state\n")
     
     session_data = create_272_byte_session_data(session)
     
@@ -708,7 +729,7 @@ def build_reply(data, session):
         return handlers[cmd_str](data, session)
     
     print(f"UNKNOWN COMMAND: {cmd_str}")
-    return create_packet(cmd_str, '', "STATUS=0\n")
+    return create_packet(cmd_str, '', "S=0\nSTATUS=0\n")
     
 def threaded_client(connection, address, socket_type):
     global session_manager, ping_manager, data_server_manager, room_manager, challenge_system
@@ -733,7 +754,7 @@ def threaded_client(connection, address, socket_type):
                 
                 if session.check_protocol_timeout():
                     print(f"BUDDY PROTOCOL: Timeout detected for {connection_id}")
-                    timeout_response = create_packet('time', '', "STATUS=0\nERROR=Protocol timeout\n")
+                    timeout_response = create_packet('time', '', "S=0\nSTATUS=0\nERROR=Protocol timeout\n")
                     try:
                         connection.sendall(timeout_response)
                     except:
@@ -799,7 +820,7 @@ def threaded_client(connection, address, socket_type):
                 
                 if session.check_protocol_timeout():
                     print(f"PROTOCOL: Timeout detected for {connection_id}")
-                    timeout_response = create_packet('time', '', "STATUS=0\nERROR=Protocol timeout\n")
+                    timeout_response = create_packet('time', '', "S=0\nSTATUS=0\nERROR=Protocol timeout\n")
                     try:
                         connection.sendall(timeout_response)
                     except:
@@ -898,7 +919,7 @@ def threaded_client(connection, address, socket_type):
                             True      # Is self
                         )
                         print(f"AUTH: Updated presence for {username} in Lobby")
-                    response = f"PERS={current_persona}\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+                    response = f"PERS={current_persona}\nS=0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
                     try:
                         connection.sendall(create_packet('pers', '', response))
                         print(f"AUTH: Sent automatic PERS confirmation for {connection_id}")

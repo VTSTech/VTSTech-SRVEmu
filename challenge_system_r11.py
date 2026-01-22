@@ -14,7 +14,7 @@ class ChallengeSystem:
     def handle_auxi(self, data, session):
         if not hasattr(session, 'selected_target') or not session.selected_target:
             print(f"AUXI ERROR: {session.clientNAME} has no selected target")
-            return self.create_packet('auxi', '', "STATUS=0\nERROR=No target selected\n")
+            return self.create_packet('auxi', '', "S=0\nSTATUS=0\nERROR=No target selected\n")
         
         data_str = data.decode('latin1') if data else ""
         print(f"AUXI: Challenge initiation from {session.clientNAME} to {session.selected_target}")
@@ -60,9 +60,9 @@ class ChallengeSystem:
                 target_session.challenge_timeout = time.time() + 30
             except Exception as e:
                 print(f"AUXI: Error sending notification: {e}")
-                return self.create_packet('auxi', '', "STATUS=0\nERROR=Could not send challenge\n")
+                return self.create_packet('auxi', '', "S=0\nSTATUS=0\nERROR=Could not send challenge\n")
         
-        response = f"TEXT={challenge_token}\nSTATUS=0\n"
+        response = f"TEXT={challenge_token}\nS=0\nSTATUS=0\n"
         return self.create_packet('auxi', '', response)
     
     def handle_mesg(self, data, session):
@@ -128,10 +128,11 @@ class ChallengeSystem:
 		                    # We use F=3 and TYPE=CHALLENGE to trigger the Accept/Decline popup
 		                    notification = (
 												            f"I=3\n"                        # The Room ID (Beginner)
-												            f"N={session.current_persona}\n" # The Sender's Name
+												            f"PRIV={session.current_persona}\n" # The Sender's Name
 												            f"TEXT={challenge_token}\n"      # The Challenge Token
-												            f"TYPE=INVITE\n"                 # The Class Trigger
-												            f"F=3\n"                         # The UI Flag
+												            f"TYPE=priv\n"                 # The Class Trigger
+												            f"F=1\n"                         # The UI Flag
+												            f"ATTR=3\n"                         # The UI Flag
 												        )
 		                    print(f"[DEBUG]", notification)
 		                    target_session.connection.sendall(self.create_packet('+msg', '', notification))
@@ -145,10 +146,10 @@ class ChallengeSystem:
 		                    
 		                except Exception as e:
 		                    print(f"MESG: Error sending notification: {e}")
-		                    return self.create_packet('mesg', '', "STATUS=0\nERROR=Could not send challenge\n")
+		                    return self.create_packet('mesg', '', "S=0\nSTATUS=0\nERROR=Could not send challenge\n")
 		            
 		            # Response back to the Sender (VTSTech)
-		            response = f"TEXT={challenge_token}\nSTATUS=0\n"
+		            response = f"TEXT={challenge_token}\nS=0\nSTATUS=0\n"
 		            return self.create_packet('mesg', '', response)
 		        
 		        # 4. ROUTE TO STANDARD CHAT
@@ -156,7 +157,7 @@ class ChallengeSystem:
 		        if hasattr(self, 'message_handlers'):
 		            return self.message_handlers.handle_mesg(data, session)
 		        else:
-		            return self.create_packet('mesg', '', "STATUS=0\n")
+		            return self.create_packet('mesg', '', "S=0\nSTATUS=0\n")
     
     def handle_user(self, data, session):
         data_str = data.decode('latin1') if data else ""
@@ -169,7 +170,7 @@ class ChallengeSystem:
                 break
         
         if not target_persona:
-            return self.create_packet('user', '', "STATUS=0\nERROR=No target specified\n")
+            return self.create_packet('user', '', "S=0\nSTATUS=0\nERROR=No target specified\n")
         
         print(f"USER: {session.clientNAME} selected target: {target_persona}")
         session.selected_target = target_persona
@@ -192,10 +193,10 @@ class ChallengeSystem:
         
         if target_found and target_conn_id in self.client_sessions:
             target_session = self.client_sessions[target_conn_id]
-            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+            response = f"PERS={target_persona}\nTITLE=1\nS=0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
             print(f"USER: Found target {target_persona} in room {target_session.current_room}")
         else:
-            response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
+            response = f"PERS={target_persona}\nTITLE=0\nS=0\nSTATUS=0\nERROR=User not found\n"
             print(f"USER: Target {target_persona} not found")
         
         return self.create_packet('user', '', response)
@@ -204,11 +205,11 @@ class ChallengeSystem:
         current_state = getattr(session, 'challenge_state', 0)
         
         if current_state == 0:
-            return self.create_packet('chal', '', "STATUS=0\n")
+            return self.create_packet('chal', '', "S=0\nSTATUS=0\n")
         else:
             session.challenge_state = 0
             session.challenger = ''
-            return self.create_packet('chal', '', "STATUS=0\n")
+            return self.create_packet('chal', '', "S=0\nSTATUS=0\n")
     
     def handle_peek(self, data, session):
 		    """Handle peek command - get users in a specific ROOM"""
@@ -235,7 +236,7 @@ class ChallengeSystem:
 		    
 		    if target_room_id is None:
 		        print(f"[PEEK] Room '{target_name}' not found")
-		        return self.create_packet('peek', '', "STATUS=0\nERROR=Room not found\n")
+		        return self.create_packet('peek', '', "S=0\nSTATUS=0\nERROR=Room not found\n")
 		    
 		    # RECALCULATE count directly for 100% accuracy in the UI
 		    actual_count = sum(1 for u in self.room_manager.active_users.values() 
@@ -291,7 +292,7 @@ class ChallengeSystem:
             if response == 'ACPT':
                 self.start_race_between_players(challenger_session, session)
         
-        return self.create_packet('mesg', '', "STATUS=0\n")
+        return self.create_packet('mesg', '', "S=0\nSTATUS=0\n")
     
     def find_user_session(self, username):
         for session in self.client_sessions.values():
@@ -306,7 +307,7 @@ class ChallengeSystem:
         target_session.challenge_state = 6
         
         session_data = self.create_272_byte_session_data(challenger_session, target_session)
-        play_response = f"SELF=1\nHOST=1\nOPPO=0\nP1=1\nP2=0\nP3=0\nP4=0\nAUTH=1\nFROM={challenger_session.current_persona}\nSEED={int(time.time())}\nWHEN={int(time.time())}\nSTATUS=0\n"
+        play_response = f"SELF=1\nHOST=1\nOPPO=0\nP1=1\nP2=0\nP3=0\nP4=0\nAUTH=1\nFROM={challenger_session.current_persona}\nSEED={int(time.time())}\nWHEN={int(time.time())}\nS=0\nSTATUS=0\n"
         
         try:
             challenger_session.connection.sendall(self.create_packet('play', '', play_response))

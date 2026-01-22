@@ -55,7 +55,7 @@ class AccountManager:
         required_fields = ['NAME', 'USER', 'PASS', 'BORN', 'MAIL']
         for field in required_fields:
             if not getattr(session, f'client{field}', ''):
-                return create_packet_func('acct', '', f"STATUS=0\nERROR=Missing required fields\n")
+                return create_packet_func('acct', '', f"S=0\nSTATUS=0\nERROR=Missing required fields\n")
         
         md5_hash = hashlib.md5(session.clientPASS.encode('ascii')).hexdigest()
         timestamp = time.strftime('%Y.%m.%d %I:%M:%S')
@@ -67,7 +67,7 @@ class AccountManager:
             print(f"ACCT: Successfully created account for {session.clientNAME}")
         except Exception as e:
             print(f"ACCT: Error saving account: {e}")
-            return create_packet_func('acct', '', "STATUS=0\nERROR=Account creation failed\n")
+            return create_packet_func('acct', '', "S=0\nSTATUS=0\nERROR=Account creation failed\n")
         
         response_lines = [
             "TOS=1", f"NAME={session.clientNAME.lower()}", f"USER={session.clientUSER}",
@@ -124,9 +124,9 @@ class PersonaManager:
                 response = f"PERS={new_persona}\nALTS={session.persona_count}\nSTATUS=1\n"
             else:
                 session.available_personas.remove(new_persona)
-                response = f"PERS={new_persona}\nALTS={session.persona_count}\nSTATUS=0\n"
+                response = f"PERS={new_persona}\nALTS={session.persona_count}\nS=0\nSTATUS=0\n"
         else:
-            response = f"PERS={new_persona}\nALTS=4\nSTATUS=0\n"
+            response = f"PERS={new_persona}\nALTS=4\nS=0\nSTATUS=0\n"
         
         return create_packet_func('cper', '', response)
     
@@ -173,7 +173,7 @@ class PersonaManager:
         except Exception as e:
             print(f"PERS: Error updating presence: {e}")
         
-        return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
+        return create_packet_func('pers', '', f"PERS={session.current_persona}\nLKEY=$0\nS=0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n")
 
 class AuthenticationHandlers:
     def __init__(self, create_packet_func, active_users=None, client_sessions=None):
@@ -269,7 +269,7 @@ class AuthenticationHandlers:
                 break
         
         if not target_persona:
-            return self.create_packet('user', '', "STATUS=0\nERROR=No target specified\n")
+            return self.create_packet('user', '', "S=0\nSTATUS=0\nERROR=No target specified\n")
         
         print(f"USER: {session.clientNAME} selected target: {target_persona}")
         session.selected_target = target_persona
@@ -285,10 +285,10 @@ class AuthenticationHandlers:
         
         if target_found and target_conn_id in self.client_sessions:
             target_session = self.client_sessions[target_conn_id]
-            response = f"PERS={target_persona}\nTITLE=1\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+            response = f"PERS={target_persona}\nTITLE=1\nS=0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
             print(f"USER: Found target {target_persona} in room {target_session.current_room}")
         else:
-            response = f"PERS={target_persona}\nTITLE=0\nSTATUS=0\nERROR=User not found\n"
+            response = f"PERS={target_persona}\nTITLE=0\nS=0\nSTATUS=0\nERROR=User not found\n"
             print(f"USER: Target {target_persona} not found")
         
         return self.create_packet('user', '', response)
@@ -307,8 +307,8 @@ class AuthenticationHandlers:
         
         if updated_fields:
             print(f"EDIT: Updated fields: {updated_fields}")
-            response = "STATUS=0\n" + '\n'.join([f"{k}={v}" for k, v in updated_fields.items()]) + '\n'
+            response = "S=0\nSTATUS=0\n" + '\n'.join([f"{k}={v}" for k, v in updated_fields.items()]) + '\n'
         else:
-            response = "STATUS=0\nERROR=No valid fields\n"
+            response = "S=0\nSTATUS=0\nERROR=No valid fields\n"
         
         return self.create_packet('edit', '', response)
