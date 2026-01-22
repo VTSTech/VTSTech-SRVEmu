@@ -216,7 +216,7 @@ class ChallengeSystem:
 		    target_name = ""
 		    for line in data_str.split('\n'):
 		        if line.startswith('NAME='):
-		            target_name = line[5:]
+		            target_name = line[5:].strip() # Added strip for safety
 		            break
 		    
 		    print(f"[PEEK] from {session.clientNAME}: Looking for room '{target_name}'")
@@ -235,30 +235,27 @@ class ChallengeSystem:
 		        print(f"[PEEK] Room '{target_name}' not found")
 		        return self.create_packet('peek', '', "STATUS=0\nERROR=Room not found\n")
 		    
-		    print(f"[PEEK] Found room {target_room_id}: {target_name}")
+		    # RECALCULATE count directly for 100% accuracy in the UI
+		    actual_count = sum(1 for u in self.room_manager.active_users.values() 
+		                     if u.get('room_id') == target_room_id)
 		    
-		    # Find all users in this room
-		    users_in_room = []
-		    for conn_id, user_data in self.room_manager.active_users.items():
-		        if user_data.get('room_id') == target_room_id:
-		            users_in_room.append(user_data)
-		    
-		    print(f"[PEEK] Room {target_name} has {len(users_in_room)} users")
+		    print(f"[PEEK] Found room {target_room_id}: {target_name} with {actual_count} users")
 		    
 		    # Build response
-		    response_lines = []
-		    
-		    # Add room info first
-		    response_lines.extend([
+		    response_lines = [
 		        f"I={target_room_id}",
 		        f"N={target_name}",
 		        f"H={target_room_data.get('desc', '')}",
-		        f"T={len(users_in_room)}",
-		        f"L={target_room_data.get('maxusers', 50)}",
-		        f"F={target_room_data.get('type', 1)}"
-		    ])
+		        f"T={target_room_data.get('type', 1)}", # Type is usually T or F depending on client
+		        f"L={actual_count}", # FIX: Send active user count instead of a hardcoded limit
+		        f"F=1",
+		        f"STATUS=1"
+		    ]
 		    
-		    # Add user list
+		    # Add user list for this room
+		    users_in_room = [u for u in self.room_manager.active_users.values() 
+		                     if u.get('room_id') == target_room_id]
+		                     
 		    for i, user_data in enumerate(users_in_room):
 		        persona = user_data.get('persona', '')
 		        is_self = (user_data.get('conn_id') == session.connection_id)
@@ -270,12 +267,8 @@ class ChallengeSystem:
 		            f"USER{i}_I={target_room_id}"
 		        ])
 		    
-		    response_lines.append("STATUS=1")
-		    
 		    response = '\n'.join(response_lines) + '\n'
-		    print(f"[PEEK] Response for {target_name}:")
-		    print(response)
-		    
+		    print("[PEEK DEBUG]", response)
 		    return self.create_packet('peek', '', response)
     
     def handle_challenge_response(self, session, target_user, response):

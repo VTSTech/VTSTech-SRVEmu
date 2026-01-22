@@ -15,9 +15,9 @@ class RoomManager:
         self.rank_hash_table = {}  # piVar24[0xce] equivalent
         self.active_rooms = {
 				    0: {'name': 'Lobby', 'desc': 'Main Lobby Hub', 'usercount': 0, 'maxusers': 100, 'room_id': 0, 'flags': '0', 'type': 0},  # Add this
-				    1: {'name': 'East', 'desc': 'East Coast Racers', 'usercount': 0, 'maxusers': 50, 'room_id': 1, 'flags': '0', 'type': 1},
-				    2: {'name': 'West', 'desc': 'West Coast Racers', 'usercount': 0, 'maxusers': 50, 'room_id': 2, 'flags': '0', 'type': 1},
-				    3: {'name': 'Beginner', 'desc': 'New Drivers Welcome', 'usercount': 0, 'maxusers': 50, 'room_id': 3, 'flags': '0', 'type': 1}
+				    1: {'name': 'East', 'desc': 'East Coast Racers', 'usercount': 0, 'maxusers': 100, 'room_id': 1, 'flags': '0', 'type': 1},
+				    2: {'name': 'West', 'desc': 'West Coast Racers', 'usercount': 0, 'maxusers': 100, 'room_id': 2, 'flags': '0', 'type': 1},
+				    3: {'name': 'Beginner', 'desc': 'New Drivers Welcome', 'usercount': 0, 'maxusers': 100, 'room_id': 3, 'flags': '0', 'type': 1}
 				}
         self.active_users = {}
         self.user_presence_lock = threading.Lock()
@@ -123,43 +123,20 @@ class RoomManager:
 		    return self.create_packet('+rom', '', packet_data)   
         
     def create_user_update_packet(self, user_data):
-		    """Create user update packet"""
-		    if not user_data.get('username') or user_data.get('username') == 'Lobby':
-		        return self.create_packet('+usr', '', "I=0\nN=Invalid\nF=0\n")
-		        
-		    display_name = user_data.get('persona', user_data.get('username', 'Unknown'))
-		    room_id = user_data.get('room_id', 0)
+		    """Create user update packet with UNIQUE User ID"""
+		    display_name = user_data.get('persona', 'Unknown')
 		    
-		    # Ensure room_id is properly set (allow 0 for Lobby)
-		    if room_id is None or room_id == '':
-		        room_id = 0
+		    # Generate a unique ID based on the connection ID or persona name
+		    # Do NOT use room_id for the 'I' field here
+		    user_id = abs(hash(user_data.get('conn_id', display_name))) % 1000000 
 		    
-		    if 'unique_id' in user_data:
-		        user_id = user_data['unique_id']
-		    else:
-		        if user_data.get('is_dummy', False):
-		            user_id = -abs(hash(user_data['username'])) % 1000000
-		        else:
-		            user_id = abs(hash(user_data.get('conn_id', display_name))) % 1000000    
-		            
-		    # Allow room_id 0 (Lobby)
-		    if room_id < 0:
-		        return self.create_packet('+usr', '', "I=0\nN=Invalid\nF=0\n")
-		        
-		    # Determine correct flag value
-		    # Self user should be F=1, others F=0
-		    user_flags = user_data.get('flags', '0')
-		    
-		    # Check if this is a self-referencing packet
-		    is_self = user_data.get('is_self', False)
-		    if is_self:
-		        user_flags = '1'
+		    user_flags = '1' if user_data.get('is_self', False) else '0'
 		    
 		    fields = [
-		        f"I={user_id}", 
+		        f"I={user_id}", # User's unique ID key
 		        f"N={display_name}", 
-		        f"F={user_flags}",  # Use dynamic flag value
-		        f"A={self.server_ip}"  # Add IP address
+		        f"F={user_flags}", 
+		        f"A={user_data.get('ip', self.server_ip)}" 
 		    ]
 		    return self.create_packet('+usr', '', '\n'.join(fields) + '\n')
         
@@ -176,11 +153,16 @@ class RoomManager:
         return hash_table.get(key)
         
     def create_population_packet(self):
-        """Create population packet"""
-        pop_data = [f"{room_id}:{room_data['usercount']}" for room_id, room_data in self.active_rooms.items()]
-        population_data = f"Z={' '.join(pop_data)}\n"
-        print(f"POPULATION: Room counts - {population_data.strip()}")
-        return self.create_packet('+pop', '', population_data)
+		    """Create population packet by scanning active_users directly"""
+		    pop_entries = []
+		    for room_id in self.active_rooms.keys():
+		        # Scrape the user table directly for the most accurate number
+		        count = sum(1 for u in self.active_users.values() if u.get('room_id') == room_id)
+		        pop_entries.append(f"{room_id}:{count}")
+		    
+		    population_data = f"Z={' '.join(pop_entries)}\n"
+		    print(f"POPULATION BROADCAST: {population_data.strip()}")
+		    return self.create_packet('+pop', '', population_data)
         
     def broadcast_room_updates(self, client_sessions):
         """Broadcast room updates to all clients"""
@@ -267,15 +249,20 @@ class RoomHandlers:
         threading.Timer(0.1, send_lobby_updates).start()
         
         if "ROOMS=1" in data_str:
-            response_lines.extend(["ROOMS=1", f"COUNT={len(self.room_manager.active_rooms)}"])
-            for i, room_data in enumerate(self.room_manager.active_rooms.values()):
-                response_lines.extend([
-                    f"ROOM{i}={room_data['name']}", 
-                    f"ROOM{i}_DESC={room_data['desc']}",
-                    f"ROOM{i}_COUNT={room_data['usercount']}", 
-                    f"ROOM{i}_MAX={room_data['maxusers']}"
-                ])
-            print(f"SELE: Including {len(self.room_manager.active_rooms)} rooms")
+				        rooms = list(self.room_manager.active_rooms.values())
+				        response_lines.extend(["ROOMS=1", f"COUNT={len(rooms)}"])
+				        for i, room_data in enumerate(rooms):
+				            # Recalculate count specifically for this response
+				            r_id = room_data['room_id']
+				            actual_count = sum(1 for u in self.room_manager.active_users.values() 
+				                             if u.get('room_id') == r_id)
+				            
+				            response_lines.extend([
+				                f"ROOM{i}={room_data['name']}",
+				                f"ROOM{i}_DESC={room_data['desc']}",
+				                f"ROOM{i}_COUNT={actual_count}", # Use recalculated count
+				                f"ROOM{i}_MAX={room_data['maxusers']}"
+				            ])
         
         if "USERS=1" in data_str:
             # Include ALL active users
@@ -355,12 +342,25 @@ class RoomHandlers:
 		    
 		    username = getattr(session, 'authenticated_username', session.clientNAME)
 		    persona = getattr(session, 'current_persona', username)
-		    
+		    who_reply = (f"F=U\nN={persona}\nRI={new_room_id}\n"
+				             f"RT=1\nR={new_room_id}\nRF=1\n")
+		    session.connection.sendall(self.create_packet('+who', '', who_reply))		    
 		    print(f"ROOM DEBUG: Using username '{username}' from auth, persona '{persona}'")
 		    
 		    # Update presence (this will set correct population)
-		    self.update_user_presence(session.connection_id, username, persona, display_name, new_room_id, True, is_self=True)
-		    
+		    # After creating the room, FORCE a presence update for the creator
+		    # This ensures the usercount for the new room goes from 0 to 1
+		    self.update_user_presence(
+		        session.connection_id, 
+		        session.authenticated_username, 
+		        session.current_persona, 
+		        display_name, 
+		        new_room_id, 
+		        connected=True, 
+		        is_self=True
+		    )
+		    client_sessions = self.get_client_sessions()
+		    self.room_manager.broadcast_room_updates(client_sessions)
 		    # Send room creation response
 		    response_lines = [
 		        f"I={new_room_id}", 
@@ -393,6 +393,7 @@ class RoomHandlers:
 		                
 		            except Exception as e:
 		                print(f"ROOM: Error sending updates: {e}")
+
 		    def broadcast_new_room(room_id, room_data):
 				    """Broadcast new room to all connected clients"""
 				    client_sessions = self.get_client_sessions()  # You need to implement this
@@ -487,15 +488,23 @@ class RoomHandlers:
         return self.create_packet('+who', '', '\n'.join(fields) + '\n')
     
     def reply_pop(self, session):
-		    """+pop command handler"""
-		    current_room_id = getattr(session, 'current_room_id', 0)
-		    room_population = "0/50"
-		    for room_data in self.room_manager.active_rooms.values():
-		        if room_data['room_id'] == current_room_id:
-		            room_population = f"{room_data['usercount']}:{room_data['maxusers']}"
-		            break
-		    print(f"+pop: Room {current_room_id} population {room_population}")
-		    return self.create_packet('+pop', '', f"Z={room_population}\n")
+		    """+pop command handler - FIXED to report all room counts"""
+		    pop_entries = []
+		    
+		    # We must report the status of ALL rooms the client knows about
+		    for room_id, room_data in self.room_manager.active_rooms.items():
+		        # Scrape the user table for the real-time count
+		        count = sum(1 for u in self.room_manager.active_users.values() 
+		                    if u.get('room_id') == room_id)
+		        
+		        # Format is RoomID:Count
+		        pop_entries.append(f"{room_id}:{count}")
+		    
+		    # Join with spaces: "Z=0:1 1:0 2:0 3:0"
+		    population_string = f"Z={' '.join(pop_entries)}\n"
+		    
+		    print(f"+pop: Broadcasting validated population: {population_string.strip()}")
+		    return self.create_packet('+pop', '', population_string)
 
     def reply_rom(self, session):
 		    """Send room list as +rom commands - INCLUDE ALL ROOMS"""
@@ -523,40 +532,20 @@ class RoomHandlers:
 		    return room_packets
             
     def reply_usr(self, session):
-		    """+usr command handler - send users in CURRENT ROOM, not all users"""
+		    """Only send users that are in the SAME room as the requesting client"""
+		    current_room_id = getattr(session, 'current_room_id', 0)
 		    response_lines = []
 		    
-		    current_room_id = getattr(session, 'current_room_id', 0)
-		    print(f"+usr: Building user list for room {current_room_id}")
-		    
-		    # Get users in the SAME room as the client
-		    users_in_room = []
 		    for conn_id, user_data in self.room_manager.active_users.items():
+		        # CRITICAL: Only include users if their room matches the client's room
 		        if user_data.get('room_id') == current_room_id:
-		            users_in_room.append(user_data)
-		    
-		    print(f"+usr: Room {current_room_id} has {len(users_in_room)} users")
-		    
-		    for i, user_data in enumerate(users_in_room):
-		        persona = user_data.get('persona', '')
-		        is_self = (user_data.get('conn_id') == session.connection_id)
-		        f_flag = '1' if is_self else '0'
-		        
-		        # Format: I=room_id N=name F=flag A=ip
-		        ip_addr = self.room_manager.server_ip
-		        if 'ip' in user_data:
-		            ip_addr = user_data['ip']
-		        
-		        user_entry = f"I={current_room_id}\nN={persona}\nF={f_flag}\nA={ip_addr}"
-		        response_lines.append(user_entry)
-		        
-		        print(f"+usr {'Self' if is_self else 'Other'}: {persona} F={f_flag}")
-		    
-		    if response_lines:
-		        print(f"+usr: Sending {len(response_lines)} user entries for room {current_room_id}")
-		    
-		    full_response = '\n'.join(response_lines)
-		    if full_response:
-		        full_response += '\n'
-		    
-		    return self.create_packet('+usr', '', full_response)
+		            u_id = user_data.get('unique_id') or abs(hash(conn_id)) % 1000000
+		            is_self = (conn_id == session.connection_id)
+		            
+		            entry = (f"I={u_id}\n"
+		                     f"N={user_data['persona']}\n"
+		                     f"F={'1' if is_self else '0'}\n"
+		                     f"A={user_data.get('ip', self.room_manager.server_ip)}\n")
+		            response_lines.append(entry)
+		            
+		    return self.create_packet('+usr', '', "".join(response_lines))
