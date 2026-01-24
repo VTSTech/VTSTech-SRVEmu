@@ -7,7 +7,7 @@ from challenge_system_r11 import ChallengeSystem
 from authentication_system_r11 import AuthenticationHandlers
 from session_system_r11 import SessionManager, NetworkHandlers, PingManager, DataServerManager
 from room_system_r11 import RoomManager, RoomHandlers
-from message_system_r10 import MessageHandlers
+from message_system_r11 import MessageHandlers
 from buddy_system_r10 import BuddyHandlers
 
 from state_trigger import StateTrigger
@@ -167,6 +167,7 @@ class ClientSession:
     def __init__(self, connection_id, game_mode=None):
         self.connection_id = connection_id
         self.game_mode = game_mode
+        self.room_id = 0
         # Consolidate initialization
         self.connection = self.ping_timer = None
         self.data_port = 0
@@ -181,8 +182,10 @@ class ClientSession:
         for attr in ['clientNAME', 'clientUSER', 'current_persona', 'authenticated_username']:
             setattr(self, attr, 'Unknown')
         
-        self.available_personas = []; self.persona_count = 0
-        self.current_room = "Lobby"; self.current_room_id = 0
+        self.available_personas = []
+        self.persona_count = 0
+        self.current_room = "Lobby"
+        self.current_room_id = 0
         
         # Authentication - consolidated
         self.auth_state = 0
@@ -547,40 +550,63 @@ def handle_onln(data, session):
     response = f"S=0\nSTATUS=0\nSERVER=VTSTech\nVERSION={BUILD}\nUSERS={len(session_manager.client_sessions)}\n"
     return create_packet('onln', '', response)
 
-def handle_snap(data, session): # Removed 'self'
-    # Use the session_manager which is globally available in your script
-    global session_manager 
-    
-    # We need to parse the 'FIND' tag to know who the client is asking about
-    # Since parse_tag isn't global, we do a quick split or use session_manager's helper
+def handle_snap(data, session):
     data_str = data.decode('latin1') if isinstance(data, bytes) else str(data)
-    target_persona = "Unknown"
-    for line in data_str.split('\n'):
-        if line.startswith('FIND='):
-            target_persona = line[5:].strip()
-
-    print(f"SNAP: {session.current_persona} requesting snapshot of {target_persona}")
-
-    # Based on Ghidra: N=Name, S=Rank, P=Status, V=Vehicle
-    # We must match the 0x80 (128 byte) buffer for V
-    snapshot_data = (
-        f"N={target_persona}\n"
-        f"S=50\n"
-        f"P=0\n"
-        f"V=1,0,0,0,0,0,0,0\n" 
-    )
     
-    # 1. Broadcast the +snp async packet to EVERYONE
-    # This triggers the 'LobbyApiUpdate' logic in Ghidra and sets the 0x80 bit
-    for conn_id, s in session_manager.client_sessions.items():
-        if s.connection:
-            try:
-                s.connection.sendall(create_packet("+snp", "", snapshot_data))
-            except:
-                pass
-    
-    # 2. Return the direct reply to the 'snap' command to satisfy System_SendCommand
-    return create_packet("snap", "", "S=0\nSTATUS=0\n")
+    def get_tag(tag):
+        for line in data_str.split('\n'):
+            if line.startswith(f"{tag}="): return line.split('=')[1].strip()
+        return None
+
+    chan = get_tag("CHAN")
+    index = get_tag("INDEX")
+    find_name = get_tag("FIND")
+    start = int(get_tag("START") or 0)
+
+    # --- LEADERBOARD (CHAN 5) ---
+    if chan == "5":
+        # We'll send 3 players for testing
+        players = ["VTSTech2", "Jeff Gordon", "Tony Stewart"]
+        
+        for i, name in enumerate(players):
+            current_rank = start + i + 1
+            # We use IDENT= to uniquely tag this row, as seen in strings.json
+            row_payload = (
+                f"N={name}\n"
+                f"R={current_rank}\n"
+                f"V={1000 - (i*100)}\n"  # The stat value
+                f"IDENT={current_rank}\n" # Synchronize row identity
+            )
+            print(f"[DEBUG] Sending Row {current_rank}: {name}")
+            session.connection.sendall(create_packet("+snp", "", row_payload))
+
+        # CLOSING PACKET: Mandatory structural tags from strings.json
+        # LCOUNT = List Total Count, LIDENT = List Identity/Channel
+        done_payload = (
+            f"S=0\n"
+            f"CHAN={chan}\n"
+            f"COUNT={len(players)}\n"
+            f"LCOUNT={len(players)}\n"
+            f"LIDENT={chan}\n"
+        )
+        print(f"[DEBUG] Closing CHAN 5 with COUNT={len(players)}")
+        session.connection.sendall(create_packet("snap", "", done_payload))
+        return None
+
+    # --- PROFILE (CHAN 4) ---
+    elif chan == "4":
+        # Profile screens are single-entry 'snapshots'
+        user_row = (
+            f"N={find_name or 'VTSTech2'}\n"
+            "R=1\nW=50\nL=10\nS=60\nP=5\n"
+            "T5=20\nT10=40\nLL=500\nLC=1200\n"
+            "STRK=2\nAS=10\nAF=5\n"
+        )
+        session.connection.sendall(create_packet("+snp", "", user_row))
+        session.connection.sendall(create_packet("snap", "", "S=0\n"))
+        return None
+
+    return create_packet("snap", "", "S=0\n")
 
 def handle_rept(data, session):
     data_str = data.decode('latin1') if data else ""
@@ -691,7 +717,7 @@ def build_reply(data, session):
         '@dir': lambda d, s: network_handlers.handle_dir_command(d, s),
         '@tic': handle_tic,
         'addr': lambda d, s: network_handlers.handle_addr_command(d, s),
-        'peek': lambda d, s: challenge_system.handle_peek(d, s),
+        'peek': lambda d, s: room_handlers.handle_peek(d, s),
         'skey': lambda d, s: network_handlers.handle_skey(s),
         'news': lambda d, s: network_handlers.handle_news(d, s),
         '~png': lambda d, s: ping_manager.handle_ping(d, s),
@@ -1073,19 +1099,31 @@ def initialize_systems(game_mode=None):
         GAME_MODES['nbav3']['module'] = NBAv3Handlers
         GAME_MODES['nbav3']['handlers'] = NBAv3Handlers(create_packet, SERVER_IP)
     
-    # FIXED: Pass room_manager to ChallengeSystem
+    # 1. Initialize message_handlers first
+    # Pass session_manager.client_sessions so it can find people to chat with
+    message_handlers = MessageHandlers(
+        create_packet, 
+        room_manager.active_users, 
+        room_manager_ref=session_manager # Assuming session_manager holds the session list
+    )
+    print("MESSAGE: Message system initialized")
+
+    # 2. Initialize challenge_system
+    # Now message_handlers is defined and can be passed safely
     challenge_system = ChallengeSystem(
-		    create_packet, 
-		    room_manager.active_users, 
-		    session_manager.client_sessions, 
-		    session_manager, 
-		    room_manager,
-		    message_handlers  # Add this
-		)
+            create_packet, 
+            room_manager.active_users, 
+            session_manager.client_sessions, 
+            session_manager, 
+            room_manager,
+            message_handlers
+        )
     print("CHALLENGE: Challenge system initialized")
     
-    message_handlers = MessageHandlers(create_packet, room_manager.active_users, challenge_system)
-    print("MESSAGE: Message system initialized")
+    # 3. Inject the challenge system back into message handlers
+    # This solves the "chicken and egg" problem
+    message_handlers.challenge_system = challenge_system
+    print("MESSAGE: Challenge system linked to messaging")
     
     print(f"INIT: All systems initialized successfully for {game_mode}")
     

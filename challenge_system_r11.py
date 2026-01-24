@@ -1,5 +1,5 @@
 # challenge_system_r11.py - OPTIMIZED CHALLENGE SYSTEM
-import time, struct, threading, random
+import time, struct, threading, random, socket
 
 class ChallengeSystem:
     def __init__(self, create_packet_func, active_users, client_sessions, session_manager, room_manager, message_handlers=None):
@@ -115,7 +115,7 @@ class ChallengeSystem:
 		            session.challenge_target = target_user
 		            session.challenge_token = challenge_token
 		            session.challenge_timeout = time.time() + 30
-		            
+		            sender_room_id = getattr(session, 'room_id', 0)
 		            target_session = None
 		            for conn_id, other_session in self.client_sessions.items():
 		                if hasattr(other_session, 'current_persona') and other_session.current_persona == target_user:
@@ -127,13 +127,13 @@ class ChallengeSystem:
 		                    # FIX: Deliver UI Trigger to Target
 		                    # We use F=3 and TYPE=CHALLENGE to trigger the Accept/Decline popup
 		                    notification = (
-												            f"I=3\n"                        # The Room ID (Beginner)
-												            f"PRIV={session.current_persona}\n" # The Sender's Name
-												            f"TEXT={challenge_token}\n"      # The Challenge Token
-												            f"TYPE=priv\n"                 # The Class Trigger
-												            f"F=1\n"                         # The UI Flag
-												            f"ATTR=3\n"                         # The UI Flag
-												        )
+													f"FROM={session.persona}\n"
+													    f"TEXT={challenge_token}\n"
+													    f"F=1\n" # Flag 1 often triggers the 'Proposal' state
+													    f"ATTR=3\n"
+													    f"RI={sender_room_id}\n" # Explicitly include the Room ID
+													    f"PRIV={target_user}\n"
+													)
 		                    print(f"[DEBUG]", notification)
 		                    target_session.connection.sendall(self.create_packet('+msg', '', notification))
 		                    print(f"MESG: Sent UI Challenge notification to {target_user}")
@@ -158,6 +158,7 @@ class ChallengeSystem:
 		            return self.message_handlers.handle_mesg(data, session)
 		        else:
 		            return self.create_packet('mesg', '', "S=0\nSTATUS=0\n")
+
     
     def handle_user(self, data, session):
         data_str = data.decode('latin1') if data else ""
@@ -211,69 +212,6 @@ class ChallengeSystem:
             session.challenger = ''
             return self.create_packet('chal', '', "S=0\nSTATUS=0\n")
     
-    def handle_peek(self, data, session):
-		    """Handle peek command - get users in a specific ROOM"""
-		    data_str = data.decode('latin1') if data else ""
-		    
-		    # Parse NAME field
-		    target_name = ""
-		    for line in data_str.split('\n'):
-		        if line.startswith('NAME='):
-		            target_name = line[5:].strip() # Added strip for safety
-		            break
-		    
-		    print(f"[PEEK] from {session.clientNAME}: Looking for room '{target_name}'")
-		    
-		    # Find the room by name
-		    target_room_id = None
-		    target_room_data = None
-		    
-		    for room_id, room_data in self.room_manager.active_rooms.items():
-		        if room_data.get('name') == target_name:
-		            target_room_id = room_id
-		            target_room_data = room_data
-		            break
-		    
-		    if target_room_id is None:
-		        print(f"[PEEK] Room '{target_name}' not found")
-		        return self.create_packet('peek', '', "S=0\nSTATUS=0\nERROR=Room not found\n")
-		    
-		    # RECALCULATE count directly for 100% accuracy in the UI
-		    actual_count = sum(1 for u in self.room_manager.active_users.values() 
-		                     if u.get('room_id') == target_room_id)
-		    
-		    print(f"[PEEK] Found room {target_room_id}: {target_name} with {actual_count} users")
-		    
-		    # Build response
-		    response_lines = [
-		        f"I={target_room_id}",
-		        f"N={target_name}",
-		        f"H={target_room_data.get('desc', '')}",
-		        f"T={target_room_data.get('type', 1)}", # Type is usually T or F depending on client
-		        f"L={actual_count}", # FIX: Send active user count instead of a hardcoded limit
-		        f"F=1",
-		        f"STATUS=0"
-		    ]
-		    
-		    # Add user list for this room
-		    users_in_room = [u for u in self.room_manager.active_users.values() 
-		                     if u.get('room_id') == target_room_id]
-		                     
-		    for i, user_data in enumerate(users_in_room):
-		        persona = user_data.get('persona', '')
-		        is_self = (user_data.get('conn_id') == session.connection_id)
-		        f_flag = '1' if is_self else '0'
-		        
-		        response_lines.extend([
-		            f"USER{i}_N={persona}",
-		            f"USER{i}_F={f_flag}",
-		            f"USER{i}_I={target_room_id}"
-		        ])
-		    
-		    response = '\n'.join(response_lines) + '\n'
-		    print("[PEEK DEBUG]", response)
-		    return self.create_packet('peek', '', response)
-    
     def handle_challenge_response(self, session, target_user, response):
         print(f"[CHALLENGE] {session.clientNAME} responded: {response} to {target_user}")
         
@@ -325,37 +263,38 @@ class ChallengeSystem:
         except Exception as e:
             print(f"RACE: Error sending to target: {e}")
     
-    def create_272_byte_session_data(self, session1, session2=None):
-        session_data = bytearray(272)
-        session_data[0:4] = struct.pack(">I", 1)
-        
-        player1_name = session1.current_persona if hasattr(session1, 'current_persona') else 'Player1'
-        session_data[4:20] = player1_name.ljust(16, '\0').encode('ascii')
-        session_data[20:24] = struct.pack(">I", 1)
-        
-        if session2 and hasattr(session2, 'current_persona'):
-            player2_name = session2.current_persona
-            session_data[24:40] = player2_name.ljust(16, '\0').encode('ascii')
-            session_data[40:44] = struct.pack(">I", 2)
-        else:
-            session_data[24:40] = 'Waiting...'.ljust(16, '\0').encode('ascii')
-            session_data[40:44] = struct.pack(">I", 0)
-        
-        session_data[44:48] = struct.pack(">I", 10)
-        session_data[48:52] = struct.pack(">I", 2)
-        session_data[52:56] = struct.pack(">I", 1)
-        session_data[56:60] = struct.pack(">I", 1)
-        session_data[60:64] = struct.pack(">I", random.randint(1, 0xFFFFFFFF))
-        session_data[64:68] = struct.pack(">I", int(time.time()))
-        session_data[68:72] = struct.pack(">I", 1)
-        session_data[72:76] = struct.pack(">I", 1)
-        session_data[76:80] = struct.pack(">I", 0)
-        session_data[80:84] = struct.pack(">I", 2)
-        
-        for i in range(84, 272, 4):
-            session_data[i:i+4] = struct.pack(">I", 0)
-        
-        return bytes(session_data)
+    def create_272_byte_session_data(self, host_session, guest_session):
+		    # Initialize 272 null bytes
+		    blob = bytearray(272)
+		    
+		    try:
+		        # Use the captured address from the 'addr' command
+		        # If addr is "1.2.3.4", inet_aton converts it to \x01\x02\x03\x04
+		        ip_addr = host_session.direct_address if host_session.direct_address else "0.0.0.0"
+		        ip_bytes = socket.inet_aton(ip_addr)
+		        
+		        # Use the captured port (default for NC04 is often 10600 or what's in 'addr')
+		        port = int(host_session.direct_port) if host_session.direct_port else 10600
+		        
+		        # Pack IP and Port at the start
+		        struct.pack_into(">4sH", blob, 0, ip_bytes, port)
+		        
+		        # Pack Persona Name at 0x10 (Ghidra shows a 32-byte buffer)
+		        persona = host_session.current_persona.encode('latin1')
+		        struct.pack_into("32s", blob, 0x10, persona[:32])
+		        
+		        # Set the Host/Client flag at 0x30
+		        # If this session is the one receiving the packet, tell it if it's host
+		        is_host = 1 if host_session == guest_session else 0
+		        struct.pack_into(">I", blob, 0x30, is_host)
+		        
+		        # NASCAR often expects a 'Seed' or 'Key' at 0x44 to sync the RNG
+		        struct.pack_into(">I", blob, 0x44, int(time.time()) & 0xFFFFFFFF)
+
+		    except Exception as e:
+		        print(f"SESSION BLOB ERROR: {e}")
+		        
+		    return bytes(blob)
     
     def ChallengeCallback_Cleanup(self, session):
         if hasattr(session, 'challenge_state') and session.challenge_state != 0:

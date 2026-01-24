@@ -198,9 +198,10 @@ class AuthenticationHandlers:
         account_personas = AccountManager.load_account_personas(authenticated_username)
         session.available_personas = account_personas
         session.current_persona = account_personas[0]
+        session.persona = account_personas[0]
         session.persona_count = len(account_personas)
         session.authenticated_username = authenticated_username
-        
+        session.room_id = 0
         try:
             import __main__
             if hasattr(__main__, 'room_manager'):
