@@ -1,0 +1,55 @@
+
+void Session_CopyRaceData(void *param_1,undefined8 *param_2)
+
+{
+  undefined8 *puVar1;
+  undefined8 *puVar2;
+  undefined8 uVar3;
+  undefined8 uVar4;
+  undefined8 uVar5;
+  
+  if (param_2 == (undefined8 *)0x0) {
+    memset((void *)((int)param_1 + 0x2dc),0,0x110);
+    *(undefined1 *)((int)param_1 + 0x2d8) = 0;
+  }
+  else {
+    puVar2 = (undefined8 *)((int)param_1 + 0x2dc);
+    puVar1 = param_2 + 0x20;
+    if ((((uint)param_2 | (uint)puVar2) & 7) == 0) {
+      do {
+        uVar3 = param_2[1];
+        uVar4 = param_2[2];
+        uVar5 = param_2[3];
+        *puVar2 = *param_2;
+        puVar2[1] = uVar3;
+        puVar2[2] = uVar4;
+        puVar2[3] = uVar5;
+        param_2 = param_2 + 4;
+        puVar2 = puVar2 + 4;
+      } while (param_2 != puVar1);
+    }
+    else {
+      do {
+        uVar3 = param_2[1];
+        uVar4 = param_2[2];
+        uVar5 = param_2[3];
+        *puVar2 = *param_2;
+        puVar2[1] = uVar3;
+        puVar2[2] = uVar4;
+        puVar2[3] = uVar5;
+        param_2 = param_2 + 4;
+        puVar2 = puVar2 + 4;
+      } while (param_2 != puVar1);
+    }
+    uVar3 = param_2[1];
+    *puVar2 = *param_2;
+    puVar2[1] = uVar3;
+    *(undefined1 *)((int)param_1 + 0x2d8) = 1;
+  }
+  AuthState_Complete(param_1);
+  return;
+}
+--
+Incoming References - Session_CopyRaceData
+Session_InitializeEmpty
+Session_ProcessPlayCommand

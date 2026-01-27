@@ -1,0 +1,48 @@
+
+void Challenge_ValidateTokenFormat(undefined2 *param_1,byte *param_2)
+
+{
+  bool bVar1;
+  uint uVar2;
+  uint uVar3;
+  size_t sVar4;
+  ulong uVar5;
+  byte **ppbVar6;
+  uint uVar7;
+  byte *pbVar8;
+  float fVar9;
+  byte *apbStack_c0 [12];
+  
+  uVar7 = 0;
+  fVar9 = FUN_002caab8((float)DAT_004e3650 * 0.25);
+  uVar2 = FUN_0029dd50((uint)fVar9);
+  uVar3 = ((uVar2 << 5) >> 3) + 0xf >> 4;
+  ppbVar6 = apbStack_c0 + uVar3 * -4;
+  sVar4 = strlen((char *)param_2);
+  pbVar8 = param_2 + (int)sVar4;
+  apbStack_c0[0] = param_2;
+  if (uVar2 != 0) {
+    do {
+      uVar5 = FUN_00104c68(param_2,(long)(int)apbStack_c0,0x24);
+      *(char *)((int)ppbVar6 + 1) = (char)(uVar5 >> 8);
+      param_2 = apbStack_c0[0] + 1;
+      *(char *)((int)ppbVar6 + 2) = (char)(uVar5 >> 0x10);
+      bVar1 = pbVar8 <= apbStack_c0[0];
+      *(char *)((int)ppbVar6 + 3) = (char)(uVar5 >> 0x18);
+      *(char *)ppbVar6 = (char)uVar5;
+      if (bVar1) break;
+      uVar7 = uVar7 + 1;
+      ppbVar6 = (byte **)((int)ppbVar6 + 4);
+    } while (uVar7 < uVar2);
+  }
+  ChallengeValidation_FinalCheck(param_1,apbStack_c0 + uVar3 * -4);
+  return;
+}
+--
+Incoming References - Challenge_ValidateTokenFormat
+FUN_00206e80
+FUN_00206fb0
+FUN_00209858
+FUN_00209dd0
+FUN_00284480
+ChallengeText_IsValidFormat

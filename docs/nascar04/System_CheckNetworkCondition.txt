@@ -1,0 +1,61 @@
+
+undefined4 System_CheckNetworkCondition(int param_1)
+
+{
+  bool bVar1;
+  int iVar2;
+  undefined4 uVar3;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  char acStack_a0 [64];
+  int *apiStack_60 [4];
+  
+  bVar1 = System_CheckNetworkThread();
+  uVar3 = 1;
+  if (bVar1) {
+    bVar1 = MultiplayerMode_Check();
+    uVar3 = 1;
+    if ((!bVar1) && (uVar3 = 1, g_BuddySystem == (short *)0x0)) {
+      iVar2 = NetworkConfig_GetConnectionData((int *)apiStack_60);
+      uVar3 = 1;
+      if ((iVar2 == 0) &&
+         (g_BuddySystem =
+               BuddySystem_CreateInstance((char *)*apiStack_60[0],(char *)apiStack_60[0][2]),
+         uVar3 = 1, g_BuddySystem != (short *)0x0)) {
+        StringHelper_CopyWithParams
+                  (acStack_a0,0x40,0x3e3358,(long)*apiStack_60[0],(long)apiStack_60[0][3],
+                   extraout_t1,extraout_t2,extraout_t3);
+        BuddySystem_InitializeConfig
+                  ((int)g_BuddySystem,acStack_a0,*(undefined4 *)(param_1 + 0x10),&DAT_003e3360,0) ;
+        BuddySystem_RegisterDispatcher((int)g_BuddySystem,MultiplayerCommand_Dispatcher,0);
+        iVar2 = RegisterProtocolCallback(0x326950,0);
+        uVar3 = 1;
+        if (iVar2 == 0) {
+          iVar2 = MultiplayerSystem_InitializeComponents(param_1);
+          uVar3 = 1;
+          if (iVar2 == 0) {
+            DAT_MultiplayerMode = 1;
+            DAT_0039455c = 0xffffffff;
+            uVar3 = 0;
+            DAT_003945f8 = 0;
+            DAT_00394550 = 0;
+            DAT_00394560 = 0;
+            DAT_0039456c = 0;
+            GLOBAL_ConfigFlag = 0;
+            DAT_00394571 = 0;
+            DAT_00394572 = 0;
+            DAT_00394574 = 0;
+            DAT_00394578 = 0;
+            g_FormattedLKEY = 0;
+            DAT_00394554 = param_1;
+          }
+        }
+      }
+    }
+  }
+  return uVar3;
+}
+--
+Incoming References - System_CheckNetworkCondition
+NetworkSystem_InitializeMultiplayer

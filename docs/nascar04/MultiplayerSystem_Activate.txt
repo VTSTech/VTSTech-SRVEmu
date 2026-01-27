@@ -1,0 +1,21 @@
+
+undefined4 MultiplayerSystem_Activate(void)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = 1;
+  if (DAT_MultiplayerMode == 1) {
+    if (DAT_00394574 != 0) {
+      NetworkConnection_InitializeSession
+                ((long)g_BuddySystem,0x394578,DAT_00394574,*DAT_00394554,&g_FormattedLKEY,
+                 (byte *)DAT_00394554[3],MultiplayerCommand_Dispatcher,0);
+      DAT_MultiplayerMode = 2;
+    }
+    uVar1 = 0;
+  }
+  return uVar1;
+}
+
+Incoming References - MultiplayerSystem_Activate
+Command_HandleServerNews

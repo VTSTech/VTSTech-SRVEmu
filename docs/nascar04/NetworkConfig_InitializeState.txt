@@ -1,0 +1,38 @@
+
+undefined4 NetworkConfig_InitializeState(void)
+
+{
+  bool bVar1;
+  int iVar2;
+  undefined4 uVar3;
+  undefined8 extraout_a3;
+  undefined8 extraout_t0;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  int aiStack_30 [4];
+  
+  uVar3 = 1;
+  if (DAT_003e31f8 == 0) {
+    bVar1 = System_CheckNetworkThread();
+    uVar3 = 1;
+    if (bVar1) {
+      iVar2 = FUN_003236f0(aiStack_30);
+      uVar3 = 1;
+      if (iVar2 == 0) {
+        iVar2 = FUN_00323760();
+        uVar3 = 1;
+        if ((iVar2 == 0) && (DAT_003e31f8 = FUN_0031a238(), uVar3 = 1, DAT_003e31f8 != 0)) {
+          uVar3 = 0;
+          iVar2 = Network_GetCurrentConfig();
+          FUN_0031a408(DAT_003e31f8,(long)iVar2,(long)aiStack_30[0],extraout_a3,extraout_t0,
+                       extraout_t1,extraout_t2,extraout_t3);
+        }
+      }
+    }
+  }
+  return uVar3;
+}
+--
+Incoming References - NetworkConfig_InitializeState
+NetworkConfig_InitializeAndSELEct

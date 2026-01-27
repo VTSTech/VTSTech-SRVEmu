@@ -1,0 +1,82 @@
+
+char * Util_StoreData(char *param_1,char *param_2,int param_3)
+
+{
+  char cVar1;
+  char *pcVar2;
+  
+  if ((param_3 != 0) && (pcVar2 = param_1, param_2 != param_1)) {
+    do {
+      param_3 = param_3 + -1;
+      if (param_3 == 0) {
+        *pcVar2 = '\0';
+        return param_1;
+      }
+      cVar1 = *param_2;
+      param_2 = param_2 + 1;
+      *pcVar2 = cVar1;
+      pcVar2 = pcVar2 + 1;
+    } while (cVar1 != '\0');
+  }
+  return param_1;
+}
+--
+Incoming References - Util_StoreData
+ChallengeTarget_Setup
+FUN_001eba80
+FUN_00206700
+FUN_00207700
+FUN_00207a00
+ChallengeSystem_DisplayNotification
+FUN_00209550
+System_LogWithParam
+FUN_002810d8
+CommandHandler_MultiParamCopy
+FUN_002821f0
+Protocol_CommandDispatcher
+ChallengeSystem_GetConfigValue
+ChallengeSystem_CreateChallengeData
+ChallengeSystem_InitiateChallenge
+FUN_00283108
+ChallengeSystem_ProcessChallengeQueue
+ChallengeSystem_FindUserByPermission
+ChallengeSystem_CommandDispatcher
+NetworkConfig_ProcessSessionData
+FUN_00287d68
+CommandHandler_PEEK
+RoomConfig_GetParameter
+FUN_00288260
+FUN_00288398
+UserValidation_ProcessPersona
+Challenge_ProcessResponse
+Challenge_HandleIncoming
+FUN_00289250
+FUN_002897b0
+FUN_00289e10
+FUN_002f85f8
+FUN_003247e0
+FUN_00324830
+Data_ProcessUsername
+CommandHandler_CopyUsername
+Username_ValidateAndStoreDuplicate
+Username_CopyFromPrimaryStorage
+Data_ProcessUserData
+UserConfig_SetEmail
+UserConfig_GetFieldValue
+CommandHandler_ValidateUsername
+PersonaSlot_ValidateAndStore
+CommandHandler_SetPersonaSlot
+CommandHandler_CopyPersonaData
+ConnectionTrigger_Validate
+ServerStatus_CheckMaintenance
+SystemConfig_UpdateSetting
+SystemConfig_SetParameter
+Connection_ProcessUsername1
+ConnectionData_CopyFromPrimaryTable
+Connection_ProcessUsername2
+ConnectionData_CopyFromSecondaryTable
+MultiplayerSystem_ProcessUserRequest
+ChallengeTarget_StoreConnectionInfo
+NetworkConfig_StoreFormattedLKEY
+Config_ProcessNumericValue
+ChallengeSystem_StoreTargetFromBuddy

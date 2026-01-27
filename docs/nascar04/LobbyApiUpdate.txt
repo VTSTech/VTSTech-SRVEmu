@@ -1,576 +1,765 @@
-// COMPLETELY REVISED - Based on Ghidra Analysis
-// LobbyApiUpdate - EA NASCAR Thunder 2004 Lobby System Core
-// Address: 0x0031bdf0
-// Last Updated: [Current Date] - FULLY VERIFIED
 
-==================================================
-                   CORE OVERVIEW
-==================================================
-LobbyApiUpdate is the central update function for EA's online lobby system.
-It processes all incoming Ares protocol messages, manages the connection
-state machine, handles room/user lists, and coordinates multiplayer sessions.
-Called every frame via ProtocolDispatcher_Main (0x003230f0).
+void LobbyApiUpdate(undefined8 param_1)
 
-==================================================
-                  DATA STRUCTURES
-==================================================
-
-struct LobbyContext (0x590 bytes / 1424 bytes)
 {
-    // CONNECTION MANAGEMENT (0x00-0x18)
-    void* socket_handle;           // +0x00: AresSocket pointer (verified)
-    int unknown1;                  // +0x04: Reserved
-    int flags;                     // +0x08: State flags (VERIFIED)
-    int state;                     // +0x0C: Current state (4-char ASCII)
-    int timeout_timer;             // +0x10: Timeout counter in ms
-    int last_ping_time;            // +0x14: Last ping timestamp
-    int last_activity_time;        // +0x18: Last activity time (NEW)
-    int ping_interval;             // +0x1C: Ping response time
-    
-    // NETWORK BUFFERS (0x20-0x24)
-    int buffer_size;               // +0x20: Receive buffer size
-    int buffer_read_pos;           // +0x24: Read position
-    int buffer_write_pos;          // +0x28: Write position
-    void* receive_buffer;          // +0x2C: Data buffer pointer
-    
-    // USER INFORMATION (0x4D-0x5D)
-    char username[64];             // +0x4D: Logged in username
-    char persona[64];              // +0x5D: Selected persona
-    
-    // CONNECTION INFO (0x6C-0x70) - CORRECTED OFFSETS
-    int local_player_id;           // +0x6C: Assigned player ID
-    int session_flags;             // +0x70: Session-specific flags
-    
-    // SERVER CONNECTION (0xEC-0xED) - CORRECTED
-    int remote_port;               // +0xEC: Game server port
-    int remote_ip;                 // +0xED: Game server IP
-    
-    // SERVER RESPONSE DATA (0xEE-0x12F)
-    char server_info[256];         // +0xEE: Server metadata
-    int session_id;                // +0x12E: Game session ID
-    char status[64];               // +0x12F: Status message
-    
-    // HASH TABLE POINTERS (0xC4-0xCF) - CORRECTED OFFSETS
-    void* room_table;              // +0xC4: HashTable for rooms
-    void* room_data_pool;          // +0xC5: Memory pool for room entries
-    void* user_table;              // +0xC9: HashTable for users
-    void* user_data_pool;          // +0xCA: Memory pool for user entries
-    void* rank_table;              // +0xCE: HashTable for rankings
-    void* rank_data_pool;          // +0xCF: Memory pool for rank entries
-    
-    // GAME SESSION DATA (0x80-0xB4) - VERIFIED
-    char session_host[32];         // +0x80: Session host name
-    char session_self[32];         // +0x88: Self player name
-    char session_opponent[32];     // +0x90: Opponent name
-    char player1[16];              // +0xA0: Player 1 name
-    char player2[16];              // +0xA4: Player 2 name
-    char player3[16];              // +0xA8: Player 3 name
-    char player4[16];              // +0xAC: Player 4 name
-    int host_ip;                   // +0xB0: Host IP address
-    int from_ip;                   // +0xB1: Message source IP
-    int seed_value;                // +0xB2: Random seed
-    int timestamp;                 // +0xB3: Message timestamp
-    
-    // SYSTEM STATE (0x140-0x144)
-    int public_key_received;       // +0x140: SKEY received flag
-    int slot_count;                // +0x144: Available slots
-    int snap_channel;              // +0x142: Snapshot channel ID
-    int snap_remaining;            // +0x143: Snapshots remaining
-    
-    // CALLBACK FUNCTIONS - CORRECTED OFFSETS (MULTIPLY BY 4)
-    void (*message_callback)();    // +0x514 (was 0x147)
-    void (*connect_callback)();    // +0x52C (was 0x14B)
-    void (*play_callback)();       // +0x534 (was 0x14D)
-    
-    // CALLBACK DATA POINTERS
-    void* message_callback_data;   // +0x518
-    void* connect_callback_data;   // +0x530
-    void* play_callback_data;      // +0x538
-};
-
-struct AresSocket (0x1C+ bytes) // Partial structure - for ProtoAries functions
-{
-    int socket_handle;             // +0x00: System socket handle
-    int unknown1;                  // +0x04: Unknown
-    int refill_flag;               // +0x08: 0=idle, 1=refilling
-    int read_pos;                  // +0x0C: Buffer read position
-    int write_pos;                 // +0x10: Buffer write position
-    int buffer_size;               // +0x14: Total buffer size
-    byte* buffer;                  // +0x18: Data buffer pointer
-};
-
-==================================================
-                STATE MACHINE
-==================================================
-
-// State Constants (4-char ASCII) - VERIFIED
-#define STATE_OFFLINE     0x6f66666c  // "offl"
-#define STATE_TIMEOUT     0x74696d65  // "time"
-#define STATE_TERMINATED  0x7465726d  // "term"
-#define STATE_DIRECTORY   0x72646972  // "rdir"
-#define STATE_CONNECTING  0x636f6e6e  // "conn"
-#define STATE_SESSION_KEY 0x736b6579  // "skey"
-#define STATE_IDLE        0x69646c65  // "idle"
-#define STATE_AUTH        0x61757468  // "auth"
-#define STATE_ACCOUNT     0x61636374  // "acct"
-
-// State Transitions (EXACT from decompilation)
-// OFFLINE → DIRECTORY → CONNECTING → SESSION_KEY → IDLE → AUTH → ACCOUNT
-
-==================================================
-                FLAG BITMASK
-==================================================
-
-#define FLAG_SKEY_RECEIVED   0x00000001  // Session key received
-#define FLAG_AUTHENTICATED   0x00000002  // User authenticated
-#define FLAG_ROOM_UPDATED    0x00000008  // Room info changed
-#define FLAG_ROOMS_CHANGED   0x00000020  // Room list modified
-#define FLAG_USERS_CHANGED   0x00000040  // User list modified
-#define FLAG_RANKS_CHANGED   0x00000080  // Rankings updated
-#define FLAG_SESSION_DATA    0x00000200  // Game session received
-#define FLAG_SERVER_INFO     0x00000400  // Server info available
-#define FLAG_DIRECT_CONNECT  0x00000800  // Direct connection mode
-
-==================================================
-            MESSAGE PROCESSING LOOP
-==================================================
-
-// EXACT Algorithm from Ghidra Decompilation
-void LobbyApiUpdate(LobbyContext* ctx) {
-    // 1. Update timing and check timeouts (5-second intervals)
-    uint current_time = ProtoAriesTick();
-    if (ctx->last_ping_time && (current_time - ctx->last_ping_time > 5000)) {
-        ctx->timeout_timer += current_time - ctx->last_ping_time;
-        if (ctx->timeout_timer > 30000) { // 30 second total timeout
-            Lobby_SetState(ctx, STATE_TIMEOUT, 0x800);
-            return;
+  byte bVar1;
+  uint uVar2;
+  int iVar3;
+  byte *pbVar4;
+  uint uVar5;
+  undefined4 *puVar6;
+  int *piVar7;
+  byte *pbVar8;
+  int *piVar9;
+  int iVar10;
+  ulong uVar11;
+  int iVar13;
+  undefined8 *puVar14;
+  long lVar15;
+  uint uVar16;
+  undefined8 *puVar17;
+  long lVar18;
+  char *pcVar19;
+  undefined8 extraout_a3;
+  undefined8 extraout_a3_00;
+  undefined8 uVar20;
+  long lVar21;
+  undefined8 extraout_t0;
+  undefined8 extraout_t0_00;
+  undefined8 uVar22;
+  undefined8 extraout_t1;
+  undefined8 extraout_t1_00;
+  undefined8 extraout_t1_01;
+  undefined8 uVar23;
+  undefined8 extraout_t2;
+  undefined8 extraout_t2_00;
+  undefined8 extraout_t2_01;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  undefined8 extraout_t3_01;
+  int *piVar24;
+  byte abStack_410 [256];
+  undefined4 uStack_310;
+  int iStack_30c;
+  uint uStack_308;
+  byte *pbStack_304;
+  undefined1 auStack_300 [56];
+  code *pcStack_2c8;
+  undefined4 uStack_2c4;
+  byte bStack_2b0;
+  byte abStack_2af [511];
+  int iStack_b0;
+  uint uStack_ac;
+  byte *pbStack_a8;
+  byte **ppbStack_a4;
+  long lVar12;
+  
+  piVar24 = (int *)param_1;
+  if (*piVar24 == 0) {
+    return;
+  }
+  uVar2 = ProtoAriesTick();
+  iVar10 = piVar24[3];
+  if (iVar10 == 0x6f66666c) goto LAB_0031be98;
+  iVar13 = uVar2 - piVar24[5];
+  if (piVar24[5] == 0) {
+LAB_0031be6c:
+    iVar3 = piVar24[4];
+  }
+  else {
+    iVar3 = piVar24[4];
+    if (5000 < iVar13) {
+      piVar24[4] = iVar3 + iVar13;
+      goto LAB_0031be6c;
+    }
+  }
+  if ((int)(iVar3 - uVar2) < 0) {
+    Lobby_ChangeConnectionState(param_1,0x74696d65,0x800);
+    iVar10 = piVar24[3];
+  }
+LAB_0031be98:
+  piVar24[5] = uVar2;
+  if ((iVar10 != 0x7465726d) && (iVar10 != 0x6f66666c)) {
+    Lobby_ProcessNetworkEvents(param_1);
+    ppbStack_a4 = &pbStack_a8;
+    while( true ) {
+      iVar10 = ProtoAriesPeek((undefined4 *)*piVar24,(long)(int)&iStack_b0,(long)(int)&uStack_ac ,
+                              (long)(int)ppbStack_a4);
+      lVar21 = (long)iVar10;
+      if (lVar21 < 0) break;
+      piVar24[4] = uVar2 + 60000;
+      if (iStack_b0 == 0x7e706e67) {
+        iVar10 = 0x7e706e67;
+        if (piVar24[7] != -1) {
+          String_FormatTruncated((char *)abStack_410,0x100,(char *)pbStack_a8);
+          String_AppendKeyValue(abStack_410,0x100,NET_PingField,piVar24[7]);
+          lVar21 = -1;
+          iVar10 = iStack_b0;
+          pbStack_a8 = abStack_410;
         }
-    }
-    
-    ctx->last_ping_time = current_time;
-    
-    // 2. Skip if terminated or offline
-    if (ctx->state == STATE_TERMINATED || ctx->state == STATE_OFFLINE) {
-        return;
-    }
-    
-    // 3. Process network events
-    Lobby_ProcessNetworkEvents(ctx);
-    
-    // 4. Main message processing loop
-    while (1) {
-        int msg_type, msg_subtype;
-        char* message_data;
-        
-        // Non-destructive peek
-        int result = ProtoAriesPeek(ctx->socket_handle, 
-                                   &msg_type, &msg_subtype, 
-                                   &message_data);
-        
-        if (result < 0) break; // No more messages
-        
-        // Reset activity timer
-        ctx->last_activity_time = current_time + 60000;
-        
-        // 5. Message-specific processing (EXACT order from decompilation)
-        if (msg_type == 0x7e706e67) { // "~png" - Ping
-            // Handle ping response
-            if (ctx->ping_interval != -1) {
-                char buffer[256];
-                String_FormatTruncated(buffer, 256, message_data);
-                String_AppendKeyValue(buffer, 256, "TIME", ctx->ping_interval);
-                ProtoAriesSend(ctx->socket_handle, msg_type, msg_subtype, buffer, -1);
+        ProtoAriesSend((undefined4 *)*piVar24,iVar10,uStack_ac,(char *)pbStack_a8,lVar21);
+        puVar6 = (undefined4 *)*piVar24;
+      }
+      else {
+        uStack_308 = uStack_ac;
+        pbStack_304 = pbStack_a8;
+        uStack_310 = 0;
+        iStack_30c = iStack_b0;
+        if ((code *)piVar24[0x145] != (code *)0x0) {
+          (*(code *)piVar24[0x145])(param_1,&uStack_310,piVar24[0x146]);
+        }
+        CommandQueue_ProcessNext((int)piVar24,(long)(int)auStack_300,iStack_b0);
+        if (pcStack_2c8 != (code *)0x0) {
+          (*pcStack_2c8)(param_1,&uStack_310,uStack_2c4);
+        }
+        if (piVar24[3] == 0x72646972) {
+          if (iStack_b0 == 0x40646972) {
+            uVar5 = Lobby_GetConnectionParam((undefined4 *)*piVar24,0x6c707274);
+            uVar16 = Lobby_GetConnectionParam((undefined4 *)*piVar24,0x6c616472);
+            piVar24[0x140] = uVar16;
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_DirectField);
+            if (pbVar4 == (byte *)0x0) {
+              pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_Field3);
+              uVar16 = TagFieldGetAddress(pbVar4,0);
+              piVar24[0xed] = uVar16;
+              pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_PortField);
+              iVar10 = TagFieldGetNumber(pbVar4,0);
+              piVar24[0xec] = iVar10;
             }
-        } else {
-            // Call message callback if registered
-            if (ctx->message_callback) {
-                CallbackParams params = {1, msg_type, 0, message_data};
-                ctx->message_callback(ctx, &params, ctx->message_callback_data);
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_SessionField);
+            iVar10 = TagFieldGetNumber(pbVar4,0);
+            piVar24[0x12e] = iVar10;
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_StatusField);
+            TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x12f),0x40,(byte *)NET_DefaultValue);
+            Lobby_ClearProtocolState((undefined4 *)*piVar24);
+            if (piVar24[0xed] != 0) {
+              piVar24[3] = 0x636f6e6e;
+              Lobby_UpdateConnection((int)piVar24);
+              Connection_InitiateToServer
+                        ((int)piVar24,0x3df238,(long)piVar24[0xed],(long)piVar24[0xec],extraout_t0 ,
+                         extraout_t1,extraout_t2,extraout_t3);
+              ProtoAriesConnect((undefined4 *)*piVar24,piVar24[0xed],piVar24[0xec]);
+              abStack_410[0] = 0;
+              Network_FormatIPAndProcess(abStack_410,0x100,NET_Field3,piVar24[0x140]);
+              String_AppendKeyValue(abStack_410,0x100,LOBBY_PortField,uVar5);
+              ProtoAriesSend((undefined4 *)*piVar24,0x61646472,0,(char *)abStack_410,-1);
+              break;
             }
-            
-            // Process via command queue
-            CommandQueue_ProcessNext(ctx, msg_type, message_data);
-            
-            // State-specific processing
-            if (ctx->state == STATE_DIRECTORY && msg_type == 0x40646972) { // "@dir"
-                // Parse directory response
-                ProcessDirectoryResponse(ctx, message_data);
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_ServerField);
+            TagFieldGetString(pbVar4,(byte *)(piVar24 + 0xee),0x100,(byte *)NET_DefaultValue);
+            piVar24[2] = piVar24[2] | 0x400;
+          }
+          iStack_b0 = 0;
+        }
+        if ((iStack_b0 == -1) && (uStack_ac == 0xffffffff)) {
+          abStack_410[0] = 0;
+          TagFieldSetBinary(abStack_410,0x100,LOBBY_PublicKeyField,(byte *)"Public Key",10);
+          ProtoAriesSend((undefined4 *)*piVar24,0x736b6579,0,(char *)abStack_410,-1);
+          piVar24[0x141] = 1;
+          piVar24[3] = 0x736b6579;
+          iStack_b0 = 0x636f6e6e;
+          uStack_ac = 0;
+        }
+        uVar5 = uStack_ac;
+        if ((piVar24[3] == 0x736b6579) &&
+           (((iStack_b0 == 0x736b6579 || (iStack_b0 == 0x73656c65)) && (uStack_ac == 0)))) {
+          if (iStack_b0 == 0x736b6579) {
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_PublicKeyField);
+            TagFieldGetBinary((long)(int)pbVar4,(byte *)(piVar24 + 9),0x10);
+            uVar16 = piVar24[2];
+          }
+          else {
+            uVar16 = piVar24[2];
+          }
+          piVar24[2] = uVar16 | 1;
+          piVar24[3] = 0x69646c65;
+          iStack_b0 = 0x636f6e6e;
+          uStack_ac = 0;
+          piVar24[6] = uVar2;
+          if ((code *)piVar24[0x14b] != (code *)0x0) {
+            iStack_30c = 0x636f6e6e;
+            uStack_310 = 3;
+            uStack_308 = 0;
+            pbStack_304 = (byte *)0x0;
+            (*(code *)piVar24[0x14b])(param_1,&uStack_310,piVar24[0x14c]);
+            uVar5 = uStack_ac;
+          }
+        }
+        if (((iStack_b0 == -1) && (uVar5 == 0xfefefefe)) && (piVar24[3] != 0x636f6e6e)) {
+          Lobby_ChangeConnectionState(param_1,0xfefefefe,0x800);
+          uVar5 = uStack_ac;
+        }
+        if (uVar5 == 0x61757468) {
+          Lobby_ChangeConnectionState(param_1,0x61757468,2);
+        }
+        if ((iStack_b0 == 0x61757468) && (uStack_ac == 0)) {
+          piVar24[3] = 0x61757468;
+          piVar24[2] = piVar24[2] | 2;
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_Field2);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x4d),0x40,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_Field3);
+          uVar5 = TagFieldGetAddress(pbVar4,0);
+          piVar24[0x13f] = uVar5;
+        }
+        if ((iStack_b0 == 0x61636374) && (uStack_ac == 0)) {
+          piVar24[3] = 0x61636374;
+          piVar24[2] = piVar24[2] | 2;
+        }
+        if (((iStack_b0 == 0x736e6170) &&
+            (iVar10 = piVar24[0x143], piVar24[0x143] = iVar10 + -1, iVar10 + -1 == 0)) &&
+           (uStack_ac == 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_SnapField);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          piVar24[0x142] = iVar10;
+        }
+        if ((iStack_b0 == 0x73656c65) && (uStack_ac == 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_SlotsField);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          piVar24[0x141] = iVar10;
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_MaxSlotsField);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          piVar24[0x144] = iVar10;
+        }
+        if ((iStack_b0 == 0x70657273) && (uStack_ac == 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)LOBBY_PersonaField);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x5d),0x40,(byte *)NET_DefaultValue);
+          piVar24[6] = uVar2;
+        }
+        if (iStack_b0 == 0x2b736573) {
+          memset(piVar24 + 0x80,0,0x110);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_Field2);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x80),0x20,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field1);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x88),0x20,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field2);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x90),0x20,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field3);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x98),0x20,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field4);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0xa0),0x10,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field5);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0xa4),0x10,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field6);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0xa8),0x10,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field7);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0xac),0x10,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field8);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0xb4),0x40,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_Field3);
+          uVar5 = TagFieldGetAddress(pbVar4,0);
+          piVar24[0xb0] = uVar5;
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field9);
+          uVar5 = TagFieldGetAddress(pbVar4,0);
+          piVar24[0xb1] = uVar5;
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field10);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          piVar24[0xb2] = iVar10;
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)USER_Field11);
+          uVar11 = TagFieldGetEpoch((long)(int)pbVar4,0);
+          piVar24[0xb3] = (int)uVar11;
+          piVar24[2] = piVar24[2] | 0x200;
+          if ((code *)piVar24[0x14d] != (code *)0x0) {
+            uStack_310 = 4;
+            iStack_30c = 0x706c6179;
+            pbStack_304 = pbStack_a8;
+            uStack_308 = 0;
+            (*(code *)piVar24[0x14d])(param_1,&uStack_310,piVar24[0x14e]);
+          }
+        }
+        if ((iStack_b0 == 0x2b6d7367) && (piVar24[0x147] != 0)) {
+          uStack_310 = 1;
+          iStack_30c = 0x63686174;
+          uStack_308 = 0;
+          pbStack_304 = pbStack_a8;
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_FlagsField);
+          uStack_308 = TagFieldGetFlags((char *)pbVar4,0);
+          if ((uStack_308 & 4) != 0) {
+            iStack_30c = 0x63617374;
+          }
+          if ((uStack_308 & 0x10000) != 0) {
+            iStack_30c = 0x70726976;
+          }
+          (*(code *)piVar24[0x147])(param_1,&uStack_310,piVar24[0x148]);
+        }
+        if (iStack_b0 == 0x2b77686f) {
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+          TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x5d),0x40,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_FlagsField);
+          uVar5 = TagFieldGetFlags((char *)pbVar4,0);
+          piVar24[0x6d] = uVar5;
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_RoomID);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_PlayerCount);
+          iVar13 = TagFieldGetNumber(pbVar4,0);
+          if (iVar10 != piVar24[0x6e]) {
+            piVar24[0x6e] = iVar10;
+            Lobby_UpdateRoomPopulation((int)piVar24,iVar10,(long)iVar13);
+            pbVar4 = TagFieldFind(pbStack_a8,&MSG_RankField);
+            TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x70),0x40,(byte *)NET_DefaultValue);
+            pbVar4 = TagFieldFind(pbStack_a8,&MSG_RoomFlags);
+            uVar5 = TagFieldGetFlags((char *)pbVar4,0);
+            piVar24[0x6f] = uVar5;
+            piVar24[2] = piVar24[2] | 8;
+            if (piVar24[0xc9] != 0) {
+              while (puVar6 = (undefined4 *)Buddy_GetNextUser((int *)piVar24[0xc9]),
+                    puVar6 != (undefined4 *)0x0) {
+                iVar10 = HashTable_FreeEntry(piVar24[0xca],puVar6);
+                Util_FreeMemory((long)iVar10);
+              }
+              piVar24[2] = piVar24[2] | 0x40;
             }
-            // ... other message handlers (see Message Handlers section)
+          }
         }
-        
-        // 6. Remove processed message
-        ProtoAriesRecv(ctx->socket_handle, 0, 0, 0, 0);
-    }
-    
-    // 7. Periodic updates (30-second intervals)
-    if (ctx->last_activity_time && current_time >= ctx->last_activity_time) {
-        Lobby_UpdateConnection(ctx);
-        ctx->last_activity_time = current_time + 30000;
-    }
-}
-
-==================================================
-            MESSAGE HANDLERS - VERIFIED
-==================================================
-
-// Directory Response Handler (@dir - 0x40646972)
-void ProcessDirectoryResponse(LobbyContext* ctx, char* data) {
-    char* direct_tag = TagFieldFind(data, "DIRECT");
-    if (direct_tag && atoi(direct_tag) == 1) {
-        ctx->flags |= FLAG_DIRECT_CONNECT;
-        return;
-    }
-    
-    char* addr_tag = TagFieldFind(data, "ADDR");
-    char* port_tag = TagFieldFind(data, "PORT");
-    char* sess_tag = TagFieldFind(data, "SESS");
-    char* down_tag = TagFieldFind(data, "DOWN");
-    
-    if (addr_tag && port_tag && sess_tag) {
-        ctx->remote_ip = TagFieldGetAddress(addr_tag, 0);
-        ctx->remote_port = atoi(port_tag);
-        ctx->session_id = atoi(sess_tag);
-        
-        if (down_tag) {
-            TagFieldGetString(down_tag, ctx->server_info, 256, "");
-            ctx->flags |= FLAG_SERVER_INFO;
+        if ((iStack_b0 == 0x2b726f6d) && (piVar24[0xc4] != 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_IDField);
+          iVar10 = TagFieldGetNumber(pbVar4,-1);
+          if (-1 < iVar10) {
+            pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+            if (pbVar4 == (byte *)0x0) {
+              puVar6 = (undefined4 *)HashTable_Lookup(piVar24[0xc4],iVar10);
+              if (puVar6 == (undefined4 *)0x0) {
+                uVar5 = piVar24[2];
+              }
+              else {
+                HashTable_Remove((int *)piVar24[0xc4],iVar10);
+                iVar10 = HashTable_FreeEntry(piVar24[0xc5],puVar6);
+                Util_FreeMemory((long)iVar10);
+                piVar24[2] = piVar24[2] | 0x20;
+                uVar5 = piVar24[2];
+              }
+            }
+            else {
+              piVar7 = (int *)Util_AllocateMemory(0x68);
+              memset(piVar7,0,0x68);
+              *piVar7 = iVar10;
+              pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+              TagFieldGetString(pbVar4,(byte *)(piVar7 + 7),0x20,(byte *)NET_DefaultValue);
+              pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_DescriptionField);
+              TagFieldGetString(pbVar4,(byte *)(piVar7 + 0xf),0x20,(byte *)NET_DefaultValue);
+              pbVar4 = TagFieldFind(pbStack_a8,&MSG_FlagsField);
+              uVar5 = TagFieldGetFlags((char *)pbVar4,0xffffffff);
+              piVar7[2] = uVar5;
+              pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_HostField);
+              uVar5 = TagFieldGetAddress(pbVar4,0);
+              piVar7[0x19] = uVar5;
+              pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_PlayerCountField);
+              iVar10 = TagFieldGetNumber(pbVar4,0);
+              piVar7[4] = iVar10;
+              pbVar4 = TagFieldFind(pbStack_a8,&ROOM_MaxPlayersField);
+              iVar10 = TagFieldGetNumber(pbVar4,0);
+              piVar7[3] = iVar10;
+              Util_FormatIPString((char *)(piVar7 + 5),0x3e2f70,(long)piVar7[4],extraout_a3,
+                                  extraout_t0_00,extraout_t1_00,extraout_t2_00,extraout_t3_00);
+              if ((piVar7[2] & 0x10000U) == 0) {
+                pcVar19 = &DAT_003e3108;
+              }
+              else {
+                pcVar19 = &DAT_003e3100;
+              }
+              StringHelper_CopyToBuffer((long)(int)(piVar7 + 6),pcVar19);
+              *(undefined1 *)(piVar7 + 0x17) = 0;
+              pbVar4 = TagFieldFind(pbStack_a8,&ROOM_PasswordField);
+              iVar10 = TagFieldGetNumber(pbVar4,-1);
+              uVar11 = (ulong)iVar10;
+              if (uVar11 == 0) {
+                piVar7[0x17] = ROOM_DefaultPassword;
+                iVar10 = piVar24[0xc4];
+              }
+              else {
+                if (0 < (long)uVar11) {
+                  Util_FormatIPString((char *)(piVar7 + 0x17),0x3e3120,uVar11,extraout_a3_00,uVar 11,
+                                      extraout_t1_01,extraout_t2_01,extraout_t3_01);
+                }
+                iVar10 = piVar24[0xc4];
+              }
+              puVar6 = (undefined4 *)HashTable_Lookup(iVar10,*piVar7);
+              if ((long)(int)puVar6 == 0) {
+                iVar10 = HashTable_AllocateEntry((long)piVar24[0xc5],(long)(int)piVar7);
+                HashTable_Insert((int *)piVar24[0xc4],*piVar7,iVar10);
+                uVar5 = piVar24[2];
+              }
+              else {
+                iVar10 = Buddy_GetUserData((long)piVar24[0xc5],(long)(int)puVar6);
+                if ((((long)iVar10 != 0) && ('/' < *(char *)(iVar10 + 0x5c))) &&
+                   (*(char *)(iVar10 + 0x5c) < ':')) {
+                  StringHelper_CopyToBuffer((long)(int)(piVar7 + 0x17),(char *)(iVar10 + 0x5c));
+                }
+                Util_FreeMemory((long)iVar10);
+                HashTable_UpdateEntry(piVar24[0xc5],puVar6,(long)(int)piVar7);
+                uVar5 = piVar24[2];
+              }
+            }
+            piVar24[2] = uVar5 | 0x20;
+          }
         }
-        
-        // Connect to game server
-        ctx->state = STATE_CONNECTING;
-        Lobby_UpdateConnection(ctx);
-        Connection_InitiateToServer(ctx, ctx->remote_ip, ctx->remote_port);
-        ProtoAriesConnect(ctx->socket_handle, ctx->remote_ip, ctx->remote_port);
-        
-        // Send address confirmation
-        char buffer[256];
-        Network_FormatIPAndProcess(buffer, 256, "ADDR", ctx->local_ip);
-        String_AppendKeyValue(buffer, 256, "PORT", ctx->local_port);
-        ProtoAriesSend(ctx->socket_handle, 0x61646472, 0, buffer, -1); // "addr"
-    }
-}
-
-// Session Key Handler (skey - 0x736b6579)
-void ProcessSessionKey(LobbyContext* ctx, char* data) {
-    char* key_tag = TagFieldFind(data, "SKEY");
-    if (key_tag) {
-        TagFieldGetBinary(key_tag, (byte*)(ctx + 0x24), 16); // Store at ctx+0x24
-        ctx->flags |= FLAG_SKEY_RECEIVED;
-        ctx->state = STATE_IDLE;
-        ctx->last_activity_time = ProtoAriesTick() + 30000;
-        
-        // Notify connection callback
-        if (ctx->connect_callback) {
-            CallbackParams params = {2, 0x636f6e6e, 3, NULL}; // "conn", state=3
-            ctx->connect_callback(ctx, &params, ctx->connect_callback_data);
+        if ((iStack_b0 == 0x2b706f70) && (piVar24[0xc4] != 0)) {
+          pbVar8 = TagFieldFind(pbStack_a8,(byte *)ROOM_PopulationField);
+          pbVar4 = &bStack_2b0;
+          TagFieldGetString(pbVar8,pbVar4,0x200,(byte *)NET_DefaultValue);
+          bVar1 = bStack_2b0;
+          while (uVar5 = (uint)bVar1, uVar5 != 0) {
+            iVar10 = 0;
+            while (bVar1 - 0x30 < 10) {
+              uVar16 = uVar5 & 0xf;
+              pbVar4 = pbVar4 + 1;
+              bVar1 = *pbVar4;
+              uVar5 = (uint)bVar1;
+              iVar10 = iVar10 * 10 + uVar16;
+            }
+            if (iVar10 == 0) break;
+            uVar11 = 0;
+            if (uVar5 != 0) {
+              pbVar4 = pbVar4 + 1;
+            }
+            uVar5 = (uint)*pbVar4;
+            if (*pbVar4 - 0x30 < 10) {
+              iVar13 = piVar24[0x6e];
+              uVar16 = uVar5;
+              do {
+                pbVar8 = pbVar4;
+                pbVar4 = pbVar8 + 1;
+                uVar5 = (uint)*pbVar4;
+                uVar11 = (ulong)(int)((int)uVar11 * 10 + (uVar16 & 0xf));
+                uVar16 = uVar5;
+              } while (*pbVar4 - 0x30 < 10);
+              pbVar8 = pbVar8 + 2;
+            }
+            else {
+              iVar13 = piVar24[0x6e];
+              pbVar8 = pbVar4 + 1;
+            }
+            if (uVar5 != 0) {
+              pbVar4 = pbVar8;
+            }
+            if (iVar10 != iVar13) {
+              Lobby_UpdateRoomPopulation((int)piVar24,iVar10,uVar11);
+            }
+            bVar1 = *pbVar4;
+          }
         }
-    }
-}
-
-// Authentication Handler (auth - 0x61757468)
-void ProcessAuthentication(LobbyContext* ctx, char* data) {
-    char* name_tag = TagFieldFind(data, "NAME");
-    char* addr_tag = TagFieldFind(data, "ADDR");
-    
-    if (name_tag && addr_tag) {
-        TagFieldGetString(name_tag, ctx->username, 64, "");
-        ctx->remote_ip = TagFieldGetAddress(addr_tag, 0);
-        ctx->state = STATE_AUTH;
-        ctx->flags |= FLAG_AUTHENTICATED;
-    }
-}
-
-// Session Data Handler (+ses - 0x2b736573) - VERIFIED
-void ProcessSessionData(LobbyContext* ctx, char* data) {
-    // Clear session data area (272 bytes)
-    memset(ctx + 0x80, 0, 0x110);
-    
-    // Parse all fields (EXACT order from decompilation)
-    TagFieldGetString(TagFieldFind(data, "NAME"), ctx->session_host, 32, "");
-    TagFieldGetString(TagFieldFind(data, "SELF"), ctx->session_self, 32, "");
-    TagFieldGetString(TagFieldFind(data, "HOST"), ctx->session_host, 32, "");
-    TagFieldGetString(TagFieldFind(data, "OPPO"), ctx->session_opponent, 32, "");
-    
-    // Player slots
-    TagFieldGetString(TagFieldFind(data, "P1"), ctx->player1, 16, "");
-    TagFieldGetString(TagFieldFind(data, "P2"), ctx->player2, 16, "");
-    TagFieldGetString(TagFieldFind(data, "P3"), ctx->player3, 16, "");
-    TagFieldGetString(TagFieldFind(data, "P4"), ctx->player4, 16, "");
-    
-    // Connection info
-    ctx->host_ip = TagFieldGetAddress(TagFieldFind(data, "ADDR"), 0);
-    ctx->from_ip = TagFieldGetAddress(TagFieldFind(data, "FROM"), 0);
-    ctx->seed_value = TagFieldGetNumber(TagFieldFind(data, "SEED"), 0);
-    ctx->timestamp = TagFieldGetEpoch(TagFieldFind(data, "WHEN"), 0);
-    
-    ctx->flags |= FLAG_SESSION_DATA;
-    
-    // Notify game via play callback
-    if (ctx->play_callback) {
-        CallbackParams params = {4, 0x706c6179, 0, data}; // "play"
-        ctx->play_callback(ctx, &params, ctx->play_callback_data);
-    }
-}
-
-// Room Information Handler (+rom - 0x2b726f6d) - VERIFIED
-void ProcessRoomInfo(LobbyContext* ctx, char* data) {
-    int room_id = TagFieldGetNumber(TagFieldFind(data, "I"), -1);
-    if (room_id < 0) return;
-    
-    char* name_tag = TagFieldFind(data, "NAME");
-    if (!name_tag) {
-        // Room removal
-        void* room_entry = HashTable_Lookup(ctx->room_table, room_id);
-        if (room_entry) {
-            HashTable_Remove(ctx->room_table, room_id);
-            Buddy_FreeUserData(ctx->room_data_pool, room_entry);
-            ctx->flags |= FLAG_ROOMS_CHANGED;
+        if ((iStack_b0 == 0x2b757372) && (piVar24[0xc9] != 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_IDField);
+          iVar10 = TagFieldGetNumber(pbVar4,-1);
+          if (-1 < iVar10) {
+            pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+            if (pbVar4 == (byte *)0x0) {
+              puVar6 = (undefined4 *)HashTable_Lookup(piVar24[0xc9],iVar10);
+              if (puVar6 != (undefined4 *)0x0) {
+                HashTable_Remove((int *)piVar24[0xc9],iVar10);
+                iVar10 = HashTable_FreeEntry(piVar24[0xca],puVar6);
+                Util_FreeMemory((long)iVar10);
+              }
+            }
+            else {
+              piVar7 = (int *)Util_AllocateMemory(0x138);
+              lVar21 = (long)(int)piVar7;
+              memset(piVar7,0,0x138);
+              *piVar7 = iVar10;
+              pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+              TagFieldGetString(pbVar4,(byte *)(piVar7 + 2),0x20,(byte *)NET_DefaultValue);
+              pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_HostField);
+              uVar5 = TagFieldGetAddress(pbVar4,0);
+              piVar7[0xc] = uVar5;
+              pbVar4 = TagFieldFind(pbStack_a8,&ROOM_PasswordField);
+              TagFieldGetString(pbVar4,(byte *)(piVar7 + 10),8,(byte *)NET_DefaultValue);
+              pbVar4 = TagFieldFind(pbStack_a8,&MSG_FlagsField);
+              uVar5 = TagFieldGetFlags((char *)pbVar4,0);
+              piVar7[1] = uVar5;
+              pbVar4 = TagFieldFind(pbStack_a8,&DAT_003e3130);
+              TagFieldGetString(pbVar4,(byte *)(piVar7 + 0xe),0x80,(byte *)NET_DefaultValue);
+              pbVar4 = TagFieldFind(pbStack_a8,&MSG_RankField);
+              iVar10 = TagFieldGetNumber(pbVar4,0);
+              piVar7[0xd] = iVar10;
+              pbVar4 = TagFieldFind(pbStack_a8,&DAT_003e3138);
+              TagFieldGetString(pbVar4,(byte *)(piVar7 + 0x2e),0x80,(byte *)NET_DefaultValue);
+              puVar6 = (undefined4 *)HashTable_Lookup(piVar24[0xc9],*piVar7);
+              if ((long)(int)puVar6 == 0) {
+                iVar10 = HashTable_AllocateEntry((long)piVar24[0xca],lVar21);
+                HashTable_Insert((int *)piVar24[0xc9],*piVar7,iVar10);
+              }
+              else {
+                piVar9 = (int *)Buddy_GetUserData((long)piVar24[0xca],(long)(int)puVar6);
+                lVar12 = (long)(int)piVar9;
+                if ((((uint)piVar7 | (uint)piVar9) & 7) == 0) {
+                  lVar15 = lVar21;
+                  lVar18 = lVar12;
+                  do {
+                    puVar14 = (undefined8 *)lVar15;
+                    uVar20 = puVar14[1];
+                    uVar22 = puVar14[2];
+                    uVar23 = puVar14[3];
+                    puVar17 = (undefined8 *)lVar18;
+                    *puVar17 = *puVar14;
+                    puVar17[1] = uVar20;
+                    puVar17[2] = uVar22;
+                    puVar17[3] = uVar23;
+                    puVar14 = puVar14 + 4;
+                    lVar15 = (long)(int)puVar14;
+                    puVar17 = puVar17 + 4;
+                    lVar18 = (long)(int)puVar17;
+                  } while (lVar15 != (int)(piVar7 + 0x48));
+                }
+                else {
+                  lVar15 = lVar21;
+                  lVar18 = lVar12;
+                  do {
+                    puVar14 = (undefined8 *)lVar15;
+                    uVar22 = puVar14[1];
+                    uVar23 = puVar14[2];
+                    uVar20 = puVar14[3];
+                    puVar17 = (undefined8 *)lVar18;
+                    *puVar17 = *puVar14;
+                    puVar17[1] = uVar22;
+                    puVar17[2] = uVar23;
+                    puVar17[3] = uVar20;
+                    puVar14 = puVar14 + 4;
+                    lVar15 = (long)(int)puVar14;
+                    puVar17 = puVar17 + 4;
+                    lVar18 = (long)(int)puVar17;
+                  } while (lVar15 != (int)(piVar7 + 0x48));
+                }
+                uVar20 = puVar14[1];
+                uVar22 = puVar14[2];
+                *puVar17 = *puVar14;
+                puVar17[1] = uVar20;
+                puVar17[2] = uVar22;
+                HashTable_UpdateEntry(piVar24[0xca],puVar6,lVar12);
+                Util_FreeMemory(lVar21);
+                piVar7 = piVar9;
+              }
+              if ((piVar7[1] & 0x200000U) != 0) {
+                piVar24[0x6d] = piVar7[1];
+              }
+            }
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_PlayerCountField);
+            iVar10 = TagFieldGetNumber(pbVar4,0);
+            Lobby_UpdateRoomPopulation((int)piVar24,piVar24[0x6e],(long)iVar10);
+            piVar24[2] = piVar24[2] | 0x40;
+          }
         }
-    } else {
-        // Room creation/update (104 bytes structure)
-        RoomEntry* room = allocate_room_entry();
-        room->id = room_id;
-        room->max_players = TagFieldGetNumber(TagFieldFind(data, "L"), 0);
-        room->current_players = TagFieldGetNumber(TagFieldFind(data, "T"), 0);
-        room->host_ip = TagFieldGetAddress(TagFieldFind(data, "HOST"), 0);
-        
-        TagFieldGetString(name_tag, room->name, 32, "");
-        TagFieldGetString(TagFieldFind(data, "H"), room->description, 32, "");
-        
-        // Password handling
-        int password = TagFieldGetNumber(TagFieldFind(data, "P"), -1);
-        if (password == 0) {
-            strcpy(room->password, "---"); // No password
-        } else if (password > 0) {
-            snprintf(room->password, 8, "~%dms", password);
+        if ((iStack_b0 == 0x2b726e6b) && (piVar24[0xce] != 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,&RANK_TypeField);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          if (iVar10 == -2) {
+            while (puVar6 = (undefined4 *)Buddy_GetNextUser((int *)piVar24[0xce]),
+                  puVar6 != (undefined4 *)0x0) {
+              iVar10 = HashTable_FreeEntry(piVar24[0xcf],puVar6);
+              Util_FreeMemory((long)iVar10);
+            }
+            uVar5 = piVar24[2];
+          }
+          else {
+            piVar7 = (int *)Util_AllocateMemory(0xa8);
+            lVar21 = (long)(int)piVar7;
+            piVar7[1] = 0;
+            pbVar8 = (byte *)(piVar7 + 2);
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)ROOM_HostField);
+            iVar10 = TagFieldGetNumber(pbVar4,0);
+            *piVar7 = iVar10;
+            pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+            TagFieldGetString(pbVar4,pbVar8,0x20,(byte *)NET_DefaultValue);
+            pbVar4 = TagFieldFind(pbStack_a8,&DAT_003e3130);
+            TagFieldGetString(pbVar4,(byte *)(piVar7 + 10),0x80,(byte *)NET_DefaultValue);
+            if (*piVar7 < 0x2000) {
+              iVar10 = piVar24[0xce];
+            }
+            else {
+              *piVar7 = 0x1fff;
+              iVar10 = piVar24[0xce];
+            }
+            puVar6 = (undefined4 *)Buddy_FindUserByString(iVar10,(long)(int)pbVar8);
+            if ((long)(int)puVar6 == 0) {
+              if (*piVar7 < 1) {
+                Util_FreeMemory(lVar21);
+                uVar5 = piVar24[2];
+              }
+              else {
+                iVar10 = HashTable_AllocateEntry(piVar24[0xcf],lVar21);
+                Buddy_AddUser((int *)piVar24[0xce],pbVar8,iVar10);
+                uVar5 = piVar24[2];
+              }
+            }
+            else {
+              if (*piVar7 < 1) {
+                puVar6 = (undefined4 *)Buddy_RemoveUser((int *)piVar24[0xce],(long)(int)pbVar8);
+                iVar10 = HashTable_FreeEntry(piVar24[0xcf],puVar6);
+                Util_FreeMemory((long)iVar10);
+              }
+              else {
+                uVar5 = Buddy_GetUserData((long)piVar24[0xcf],(long)(int)puVar6);
+                lVar12 = (long)(int)uVar5;
+                if ((((uint)piVar7 | uVar5) & 7) == 0) {
+                  lVar15 = lVar21;
+                  lVar18 = lVar12;
+                  do {
+                    puVar14 = (undefined8 *)lVar15;
+                    uVar23 = puVar14[1];
+                    uVar20 = puVar14[2];
+                    uVar22 = puVar14[3];
+                    puVar17 = (undefined8 *)lVar18;
+                    *puVar17 = *puVar14;
+                    puVar17[1] = uVar23;
+                    puVar17[2] = uVar20;
+                    puVar17[3] = uVar22;
+                    puVar14 = puVar14 + 4;
+                    lVar15 = (long)(int)puVar14;
+                    puVar17 = puVar17 + 4;
+                    lVar18 = (long)(int)puVar17;
+                  } while (lVar15 != (int)(piVar7 + 0x28));
+                }
+                else {
+                  lVar15 = lVar21;
+                  lVar18 = lVar12;
+                  do {
+                    puVar14 = (undefined8 *)lVar15;
+                    uVar23 = puVar14[1];
+                    uVar20 = puVar14[2];
+                    uVar22 = puVar14[3];
+                    puVar17 = (undefined8 *)lVar18;
+                    *puVar17 = *puVar14;
+                    puVar17[1] = uVar23;
+                    puVar17[2] = uVar20;
+                    puVar17[3] = uVar22;
+                    puVar14 = puVar14 + 4;
+                    lVar15 = (long)(int)puVar14;
+                    puVar17 = puVar17 + 4;
+                    lVar18 = (long)(int)puVar17;
+                  } while (lVar15 != (int)(piVar7 + 0x28));
+                }
+                *puVar17 = *puVar14;
+                HashTable_UpdateEntry(piVar24[0xcf],puVar6,lVar12);
+              }
+              Util_FreeMemory(lVar21);
+              uVar5 = piVar24[2];
+            }
+          }
+          piVar24[2] = uVar5 | 0x80;
         }
-        
-        // Update hash table
-        void* existing = HashTable_Lookup(ctx->room_table, room_id);
-        if (existing) {
-            Buddy_UpdateUserData(ctx->room_data_pool, existing, room);
-            free(room);
-        } else {
-            int entry_id = Buddy_CreateUserEntry(ctx->room_data_pool, room);
-            HashTable_Insert(ctx->room_table, room_id, entry_id);
+        if ((((iStack_b0 == 0x2b736e70) && (iVar10 = piVar24[0x142], 3 < iVar10)) && (iVar10 < 8) )
+           && (piVar24[iVar10 * 5 + 0xc4] != 0)) {
+          piVar7 = (int *)Util_AllocateMemory(0xa8);
+          lVar21 = (long)(int)piVar7;
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_RankField);
+          pbVar8 = (byte *)(piVar7 + 2);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          piVar7[1] = iVar10;
+          pbVar4 = TagFieldFind(pbStack_a8,&ROOM_PasswordField);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          *piVar7 = iVar10;
+          pbVar4 = TagFieldFind(pbStack_a8,&MSG_UsernameField);
+          TagFieldGetString(pbVar4,pbVar8,0x20,(byte *)NET_DefaultValue);
+          pbVar4 = TagFieldFind(pbStack_a8,&DAT_003e3130);
+          TagFieldGetString(pbVar4,(byte *)(piVar7 + 10),0x80,(byte *)NET_DefaultValue);
+          if (*piVar7 < 0x2000) {
+            iVar10 = piVar24[0x142];
+          }
+          else {
+            *piVar7 = 0x1fff;
+            iVar10 = piVar24[0x142];
+          }
+          puVar6 = (undefined4 *)
+                   Buddy_FindUserByString(piVar24[iVar10 * 5 + 0xc4],(long)(int)pbVar8);
+          if ((long)(int)puVar6 == 0) {
+            iVar10 = HashTable_AllocateEntry(piVar24[piVar24[0x142] * 5 + 0xc5],lVar21);
+            Buddy_AddUser((int *)piVar24[piVar24[0x142] * 5 + 0xc4],pbVar8,iVar10);
+            uVar5 = piVar24[2];
+          }
+          else {
+            uVar5 = Buddy_GetUserData((long)piVar24[piVar24[0x142] * 5 + 0xc5],(long)(int)puVar6) ;
+            lVar12 = (long)(int)uVar5;
+            if ((((uint)piVar7 | uVar5) & 7) == 0) {
+              lVar15 = lVar21;
+              lVar18 = lVar12;
+              do {
+                puVar14 = (undefined8 *)lVar15;
+                uVar20 = puVar14[1];
+                uVar22 = puVar14[2];
+                uVar23 = puVar14[3];
+                puVar17 = (undefined8 *)lVar18;
+                *puVar17 = *puVar14;
+                puVar17[1] = uVar20;
+                puVar17[2] = uVar22;
+                puVar17[3] = uVar23;
+                puVar14 = puVar14 + 4;
+                lVar15 = (long)(int)puVar14;
+                puVar17 = puVar17 + 4;
+                lVar18 = (long)(int)puVar17;
+              } while (lVar15 != (int)(piVar7 + 0x28));
+            }
+            else {
+              lVar15 = lVar21;
+              lVar18 = lVar12;
+              do {
+                puVar14 = (undefined8 *)lVar15;
+                uVar20 = puVar14[1];
+                uVar22 = puVar14[2];
+                uVar23 = puVar14[3];
+                puVar17 = (undefined8 *)lVar18;
+                *puVar17 = *puVar14;
+                puVar17[1] = uVar20;
+                puVar17[2] = uVar22;
+                puVar17[3] = uVar23;
+                puVar14 = puVar14 + 4;
+                lVar15 = (long)(int)puVar14;
+                puVar17 = puVar17 + 4;
+                lVar18 = (long)(int)puVar17;
+              } while (lVar15 != (int)(piVar7 + 0x28));
+            }
+            *puVar17 = *puVar14;
+            HashTable_UpdateEntry(piVar24[piVar24[0x142] * 5 + 0xc5],puVar6,lVar12);
+            Util_FreeMemory(lVar21);
+            uVar5 = piVar24[2];
+          }
+          piVar24[2] = uVar5 | 0x80;
         }
-        
-        ctx->flags |= FLAG_ROOMS_CHANGED;
-    }
-}
-
-==================================================
-            CALLBACK SYSTEM ARCHITECTURE
-==================================================
-
-struct CallbackParams {
-    int type;           // 1=msg, 2=conn, 3=auth_state, 4=play
-    int message_type;   // Original message type
-    int flags;          // Message flags
-    char* data;         // Message data
-};
-
-// Callback Invocation Examples (from decompilation)
-if (msg_type == 0x2b6d7367) { // "+msg" - Chat message
-    CallbackParams params = {1, 0x63686174, msg_flags, data}; // "chat"
-    if (ctx->message_callback) {
-        ctx->message_callback(ctx, &params, ctx->message_callback_data);
-    }
-}
-
-if (msg_type == 0x736b6579 && msg_subtype == 0) { // "skey"
-    ctx->flags |= FLAG_SKEY_RECEIVED;
-    ctx->state = STATE_IDLE;
-    
-    CallbackParams params = {2, 0x636f6e6e, 3, NULL}; // "conn", state=3
-    if (ctx->connect_callback) {
-        ctx->connect_callback(ctx, &params, ctx->connect_callback_data);
-    }
-}
-
-if (msg_type == 0x2b736573) { // "+ses" - Session data
-    CallbackParams params = {4, 0x706c6179, 0, data}; // "play"
-    if (ctx->play_callback) {
-        ctx->play_callback(ctx, &params, ctx->play_callback_data);
-    }
-}
-
-==================================================
-            HASH TABLE OPERATIONS
-==================================================
-
-// Room Hash Table (128 buckets typically)
-struct RoomEntry {
-    int id;                 // +0x00: Room ID
-    int flags;              // +0x04: Room flags
-    int max_players;        // +0x08: Maximum players
-    int current_players;    // +0x0C: Current players
-    char display_ip[16];    // +0x10: Display IP string
-    char status[16];        // +0x20: Status string
-    char password[8];       // +0x30: Password display
-    int host_ip;            // +0x38: Host IP address
-    char name[32];          // +0x3C: Room name
-    char description[32];   // +0x5C: Room description
-}; // Total: 104 bytes (0x68 hex)
-
-// User Hash Table (312 bytes per entry)
-struct UserEntry {
-    int id;                 // +0x00: User ID
-    int flags;              // +0x04: User flags
-    char username[32];      // +0x08: Username
-    char password[8];       // +0x28: Password hash
-    int rank;               // +0x30: User rank
-    int host_ip;            // +0x34: Host IP address
-    char description[128];  // +0x38: User description
-    char extra_info[128];   // +0xB8: Extra information
-}; // Total: 312 bytes (0x138 hex)
-
-// Hash Algorithm (from HashTable_ComputeHash)
-int ComputeStringHash(const char* key, int table_size) {
-    uint hash = 0;
-    char ch = *key;
-    
-    while (ch != 0) {
-        if (ch > ' ') {  // Skip control characters
-            hash = hash * 0x83 + (ch & 0x5f);  // Convert to uppercase
+        if (((iStack_b0 == 0x6d6f7665) || (iStack_b0 == 0x726f6f6d)) && (uStack_ac == 0)) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)FIELD_LIDENT);
+          iVar10 = TagFieldGetNumber(pbVar4,-1);
+          if (-1 < iVar10) {
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)FIELD_LCOUNT);
+            iVar13 = TagFieldGetNumber(pbVar4,0);
+            Lobby_UpdateRoomPopulation((int)piVar24,iVar10,(long)iVar13);
+          }
         }
-        key++;
-        ch = *key;
+        if (iStack_b0 == 0x6d6f7665) {
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)FIELD_IDENT);
+          iVar10 = TagFieldGetNumber(pbVar4,0);
+          pbVar4 = TagFieldFind(pbStack_a8,(byte *)FIELD_COUNT);
+          iVar13 = TagFieldGetNumber(pbVar4,0);
+          if (iVar10 != piVar24[0x6e]) {
+            piVar24[0x6e] = iVar10;
+            Lobby_UpdateRoomPopulation((int)piVar24,iVar10,(long)iVar13);
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)NET_Field2);
+            TagFieldGetString(pbVar4,(byte *)(piVar24 + 0x70),0x40,(byte *)NET_DefaultValue);
+            pbVar4 = TagFieldFind(pbStack_a8,(byte *)FIELD_FLAGS);
+            uVar5 = TagFieldGetFlags((char *)pbVar4,0);
+            piVar24[0x6f] = uVar5;
+            piVar24[2] = piVar24[2] | 8;
+            if (piVar24[0xc9] != 0) {
+              while (puVar6 = (undefined4 *)Buddy_GetNextUser((int *)piVar24[0xc9]),
+                    puVar6 != (undefined4 *)0x0) {
+                iVar10 = HashTable_FreeEntry(piVar24[0xca],puVar6);
+                Util_FreeMemory((long)iVar10);
+              }
+              piVar24[2] = piVar24[2] | 0x40;
+            }
+          }
+          puVar6 = (undefined4 *)*piVar24;
+        }
+        else {
+          puVar6 = (undefined4 *)*piVar24;
+        }
+      }
+      ProtoAriesRecv(puVar6,0,0,0,0);
     }
-    
-    return (int)(hash & 0x7fffffff) % table_size;
-}
-
-==================================================
-            CONNECTION LIFECYCLE
-==================================================
-
-// Phase 1: Directory Service
-1. Client connects to master server
-2. Server responds with "@dir" containing game server info
-3. Client stores ADDR, PORT, SESS from response
-
-// Phase 2: Game Server Connection
-4. Client connects to game server IP:PORT
-5. Server sends "skey" with 16-byte public key
-6. Client responds with address confirmation ("addr")
-7. Server sets state to "idle"
-
-// Phase 3: Authentication
-8. Server sends "auth" with username and client IP
-9. Client stores credentials, sets state to "auth"
-10. Server may send "acct" for account operations
-
-// Phase 4: Persona Selection
-11. Server sends "pers" with persona name
-12. Client updates persona field
-
-// Phase 5: Game Session
-13. Server sends "+ses" with full session data
-14. Client parses all player/session info
-15. Game begins via play callback
-
-==================================================
-            ERROR HANDLING
-==================================================
-
-// Timeout Management (5-second intervals, 30-second total)
-if (ctx->last_ping_time && (current_time - ctx->last_ping_time > 5000)) {
-    ctx->timeout_timer += current_time - ctx->last_ping_time;
-    if (ctx->timeout_timer > 30000) {
-        Lobby_SetState(ctx, STATE_TIMEOUT, 0x800);
-        return;
+    LobbyApiListUpdate(param_1);
+    if ((piVar24[6] != 0) && ((uint)piVar24[6] <= uVar2)) {
+      Lobby_UpdateConnection((int)piVar24);
+      piVar24[6] = uVar2 + 30000;
     }
+  }
+  return;
 }
-
-// Ping tracking
-if (msg_type == 0x7e706e67) { // "~png"
-    int ping_time = TagFieldGetNumber(TagFieldFind(data, "TIME"), 0);
-    ctx->ping_interval = current_time - ping_time;
-    ctx->last_ping_time = current_time;
-    ctx->timeout_timer = 0;
-}
-
-==================================================
-            INTEGRATION POINTS
-==================================================
-
-// Called from:
-ProtocolDispatcher_Main() → LobbyApiUpdate() → (processes messages)
-
-// Calls to:
-ProtoAriesPeek() - Check for incoming messages
-ProtoAriesRecv() - Remove processed messages
-ProtoAriesSend() - Send responses
-TagFieldFind() - Parse message data
-HashTable_*() - Manage room/user lists
-Buddy_*() - Memory pool management
-
-==================================================
-            PERFORMANCE NOTES
-==================================================
-
-// Memory Pools
-- Room entries: 104 bytes each, allocated from pool
-- User entries: 312 bytes each, allocated from pool
-- Uses buddy allocator for efficient reuse
-
-// Batch Processing
-- Population updates ("+pop") can contain multiple room updates
-- Format: "Z=room1_id:population1 room2_id:population2 ..."
-
-// Network Optimizations
-- Zero-copy message peeking when possible
-- Scatter-gather DMA for efficient packet transmission
-- Cache-aligned buffers for PS2 hardware
-
-==================================================
-            SECURITY IMPLICATIONS
-==================================================
-
-// Public Key Exchange
-- 16-byte session key transmitted in "skey" message
-- Stored at LobbyContext+0x24
-- Used for subsequent encryption
-
-// Password Handling
-- Room passwords transmitted as numeric hashes
-- Display format: "~%dms" for hashed passwords
-- "---" indicates no password
-
-==================================================
-            TESTING/EMULATION NOTES
-==================================================
-
-// Minimal Server Implementation
-To emulate EA's server, implement:
-1. "@dir" response with ADDR, PORT, SESS
-2. "skey" response with 16-byte key
-3. "auth" response with username confirmation
-4. "+ses" response with session data when game starts
-
-// Message Flow for Testing
-Client → Server: Connect
-Server → Client: "@dir" (server info)
-Client → Server: Connect to game server
-Server → Client: "skey" (public key)
-Client → Server: "addr" (address confirmation)
-Server → Client: "auth" (authentication)
-Server → Client: "+ses" (game session data)
-
-// Critical Strings for Parsing
-All parsing uses TagFieldFind with these exact strings:
-"ADDR", "PORT", "SESS", "DIRECT", "DOWN", "SKEY", "NAME",
-"HOST", "P1", "P2", "P3", "P4", "FROM", "SEED", "WHEN"
-
-==================================================
-            REVISION HISTORY
-==================================================
-
-2024-01-15: Initial documentation based on static analysis
-2024-01-16: Verified with Ghidra decompilation
-2024-01-17: Corrected structure offsets (multiply by 4)
-2024-01-18: Added exact message processing order
-2024-01-19: Verified hash algorithm and callback system
-[CURRENT DATE]: Complete drop-in replacement documentation
+--
+Incoming References - LobbyApiUpdate
+ProtocolDispatcher_Main

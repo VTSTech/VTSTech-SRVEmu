@@ -1,0 +1,12 @@
+
+char * NetworkConfig_StoreFormattedLKEY(char *param_1)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = Util_StoreData(&g_FormattedLKEY,param_1,0x40);
+  return pcVar1;
+}
+--
+Incoming References - NetworkConfig_StoreFormattedLKEY
+NetworkConfig_InitializeAndSELEct

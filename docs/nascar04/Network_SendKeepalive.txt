@@ -1,0 +1,76 @@
+
+char * Network_SendKeepalive(float param_1,int param_2)
+
+{
+  undefined8 *puVar1;
+  char *pcVar2;
+  undefined8 extraout_t0;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  short sStack_30;
+  ushort uStack_2e;
+  ushort uStack_2c;
+  ushort uStack_2a;
+  
+  FUN_001c4478(param_1,&sStack_30,(undefined2 *)((uint)&sStack_30 | 2),
+               (undefined2 *)((uint)&sStack_30 | 4),(undefined2 *)((uint)&sStack_30 | 6),
+               (undefined1 *)((uint)&sStack_30 | 8));
+  if (sStack_30 != 0) {
+    uStack_2e = uStack_2e + sStack_30 * 0x3c;
+  }
+  if (uStack_2e == 0) {
+    if (uStack_2c < 10) {
+      pcVar2 = "%d.%03d";
+    }
+    else {
+      pcVar2 = "%02d.%03d";
+    }
+    pcVar2 = (char *)Util_FormatIPString(*(char **)(param_2 + 8),(long)(int)pcVar2,(ulong)uStack_ 2c,
+                                         (ulong)uStack_2a,extraout_t0,extraout_t1,extraout_t2,
+                                         extraout_t3);
+  }
+  else if (uStack_2e < 100) {
+    pcVar2 = (char *)Util_FormatIPString(*(char **)(param_2 + 8),0x3af7b0,(ulong)uStack_2e,
+                                         (ulong)uStack_2c,(ulong)uStack_2a,extraout_t1,extraout_t2 ,
+                                         extraout_t3);
+  }
+  else {
+    puVar1 = *(undefined8 **)(param_2 + 8);
+    pcVar2 = "Wyoming";
+    *puVar1 = 0x2d2d2e2d2d3a2d2d;
+    *(undefined1 *)(puVar1 + 1) = 0x2d;
+    *(undefined1 *)((int)puVar1 + 9) = 0;
+  }
+  return pcVar2;
+}
+--
+Incoming References - Network_SendKeepalive
+FUN_00161110
+Network_CalculateBandwidth
+NetworkEvent_MainDispatcher
+Control_SetCalibrationData
+Control_ConfigureAll
+System_UpdateConfigValue
+FUN_001cdb88
+FUN_001cde28
+FUN_001ce348
+FUN_001ce7d8
+FUN_001ced38
+FUN_001dce78
+FUN_001dd900
+FUN_001de890
+FUN_001deb00
+FUN_001deea8
+FUN_001e0050
+Session_CalculateMetrics
+FUN_001e2cf8
+FUN_001e3398
+System_HandleComplexOp
+FUN_002036b8
+FUN_00203d38
+Lobby_SynchronizeUserList
+FUN_002048d0
+FUN_00204e28
+FUN_00205158
+FUN_00205d28

@@ -2,6 +2,7 @@
 import time
 import struct
 import random
+import socket
 
 class NascarHandlers:
     def __init__(self, create_packet_func, server_ip):

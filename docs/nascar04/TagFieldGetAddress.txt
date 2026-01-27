@@ -1,0 +1,30 @@
+
+uint TagFieldGetAddress(byte *param_1,uint param_2)
+
+{
+  byte bVar1;
+  uint uVar2;
+  
+  uVar2 = 0;
+  if (param_1 == (byte *)0x0) {
+    return param_2;
+  }
+  do {
+    bVar1 = *param_1;
+    if (bVar1 - 0x30 < 10) {
+      uVar2 = uVar2 & 0xffffff00 | (uVar2 & 0xff) * 10 + (bVar1 & 0xf);
+    }
+    else {
+      if (bVar1 != 0x2e) {
+        return uVar2;
+      }
+      uVar2 = uVar2 << 8;
+    }
+    param_1 = param_1 + 1;
+  } while( true );
+}
+--
+Incoming References - TagFieldGetAddress
+NetworkUser_ConnectAndValidate
+Lobby_ProcessNetworkEvents
+LobbyApiUpdate

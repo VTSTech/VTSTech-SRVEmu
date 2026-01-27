@@ -1,0 +1,40 @@
+
+undefined4
+Game_HandleProtocolCommand(undefined4 param_1,int *param_2,undefined8 param_3,int *param_4)
+
+{
+  char cVar1;
+  undefined4 uVar2;
+  
+  switch(param_1) {
+  case 0x80000001:
+    cVar1 = System_CheckReadyState();
+    *param_4 = (int)cVar1;
+  case 0x80000006:
+switchD_002080e4_caseD_80000006:
+    uVar2 = 1;
+    break;
+  case 0x80000002:
+    cVar1 = System_ValidationCheck(*param_2,param_2[1]);
+    *param_4 = (int)cVar1;
+    goto switchD_002080e4_caseD_80000006;
+  case 0x80000003:
+    ChallengeSystem_DisplayNotification(*param_2);
+    uVar2 = 1;
+    break;
+  case 0x80000004:
+    System_Cleanup();
+    uVar2 = 1;
+    break;
+  case 0x80000005:
+    System_ResetState();
+    uVar2 = 1;
+    break;
+  default:
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+--
+Incoming References - Game_HandleProtocolCommand
+Game_CommandRouter

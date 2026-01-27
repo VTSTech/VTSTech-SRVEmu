@@ -1,0 +1,55 @@
+
+int ProtoAriesPeek(undefined4 *param_1,long param_2,long param_3,long param_4)
+
+{
+  undefined *puVar1;
+  byte *pbVar2;
+  uint uVar3;
+  int iVar4;
+  
+  if ((int)param_1[3] < (int)param_1[4]) {
+    pbVar2 = (byte *)(param_1[6] + param_1[3]);
+    puVar1 = (undefined *)(param_1[6] + param_1[3] + 0xc);
+    uVar3 = (uint)pbVar2[8] << 0x18 | (uint)pbVar2[0xb] |
+            (uint)pbVar2[10] << 8 | (uint)pbVar2[9] << 0x10;
+    iVar4 = uVar3 - 0xc;
+    if (iVar4 < 1) {
+      puVar1 = &DAT_003e31b0;
+    }
+    else {
+      puVar1[uVar3 - 0xd] = 0;
+    }
+    if (param_2 != 0) {
+      *(uint *)param_2 =
+           (uint)*pbVar2 << 0x18 | (uint)pbVar2[3] | (uint)pbVar2[2] << 8 | (uint)pbVar2[1] << 0x 10;
+    }
+    if (param_3 != 0) {
+      *(uint *)param_3 =
+           (uint)pbVar2[4] << 0x18 | (uint)pbVar2[7] |
+           (uint)pbVar2[6] << 8 | (uint)pbVar2[5] << 0x10;
+    }
+    if (param_4 != 0) {
+      *(undefined4 *)param_4 = puVar1;
+    }
+  }
+  else {
+    iVar4 = -1;
+    if ((param_1[2] == 0) && (iVar4 = -1, (int)param_1[4] <= (int)param_1[3])) {
+      param_1[2] = 1;
+      if (0 < (int)param_1[4]) {
+        InvalidDCache(param_1[6],(param_1[6] + param_1[5]) - 1);
+        param_1[4] = 0;
+        param_1[3] = param_1[4];
+      }
+      RpcBind((int *)&DAT_0050aac8,0x73657373,0x72656376);
+      RpcCall(0x50aac8,0,*param_1,0,0,0,param_1[6],param_1[5],0x3222d0,(int)param_1);
+      iVar4 = -1;
+    }
+  }
+  return iVar4;
+}
+--
+Incoming References - ProtoAriesPeek
+LobbyApiUpdate
+ProtoAriesRecv
+BuddyApiUpdate

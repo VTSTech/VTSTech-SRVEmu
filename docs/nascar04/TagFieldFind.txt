@@ -1,0 +1,89 @@
+
+byte * TagFieldFind(byte *param_1,byte *param_2)
+
+{
+  byte bVar1;
+  byte *pbVar2;
+  byte *pbVar3;
+  byte *pbVar4;
+  byte *pbVar5;
+  byte *pbVar6;
+  
+  if ((((param_1 == (byte *)0x0) || (*param_1 == 0)) || (param_2 == (byte *)0x0)) ||
+     (pbVar5 = param_2, *param_2 == 0)) {
+    return (byte *)0x0;
+  }
+  do {
+    pbVar6 = pbVar5;
+    pbVar2 = param_1;
+    pbVar5 = pbVar6 + 1;
+  } while (pbVar6[1] != 0);
+LAB_0031dedc:
+  do {
+    pbVar5 = pbVar2;
+    bVar1 = *pbVar5;
+    if (bVar1 == 0) {
+      return (byte *)0x0;
+    }
+    if (bVar1 == 0x3d) {
+      bVar1 = pbVar5[1];
+LAB_0031defc:
+      pbVar3 = pbVar5 + -1;
+      if ((bVar1 < 0x20) && (pbVar5[-1] < 0x21)) {
+        return (byte *)0x0;
+      }
+      if ((param_1 <= pbVar3) &&
+         (pbVar4 = pbVar6, (&DAT_003df6c8)[pbVar5[-1]] == (&DAT_003df6c8)[*pbVar6])) {
+        do {
+          if ((pbVar4 == param_2) && ((pbVar3 == param_1 || (pbVar3[-1] < 0x21)))) {
+            pbVar2 = pbVar5 + 2;
+            if (bVar1 != 0x20) {
+              pbVar2 = pbVar5 + 1;
+            }
+            return pbVar2;
+          }
+          pbVar3 = pbVar3 + -1;
+          pbVar4 = pbVar4 + -1;
+          if (pbVar3 < param_1) goto LAB_0031ded8;
+          pbVar2 = pbVar5 + 1;
+        } while ((&DAT_003df6c8)[*pbVar3] == (&DAT_003df6c8)[*pbVar4]);
+        goto LAB_0031dedc;
+      }
+    }
+    else if (bVar1 == 0x3a) {
+      bVar1 = pbVar5[1];
+      goto LAB_0031defc;
+    }
+LAB_0031ded8:
+    pbVar2 = pbVar5 + 1;
+  } while( true );
+}
+--
+Incoming References - TagFieldFind
+Command_HandleServerNews
+NetworkUser_ConnectAndValidate
+MessageRouting_ChallengeHandler
+NetworkConfig_InitializeAndSELEct
+CommandHandler_PERS_USER
+Challenge_HandleRaceCommand
+CommandHandler_INDEX_RANGE
+CommandHandler_INDEX_RANGE_Simple
+CommandHandler_RANGE
+CommandHandler_RANGE_Simple
+Lobby_ProcessNetworkEvents
+Security_EncryptAndSend
+LobbyApiUpdate
+Auth_ParseTagField
+Field_ProcessConfigIndex
+Field_ProcessUserConfig
+Data_ParseMultiValueField
+Data_ExtractSingleField
+Command_HandlePersona1
+Data_ParseUserMultiValueField
+Config_GetOptionsValue
+Command_HandlePersona4
+Config_ProcessSetupData
+Network_HandleReceive
+Network_SendPlayerData
+Buddy_ProcessSendCommand
+BuddyApiUpdate

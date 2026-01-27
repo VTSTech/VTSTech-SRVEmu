@@ -516,7 +516,7 @@ class RoomHandlers:
         username = getattr(session, 'authenticated_username', session.clientNAME)
         persona = getattr(session, 'current_persona', username)
         current_room_id = getattr(session, 'current_room_id', 0)
-        fields = ["F=U", f"N={persona}", f"RI={current_room_id}", "RT=2", "R=0", "RF=0"]
+        fields = ["F=U", f"N={persona}", f"RI={current_room_id}", "RT=4", "R=0", "RF=0"]
         print(f"+who: User list includes {persona} (user: {username})")
         return self.create_packet('+who', '', '\n'.join(fields) + '\n')
     

@@ -1,0 +1,527 @@
+
+long Game_CommandRouter(ulong param_1,undefined2 param_2,ushort param_3,ulong param_4,
+                       undefined8 param_5,undefined8 param_6,undefined8 param_7,undefined8 param_ 8)
+
+{
+  bool bVar1;
+  int iVar2;
+  uint uVar3;
+  uint *puVar4;
+  uint *puVar5;
+  
+  puVar4 = (uint *)param_5;
+  uVar3 = (uint)param_1;
+  puVar5 = (uint *)param_6;
+  switch(param_2) {
+  case 0:
+    switch(param_3) {
+    case 0:
+      iVar2 = GameState_CheckConditionalBlock
+                        (uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 2:
+      iVar2 = SystemBasic_Handler(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 3:
+      iVar2 = SystemComplex_Handler(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_ 8);
+      return (long)iVar2;
+    case 4:
+      iVar2 = SystemConfig_Handler
+                        (uVar3,(int *)puVar4,param_4,puVar5,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 5:
+      iVar2 = SystemSimple_Handler(uVar3);
+      return (long)iVar2;
+    case 7:
+      iVar2 = SystemState_Handler(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8) ;
+      return (long)iVar2;
+    case 8:
+    case 9:
+    case 10:
+switchD_001c6b70_caseD_1d:
+      iVar2 = MultiplayerSys_Handler(uVar3,puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0xb:
+      iVar2 = SystemCmd_UserData(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xc:
+      iVar2 = SystemCmd_DataProcess(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_ 8);
+      return (long)iVar2;
+    case 0xd:
+      iVar2 = SystemCmd_Validation(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8 );
+      return (long)iVar2;
+    case 0xe:
+      bVar1 = SystemCmd_CheckFlag(uVar3,(int *)puVar4);
+      return (long)bVar1;
+    case 0xf:
+      bVar1 = SystemCmd_QuickCheck(uVar3);
+      return (long)bVar1;
+    }
+    break;
+  case 1:
+    switch(param_3) {
+    case 0:
+      iVar2 = System_StartupCheck(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8) ;
+      return (long)iVar2;
+    case 1:
+      iVar2 = System_LoadResources(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8 );
+      return (long)iVar2;
+    case 2:
+      iVar2 = System_ValidateConfig(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_ 8);
+      return (long)iVar2;
+    case 3:
+      iVar2 = System_ResetComponents(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 4:
+      iVar2 = System_InitializeModules
+                        (uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 5:
+      iVar2 = System_GetVersion(uVar3);
+      return (long)iVar2;
+    case 8:
+      iVar2 = System_CheckDependencies(uVar3);
+      return (long)iVar2;
+    case 10:
+      iVar2 = System_ProcessEvents(uVar3,(int *)puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 0xc:
+switchD_001c6b70_caseD_1f:
+      iVar2 = System_FinalizeInit(uVar3);
+      return (long)iVar2;
+    case 0xd:
+      iVar2 = System_PostInit(param_1,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xe:
+      iVar2 = System_VerifyReady(uVar3);
+      return (long)iVar2;
+    }
+    break;
+  case 2:
+    switch(param_3) {
+    case 0:
+      iVar2 = Connection_Initialize(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 2:
+      iVar2 = Connection_Configure
+                        (uVar3,(int *)puVar4,param_4,puVar5,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 3:
+      iVar2 = Connection_Validate(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 8:
+      iVar2 = Game_HandleProtocolCommand(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 10:
+      iVar2 = Connection_ProcessData(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param _8);
+      return (long)iVar2;
+    }
+    break;
+  case 3:
+    switch(param_3) {
+    case 0:
+      iVar2 = Device_Initialize(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 1:
+      iVar2 = Device_Configure(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 2:
+      iVar2 = Device_ProcessInput(uVar3,param_5,param_4,param_6,param_5,param_6,param_1);
+      return (long)iVar2;
+    case 3:
+      iVar2 = Device_Calibrate(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 4:
+      iVar2 = Device_UpdateSettings(uVar3,(int *)puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 5:
+      iVar2 = Device_Reset(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 6:
+      iVar2 = Device_GetStatus(uVar3,puVar4);
+      return (long)iVar2;
+    case 7:
+switchD_001c6558_caseD_11:
+      iVar2 = Device_SetMode(uVar3,puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 8:
+      iVar2 = Device_ApplyConfig(uVar3,(int *)puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 9:
+      iVar2 = SessionConfig_Handler
+                        (uVar3,(int *)puVar4,param_4,(int *)puVar5,1,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xb:
+      bVar1 = Device_ValidateConnection(uVar3);
+      return (long)bVar1;
+    case 0xc:
+      iVar2 = Device_ProcessCommand(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_ 8);
+      return (long)iVar2;
+    case 0xf:
+      iVar2 = Device_FinalizeSetup(uVar3,puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 0x10:
+      iVar2 = Device_GetCapabilities(uVar3,puVar4);
+      return (long)iVar2;
+    case 0x11:
+      iVar2 = Auth_ProcessResponse(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 0x12:
+      iVar2 = Auth_GetStatus(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 0x13:
+      iVar2 = Auth_UpdateState(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 0x16:
+      bVar1 = Auth_CheckCredentials(uVar3,(int *)puVar4);
+      return (long)bVar1;
+    case 0x18:
+      iVar2 = Authentication_TriggerStateMachine(uVar3,puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 0x19:
+      bVar1 = Auth_ValidateSession(uVar3,puVar4);
+      return (long)bVar1;
+    }
+    break;
+  case 4:
+    switch(param_3) {
+    case 0:
+      iVar2 = FUN_001fe0c0(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 1:
+      iVar2 = Graphics_LoadResources(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param _8);
+      return (long)iVar2;
+    case 2:
+switchD_001c6558_caseD_12:
+      iVar2 = Graphics_Configure(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 3:
+switchD_001c6558_caseD_10:
+      iVar2 = Graphics_SetMode(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 4:
+switchD_001c6558_caseD_9:
+      iVar2 = FUN_001fea50(uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 5:
+switchD_001c6558_caseD_e:
+      iVar2 = FUN_001ff1d8(uVar3,(int *)puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 6:
+      iVar2 = FUN_001fdc20(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 7:
+switchD_001c6558_caseD_f:
+      iVar2 = FUN_001fb758(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 8:
+      goto switchD_001c6558_caseD_11;
+    case 0xc:
+switchD_001c6558_caseD_4:
+      iVar2 = FUN_001f2c68(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xe:
+switchD_001c6558_caseD_17:
+      iVar2 = FUN_001fae30(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xf:
+switchD_001c6558_caseD_16:
+      iVar2 = Graphics_UpdateBuffers
+                        (uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x11:
+      iVar2 = FUN_001ff300(uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x12:
+switchD_001c6558_caseD_18:
+      iVar2 = FUN_001fd3d8(uVar3,param_5,param_4,(int *)puVar5,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    }
+    break;
+  case 5:
+    switch(param_3) {
+    case 0:
+      iVar2 = FUN_001d8218(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 1:
+      iVar2 = FUN_001d8998(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 2:
+      iVar2 = FUN_001da0b0(uVar3,param_5,param_4,(int *)puVar5,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 3:
+      iVar2 = FUN_001da940(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 4:
+      iVar2 = FUN_001d9408(uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 5:
+      iVar2 = FUN_001db5d0(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    }
+    break;
+  case 6:
+    if (param_3 != 0) {
+      return 0;
+    }
+    iVar2 = FUN_001dc388(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+    return (long)iVar2;
+  case 8:
+    switch(param_3) {
+    case 0:
+      iVar2 = Game_InitializeLogic(uVar3,(int *)puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 1:
+      iVar2 = FUN_001ee3d0(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 2:
+      iVar2 = FUN_001eeaa8(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 3:
+      iVar2 = FUN_001edd48(uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 6:
+      iVar2 = FUN_001f05a0(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 7:
+      iVar2 = FUN_001efcb0(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 8:
+      iVar2 = FUN_001f0320(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    }
+    break;
+  case 9:
+    switch(param_3) {
+    case 0:
+      iVar2 = FUN_001f1d60(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 1:
+      iVar2 = FUN_001f1178(param_1,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 3:
+      iVar2 = FUN_001f2590(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 4:
+      goto switchD_001c6558_caseD_4;
+    case 6:
+      iVar2 = FUN_001f5080(uVar3,(int *)puVar4,param_4,puVar5);
+      return (long)iVar2;
+    case 7:
+      iVar2 = FUN_001f42d0(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 9:
+      goto switchD_001c6558_caseD_9;
+    case 10:
+      iVar2 = FUN_001f8498(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0xb:
+      iVar2 = UI_HandleEvent(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xc:
+      iVar2 = UI_UpdateState(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xd:
+      iVar2 = FUN_001f0cd0(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0xe:
+      goto switchD_001c6558_caseD_e;
+    case 0xf:
+      goto switchD_001c6558_caseD_f;
+    case 0x10:
+      goto switchD_001c6558_caseD_10;
+    case 0x11:
+      goto switchD_001c6558_caseD_11;
+    case 0x12:
+      goto switchD_001c6558_caseD_12;
+    case 0x16:
+      goto switchD_001c6558_caseD_16;
+    case 0x17:
+      goto switchD_001c6558_caseD_17;
+    case 0x18:
+      goto switchD_001c6558_caseD_18;
+    case 0x1e:
+      iVar2 = FUN_001f9d70(uVar3,puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x20:
+      iVar2 = FUN_001f85d0(uVar3,(byte *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0x21:
+      iVar2 = FUN_001f3520(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x22:
+      bVar1 = FUN_001f86c8(uVar3);
+      return (long)bVar1;
+    case 0x23:
+      iVar2 = FUN_001f6460(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x24:
+      iVar2 = UI_GetStatus(uVar3);
+      return (long)iVar2;
+    case 0x25:
+      iVar2 = UI_HandleCommand(uVar3,(int *)puVar4,param_4,(int *)puVar5,param_5,param_6,param_1 ,
+                               param_8);
+      return (long)iVar2;
+    case 0x26:
+      bVar1 = UI_ValidateState(uVar3,(int *)puVar4);
+      return (long)bVar1;
+    case 0x27:
+      iVar2 = UI_UpdateLayout(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x28:
+      iVar2 = FUN_001f0e90(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    }
+    break;
+  case 10:
+    if (param_3 != 0) {
+      if (param_3 != 1) {
+        return 0;
+      }
+LAB_001c63b4:
+      iVar2 = SessionConfig_Handler
+                        (uVar3,(int *)puVar4,param_4,(int *)puVar5,0,param_6,param_1,param_8);
+      return (long)iVar2;
+    }
+    goto LAB_001c63d0;
+  case 0xb:
+    if (param_3 != 0) {
+      if (2 < param_3) {
+        return 0;
+      }
+      goto LAB_001c63b4;
+    }
+LAB_001c63d0:
+    iVar2 = HardwareControl_Handler(uVar3,(int *)puVar4);
+    return (long)iVar2;
+  case 0xc:
+    if (param_3 == 0) goto LAB_001c63d0;
+    if (param_3 < 9) {
+      if (param_3 < 5) {
+        return 0;
+      }
+      goto LAB_001c63b4;
+    }
+    break;
+  case 0xd:
+    switch(param_3) {
+    case 0:
+      iVar2 = Race_CommandDispatcher(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param _8);
+      return (long)iVar2;
+    case 1:
+      iVar2 = Race_Configure(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 2:
+      iVar2 = Race_SessionManager(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8) ;
+      return (long)iVar2;
+    case 3:
+      iVar2 = Race_UpdateState(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 5:
+      bVar1 = Race_CheckReady(uVar3);
+      return (long)bVar1;
+    }
+    break;
+  case 0xe:
+    if (param_3 == 1) {
+      iVar2 = FUN_001ec0b0(uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    }
+    if (param_3 < 2) {
+      if (param_3 == 0) {
+        iVar2 = FUN_001eb488(uVar3,(int *)puVar4,param_4,param_6,param_5,param_6,param_1,param_8 );
+        return (long)iVar2;
+      }
+      return 0;
+    }
+    if (param_3 == 2) {
+      iVar2 = FUN_001ebcd0(uVar3,puVar4);
+      return (long)iVar2;
+    }
+    if (param_3 == 3) {
+      iVar2 = FUN_001ec278(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    }
+    return 0;
+  case 0xf:
+    switch(param_3) {
+    case 0:
+      iVar2 = Lobby_Initialize(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 2:
+      bVar1 = Lobby_CheckReady(uVar3);
+      return (long)bVar1;
+    case 3:
+      iVar2 = Lobby_Configure(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 4:
+      iVar2 = Lobby_UpdateUsers(uVar3,puVar4);
+      return (long)iVar2;
+    case 5:
+      iVar2 = Lobby_ProcessMessage(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    }
+    break;
+  case 0x10:
+    switch(param_3) {
+    case 0:
+      iVar2 = MultiplayerLobby_Initialize(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 1:
+      iVar2 = MultiplayerLobby_Configure
+                        (uVar3,puVar4,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 3:
+      bVar1 = MultiplayerLobby_CheckReady(uVar3);
+      return (long)bVar1;
+    case 4:
+      iVar2 = MultiplayerLobby_Update(uVar3,puVar4);
+      return (long)iVar2;
+    case 5:
+      iVar2 = MultiplayerLobby_Process(uVar3,puVar4);
+      return (long)iVar2;
+    }
+    break;
+  case 0x11:
+    switch(param_3) {
+    case 0:
+      iVar2 = Event_LobbyEntry(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 1:
+      iVar2 = Protocol_ConfigureHandler(uVar3,(ushort *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 3:
+      bVar1 = Protocol_CheckState(uVar3,puVar4);
+      return (long)bVar1;
+    case 0x11:
+      iVar2 = Network_CommandRouter(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0x12:
+      iVar2 = Protocol_ProcessMessage(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0x13:
+      iVar2 = Protocol_UpdateState(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0x14:
+      iVar2 = Protocol_GetStatus(uVar3,(int *)puVar4);
+      return (long)iVar2;
+    case 0x1d:
+      goto switchD_001c6b70_caseD_1d;
+    case 0x1f:
+      goto switchD_001c6b70_caseD_1f;
+    case 0x20:
+      iVar2 = Protocol_SendData(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    case 0x21:
+      iVar2 = Protocol_ReceiveData(uVar3,(int *)puVar4,param_4,(int *)puVar5);
+      return (long)iVar2;
+    case 0x25:
+      iVar2 = Protocol_Validate(uVar3,param_5,param_4,param_6,param_5,param_6,param_1,param_8);
+      return (long)iVar2;
+    }
+  }
+  return 0;
+}
+--
+Incoming References - Game_CommandRouter
+NetworkEvent_MainDispatcher

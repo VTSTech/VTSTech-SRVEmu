@@ -1,0 +1,63 @@
+
+undefined4
+Race_CommandDispatcher
+          (int param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,undefined8 param_ 5,
+          undefined8 param_6,undefined8 param_7,undefined8 param_8)
+
+{
+  char cVar1;
+  bool bVar2;
+  int *piVar3;
+  
+  if (param_1 + 0x7fffffffU < 0xc) {
+    piVar3 = (int *)param_2;
+    switch(param_1) {
+    case -0x7fffffff:
+      Race_SetupPhase1();
+      break;
+    case -0x7ffffffe:
+      Race_SetupPhase2((long)(int)(&switchD_0020275c::switchdataD_003c0300)[param_1 + 0x7fffffff U],
+                       param_2,param_3,param_4,param_5,param_6,param_2,param_8);
+      break;
+    case -0x7ffffffd:
+      Race_InitializeFromSession
+                ((short)*piVar3,(int *)piVar3[1],(int *)piVar3[2],piVar3[3],piVar3[4],
+                 (int *)piVar3[5],(int *)piVar3[6],(long)piVar3[7],piVar3[8],(int *)piVar3[9]);
+      break;
+    case -0x7ffffffc:
+      Race_SetupPhase4();
+      break;
+    case -0x7ffffffb:
+      bVar2 = Race_CheckReadyState();
+      *(int *)param_4 = (int)bVar2;
+      break;
+    case -0x7ffffffa:
+      cVar1 = Race_CheckValidState();
+      *(int *)param_4 = (int)cVar1;
+      break;
+    case -0x7ffffff9:
+      Race_CleanupResources();
+      break;
+    case -0x7ffffff8:
+      Race_Shutdown('\0');
+      break;
+    case -0x7ffffff7:
+      Race_Reset();
+      break;
+    case -0x7ffffff6:
+      Race_SetupPhase10((byte)*piVar3,param_2,param_3,param_4,param_5,param_6,param_2,param_8);
+      break;
+    case -0x7ffffff5:
+      Race_SetupPhase11((int *)*piVar3,(uint *)piVar3[1],param_3,param_4,param_5,param_6,param_2 ,
+                        param_8);
+      break;
+    case -0x7ffffff4:
+      Race_SetParameter(*piVar3);
+    }
+    return 1;
+  }
+  return 0;
+}
+--
+Incoming References - Race_CommandDispatcher
+Game_CommandRouter

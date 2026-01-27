@@ -1,0 +1,28 @@
+
+undefined4 Command_HandleServerNews(void)
+
+{
+  bool bVar1;
+  byte *pbVar2;
+  byte *pbVar3;
+  int iVar4;
+  undefined8 uVar5;
+  byte abStack_70 [64];
+  
+  uVar5 = NetworkCommandBuffer_Allocate();
+  pbVar2 = CommandHandler_NEWS((int)uVar5,0,0x3c14f0);
+  pbVar3 = TagFieldFind(pbVar2,(byte *)"BUDDY_URL");
+  TagFieldGetString(pbVar3,abStack_70,0x40,&DAT_003c1518);
+  pbVar2 = TagFieldFind(pbVar2,(byte *)"BUDDY_PORT");
+  iVar4 = TagFieldGetNumber(pbVar2,0);
+  ChallengeTarget_StoreConnectionInfo((char *)abStack_70,iVar4);
+  bVar1 = MultiplayerMode_IsLobby();
+  if (!bVar1) {
+    MultiplayerSystem_Activate();
+  }
+  NetworkBuffer_Release(uVar5);
+  return 1;
+}
+--
+Incoming References - Command_HandleServerNews
+Event_LobbyEntry

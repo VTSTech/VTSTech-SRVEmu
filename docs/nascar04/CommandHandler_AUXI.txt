@@ -1,0 +1,30 @@
+
+uint CommandHandler_AUXI(void)
+
+{
+  uint uVar1;
+  undefined8 extraout_a2;
+  undefined8 extraout_a3;
+  undefined8 extraout_t0;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  ushort auStack_1d0 [11];
+  undefined1 uStack_1b9;
+  byte abStack_1b0 [256];
+  byte abStack_b0 [128];
+  
+  ChallengeData_Initialize((long)(int)auStack_1d0);
+  Challenge_CreateToken
+            ((long)(int)auStack_1d0,'\0',extraout_a2,extraout_a3,extraout_t0,extraout_t1,extraou t_t2
+             ,extraout_t3);
+  uStack_1b9 = 1;
+  Challenge_VerifyToken(auStack_1d0,(char *)abStack_b0,0x80);
+  abStack_1b0[0] = 0;
+  String_FormatKeyValuePairs(abStack_1b0,0x100,(byte *)"TEXT",abStack_b0);
+  uVar1 = System_SendCommand(0x61757869,abStack_1b0,0,0);
+  return uVar1;
+}
+--
+Incoming References - CommandHandler_AUXI
+Game_HandleAUXICommand

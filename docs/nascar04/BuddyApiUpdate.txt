@@ -1,0 +1,397 @@
+
+void BuddyApiUpdate(undefined8 param_1)
+
+{
+  bool bVar1;
+  int iVar2;
+  uint uVar3;
+  uint uVar4;
+  byte *pbVar5;
+  char *pcVar6;
+  byte *pbVar7;
+  undefined4 *puVar8;
+  code *pcVar9;
+  int iVar10;
+  long lVar11;
+  size_t sVar13;
+  undefined8 *puVar14;
+  ulong uVar15;
+  undefined8 uVar16;
+  undefined8 uVar17;
+  undefined8 extraout_t0;
+  undefined8 uVar18;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  int *piVar19;
+  int *piVar20;
+  int *piVar21;
+  int iVar22;
+  long lVar23;
+  byte abStack_1a0 [32];
+  int iStack_180;
+  int iStack_17c;
+  int iStack_178;
+  byte *pbStack_174;
+  byte abStack_170 [8];
+  undefined8 auStack_168 [23];
+  byte *pbStack_b0;
+  byte **ppbStack_ac;
+  int *piStack_a8;
+  int *piStack_a4;
+  ulong uVar12;
+  
+  uVar3 = ProtoAriesTick();
+  ProtoAriesUpdate();
+  lVar23 = (long)(int)&iStack_180;
+  memset(&iStack_180,0,0x10);
+  piVar21 = (int *)param_1;
+  if (piVar21[0x131] == 0) {
+    uVar4 = piVar21[3];
+  }
+  else if (*piVar21 == 0) {
+    uVar4 = piVar21[3];
+  }
+  else {
+    lVar11 = (**(code **)(*piVar21 + 8))();
+    if (lVar11 == 0) {
+      uVar4 = piVar21[3];
+    }
+    else {
+      if (0 < lVar11) {
+        ProtoAriesConnect((undefined4 *)piVar21[1],*(undefined4 *)(*piVar21 + 4),piVar21[4]);
+        ProtoAriesSecure((int)piVar21,0x3e22e8,(long)*(int *)(*piVar21 + 4),(long)piVar21[4],
+                         extraout_t0,extraout_t1,extraout_t2,extraout_t3);
+        _BuddyApiTransact((int)piVar21,0x41555448,(char *)(piVar21 + 0xe5));
+      }
+      if (lVar11 < 0) {
+        _BuddyApiStatus((int)piVar21,2);
+        piVar21[0x131] = 0;
+        iVar10 = *piVar21;
+      }
+      else {
+        iVar10 = *piVar21;
+      }
+      (**(code **)(iVar10 + 0xc))();
+      *piVar21 = 0;
+      uVar4 = piVar21[3];
+    }
+  }
+  if ((uVar4 != 0) && (uVar4 < uVar3)) {
+    _BuddyApiStatus((int)piVar21,3);
+    piVar21[0x131] = 0;
+  }
+  iVar10 = piVar21[2];
+  piStack_a8 = &iStack_17c;
+  if (iVar10 == 5) {
+    if ((piVar21[0xb0] != 0) && ((uint)piVar21[0xb0] <= uVar3)) {
+      Network_TimeoutCheck((int)piVar21);
+      iVar10 = piVar21[2];
+    }
+    piStack_a8 = &iStack_17c;
+    if (iVar10 == 5) {
+      iVar22 = 0;
+      piStack_a8 = &iStack_17c;
+      piStack_a4 = &iStack_178;
+      ppbStack_ac = &pbStack_b0;
+      do {
+        while( true ) {
+          if (2 < iVar22) goto LAB_00362ed0;
+          if ((piVar21[iVar22 * 5 + 0x136] != 0) &&
+             (iVar2 = iVar22 * 5, piVar21[iVar2 + 0x134] != 0)) break;
+          iVar22 = iVar22 + 1;
+        }
+        iVar22 = iVar22 + 1;
+      } while (uVar3 <= (uint)piVar21[iVar2 + 0x134]);
+      Lobby_ClearProtocolState((undefined4 *)piVar21[1]);
+      _BuddyApiStatus((int)piVar21,6);
+      iVar10 = piVar21[2];
+    }
+    else {
+      piStack_a4 = &iStack_178;
+      ppbStack_ac = &pbStack_b0;
+    }
+  }
+  else {
+    piStack_a4 = &iStack_178;
+    ppbStack_ac = &pbStack_b0;
+  }
+LAB_00362ed0:
+  if ((iVar10 == 6) || (iVar10 == 3)) {
+    piVar20 = piVar21 + 0x135;
+    piVar19 = piVar21 + 0x136;
+    do {
+      if ((code *)*piVar19 != (code *)0x0) {
+        iStack_180 = piVar20[-3];
+        iStack_178 = -4;
+        (*(code *)*piVar19)(param_1,lVar23,*piVar20);
+        *piVar19 = 0;
+      }
+      piVar19 = piVar19 + 5;
+      piVar20 = piVar20 + 5;
+    } while ((int)piVar19 < (int)(piVar21 + 0x145));
+    puVar8 = (undefined4 *)piVar21[1];
+  }
+  else {
+    puVar8 = (undefined4 *)piVar21[1];
+  }
+  do {
+    iVar10 = ProtoAriesPeek(puVar8,(long)(int)piStack_a8,(long)(int)piStack_a4,
+                            (long)(int)ppbStack_ac);
+    if (iVar10 < 0) {
+      if ((piVar21[0x12e] != 0) && (iVar10 = DispListOrder(piVar21[0x12a]), 0 < iVar10)) {
+        pbStack_174 = (byte *)piVar21[0x12a];
+        iStack_180 = 0x726f7374;
+        iStack_17c = 0;
+        iStack_178 = 0;
+        (*(code *)piVar21[0x12e])(param_1,lVar23,piVar21[0x12d]);
+      }
+      return;
+    }
+    bVar1 = false;
+    pbStack_174 = pbStack_b0;
+    if (piVar21[0x142] != 0) {
+      _BuddyApiDebug((int)piVar21,0x3e3518,(int)&iStack_180);
+    }
+    if (iStack_17c == -1) {
+      if (iStack_178 == -1) {
+        _BuddyApiStatus((int)piVar21,5);
+      }
+      if ((iStack_17c == -1) && (iStack_178 == -0x1010102)) {
+        _BuddyApiStatus((int)piVar21,6);
+      }
+    }
+    if (iStack_17c == 0x50494e47) {
+      ProtoAriesSend((undefined4 *)piVar21[1],0x50494e47,iStack_178,(char *)pbStack_174,-1);
+    }
+    if (iStack_17c == 0x41555448) {
+      iStack_180 = 0x61757468;
+      (*(code *)piVar21[0x131])(param_1,lVar23,piVar21[0x130]);
+      piVar21[3] = 0;
+      if (iStack_178 != 0) {
+        Network_AuthComplete(param_1);
+      }
+    }
+    if ((iStack_17c == 0x52454356) && (piVar21[300] != 0)) {
+      Network_HandleReceive(param_1,lVar23);
+    }
+    if ((iStack_17c == 0x53454e44) && ((code *)piVar21[0x140] != (code *)0x0)) {
+      iStack_180 = 0x73656e64;
+      (*(code *)piVar21[0x140])(param_1,lVar23,piVar21[0x13f]);
+      piVar21[0x140] = 0;
+    }
+    if ((iStack_17c == 0x41444d4e) && ((code *)piVar21[300] != (code *)0x0)) {
+      iStack_180 = 0x61646d6e;
+      (*(code *)piVar21[300])(param_1,lVar23,piVar21[299]);
+    }
+    if (iStack_17c == 0x52474554) {
+      pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_FieldType);
+      iVar10 = TagFieldGetNumber(pbVar5,0);
+      if (iVar10 == 2) {
+        pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_RequestType);
+        iVar10 = TagFieldGetNumber(pbVar5,0);
+        bVar1 = iVar10 == 0;
+        piVar21[0x12f] = iVar10;
+      }
+    }
+    if ((iStack_17c == 0x524f5354) && (piVar21[0x12a] != 0)) {
+      uVar3 = 4;
+      pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_FieldType);
+      iVar10 = TagFieldGetNumber(pbVar5,0);
+      if (iVar10 != 1) {
+        uVar3 = 0;
+      }
+      if (iVar10 == 2) {
+        uVar3 = 0x200;
+      }
+      if ((uVar3 == 0x200) &&
+         (iVar10 = piVar21[0x12f], piVar21[0x12f] = iVar10 + -1, iVar10 + -1 == 0)) {
+        bVar1 = true;
+      }
+      pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_UsernameField);
+      TagFieldGetString(pbVar5,abStack_1a0,0x20,(byte *)BUDDY_DefaultString);
+      Buddy_ProcessUsername((char *)abStack_1a0);
+      if (piVar21[6] == 0) {
+        pcVar6 = Util_FindCharInString((char *)abStack_1a0,'.');
+        if (pcVar6 != (char *)0x0) goto LAB_003632c0;
+        iVar10 = piVar21[0x129];
+      }
+      else {
+        iVar10 = piVar21[0x129];
+      }
+      iVar10 = Buddy_FindUserByString(iVar10,(long)(int)abStack_1a0);
+      lVar11 = (long)iVar10;
+      if (lVar11 == 0) {
+        sVar13 = strlen((char *)abStack_1a0);
+        if (sVar13 < 0x20) {
+          pbVar5 = (byte *)Util_AllocateMemory(0xb8);
+          memset(pbVar5,0,0xb8);
+          StringHelper_CopyToBuffer((long)(int)pbVar5,(char *)abStack_1a0);
+          lVar11 = HashTable_AllocateEntry(piVar21[0x12a],(long)(int)pbVar5);
+          Buddy_AddUser((int *)piVar21[0x129],pbVar5,(int)lVar11);
+        }
+        if (lVar11 == 0) goto LAB_003632c0;
+        iVar10 = piVar21[0x12a];
+      }
+      else {
+        iVar10 = piVar21[0x12a];
+      }
+      iVar10 = Buddy_GetUserData((long)iVar10,lVar11);
+      if (iVar10 != 0) {
+        pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_GroupField);
+        TagFieldGetString(pbVar5,(byte *)(iVar10 + 0x20),0x20,(byte *)BUDDY_DefaultString);
+        if (uVar3 != 0) {
+          *(uint *)(iVar10 + 0xa8) = *(uint *)(iVar10 + 0xa8) & 0xffefffff | uVar3;
+        }
+      }
+    }
+LAB_003632c0:
+    if ((iStack_17c == 0x50474554) && (piVar21[0x12a] != 0)) {
+      pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_UsernameField);
+      TagFieldGetString(pbVar5,abStack_1a0,0x20,(byte *)BUDDY_DefaultString);
+      Buddy_ProcessUsername((char *)abStack_1a0);
+      iVar10 = Buddy_FindUserByString(piVar21[0x129],(long)(int)abStack_1a0);
+      if ((long)iVar10 != 0) {
+        pbVar7 = (byte *)Buddy_GetUserData((long)piVar21[0x12a],(long)iVar10);
+        uVar12 = (ulong)(int)pbVar7;
+        pbVar5 = abStack_170;
+        if ((uVar12 & 7) == 0) {
+          uVar15 = uVar12;
+          do {
+            puVar14 = (undefined8 *)uVar15;
+            uVar18 = puVar14[1];
+            uVar16 = puVar14[2];
+            uVar17 = puVar14[3];
+            *(undefined8 *)pbVar5 = *puVar14;
+            *(undefined8 *)(pbVar5 + 8) = uVar18;
+            *(undefined8 *)(pbVar5 + 0x10) = uVar16;
+            *(undefined8 *)(pbVar5 + 0x18) = uVar17;
+            puVar14 = puVar14 + 4;
+            uVar15 = (ulong)(int)puVar14;
+            pbVar5 = pbVar5 + 0x20;
+          } while (uVar15 != (long)(int)(pbVar7 + 0xa0));
+        }
+        else {
+          uVar15 = uVar12;
+          do {
+            puVar14 = (undefined8 *)uVar15;
+            uVar16 = puVar14[1];
+            uVar17 = puVar14[2];
+            uVar18 = puVar14[3];
+            *(undefined8 *)pbVar5 = *puVar14;
+            *(undefined8 *)(pbVar5 + 8) = uVar16;
+            *(undefined8 *)(pbVar5 + 0x10) = uVar17;
+            *(undefined8 *)(pbVar5 + 0x18) = uVar18;
+            puVar14 = puVar14 + 4;
+            uVar15 = (ulong)(int)puVar14;
+            pbVar5 = pbVar5 + 0x20;
+          } while (uVar15 != (long)(int)(pbVar7 + 0xa0));
+        }
+        uVar16 = puVar14[1];
+        uVar17 = puVar14[2];
+        *(undefined8 *)pbVar5 = *puVar14;
+        *(undefined8 *)(pbVar5 + 8) = uVar16;
+        *(undefined8 *)(pbVar5 + 0x10) = uVar17;
+        Network_SendPlayerData(param_1,(int)&iStack_180,(int)pbVar7);
+        iVar10 = Util_CompareMemory(abStack_170,pbVar7,0xb8);
+        if (iVar10 != 0) {
+          Buddy_ConfigUpdate(piVar21[0x12a],1);
+          ProtoAriesSecure((int)piVar21,0x3e2300,uVar12,(long)(char)pbVar7[0xa7],
+                           (long)(int)(pbVar7 + 0x40),(long)(int)(pbVar7 + 0x54),
+                           (long)(int)(pbVar7 + 0xa4),extraout_t3_00);
+        }
+      }
+    }
+    if ((iStack_17c == 0x52414444) && (piVar21[0x12a] != 0)) {
+      iStack_180 = 0x61646475;
+      pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_FieldType);
+      iVar22 = 0;
+      iVar10 = TagFieldGetNumber(pbVar5,0);
+      while( true ) {
+        pbVar5 = (byte *)NetworkConfig_GetValue((long)piVar21[0x12a],iVar22);
+        lVar11 = (long)(int)pbVar5;
+        if (lVar11 == 0) break;
+        if ((*(uint *)(pbVar5 + 0xa8) & 0x10000) == 0) {
+          iVar22 = iVar22 + 1;
+        }
+        else {
+          if (*(int *)(pbVar5 + 0xac) == iVar10) {
+            if (iStack_178 != 0) {
+              if ((code *)piVar21[0x136] != (code *)0x0) {
+                iStack_178 = -2;
+                pbStack_174 = pbVar5;
+                (*(code *)piVar21[0x136])(param_1,lVar23,piVar21[0x135]);
+              }
+              puVar8 = (undefined4 *)Buddy_RemoveUser((int *)piVar21[0x129],lVar11);
+              HashTable_FreeEntry(piVar21[0x12a],puVar8);
+              Util_FreeMemory(lVar11);
+              iVar10 = piVar21[0x12a];
+              goto LAB_003635f4;
+            }
+            pbVar7 = TagFieldFind(pbStack_174,(byte *)BUDDY_NicknameField);
+            TagFieldGetString(pbVar7,abStack_1a0,0x20,(byte *)BUDDY_DefaultString);
+            Buddy_ProcessUsername((char *)abStack_1a0);
+            if (abStack_1a0[0] == 0) {
+              pcVar9 = (code *)piVar21[0x136];
+            }
+            else {
+              sVar13 = strlen((char *)abStack_1a0);
+              if (sVar13 < 0x20) {
+                iVar10 = Buddy_RemoveUser((int *)piVar21[0x129],lVar11);
+                String_FormatTruncated((char *)pbVar5,0x20,(char *)abStack_1a0);
+                Buddy_AddUser((int *)piVar21[0x129],pbVar5,iVar10);
+                pcVar9 = (code *)piVar21[0x136];
+              }
+              else {
+                pcVar9 = (code *)piVar21[0x136];
+              }
+            }
+            if (pcVar9 != (code *)0x0) {
+              iStack_178 = 0;
+              pbStack_174 = pbVar5;
+              (*pcVar9)(param_1,lVar23,piVar21[0x135]);
+            }
+            pbVar5[0xac] = 0;
+            pbVar5[0xad] = 0;
+            pbVar5[0xae] = 0;
+            pbVar5[0xaf] = 0;
+            *(uint *)(pbVar5 + 0xa8) = *(uint *)(pbVar5 + 0xa8) ^ 0x10000;
+            break;
+          }
+          iVar22 = iVar22 + 1;
+        }
+      }
+      iVar10 = piVar21[0x12a];
+LAB_003635f4:
+      Buddy_ConfigUpdate(iVar10,1);
+    }
+    if ((iStack_17c == 0x5244454c) && (piVar21[0x13b] != 0)) {
+      pbVar5 = TagFieldFind(pbStack_174,(byte *)BUDDY_FieldType);
+      iVar10 = TagFieldGetNumber(pbVar5,0);
+      if (iVar10 == piVar21[0x138]) {
+        iStack_180 = 0x64656c75;
+        (*(code *)piVar21[0x13b])(param_1,lVar23,piVar21[0x13a]);
+        piVar21[0x13b] = 0;
+      }
+    }
+    if (bVar1) {
+      if ((code *)piVar21[0x12e] != (code *)0x0) {
+        iStack_17c = 0;
+        iStack_180 = 0x656e6472;
+        iStack_178 = 0;
+        pbStack_174 = (byte *)0x0;
+        (*(code *)piVar21[0x12e])(param_1,lVar23,piVar21[0x12d]);
+      }
+      puVar8 = (undefined4 *)piVar21[1];
+    }
+    else {
+      puVar8 = (undefined4 *)piVar21[1];
+    }
+    ProtoAriesRecv(puVar8,0,0,0,0);
+    puVar8 = (undefined4 *)piVar21[1];
+  } while( true );
+}
+--
+Incoming References - BuddyApiUpdate
+BuddySystem_Scheduler

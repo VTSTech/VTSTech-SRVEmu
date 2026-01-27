@@ -1,0 +1,64 @@
+
+undefined * MultiplayerCommand_Dispatcher(undefined8 param_1,int *param_2)
+
+{
+  int iVar1;
+  bool bVar2;
+  undefined *puVar3;
+  
+  bVar2 = MultiplayerMode_Check();
+  puVar3 = (undefined *)0x63680000;
+  if (bVar2) {
+    iVar1 = *param_2;
+    if (iVar1 == 0x63686174) {
+      puVar3 = (undefined *)Config_ProcessSetupData((int)param_2);
+      return puVar3;
+    }
+    if (iVar1 < 0x63686175) {
+      if (iVar1 == 0x61646d6e) {
+        return (undefined *)(uint)(0x61646d6e < iVar1);
+      }
+      if (0x61646d6e < iVar1) {
+        puVar3 = (undefined *)0x61757468;
+        if (iVar1 == 0x61757468) {
+          puVar3 = (undefined *)MultiplayerSystem_SetAuthState((int)param_2);
+          return puVar3;
+        }
+      }
+      else {
+        puVar3 = (undefined *)0x61646475;
+        if (iVar1 == 0x61646475) {
+          puVar3 = MultiplayerCommand_AddUser((int)param_2);
+          return puVar3;
+        }
+      }
+    }
+    else {
+      if (iVar1 == 0x656e6472) {
+        puVar3 = (undefined *)FUN_00326e30();
+        return puVar3;
+      }
+      if (iVar1 < 0x656e6473) {
+        puVar3 = (undefined *)0x636f6e6e;
+        if (iVar1 == 0x636f6e6e) {
+          puVar3 = (undefined *)NetState_Transition((int)param_2);
+          return puVar3;
+        }
+      }
+      else {
+        puVar3 = (undefined *)0x726f7374;
+        if (iVar1 == 0x726f7374) {
+          puVar3 = (undefined *)FUN_00326d80();
+          return puVar3;
+        }
+      }
+    }
+  }
+  return puVar3;
+}
+--
+Incoming References - MultiplayerCommand_Dispatcher
+MultiplayerSystem_ProcessUserRequest
+BuddySystem_InitializeCallback
+System_CheckNetworkCondition
+MultiplayerSystem_Activate

@@ -1,4 +1,4 @@
-# server_r10.py - CLEANED & OPTIMIZED
+# server_r12.py - CLEANED & OPTIMIZED
 import sys, socket, struct, time, threading, random, uuid
 from _thread import *
 
@@ -8,7 +8,7 @@ from authentication_system_r11 import AuthenticationHandlers
 from session_system_r11 import SessionManager, NetworkHandlers, PingManager, DataServerManager
 from room_system_r11 import RoomManager, RoomHandlers
 from message_system_r11 import MessageHandlers
-from buddy_system_r10 import BuddyHandlers
+from buddy_system_r11 import BuddyHandlers
 
 from state_trigger import StateTrigger
 # Import game modules
@@ -27,7 +27,7 @@ except ImportError:
     print("WARNING: NBA Street v3 module not available")
 
 # Configuration
-BUILD = "0.10-Modular"
+BUILD = "0.12-Modular"
 PORT_NFSU_PS2 = 10900   # ps2nfs04.ea.com:10900
 PORT_NFSU2_PS2 = 20900  # ps2nfs05.ea.com:10900
 PORT_BO3U_PS2 = 21800   # ps2burnout05.ea.com:21800
@@ -356,30 +356,38 @@ def get_next_data_port():
         current_data_port = PORTS['data_start'] if current_data_port > PORTS['data_start'] + 1000 else current_data_port + 1
         return port
         
-def create_packet(command, subcommand, data):
-    """Create packet with debug logging"""
+def create_packet(cmd, sub, data):
+    # 1. Force CMD and SUB to be exactly 4 bytes
+    if isinstance(cmd, str): cmd = cmd.encode('latin1')
+    if isinstance(sub, str): sub = sub.encode('latin1')
+    cmd = cmd.ljust(4, b'\x00')[:4]
+    sub = sub.ljust(4, b'\x00')[:4]
+    
+    # 2. Force DATA to bytes
     if isinstance(data, str):
-        data_bytes = data.encode('latin1')
-    else:
-        data_bytes = data
+        data = data.encode('latin1')
     
-    # Create the packet
-    size = len(data_bytes) + 12  # 12 byte header
-    header = struct.pack(">4s4sL", 
-                         command.encode('ascii'), 
-                         subcommand.encode('ascii'), 
-                         size)
+    # 3. Append the NULL terminator (The "Ghidra Fix")
+    # Using data[-1:] ensures we are comparing bytes to bytes
+    if len(data) == 0 or data[-1:] != b'\x00':
+        data += b'\x00'
+
+    # 4. Pack the 12-byte EA Header
+    # Format: 4s (cmd), 4s (sub), 3s (padding), B (1-byte size)
+    total_size = 12 + len(data)
     
-    packet = header + data_bytes
-    
-    # Debug logging for important commands
-    if command in ['+rom', '+usr', '+pop', '+who']:
-        print(f"\nDEBUG PACKET: {command}")
-        print(f"Header: {header.hex()}")
-        print(f"Data: {repr(data_bytes.decode('latin1', errors='ignore'))}")
-        print("-" * 50)
-    
-    return packet
+    try:
+        # Most 2004 games use a single byte for size in this position
+        header = struct.pack('4s4s3sB', 
+                             cmd, 
+                             sub, 
+                             b'\x00\x00\x00', 
+                             total_size & 0xFF) 
+    except struct.error:
+        # Fallback if size logic is slightly different for your build
+        header = cmd + sub + b'\x00\x00\x00' + bytes([total_size & 0xFF])
+
+    return header + data
 
 # Game-specific handler dispatcher
 def handle_game_specific_command(cmd_str, data, session):
@@ -546,8 +554,9 @@ def handle_system_command(data, session):
     return challenge_system.handle_system_command(data, session)
 
 def handle_onln(data, session):
-    print(f"ONLN: Online status check from {session.clientNAME}")
-    response = f"S=0\nSTATUS=0\nSERVER=VTSTech\nVERSION={BUILD}\nUSERS={len(session_manager.client_sessions)}\n"
+    # STATUS=0 (Available), STATUS=1 (Away), STATUS=2 (In-Game)
+    user_count = len(session_manager.client_sessions)
+    response = f"S=0\nSTATUS=0\nUSERS={user_count}\n"
     return create_packet('onln', '', response)
 
 def handle_snap(data, session):
@@ -624,36 +633,21 @@ def handle_tic(data, session):
 		pass
 
 def reply_play(data, session):
-    parse_data(data, session)
-    print(f"PLAY: Race start for {session.clientNAME}, state={session.challenge_state}")
+    # 1. Generate the 272-byte blob using the new packer
+    # We find the target session to get their info if needed
+    target_session = session_manager.get_session_by_persona(session.challenge_target)
+    binary_blob = challenge_system.create_272_byte_session_data(session, target_session)
     
-    if session.challenge_state != 6:
-        print(f"PLAY ERROR: Invalid state {session.challenge_state}, expected 6")
-        return create_packet('play', '', "S=0\nSTATUS=0\nERROR=Invalid state\n")
-    
-    session_data = create_272_byte_session_data(session)
-    
-    response_lines = [
-        "SELF=1", "HOST=1", "OPPO=0", "P1=1", "P2=0", "P3=0", "P4=0",
-        "AUTH=1", f"FROM={session.clientNAME}", 
-        f"SEED={int(time.time())}", f"WHEN={int(time.time())}", "STATUS=0"
-    ]
-    
-    response = '\n'.join(response_lines) + '\n'
-    play_packet = create_packet('play', '', response)
-    
-    def send_session_data():
-        time.sleep(0.5)
-        if session.connection:
-            try:
-                ses_packet = create_packet('+ses', '', session_data)
-                session.connection.sendall(ses_packet)
-                print(f"SESSION: Sent 272-byte data to {session.clientNAME}")
-            except Exception as e:
-                print(f"SESSION: Error sending data: {e}")
-    
-    threading.Thread(target=send_session_data, daemon=True).start()
-    return play_packet
+    # 2. Push the binary blob via +ses
+    # Note: +ses is a broadcast-style command (no sub-command)
+    ses_packet = create_packet('+ses', '', binary_blob)
+    session.connection.sendall(ses_packet)
+    if target_session:
+        target_session.connection.sendall(ses_packet)
+
+    # 3. Standard play response
+    response = "SELF=1\nHOST=1\nSTATUS=0\n"
+    return create_packet('play', '', response)
 
 def send_multiplayer_initialization(session):
     """Send multiplayer initialization sequence AFTER room join"""
@@ -945,7 +939,7 @@ def threaded_client(connection, address, socket_type):
                             True      # Is self
                         )
                         print(f"AUTH: Updated presence for {username} in Lobby")
-                    response = f"PERS={current_persona}\nS=0\nSTATUS=0\nLAST={time.strftime('%Y.%m.%d-%H:%M:%S')}\n"
+                    response = f"PERS={current_persona}\nS=0\nSTATUS=0\nLAST={time.strftime('%Y-%m-%d %H:%M:%S')}\n"
                     try:
                         connection.sendall(create_packet('pers', '', response))
                         print(f"AUTH: Sent automatic PERS confirmation for {connection_id}")
@@ -969,9 +963,9 @@ def threaded_client(connection, address, socket_type):
                     time.sleep(1.0)  # Wait for room system to process
                     print(f"MOVE DEBUG: moveNAME = '{session.moveNAME}'")
                     print(f"MOVE DEBUG: active_rooms = {room_manager.active_rooms}")
-                    if not session.multiplayer_initialized:
-                        print(f"MOVE: {session.clientNAME} joined room, triggering multiplayer init")
-                        send_multiplayer_initialization(session)
+                    #if not session.multiplayer_initialized:
+                        #print(f"MOVE: {session.clientNAME} joined room, triggering multiplayer init")
+                        #send_multiplayer_initialization(session)
                 
                 elif session.msgType == b'room':
                     # Room creation/update

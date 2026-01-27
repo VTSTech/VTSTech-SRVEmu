@@ -1,0 +1,20 @@
+
+uint TagFieldGetFlags(char *param_1,uint param_2)
+
+{
+  char cVar1;
+  
+  if (param_1 != (char *)0x0) {
+    cVar1 = *param_1;
+    param_2 = 0;
+    while (*(uint *)(&DAT_003df8e8 + cVar1 * 4) != 0) {
+      param_2 = param_2 | *(uint *)(&DAT_003df8e8 + cVar1 * 4);
+      param_1 = param_1 + 1;
+      cVar1 = *param_1;
+    }
+  }
+  return param_2;
+}
+--
+Incoming References - TagFieldGetFlags
+LobbyApiUpdate

@@ -1,0 +1,117 @@
+
+void Lobby_ProcessNetworkEvents(undefined8 param_1)
+
+{
+  byte *pbVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  undefined8 extraout_a3;
+  undefined8 extraout_a3_00;
+  undefined8 extraout_t0;
+  undefined8 extraout_t0_00;
+  undefined8 extraout_t1;
+  undefined8 extraout_t1_00;
+  undefined8 extraout_t2;
+  undefined8 extraout_t2_00;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  int iVar5;
+  int iStack_440;
+  uint uStack_43c;
+  byte abStack_430 [256];
+  byte abStack_330 [32];
+  undefined1 auStack_310 [8];
+  int iStack_308;
+  byte abStack_2f8 [32];
+  code *pcStack_2d8;
+  undefined4 uStack_2d4;
+  undefined4 uStack_2c0;
+  undefined4 uStack_2bc;
+  undefined4 uStack_2b8;
+  byte *pbStack_2b4;
+  byte abStack_2b0 [512];
+  int iStack_b0;
+  byte *pbStack_ac;
+  int *piStack_a8;
+  
+  piStack_a8 = &iStack_b0;
+  pbStack_ac = abStack_2f8;
+  while( true ) {
+    iVar5 = (int)param_1;
+    iStack_b0 = 0x100;
+    iVar3 = System_InitializeNetwork
+                      (*(int **)(iVar5 + 4),abStack_430,(long)(int)piStack_a8,(long)(int)&iStack_4 40
+                      );
+    if (iVar3 == 0) break;
+    pbVar1 = TagFieldFind(abStack_430,(byte *)NET_Field1);
+    uVar2 = TagFieldGetAddress(pbVar1,uStack_43c);
+    pbVar1 = TagFieldFind(abStack_430,(byte *)NET_Field2);
+    TagFieldGetString(pbVar1,abStack_330,0x20,(byte *)NET_DefaultValue);
+    iVar3 = Buddy_UserLookup(iVar5,(long)(int)auStack_310,(char *)abStack_330,uVar2,0);
+    if ((iVar3 != 0) && (pcStack_2d8 != (code *)0x0)) {
+      uStack_2c0 = 0;
+      uStack_2bc = 0x70696e67;
+      uStack_2b8 = 0;
+      abStack_2b0[0] = 0;
+      pbStack_2b4 = abStack_2b0;
+      String_FormatKeyValuePairs(abStack_2b0,0x200,(byte *)NET_Field2,abStack_330);
+      String_AppendKeyValue(abStack_2b0,0x200,NET_Field3,iStack_308);
+      String_AppendKeyValue(abStack_2b0,0x200,NET_Field4,iStack_440);
+      (*pcStack_2d8)(param_1,&uStack_2c0,uStack_2d4);
+    }
+    if (*(int *)(iVar5 + 0x310) == 0) {
+      iVar3 = *(int *)(iVar5 + 0x324);
+    }
+    else {
+      iStack_b0 = 0;
+      while( true ) {
+        iVar3 = NetworkConfig_GetValue((long)*(int *)(iVar5 + 0x314),iStack_b0);
+        if (iVar3 == 0) break;
+        if (*(uint *)(iVar3 + 100) == uVar2) {
+          Util_FormatIPString((char *)(iVar3 + 0x5c),0x3e2fa0,(long)iStack_440,extraout_a3,
+                              extraout_t0,extraout_t1,extraout_t2,extraout_t3);
+          iVar3 = Buddy_ConfigGetCount(*(int *)(iVar5 + 0x314));
+          if (iStack_b0 < iVar3) {
+            Buddy_ConfigUpdate(*(int *)(iVar5 + 0x314),1);
+          }
+        }
+        iStack_b0 = iStack_b0 + 1;
+      }
+      iVar3 = *(int *)(iVar5 + 0x324);
+    }
+    if (iVar3 != 0) {
+      iStack_b0 = 0;
+      while( true ) {
+        iVar3 = NetworkConfig_GetValue((long)*(int *)(iVar5 + 0x328),iStack_b0);
+        if (iVar3 == 0) break;
+        iVar4 = Util_CompareStrings((char *)(iVar3 + 8),(char *)abStack_330);
+        if (iVar4 == 0) {
+          Util_FormatIPString((char *)(iVar3 + 0x28),0x3e2fa0,(long)iStack_440,extraout_a3_00,
+                              extraout_t0_00,extraout_t1_00,extraout_t2_00,extraout_t3_00);
+          Buddy_ConfigUpdate(*(int *)(iVar5 + 0x328),1);
+        }
+        iStack_b0 = iStack_b0 + 1;
+      }
+    }
+  }
+  iVar3 = ProtoAriesTick();
+  while (iVar4 = Buddy_UserLookup(iVar5,(long)(int)auStack_310,(char *)abStack_330,-1,iVar3),
+        iVar4 != 0) {
+    if (pcStack_2d8 != (code *)0x0) {
+      uStack_2c0 = 0;
+      uStack_2bc = 0x70696e67;
+      uStack_2b8 = 0xffffffff;
+      abStack_2b0[0] = 0;
+      pbStack_2b4 = abStack_2b0;
+      String_FormatKeyValuePairs(abStack_2b0,0x200,(byte *)NET_Field2,pbStack_ac);
+      String_AppendKeyValue(abStack_2b0,0x200,NET_Field3,iStack_308);
+      String_AppendKeyValue(abStack_2b0,0x200,NET_Field4,0);
+      (*pcStack_2d8)(param_1,&uStack_2c0,uStack_2d4);
+    }
+  }
+  return;
+}
+--
+Incoming References - Lobby_ProcessNetworkEvents
+LobbyApiUpdate

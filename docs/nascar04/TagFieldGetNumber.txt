@@ -1,0 +1,40 @@
+
+int TagFieldGetNumber(byte *param_1,int param_2)
+
+{
+  byte bVar1;
+  int iVar2;
+  int iVar3;
+  
+  if (param_1 == (byte *)0x0) {
+    return param_2;
+  }
+  iVar3 = 1;
+  bVar1 = *param_1;
+  if (*param_1 != 0x2b) {
+    if (*param_1 != 0x2d) goto LAB_0031e8f4;
+    iVar3 = -1;
+  }
+  param_1 = param_1 + 1;
+  bVar1 = *param_1;
+LAB_0031e8f4:
+  iVar2 = 0;
+  while (bVar1 - 0x30 < 10) {
+    param_1 = param_1 + 1;
+    iVar2 = iVar2 * 10 + (bVar1 & 0xf);
+    bVar1 = *param_1;
+  }
+  return iVar3 * iVar2;
+}
+--
+Incoming References - TagFieldGetNumber
+Command_HandleServerNews
+CommandHandler_INDEX_RANGE
+CommandHandler_INDEX_RANGE_Simple
+CommandHandler_RANGE
+CommandHandler_RANGE_Simple
+Security_EncryptAndSend
+LobbyApiUpdate
+Field_ProcessConfigIndex
+Config_ProcessSetupData
+BuddyApiUpdate

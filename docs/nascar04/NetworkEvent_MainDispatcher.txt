@@ -1,0 +1,518 @@
+
+void NetworkEvent_MainDispatcher
+               (ulong param_1,ushort param_2,ushort param_3,ulong param_4,undefined8 param_5,
+               undefined8 param_6,undefined8 param_7,undefined8 param_8)
+
+{
+  char cVar1;
+  bool bVar2;
+  int iVar3;
+  undefined4 uVar4;
+  char *pcVar5;
+  uint uVar6;
+  int *piVar7;
+  float fVar8;
+  long lVar9;
+  undefined8 uVar10;
+  int *piVar11;
+  undefined8 extraout_a1;
+  int *piVar12;
+  undefined8 extraout_a2;
+  float *pfVar13;
+  int *piVar14;
+  undefined8 extraout_a3;
+  undefined8 extraout_t0;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t2_00;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  float *pfVar15;
+  ulong uVar16;
+  ulong uVar17;
+  float fVar18;
+  int iVar19;
+  int aiStack_90 [4];
+  int aiStack_80 [4];
+  
+  uVar16 = (ulong)param_2;
+  uVar17 = (ulong)param_3;
+  pfVar15 = (float *)param_6;
+  *pfVar15 = 0.0;
+  lVar9 = Game_CommandRouter(param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8);
+  if (lVar9 != 0) {
+    return;
+  }
+  lVar9 = NetworkEvent_FallbackDispatcher(param_2,param_3,param_1,param_5,param_4,param_6);
+  if (lVar9 != 0) {
+    return;
+  }
+  uVar6 = (uint)param_1;
+  pfVar13 = (float *)param_5;
+  lVar9 = Protocol_CommandDispatcher(param_2,param_3,uVar6,(uint *)pfVar13,param_4,(uint *)pfVar 15);
+  if (lVar9 != 0) {
+    return;
+  }
+  iVar3 = ChallengeSystem_CommandDispatcher
+                    (uVar16,uVar17,uVar6,(ushort *)pfVar13,param_4,(uint *)pfVar15);
+  if (iVar3 != 0) {
+    return;
+  }
+  iVar3 = Game_HandleSystemCommand
+                    (uVar16,uVar17,uVar6,param_5,param_4,param_6,extraout_t2,extraout_t3);
+  if (iVar3 != 0) {
+    return;
+  }
+  switch(param_1) {
+  case 0:
+    fVar8 = (float)System_GetTimerValue();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 1:
+    Network_ConfigureConnection
+              ((long)(int)*pfVar13,(int)pfVar13[1],(long)(int)pfVar13[2],(int *)pfVar13[3],
+               (long)(int)pfVar13[4],'\x01',1,extraout_t3_00);
+    break;
+  case 2:
+    fVar8 = (float)System_GetResourceStatus((long)(int)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 3:
+    fVar18 = (float)Video_GetAspectRatio();
+    fVar8 = 1.4013e-45;
+    if (fVar18 != 1.7777778) {
+      fVar8 = 0.0;
+    }
+    goto LAB_001c3914;
+  case 4:
+    Network_InitializeSession
+              ((long)(int)*pfVar13,(int)pfVar13[1],extraout_a2,extraout_a3,extraout_t0,extraout_t 1,
+               extraout_t2_00,extraout_t3_00);
+    break;
+  case 5:
+  case 0x17:
+  case 0x2b:
+  case 0x48:
+  case 0x75:
+    *pfVar15 = 0.0;
+    goto switchD_001c3904_caseD_c;
+  case 6:
+    FUN_002303e8(*(undefined1 *)pfVar13);
+    break;
+  case 7:
+    System_ConfigureMultiParam
+              ((long)(int)*pfVar13,(long)(int)pfVar13[1],(long)(int)pfVar13[2],(long)(int)pfVar13 [3]
+               ,(long)(int)pfVar13[4],(long)(int)pfVar13[5],(long)(int)pfVar13[6],extraout_t3_00) ;
+    break;
+  case 8:
+    System_ProcessEventData((uint)param_4,(int *)pfVar13);
+    break;
+  case 9:
+    fVar8 = (float)Network_ValidateConnection
+                             ((long)(int)*pfVar13,(int *)pfVar13[1],extraout_a2,extraout_a3,
+                              extraout_t0,extraout_t1,extraout_t2_00,extraout_t3_00);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 10:
+    fVar8 = (float)System_CheckResource((long)(int)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xb:
+    fVar8 = (float)System_GetOperationMode();
+    *pfVar15 = fVar8;
+  default:
+    goto switchD_001c3904_caseD_c;
+  case 0xd:
+    fVar8 = (float)Network_CalculateLatency((int)*pfVar13,SUB42(pfVar13[1],0));
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x10:
+    fVar8 = System_CompareValues(*pfVar13,pfVar13[1]);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x11:
+    Network_SetConnectionParams
+              ((long)(int)*pfVar13,(int)pfVar13[1],0,(uint)pfVar13[2],SUB42(pfVar13[3],0));
+    break;
+  case 0x12:
+    System_ResetState();
+    break;
+  case 0x18:
+    cVar1 = Hardware_GetDeviceStatus();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0x1b:
+    cVar1 = System_CheckPermission((uint)*pfVar13);
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0x1e:
+    Network_UpdateConnection((long)(int)*pfVar13,(int)pfVar13[1],(int)pfVar13[2]);
+    break;
+  case 0x20:
+  case 0x56:
+    Protocol_ResetChannel((int)*pfVar13);
+    break;
+  case 0x21:
+    pcVar5 = Protocol_GetChannelStatus((int)*pfVar13);
+    *pfVar15 = (float)pcVar5;
+    goto switchD_001c3904_caseD_c;
+  case 0x23:
+    System_CleanupResources();
+    break;
+  case 0x24:
+    System_InitializeSubsystem();
+    break;
+  case 0x26:
+    cVar1 = Hardware_GetInputState();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0x27:
+    Audio_SetOutputMode(0);
+    break;
+  case 0x29:
+    bVar2 = System_ValidateInput((int)*pfVar13,SUB41(pfVar13[1],0));
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 0x2d:
+    fVar8 = (float)Network_GetPacketStats((uint)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x2e:
+    System_ConfigureBuffer((long)(int)*pfVar13,(int)pfVar13[1],(int)pfVar13[2],(int)pfVar13[3]);
+    break;
+  case 0x2f:
+    Network_ProcessDataBlock
+              ((int)*pfVar13,extraout_a1,extraout_a2,extraout_a3,extraout_t0,extraout_t1,
+               extraout_t2_00,extraout_t3_00);
+    break;
+  case 0x30:
+    bVar2 = System_CheckReadyState2();
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 0x31:
+    Audio_ConfigureChannel(pfVar13[1],(long)(int)*pfVar13);
+    break;
+  case 0x32:
+    cVar1 = Graphics_GetRenderStatus();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0x33:
+    fVar8 = (float)Input_GetControllerState((int)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x35:
+    fVar8 = (float)System_GetMemoryUsage();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x40:
+    Network_SetQualityParams((int)*pfVar13,(int)pfVar13[1],(int)pfVar13[2]);
+    break;
+  case 0x41:
+    cVar1 = Video_GetDisplayMode();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0x42:
+    System_FinalizeOperation();
+    break;
+  case 0x44:
+    cVar1 = Hardware_CheckDriveStatus();
+    fVar8 = (float)(uint)(cVar1 == '\0');
+    goto LAB_001c3914;
+  case 0x45:
+    System_InitializeAudio();
+    break;
+  case 0x46:
+    Network_ConfigureProtocol(SUB41(*pfVar13,0),(long)(int)pfVar13[1]);
+    break;
+  case 0x47:
+    System_LogEvent((long)(int)*pfVar13);
+    break;
+  case 0x49:
+    System_InitializeVideo();
+    break;
+  case 0x4a:
+    System_UpdateConfiguration((int)*pfVar13,(int *)pfVar13[1]);
+    break;
+  case 0x4c:
+    fVar8 = (float)System_GetInitStatus();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x4d:
+    Network_CloseConnection((int)*pfVar13);
+    break;
+  case 0x4e:
+    System_SetSystemFlag(*pfVar13);
+    break;
+  case 0x4f:
+    fVar8 = (float)System_GetSystemFlags();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x50:
+    Network_SendKeepalive(*pfVar13,(int)pfVar13[1]);
+    break;
+  case 0x51:
+    System_ValidateSession((long)(int)*pfVar13);
+    break;
+  case 0x52:
+    iVar3 = Network_ConnectionCheck();
+    if (iVar3 == 1) {
+      cVar1 = FUN_0017a8b8();
+      *pfVar15 = (float)(int)cVar1;
+    }
+    else {
+      cVar1 = FUN_0016c818();
+      *pfVar15 = (float)(int)cVar1;
+    }
+    goto switchD_001c3904_caseD_c;
+  case 0x53:
+    System_ResetFlags();
+    break;
+  case 0x55:
+    Protocol_ConfigureChannel((int)*pfVar13);
+    break;
+  case 0x57:
+    bVar2 = Network_CheckConnectivity((long)(int)*pfVar13);
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 0x58:
+    fVar8 = (float)System_GetUptime();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x59:
+    System_UpdateTimer((int)*pfVar13,(long)(int)pfVar13[1]);
+    break;
+  case 0x5a:
+    Network_ProcessComplexData
+              ((long)(int)*pfVar13,(uint *)pfVar13[1],(int)pfVar13[2],(int)pfVar13[3],
+               (int)pfVar13[4],(undefined4 *)pfVar13[5],(int *)pfVar13[6],(long)(int)pfVar13[7],
+               (int)pfVar13[8]);
+    break;
+  case 0x5b:
+    cVar1 = Hardware_GetTemperature();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0x5c:
+    System_ProcessCommandBlock((int *)*pfVar13);
+    break;
+  case 0x5d:
+    fVar8 = (float)Network_GetConnectionInfo((long)(int)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x76:
+    cVar1 = NetworkHelper_OnlineCheck();
+    fVar8 = (float)(int)cVar1;
+    goto LAB_001c3914;
+  case 0x77:
+    Config_SetWithValidation(0x427ac0,0xb,0x8e);
+    break;
+  case 0x78:
+    uVar10 = System_GetRandomValue();
+    *pfVar15 = (float)uVar10;
+    goto switchD_001c3904_caseD_c;
+  case 0x7a:
+    Audio_SetOutputMode(1);
+    break;
+  case 0x7b:
+    Audio_SetChannelMode((int)*pfVar13,0);
+    break;
+  case 0x7c:
+    Audio_SetChannelMode((int)*pfVar13,1);
+    break;
+  case 0x7d:
+    Network_SetSecurityParams((uint)*pfVar13,(int)pfVar13[1]);
+    break;
+  case 0x7e:
+    piVar12 = aiStack_90;
+    iVar3 = 2;
+    piVar7 = (int *)*pfVar13 + *(int *)*pfVar13 + 1;
+    do {
+      iVar19 = *piVar7;
+      iVar3 = iVar3 + -1;
+      piVar7 = piVar7 + 1;
+      *piVar12 = iVar19;
+      piVar12 = piVar12 + 1;
+    } while (-1 < iVar3);
+    System_ProcessDataArray(aiStack_90);
+    break;
+  case 0x7f:
+    piVar14 = aiStack_90;
+    iVar3 = 2;
+    piVar11 = (int *)pfVar13[1] + *(int *)pfVar13[1] + 1;
+    piVar12 = (int *)pfVar13[2] + *(int *)pfVar13[2] + 1;
+    piVar7 = aiStack_80;
+    do {
+      iVar19 = *piVar11;
+      iVar3 = iVar3 + -1;
+      piVar11 = piVar11 + 1;
+      *piVar14 = iVar19;
+      piVar14 = piVar14 + 1;
+      iVar19 = *piVar12;
+      piVar12 = piVar12 + 1;
+      *piVar7 = iVar19;
+      piVar7 = piVar7 + 1;
+    } while (-1 < iVar3);
+    Network_CompareDataBlocks((int)*pfVar13,aiStack_90,aiStack_80);
+    System_FinalizeComparison(pfVar13[3]);
+    break;
+  case 0x80:
+    System_ResetDataBuffer();
+    break;
+  case 0x81:
+    System_InitializeDataSystem();
+    break;
+  case 0x82:
+    Network_SendBufferedData(*pfVar13,(int)pfVar13[1],pfVar13[2],pfVar13[3]);
+    break;
+  case 0x85:
+    iVar3 = Config_GetInteger(0x427ac0,0xb);
+    fVar8 = (float)(uint)(iVar3 != 0x8e);
+    goto LAB_001c3914;
+  case 0x89:
+    fVar8 = (float)GameState_CheckMultiplayer();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0x8c:
+    Graphics_UpdateTexture((int *)*pfVar13);
+    break;
+  case 0x8f:
+    System_SetPriority(*pfVar13);
+    break;
+  case 0x90:
+    System_GetPriority();
+    break;
+  case 0x91:
+    Network_ValidatePacket
+              ((long)(int)*pfVar13,(int)pfVar13[1],extraout_a2,extraout_a3,extraout_t0,extraout_t 1,
+               extraout_t2_00,extraout_t3_00);
+    break;
+  case 0x92:
+    System_ProcessSecurityCheck
+              ((uint *)*pfVar13,(int)pfVar13[1],extraout_a2,extraout_a3,extraout_t0,extraout_t1,
+               extraout_t2_00,extraout_t3_00);
+    break;
+  case 0xa2:
+    fVar8 = (float)Network_CalculateBandwidth((int)*pfVar13,(int)pfVar13[1]);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xb5:
+    fVar8 = (float)System_GetPerformanceStats((int)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xbc:
+    Network_ResetStatistics(SUB41(*pfVar13,0));
+    break;
+  case 0xc0:
+    fVar8 = (float)CommandHandler_REPT(*(byte **)((int)*pfVar13 + 8));
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xc1:
+    System_UpdateMetrics((uint)*pfVar13,pfVar13[1]);
+    break;
+  case 0xc2:
+    fVar8 = (float)Graphics_GetFrameRate();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xc3:
+    bVar2 = Graphics_CheckCapability((long)(int)*pfVar13,(int)pfVar13[1]);
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 0xc4:
+    bVar2 = Graphics_ValidateMode((long)(int)*pfVar13);
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 199:
+    System_DebugLog(*pfVar13);
+    break;
+  case 200:
+    fVar8 = (float)System_ValidatePointer((undefined4 *)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xce:
+    Video_EnableFeature();
+    break;
+  case 0xcf:
+    Video_DisableFeature();
+    break;
+  case 0xd0:
+    System_ResetDebugState();
+    break;
+  case 0xd2:
+    fVar8 = *pfVar13;
+    pcVar5 = (char *)System_GetBuildInfo();
+    StringHelper_CopyToBuffer((long)*(int *)((int)fVar8 + 8),pcVar5);
+    break;
+  case 0xd3:
+    fVar8 = (float)StringHelper_CompareN
+                             (*(char **)((int)*pfVar13 + 8),*(char **)((int)pfVar13[1] + 8),
+                              *(int *)((int)*pfVar13 + 4));
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xd8:
+    bVar2 = System_CheckIntegrity();
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 0xd9:
+    cVar1 = Hardware_CheckOnlineStatus();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0xda:
+    fVar8 = (float)Network_GetErrorCode((int)*pfVar13);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xdb:
+    System_ResetErrorState();
+    break;
+  case 0xe1:
+    fVar8 = (float)GameState_GetNetworkFlag();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xe7:
+    uVar6 = Input_GetControllerState((int)*pfVar13);
+    fVar8 = (float)Input_ProcessControllerData(uVar6);
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xe8:
+    System_ConfigureDevice
+              ((long)(int)*pfVar13,(int)pfVar13[1],extraout_a2,extraout_a3,extraout_t0,extraout_t 1,
+               extraout_t2_00,extraout_t3_00);
+    break;
+  case 0xe9:
+    Network_SendEventNotification(uVar16,uVar17,*(undefined1 *)pfVar13);
+    break;
+  case 0xea:
+    System_FinalizeNetworkSetup();
+    break;
+  case 0xeb:
+    fVar8 = (float)System_GetNetworkMetrics();
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xef:
+    fVar8 = 1.4013e-45;
+LAB_001c3914:
+    *pfVar15 = fVar8;
+    goto switchD_001c3904_caseD_c;
+  case 0xf1:
+    uVar4 = System_GetHardwareInfo(0x4e2618);
+    *(undefined4 *)*pfVar13 = uVar4;
+    cVar1 = System_GetCryptographicSeed();
+    *(int *)pfVar13[1] = (int)cVar1;
+    *(undefined4 *)pfVar13[2] = DAT_004e2670;
+    goto switchD_001c3904_caseD_c;
+  case 0xf5:
+    cVar1 = System_GetDebugMode();
+    *pfVar15 = (float)(int)cVar1;
+    goto switchD_001c3904_caseD_c;
+  case 0xf6:
+    bVar2 = Network_ValidateSessionKey((int)*pfVar13);
+    *pfVar15 = (float)(int)bVar2;
+    goto switchD_001c3904_caseD_c;
+  case 0xf7:
+    cVar1 = System_GetOperationResult();
+    *pfVar15 = (float)(int)cVar1;
+switchD_001c3904_caseD_c:
+  }
+  return;
+}
+--
+Incoming References - NetworkEvent_MainDispatcher
+RaceSession_CreateFull

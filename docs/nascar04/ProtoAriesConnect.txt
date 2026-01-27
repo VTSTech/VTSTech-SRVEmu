@@ -1,0 +1,39 @@
+
+undefined4 ProtoAriesConnect(undefined4 *param_1,undefined4 param_2,undefined4 param_3)
+
+{
+  short *psVar1;
+  int iVar2;
+  undefined4 uVar3;
+  
+  psVar1 = (short *)param_1[1];
+  uVar3 = 0xffffffff;
+  if (*psVar1 == 0) {
+    psVar1[1] = 0;
+    *(char *)(psVar1 + 1) = (char)((uint)param_3 >> 8);
+    *psVar1 = 2;
+    iVar2 = param_1[1];
+    psVar1[2] = 0;
+    psVar1[3] = 0;
+    psVar1[4] = 0;
+    psVar1[5] = 0;
+    psVar1[6] = 0;
+    psVar1[7] = 0;
+    *(char *)(iVar2 + 3) = (char)param_3;
+    *(char *)(param_1[1] + 7) = (char)param_2;
+    *(char *)(param_1[1] + 6) = (char)((uint)param_2 >> 8);
+    *(char *)(param_1[1] + 5) = (char)((uint)param_2 >> 0x10);
+    *(char *)(param_1[1] + 4) = (char)((uint)param_2 >> 0x18);
+    FUN_002c65c8(param_1[1],param_1[1] + 0x20);
+    RpcBind((int *)&DAT_0050aa88,0x73657373,0x636f6e6e);
+    RpcCall(0x50aa88,0,*param_1,0,(long)(int)param_1[1],0x10,0,0,0,0);
+    param_1[4] = 0;
+    uVar3 = 0;
+  }
+  return uVar3;
+}
+--
+Incoming References - ProtoAriesConnect
+NetworkConnection_MainHandler
+LobbyApiUpdate
+BuddyApiUpdate

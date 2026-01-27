@@ -1,0 +1,22 @@
+
+uint Game_HandleAUXICommand(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  iVar1 = GameState_GetCurrent();
+  if (iVar1 == 0x4b1) {
+    uVar2 = CommandHandler_AUXI();
+  }
+  else {
+    uVar2 = GameState_GetCurrent();
+    if (uVar2 == 0x4ba) {
+      uVar2 = GameState_NetworkInit();
+    }
+  }
+  return uVar2;
+}
+--
+Incoming References - Game_HandleAUXICommand
+Game_HandleSystemCommand

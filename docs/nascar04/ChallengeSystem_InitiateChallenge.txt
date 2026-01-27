@@ -1,0 +1,33 @@
+
+undefined4 ChallengeSystem_InitiateChallenge(int *param_1)
+
+{
+  char *pcVar1;
+  short *psVar2;
+  int iVar3;
+  short *psVar4;
+  undefined4 uVar5;
+  
+  uVar5 = 1;
+  if (DAT_0038b710 == (short *)0x0) {
+    pcVar1 = *(char **)(*param_1 + 8);
+    iVar3 = MultiplayerBuddy_FindByParam((long)(int)pcVar1);
+    if (iVar3 != 0) {
+      DAT_0038b710 = Memory_AllocateNetwork(0x20,0);
+      Util_StoreData((char *)(DAT_0038b710 + 6),pcVar1,0x11);
+      psVar4 = FUN_00283600(0x58,0x19);
+      psVar2 = DAT_0038b710;
+      psVar2[2] = 1;
+      psVar2[3] = 0;
+      psVar2[4] = 0x118;
+      psVar2[5] = 0;
+      uVar5 = 0;
+      *(short **)psVar2 = psVar4;
+      ChallengeSystem_ProcessAllTargets();
+    }
+  }
+  return uVar5;
+}
+--
+Incoming References - ChallengeSystem_InitiateChallenge
+ChallengeSystem_CommandDispatcher

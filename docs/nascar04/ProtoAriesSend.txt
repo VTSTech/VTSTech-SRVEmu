@@ -1,0 +1,59 @@
+
+undefined8
+ProtoAriesSend(undefined4 *param_1,undefined4 param_2,undefined4 param_3,char *param_4,long para m_5)
+
+{
+  size_t sVar1;
+  int iVar2;
+  undefined1 uStack_b0;
+  undefined1 uStack_af;
+  undefined1 uStack_ae;
+  undefined1 uStack_ad;
+  undefined1 uStack_ac;
+  undefined1 uStack_ab;
+  undefined1 uStack_aa;
+  undefined1 uStack_a9;
+  undefined1 uStack_a8;
+  undefined1 uStack_a7;
+  undefined1 uStack_a6;
+  undefined1 uStack_a5;
+  undefined4 uStack_a0;
+  undefined1 *puStack_9c;
+  int iStack_98;
+  char *pcStack_94;
+  undefined4 uStack_90;
+  
+  ProtoAriesUpdate();
+  iVar2 = (int)param_5 + 0xc;
+  if (param_5 < 0) {
+    sVar1 = strlen(param_4);
+    iVar2 = (int)sVar1 + 0xd;
+  }
+  iStack_98 = iVar2 + -0xc;
+  puStack_9c = &uStack_b0;
+  uStack_ad = (undefined1)param_2;
+  uStack_a9 = (undefined1)param_3;
+  uStack_a5 = (undefined1)iVar2;
+  uStack_a8 = (undefined1)((uint)iVar2 >> 0x18);
+  uStack_a7 = (undefined1)((uint)iVar2 >> 0x10);
+  uStack_a6 = (undefined1)((uint)iVar2 >> 8);
+  uStack_b0 = (undefined1)((uint)param_2 >> 0x18);
+  uStack_af = (undefined1)((uint)param_2 >> 0x10);
+  uStack_ae = (undefined1)((uint)param_2 >> 8);
+  uStack_ac = (undefined1)((uint)param_3 >> 0x18);
+  uStack_ab = (undefined1)((uint)param_3 >> 0x10);
+  uStack_aa = (undefined1)((uint)param_3 >> 8);
+  uStack_a0 = 0xc;
+  uStack_90 = 0;
+  pcStack_94 = param_4;
+  RpcBind((int *)&DAT_0050aab8,0x73657373,0x73656e64);
+  RpcCall(0x50aab8,2,*param_1,0,(long)(int)&uStack_a0,0,0,0,0,0);
+  return 0;
+}
+--
+Incoming References - ProtoAriesSend
+NetworkConnection_MainHandler
+Security_EncryptAndSend
+LobbyApiUpdate
+_BuddyApiTransact
+BuddyApiUpdate

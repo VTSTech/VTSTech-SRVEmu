@@ -1,0 +1,206 @@
+
+uint Race_InitializeFromSession
+               (short param_1,int *param_2,int *param_3,int param_4,int param_5,int *param_6,
+               int *param_7,undefined8 param_8,int param_9,int *param_10)
+
+{
+  short sVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  uint uVar5;
+  int iVar6;
+  int iVar7;
+  long lVar9;
+  undefined8 extraout_a2;
+  undefined8 extraout_a2_00;
+  undefined8 extraout_a2_01;
+  undefined8 uVar10;
+  undefined8 extraout_a3;
+  undefined8 extraout_a3_00;
+  undefined8 extraout_a3_01;
+  undefined8 extraout_a3_02;
+  undefined8 uVar11;
+  undefined8 extraout_t0;
+  undefined8 extraout_t0_00;
+  undefined8 extraout_t0_01;
+  undefined8 extraout_t0_02;
+  undefined8 uVar12;
+  undefined8 extraout_t1;
+  undefined8 extraout_t1_00;
+  undefined8 extraout_t1_01;
+  undefined8 extraout_t1_02;
+  undefined8 extraout_t1_03;
+  undefined8 extraout_t1_04;
+  undefined8 uVar13;
+  undefined8 extraout_t2;
+  undefined8 extraout_t2_00;
+  undefined8 extraout_t2_01;
+  undefined8 extraout_t2_02;
+  undefined8 extraout_t2_03;
+  undefined8 extraout_t2_04;
+  undefined8 uVar14;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  undefined8 extraout_t3_01;
+  undefined8 extraout_t3_02;
+  undefined8 extraout_t3_03;
+  undefined8 extraout_t3_04;
+  undefined8 extraout_t3_05;
+  undefined8 uVar15;
+  int iVar16;
+  short *psVar17;
+  int iVar18;
+  int *piVar19;
+  int *piVar20;
+  int iVar21;
+  ushort auStack_110 [8];
+  undefined1 auStack_100 [16];
+  undefined1 auStack_f0 [16];
+  byte abStack_e0 [4];
+  int iStack_dc;
+  undefined1 auStack_d8 [4];
+  int iStack_d4;
+  int iStack_d0;
+  int iStack_cc;
+  int iStack_c8;
+  int *piStack_c4;
+  int *piStack_c0;
+  int *piStack_bc;
+  int *piStack_b8;
+  undefined1 *puStack_b4;
+  undefined1 *puStack_b0;
+  byte *pbStack_ac;
+  int *piStack_a8;
+  undefined1 *puStack_a4;
+  long lVar8;
+  
+  iVar16 = (uint)g_RaceInstanceIndex * 2;
+  psVar17 = (short *)(&DAT_00383310 + iVar16);
+  iVar6 = *param_2;
+  iVar21 = *param_6;
+  iVar2 = *param_3;
+  iVar3 = *param_7;
+  *(short *)(&DAT_00383310 + (uint)g_RaceInstanceIndex * 2) =
+       *(short *)(&DAT_00383310 + (uint)g_RaceInstanceIndex * 2) + param_1;
+  piStack_c4 = param_2 + iVar6 + 1;
+  piStack_c0 = param_6 + iVar21 + 1;
+  if (*psVar17 < 0) {
+    *psVar17 = *(short *)(&DAT_00383318 + iVar16) + -1;
+  }
+  else if (*(short *)(&DAT_00383318 + iVar16) <= *psVar17) {
+    *psVar17 = 0;
+  }
+  piStack_a8 = &iStack_dc;
+  puStack_b4 = auStack_100;
+  puStack_b0 = auStack_f0;
+  pbStack_ac = abStack_e0;
+  puStack_a4 = auStack_d8;
+  piStack_bc = &iStack_d4;
+  piStack_b8 = &iStack_d0;
+  iVar6 = -2;
+  iVar16 = -0x10000;
+  iVar21 = 0;
+  iStack_cc = param_4;
+  iStack_c8 = param_5;
+  do {
+    iVar18 = iVar21 >> 0x10;
+    sVar4 = *(short *)(&DAT_00383318 + (uint)g_RaceInstanceIndex * 2);
+    lVar9 = (long)sVar4;
+    sVar1 = *(short *)(&DAT_00383318 + (uint)g_RaceInstanceIndex * 2);
+    iVar6 = (iVar6 + (uint)*(ushort *)(&DAT_00383310 + (uint)g_RaceInstanceIndex * 2)) * 0x10000;
+    iVar7 = iVar6 >> 0x10;
+    lVar8 = (long)iVar7;
+    if (lVar9 < 3) {
+      if (lVar8 < 0) {
+        iVar7 = iVar7 * -0x10000 >> 0x10;
+      }
+      sVar4 = (short)(iVar7 % (int)sVar4);
+      if (lVar9 == 0) {
+        trap(7);
+      }
+LAB_002022bc:
+      lVar8 = (long)(int)sVar4;
+    }
+    else {
+      sVar4 = (short)((uint)iVar6 >> 0x10);
+      if (lVar8 < 0) {
+        sVar4 = sVar4 + sVar1;
+        goto LAB_002022bc;
+      }
+      if (lVar9 <= lVar8) {
+        sVar4 = sVar4 - sVar1;
+        goto LAB_002022bc;
+      }
+    }
+    piVar20 = (int *)(puStack_b4 + iVar18 * 4);
+    uVar5 = (uint)g_RaceInstanceIndex;
+    *(short *)(&DAT_0042c004 + (uint)g_RaceInstanceIndex * 0x10) = (short)lVar8;
+    piVar19 = (int *)(puStack_b0 + iVar18 * 4);
+    Database_ExecuteQuery
+              (auStack_110,0x3c00d8,(long)(int)(uVar5 * 0x10 + 0x42c000),
+               (long)(int)(piStack_c4 + iVar18),(long)(int)piStack_a8,(long)(int)piVar20,
+               (long)(int)piVar19,param_8);
+    if ((*piVar19 < 1) || (*piVar20 < 1)) {
+      param_7[iVar3 + 1 + iVar18] = 0;
+    }
+    else {
+      param_7[iVar3 + 1 + iVar18] = 1;
+    }
+    Data_ClearBuffer((long)(int)pbStack_ac,0,extraout_a2,extraout_a3,extraout_t0,extraout_t1,
+                     extraout_t2,extraout_t3);
+    iVar6 = Database_ExecuteQuery
+                      ((ushort *)0x0,0x3c0130,(long)(int)puStack_a4,(long)iStack_dc,
+                       (ulong)abStack_e0[0],extraout_t1_00,extraout_t2_00,extraout_t3_00);
+    if (iVar6 == 0x17) {
+      param_3[iVar2 + 1 + iVar18] = 0;
+    }
+    else {
+      param_3[iVar2 + 1 + iVar18] = 1;
+    }
+    iVar6 = iVar16 >> 0x10;
+    iVar21 = iVar21 + 0x10000;
+    iVar16 = iVar16 + 0x10000;
+    param_8 = extraout_t3_01;
+    if (1 < iVar6) {
+      uVar5 = (uint)g_RaceInstanceIndex;
+      *(undefined2 *)(&DAT_0042c004 + (uint)g_RaceInstanceIndex * 0x10) =
+           *(undefined2 *)(&DAT_00383310 + (uint)g_RaceInstanceIndex * 2);
+      Database_ExecuteQuery
+                (auStack_110,0x3c0178,(long)(int)(uVar5 * 0x10 + 0x42c000),(long)(int)piStack_a8,
+                 (long)*(int *)(iStack_cc + 8),(long)(int)piStack_bc,(long)(int)piStack_b8,
+                 (long)param_9);
+      Race_ConfigureTrack((long)iStack_dc,(long)iStack_d4,iStack_c8,extraout_a3_00,extraout_t0_0 0,
+                          extraout_t1_01,extraout_t2_01,extraout_t3_02);
+      Database_ExecuteQuery
+                (auStack_110,0x3c0248,(long)*(int *)(*piStack_c0 + 8),
+                 (long)*(int *)(piStack_c0[1] + 8),(long)iStack_d0,extraout_t1_02,extraout_t2_02,
+                 extraout_t3_03);
+      *param_10 = (int)*(short *)(&DAT_00383310 + (uint)g_RaceInstanceIndex * 2);
+      Graphics_InitializeRace(6);
+      uVar10 = extraout_a2_00;
+      uVar11 = extraout_a3_01;
+      uVar12 = extraout_t0_01;
+      uVar13 = extraout_t1_03;
+      uVar14 = extraout_t2_03;
+      uVar15 = extraout_t3_04;
+      if (DAT_00383320 != '\0') {
+        Race_Shutdown('\x01');
+        DAT_00383320 = '\0';
+        uVar10 = extraout_a2_01;
+        uVar11 = extraout_a3_02;
+        uVar12 = extraout_t0_02;
+        uVar13 = extraout_t1_04;
+        uVar14 = extraout_t2_04;
+        uVar15 = extraout_t3_05;
+      }
+      uVar5 = Race_StartByType(g_RaceInstanceIndex,
+                               (long)(*(short *)(&DAT_00383310 + (uint)g_RaceInstanceIndex * 2) + 1)
+                               ,uVar10,uVar11,uVar12,uVar13,uVar14,uVar15);
+      return uVar5;
+    }
+  } while( true );
+}
+--
+Incoming References - Race_InitializeFromSession
+Race_CommandDispatcher

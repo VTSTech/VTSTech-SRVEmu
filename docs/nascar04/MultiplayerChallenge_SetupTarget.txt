@@ -1,0 +1,23 @@
+
+int MultiplayerChallenge_SetupTarget(long param_1,undefined4 *param_2)
+
+{
+  bool bVar1;
+  int iVar2;
+  int iVar3;
+  long lVar4;
+  
+  iVar3 = 1;
+  bVar1 = MultiplayerMode_Check();
+  if (bVar1) {
+    iVar2 = BuddySystem_FindUserData(g_BuddySystem,param_1);
+    lVar4 = (long)iVar2;
+    if ((lVar4 != 0) && (iVar3 = ChallengeSystem_StoreTargetFromBuddy(lVar4,param_2), iVar3 == 0 )) {
+      BuddySystem_RemoveUserFromList(lVar4);
+    }
+  }
+  return iVar3;
+}
+--
+Incoming References - MultiplayerChallenge_SetupTarget
+ChallengeSystem_ProcessAllTargets

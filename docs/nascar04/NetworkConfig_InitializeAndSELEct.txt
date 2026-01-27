@@ -1,0 +1,45 @@
+
+char * NetworkConfig_InitializeAndSELEct(char *param_1)
+
+{
+  char cVar1;
+  int iVar2;
+  byte *pbVar3;
+  char *pcVar4;
+  ulong uVar5;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  byte abStack_1c0 [256];
+  byte abStack_c0 [64];
+  char acStack_80 [64];
+  
+  cVar1 = NetworkConfig_CheckOnline();
+  if (cVar1 != '\0') {
+    NetworkConfig_Reset();
+  }
+  iVar2 = NetworkConfig_GetStatus();
+  if (iVar2 == 0) {
+    iVar2 = NetworkConfig_GetInstance(1);
+    DispListSort(iVar2,0,0,DisplayList_SortCallback);
+    abStack_1c0[0] = 0;
+    String_AppendKeyValue(abStack_1c0,0x100,"RANKS",0x32);
+    System_SendCommand(0x73656c65,abStack_1c0,0,0);
+    pbVar3 = *(byte **)(param_1 + 0x30);
+  }
+  else {
+    pbVar3 = *(byte **)(param_1 + 0x30);
+  }
+  pbVar3 = TagFieldFind(pbVar3,&DAT_003d82d8);
+  uVar5 = TagFieldGetEpoch((long)(int)pbVar3,0);
+  DAT_0038b750 = (undefined4)uVar5;
+  NetworkConfig_ProcessSessionData(param_1);
+  NetworkConfig_InitializeState();
+  pbVar3 = TagFieldFind(*(byte **)(param_1 + 0x30),&DAT_003d82e0);
+  TagFieldGetString(pbVar3,abStack_c0,0x40,(byte *)0x0);
+  StringHelper_CopyWithParams
+            (acStack_80,0x40,0x3d82e8,(long)(int)(param_1 + 0x22),(long)(int)abStack_c0,extraout_ t1,
+             extraout_t2,extraout_t3);
+  pcVar4 = NetworkConfig_StoreFormattedLKEY(acStack_80);
+  return pcVar4;
+}

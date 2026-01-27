@@ -1,0 +1,22 @@
+
+uint CommandHandler_AUXI2(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  byte abStack_110 [256];
+  
+  iVar1 = GameState_GetCurrent();
+  if (iVar1 == 0x4ba) {
+    uVar2 = GameState_NetworkShutdown();
+  }
+  else {
+    abStack_110[0] = 0;
+    String_FormatKeyValuePairs(abStack_110,0x100,(byte *)"TEXT",&DAT_003d83d8);
+    uVar2 = System_SendCommand(0x61757869,abStack_110,0,0);
+  }
+  return uVar2;
+}
+--
+Incoming References - CommandHandler_AUXI2
+Game_HandleSystemCommand

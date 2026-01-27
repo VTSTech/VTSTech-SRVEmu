@@ -1,0 +1,22 @@
+
+int ChallengeSystem_ProcessAllTargets(void)
+
+{
+  int iVar1;
+  int iVar2;
+  undefined4 auStack_90 [24];
+  
+  iVar2 = 0;
+  if (DAT_0038b710 != 0) {
+    while (iVar1 = MultiplayerChallenge_SetupTarget((long)(DAT_0038b710 + 0xc),auStack_90),
+          iVar1 == 0) {
+      ChallengeSystem_ProcessChallengeQueue(auStack_90,0);
+      iVar2 = iVar2 + 1;
+    }
+  }
+  return iVar2;
+}
+--
+Incoming References - ChallengeSystem_ProcessAllTargets
+ChallengeSystem_InitiateChallenge
+ChallengeSystem_CommandDispatcher

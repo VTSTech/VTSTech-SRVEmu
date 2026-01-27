@@ -1,0 +1,96 @@
+
+ulong TagFieldGetEpoch(long param_1,ulong param_2)
+
+{
+  byte bVar1;
+  byte bVar2;
+  int iVar3;
+  byte *pbVar4;
+  uint uVar5;
+  byte *pbVar6;
+  ulong uVar7;
+  int iStack_90;
+  int iStack_8c;
+  uint uStack_88;
+  int iStack_84;
+  int iStack_80;
+  int aiStack_7c [3];
+  undefined4 uStack_70;
+  int aiStack_60 [4];
+  
+  uVar7 = 0;
+  if (param_1 != 0) {
+    pbVar6 = (byte *)param_1;
+    if (*pbVar6 == 0x24) {
+      pbVar6 = pbVar6 + 1;
+      bVar2 = *pbVar6;
+      bVar1 = *pbVar6;
+      while ('/' < (char)bVar1) {
+        iVar3 = (int)(char)bVar2;
+        pbVar6 = pbVar6 + 1;
+        bVar2 = *pbVar6;
+        uVar7 = (long)((int)uVar7 << 4) | (ulong)(byte)(&DAT_003df5c8)[iVar3];
+        bVar1 = *pbVar6;
+      }
+    }
+    else if (*pbVar6 - 0x30 < 10) {
+      pbVar4 = FUN_0031d710(pbVar6,aiStack_60);
+      if ((char)*pbVar4 < '!') {
+        uVar7 = (ulong)aiStack_60[0];
+      }
+      else if (*pbVar6 - 0x30 < 10) {
+        memset(&iStack_90,0,0x24);
+        uStack_70 = 0xffffffff;
+        pbVar4 = FUN_0031d710(pbVar6,aiStack_7c);
+        pbVar6 = pbVar4 + 1;
+        if (1 < (byte)(*pbVar4 - 0x2d)) {
+          pbVar6 = pbVar4;
+        }
+        pbVar4 = FUN_0031d710(pbVar6,&iStack_80);
+        pbVar6 = pbVar4 + 1;
+        if (1 < (byte)(*pbVar4 - 0x2d)) {
+          pbVar6 = pbVar4;
+        }
+        pbVar4 = FUN_0031d710(pbVar6,(int *)((uint)&iStack_90 | 0xc));
+        pbVar6 = pbVar4 + 1;
+        if (*pbVar4 != 0x20) {
+          pbVar6 = pbVar4;
+        }
+        pbVar4 = FUN_0031d710(pbVar6,(int *)((uint)&iStack_90 | 8));
+        pbVar6 = pbVar4 + 1;
+        if (*pbVar4 != 0x3a) {
+          pbVar6 = pbVar4;
+        }
+        pbVar4 = FUN_0031d710(pbVar6,(int *)((uint)&iStack_90 | 4));
+        pbVar6 = pbVar4 + 1;
+        if (*pbVar4 != 0x3a) {
+          pbVar6 = pbVar4;
+        }
+        FUN_0031d710(pbVar6,&iStack_90);
+        if ((((0x81 < aiStack_7c[0] - 0x7b2U) || (iStack_80 < 1)) || (0xc < iStack_80)) ||
+           ((iStack_84 < 1 || (0x1f < iStack_84)))) {
+          aiStack_7c[0] = 0;
+        }
+        if (((0x17 < uStack_88) || (iStack_8c < 0)) ||
+           ((0x3b < iStack_8c || ((iStack_90 < 0 || (0x3d < iStack_90)))))) {
+          aiStack_7c[0] = 0;
+        }
+        if (aiStack_7c[0] != 0) {
+          aiStack_7c[0] = aiStack_7c[0] + -0x76c;
+          iStack_80 = iStack_80 + -1;
+          uVar5 = FUN_0031d938(&iStack_90);
+          uVar7 = (ulong)(int)uVar5;
+        }
+      }
+    }
+  }
+  if ((uVar7 == 0) && (uVar7 = param_2, param_2 == 0)) {
+    uVar7 = FUN_00320468();
+  }
+  return uVar7;
+}
+--
+Incoming References - TagFieldGetEpoch
+NetworkConfig_InitializeAndSELEct
+LobbyApiUpdate
+FUN_0031f588

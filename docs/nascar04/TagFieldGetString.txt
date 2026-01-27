@@ -1,0 +1,134 @@
+
+size_t TagFieldGetString(byte *param_1,byte *param_2,int param_3,byte *param_4)
+
+{
+  byte *pbVar1;
+  byte *pbVar2;
+  byte bVar3;
+  size_t sVar4;
+  int iVar5;
+  byte bVar6;
+  
+  if (param_1 == (byte *)0x0) {
+    if (param_4 == (byte *)0x0) {
+      return 0xffffffffffffffff;
+    }
+    iVar5 = 1;
+    if (param_2 == (byte *)0x0) {
+      sVar4 = strlen((char *)param_4);
+      return sVar4;
+    }
+    for (; iVar5 < param_3; iVar5 = iVar5 + 1) {
+      if (*param_4 == 0) {
+        *param_2 = 0;
+        goto LAB_0031ef00;
+      }
+      *param_2 = *param_4;
+      param_4 = param_4 + 1;
+      param_2 = param_2 + 1;
+    }
+    *param_2 = 0;
+  }
+  else {
+    if ((*param_1 == 0x22) || (bVar6 = 0, *param_1 == 0x27)) {
+      bVar6 = *param_1;
+      param_1 = param_1 + 1;
+    }
+    if (param_2 == (byte *)0x0) {
+      bVar3 = *param_1;
+      sVar4 = 0;
+      while( true ) {
+        if (bVar3 == bVar6) {
+          return sVar4;
+        }
+        if (bVar3 < 0x20) break;
+        if (bVar3 == 0x25) {
+          if (param_1[1] < 0x20) {
+            param_1 = param_1 + 1;
+          }
+          else {
+            if (0x1f < param_1[2]) {
+              param_1 = param_1 + 2;
+            }
+            param_1 = param_1 + 1;
+          }
+        }
+        else {
+          param_1 = param_1 + 1;
+        }
+        bVar3 = *param_1;
+        sVar4 = (size_t)((int)sVar4 + 1);
+      }
+      return sVar4;
+    }
+    iVar5 = 1;
+    if (param_3 < 1) {
+      return 0xffffffffffffffff;
+    }
+    if (1 < param_3) {
+      bVar3 = *param_1;
+      if (bVar3 != bVar6) {
+        if (bVar3 < 0x20) {
+          *param_2 = 0;
+          goto LAB_0031ef00;
+        }
+        do {
+          if (bVar3 != 0x25) {
+            bVar3 = *param_1;
+            goto LAB_0031eec8;
+          }
+          if (param_1[1] == 0x25) {
+            *param_2 = 0x25;
+            param_1 = param_1 + 2;
+          }
+          else {
+            if (param_1[1] < 0x20) {
+              bVar3 = *param_1;
+LAB_0031eec8:
+              param_1 = param_1 + 1;
+            }
+            else {
+              if (param_1[2] < 0x20) {
+                bVar3 = *param_1;
+                goto LAB_0031eec8;
+              }
+              pbVar1 = param_1 + 1;
+              pbVar2 = param_1 + 2;
+              param_1 = param_1 + 3;
+              bVar3 = "0000000000000000111111111111111122222222222222223333333333333333444444444444 444455555555555555556666666666666666777777777777777788888888888888889999999999999999aa aaaaaaaaaaaaaabbbbbbbbbbbbbbbbccccccccccccccccddddddddddddddddeeeeeeeeeeeeeeeeffffffff ffffffff0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd ef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123 456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789 abcdef"
+                      [*pbVar1 + 0x200] | (&DAT_003df5c8)[*pbVar2];
+            }
+            *param_2 = bVar3;
+          }
+          param_2 = param_2 + 1;
+          iVar5 = iVar5 + 1;
+          if (param_3 <= iVar5) {
+            *param_2 = 0;
+            goto LAB_0031ef00;
+          }
+          bVar3 = *param_1;
+        } while ((bVar3 != bVar6) && (0x1f < bVar3));
+      }
+    }
+    *param_2 = 0;
+  }
+LAB_0031ef00:
+  return (long)(iVar5 + -1);
+}
+--
+Incoming References - TagFieldGetString
+Command_HandleServerNews
+MessageRouting_ChallengeHandler
+NetworkConfig_InitializeAndSELEct
+CommandHandler_PERS_USER
+Challenge_HandleRaceCommand
+Lobby_ProcessNetworkEvents
+Security_EncryptAndSend
+LobbyApiUpdate
+Field_ProcessUserConfig
+Command_HandlePersona4
+Config_ProcessSetupData
+Network_HandleReceive
+Network_SendPlayerData
+Buddy_ProcessSendCommand
+BuddyApiUpdate

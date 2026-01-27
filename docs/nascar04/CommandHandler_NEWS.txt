@@ -1,0 +1,26 @@
+
+undefined1 * CommandHandler_NEWS(undefined4 param_1,int param_2,undefined8 param_3)
+
+{
+  int iVar1;
+  undefined1 *puVar2;
+  undefined1 auStack_260 [8];
+  int iStack_258;
+  undefined1 *puStack_254;
+  undefined1 auStack_250 [256];
+  byte abStack_150 [256];
+  
+  puStack_254 = auStack_250;
+  abStack_150[0] = 0;
+  String_AppendKeyValue(abStack_150,0x100,"NAME",param_2);
+  iVar1 = System_SendCommand_Internal(param_1,param_3,0x6e657773,abStack_150,auStack_260);
+  puVar2 = (undefined1 *)0x0;
+  if ((iVar1 == 5) && (iStack_258 == param_2 + 0x6e657730)) {
+    puVar2 = puStack_254;
+  }
+  return puVar2;
+}
+--
+Incoming References - CommandHandler_NEWS
+BuddyConfig_Store
+Command_HandleServerNews

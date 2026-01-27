@@ -1,0 +1,35 @@
+
+size_t ProtoAriesRecv(undefined4 *param_1,long param_2,long param_3,long param_4,size_t param_5)
+
+{
+  int iVar1;
+  size_t sVar2;
+  
+  iVar1 = ProtoAriesPeek(param_1,param_2,param_3,0);
+  sVar2 = (size_t)iVar1;
+  if (-1 < (long)sVar2) {
+    if ((long)sVar2 < (long)param_5) {
+      param_5 = sVar2;
+    }
+    if (param_4 != 0) {
+      memcpy((void *)param_4,(void *)(param_1[6] + param_1[3] + 0xc),param_5);
+    }
+    param_1[3] = param_1[3] + 0xc + iVar1;
+    if ((((int)param_1[4] <= (int)param_1[3]) && (param_1[2] == 0)) &&
+       ((int)param_1[4] <= (int)param_1[3])) {
+      param_1[2] = 1;
+      if (0 < (int)param_1[4]) {
+        InvalidDCache(param_1[6],(param_1[6] + param_1[5]) - 1);
+        param_1[4] = 0;
+        param_1[3] = param_1[4];
+      }
+      RpcBind((int *)&DAT_0050aad8,0x73657373,0x72656376);
+      RpcCall(0x50aad8,0,*param_1,0,0,0,param_1[6],param_1[5],0x3222d0,(int)param_1);
+    }
+  }
+  return sVar2;
+}
+--
+Incoming References - ProtoAriesRecv
+LobbyApiUpdate
+BuddyApiUpdate

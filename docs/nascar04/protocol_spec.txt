@@ -1,0 +1,200 @@
+# NASCAR Thunder 2004 Protocol Specification
+*Based on actual packet captures and reverse engineering*
+
+## Protocol Overview
+EA NASCAR Thunder 2004 uses Sony's Ares networking library with custom EA messaging layer.
+- Transport: TCP with Ares framing (12-byte header)
+- Encoding: ASCII text with key-value pairs
+- Endianness: Little-endian (PS2) but network headers are big-endian
+
+## Ares Packet Format
+OFFSET SIZE DESCRIPTION
+0      4    Message Type (e.g., "+usr")
+4      4    Subtype (Always 0x00000000)
+8      4    Total Length (Big-endian)
+12     N    Payload (ASCII Key-Value pairs, null-terminated)
+
+Example header: 2b77686f000000000000002d
+Decoded: "+who\0\0\0\0\0\0\0\x2d" (0x2d = 45 bytes total = 12 + 33)
+
+=== CONNECTION LIFECYCLE ===
+
+PHASE 1: DIRECTORY SERVICE
+Client → Server: @dir
+PROD=NASCAR-PS2-2004
+VERS="PS2/XXX-Jul 2 2003"
+LANG=en
+SLUS=BASLUS-20824
+
+Server → Client: @dir
+ADDR=192.168.2.123
+PORT=11000
+SESS=635603346243
+DIRECT=1
+
+PHASE 2: GAME SERVER CONNECTION
+Client → Server: addr
+ADDR=192.0.2.100
+PORT=17839
+
+Client → Server: skey
+SKEY=$5075626c6963204b6579
+
+Server → Client: skey
+SKEY=... (16-byte session key)
+STATUS=1
+
+PHASE 3: AUTHENTICATION
+Client → Server: auth
+NAME=VTSTech
+TOS=1
+PASS=$39f3a038
+MID=$00041f82bee5
+HWFLAG=4
+HWMASK=65828
+PROD=NASCAR-PS2-2004
+VERS="PS2/XXX-Jul 2 2003"
+LANG=en
+SLUS=BASLUS-20824
+MASK=2052765442
+
+Server → Client: auth
+STATUS=1
+SESS=635603346243
+
+PHASE 4: PERSONA SELECTION
+Client → Server: pers
+PERS=VTSTech
+
+Server → All: +who
+F=U
+N=VTSTech
+RI=0
+RT=1
+R=0
+RF=1
+
+PHASE 5: LOBBY DATA SYNC
+Client → Server: sele
+ROOMS=1 USERS=1 RANKS=1 MESGS=1
+
+Server → Client: +rom
+I=0
+N=Lobby
+H=Main Lobby Hub
+A=192.168.2.123
+T=1
+L=100
+F=0
+
+Server → Client: +usr
+I=820363
+N=VTSTech
+F=1
+A=192.168.2.123
+
+Server → Client: +pop
+Z=0:1
+
+Client → Server: news
+NAME=0
+
+Server → Client: news
+NEWS0=...
+NEWS1=...
+NEWS2=...
+NEWS3=...
+COUNT=4
+STATUS=1
+
+PHASE 6: RACE INITIATION
+Client → Server: peek
+NAME=TargetPlayer
+
+Client → Server: auxi
+TEXT=TIMESTAMP_RANDOM_CHALLENGER_TARGET
+
+Server → Target: +msg
+FROM=Challenger
+TEXT=token
+F=3
+
+Target → Server: mesg
+N=Challenger
+TEXT=ACPT/DECL/BLOC
+
+Server → Both: play
+[272-byte binary session data]
+
+=== COMMAND REFERENCE ===
+
+SYSTEM COMMANDS:
+@dir C↔S Directory service ADDR, PORT, SESS, DIRECT
+addr C→S Address confirmation ADDR, PORT
+skey C↔S Session key exchange SKEY, STATUS
+auth C↔S Authentication NAME, PASS$, TOS, MID, HWFLAG
+pers C→S Persona selection PERS
+news C↔S Server news/config NAME, NEWS0-3, COUNT
+
+LOBBY COMMANDS:
+sele C→S Data request ROOMS, USERS, RANKS, MESGS or RANKS=50
+room C→S Create room NAME, PASS, DESC, MAX
+move C→S Join room NAME, PASS
+
+CHALLENGE COMMANDS:
+peek C→S Select player NAME
+auxi C→S Initiate challenge TEXT (token)
+mesg C→S Challenge response N, TEXT (ACPT/DECL/BLOC)
+
+## Broadcast Commands (Server -> Client)
++who - Presence Sync: F, N, RI, RT, R, RF
++usr - User Update: I, N, F, A
+    - I: [STRICT INT] Unique ID used as key in user_table. 
+    - N: [STRING] Persona name.
+    - F: [INT] Status flag (0=Available, 1=Proposing/Busy).
++msg - Message Delivery: FROM, TEXT, F, ATTR, RI
+    - F: Set to 1 for System/Challenge notifications.
+    - ATTR: Set to 3 to trigger the "Race Proposal" UI popup.
+    - RI: [STRICT INT] Must match recipient's current Room ID.
++rom Room update I, N, H, A, T, L, F
++pop Population Z=room:count
++ses Session data (272-byte binary)
+
+## Challenge Flow Logic
+1. Initiator sends 'auxi' with a 15-char Token.
+2. Server broadcasts '+usr' for Initiator with F=1 (sets 'Busy' status).
+3. Server sends '+msg' to Target with TEXT=[Token], ATTR=3, F=1, RI=[RoomID].
+4. Client triggers ChallengeSystem_DisplayNotification (0x80000003).
+
+=== STATUS CODES ===
+0 General failure Various
+1 Success auth, skey, news
+100 Authentication failed auth
+101 Invalid session Various
+102 User not found Various
+103 Room full room, move
+104 Challenge expired auxi, mesg
+105 Player busy auxi
+106 Invalid token auxi
+
+=== ENCRYPTION ===
+
+    Passwords: RC4 encrypted with session key
+
+    Session key: 16 bytes from skey command
+
+    Key stored at LobbyContext+0x24
+
+    RC4 state at DAT_0050a8d0
+
+    Re-key string: "ru paranoid?" @ 0x003d8a20
+
+=== TIMING ===
+
+    Ping interval: 30 seconds
+
+    Timeout detection: 5 seconds
+
+    Total timeout: 30 seconds
+
+    Challenge timeout: ~60 seconds

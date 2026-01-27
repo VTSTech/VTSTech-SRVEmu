@@ -1,0 +1,17 @@
+
+undefined4 Multiplayer_MainEntryPoint(void)
+
+{
+  bool bVar1;
+  
+  NetworkMain_Setup();
+  bVar1 = MultiplayerMode_Check();
+  if (bVar1) {
+    ChallengeSystem_InitializeNetwork();
+  }
+  else {
+    NetworkSystem_InitializeMultiplayer();
+  }
+  return 1;
+}
+

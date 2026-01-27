@@ -1,0 +1,27 @@
+
+int NetworkSystem_InitializeMultiplayer(void)
+
+{
+  int iVar1;
+  undefined8 extraout_a3;
+  undefined8 extraout_t0;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  undefined1 auStack_40 [16];
+  ushort auStack_30 [8];
+  
+  auStack_30[0] = 0x2122;
+  auStack_30[1] = 0;
+  Network_GetLocalIP(auStack_40,4,auStack_30);
+  Util_FormatIPString(&DAT_004e1d68,0x3d79f0,(long)(int)auStack_40,extraout_a3,extraout_t0,
+                      extraout_t1,extraout_t2,extraout_t3);
+  iVar1 = System_CheckNetworkCondition(0x38b6f0);
+  if (iVar1 == 0) {
+    ChallengeCallback_Register();
+  }
+  return iVar1;
+}
+--
+Incoming References - NetworkSystem_InitializeMultiplayer
+Multiplayer_MainEntryPoint

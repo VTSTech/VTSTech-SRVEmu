@@ -36,6 +36,9 @@ class SessionManager:
         with self.thread_lock:
             self.thread_count -= 1
 
+LKEY_CACHE = {} # Index by SESS string
+GLOBAL_LKEY_MAP = {}
+
 class NetworkHandlers:
     def __init__(self, create_packet_func, get_next_data_port_func, server_ip, ports):
         self.create_packet = create_packet_func
@@ -44,19 +47,27 @@ class NetworkHandlers:
         self.ports = ports
     
     def handle_dir_command(self, data, session):
-        session.clientSESS = f"{random.randint(1000, 9999)}{random.randint(1000, 9999)}{random.randint(10, 99)}"
-        session.data_port = self.get_next_data_port()
-        
-        dir_fields = [
-            f"ADDR={self.server_ip}", f"PORT={self.ports['listener']}","LKEY=0",
-            f"SESS={session.clientSESS}", f"MASK={random.randint(1000, 9999)}f3f70ecb1757cd7001b9a7a{random.randint(1000, 9999)}",
-        ]
-        
-        dir_response = '\n'.join(dir_fields) + '\n'
-        session.client_state = 0x72646972
-        print(f"DIR: Assigned data port {session.data_port}, state=DIRECTORY")
-        
-        return self.create_packet('@dir', '', dir_response)
+		        # Generate a unique 10-digit SESS and a 32-char LKEY
+		        sess_id = str(random.randint(1000000000, 9999999999))
+		        lkey = f"3fcf27540c92935b0a66fd3b0000{random.randint(100, 999)}c"
+		        
+		        # Store the relationship in the global map
+		        from session_system_r11 import GLOBAL_LKEY_MAP
+		        GLOBAL_LKEY_MAP[sess_id] = lkey
+		        
+		        session.clientSESS = sess_id
+		        session.clientLKEY = lkey
+		        
+		        dir_fields = [
+		            f"ADDR={self.server_ip}", 
+		            f"PORT={self.ports['listener']}",
+		            f"LKEY={lkey}",
+		            f"SESS={sess_id}", 
+		            "MASK=4294967295"
+		        ]
+		        
+		        dir_response = '\n'.join(dir_fields) + '\n'
+		        return self.create_packet('@dir', '', dir_response)
     
     def handle_addr_command(self, data, session):
         print(f"ADDR: Connection established from {session.connection_id}")
@@ -71,49 +82,41 @@ class NetworkHandlers:
         session.public_key_sent = 1
         print(f"PROTOCOL: {session.connection_id} -> STATE_KEY_EXCHANGE, flags={session.client_flags:08x}")
         return self.create_packet('skey', '', "SKEY=0\n")
+        
+    def extract_int_param(self, data, key):
+		        """Helper to find an integer value in the EA param string."""
+		        # Convert bytes to string if necessary
+		        d = data.decode('latin1') if isinstance(data, bytes) else str(data)
+		        for line in d.split('\n'):
+		            if line.startswith(f"{key}="):
+		                try:
+		                    # Extracts the '0' from 'NAME=0'
+		                    return int(line.split('=')[1].strip())
+		                except (IndexError, ValueError):
+		                    return 0
+		        return 0
             
     def handle_news(self, data, session):
-        name_value = 0
-        if data:
-            try:
-                data_str = data.decode('latin1', errors='ignore')
-                for line in data_str.split('\n'):
-                    if line.startswith('NAME='):
-                        try:
-                            name_value = int(line[5:].strip())
-                        except:
-                            name_value = 0
-                        break
-            except:
-                pass
-        
-        print(f"NEWS: Client requested NAME={name_value}")
-        identifier = f"new{name_value}"
-        
-        if name_value == 0:
-            response_lines = [
-                f"BUDDY_URL={self.server_ip}",
-                f"BUDDY_PORT={self.ports['buddy']}",
-                "STATUS=1"
-            ]
-        elif name_value == 1:
-            response_lines = [
-                "TEXT=Welcome to VTSTech Server",
-                "NEWS_TEXT=Multiplayer System Active", 
-                "NEW1_TEXT=Challenge System Ready", 
-                "Room Creation Available",
-                "COUNT=4",
-                "STATUS=1"
-            ]
-        else:
-            response_lines = [
-                f"STATUS=0",
-                f"ERROR=Unknown news type {name_value}"
-            ]
-        
-        full_response = identifier + '\n' + '\n'.join(response_lines) + '\n'
-        print(f"NEWS: Sending response with identifier '{identifier}'")
-        return self.create_packet('news', "", full_response)
+		        name_val = self.extract_int_param(data, "NAME")
+		        
+		        # Ghidra logic: sub_cmd = 0x6e657730 ('new0') + name_val
+		        sub_hex = 0x6e657730 + name_val
+		        sub_str = struct.pack(">I", sub_hex).decode('latin1') 
+
+		        server_ip = "192.168.2.123" # Double check this is your actual IP!
+		        
+		        # The "Buddy Trigger" Payload
+		        out = (
+		            f"BUDDY_URL={server_ip}\n"
+		            f"BUDDY_PORT=10899\n"
+		            f"BUDDY_SERVER={server_ip}\n"
+		            "TOS_TEXT=VTSTech_TOS\n"
+		            "NEWS_TEXT=VTSTech_NEWS\n"
+		            "USE_ETOKEN=0\n"
+		            "S=0\nSTATUS=0\n"
+		        )
+		        
+		        return self.create_packet('news', sub_str, out)
 
 class PingManager:
     def __init__(self, create_packet_func):
@@ -132,7 +135,7 @@ class PingManager:
         session.ping_cnt += 1
         
         sess_value = getattr(session, 'clientSESS', 'UNSET')
-        response = f"REF={time.strftime('%Y.%m.%d-%H:%M:%S')}\nTIME=2\nSESS={sess_value}\nNAME={session.clientNAME}\nSTATUS=0\n"
+        response = f"REF={time.strftime('%Y-%m-%d %H:%M:%S')}\nTIME=2\nSESS={sess_value}\nNAME={session.clientNAME}\nSTATUS=0\n"
         session.connection.sendall(self.create_packet('~png', '', response))
         print(f"PING: Sent initial ping (#{session.ping_cnt}) with SESS={sess_value}")
     
@@ -152,7 +155,7 @@ class PingManager:
                 try:
                     session.connection.getpeername()
                     session.ping_cnt += 1
-                    response = f"REF={time.strftime('%Y.%m.%d-%H:%M:%S')}\nTIME={client_time}\nNAME={session.clientNAME}\nSESS={getattr(session, 'clientSESS', '0')}\nSTATUS=1\n"
+                    response = f"REF={time.strftime('%Y-%m-%d %H:%M:%S')}\nTIME={client_time}\nNAME={session.clientNAME}\nSESS={getattr(session, 'clientSESS', '0')}\nSTATUS=1\n"
                     session.connection.sendall(self.create_packet('~png', '', response))
                 except:
                     print("PING: Connection closed before response")

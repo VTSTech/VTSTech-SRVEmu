@@ -1,0 +1,33 @@
+
+void Config_ProcessSetupData(int param_1)
+
+{
+  byte *pbVar1;
+  int iVar2;
+  int iStack_b0;
+  byte abStack_ac [64];
+  byte abStack_6c [28];
+  byte abStack_50 [16];
+  
+  pbVar1 = TagFieldFind(*(byte **)(param_1 + 0xc),(byte *)CFG_Field1);
+  TagFieldGetString(pbVar1,abStack_6c,0x10,(byte *)CFG_DefaultValue);
+  iVar2 = Config_ValidateData((long)(int)abStack_6c);
+  if (iVar2 == 0) {
+    pbVar1 = TagFieldFind(*(byte **)(param_1 + 0xc),(byte *)CFG_Field2);
+    TagFieldGetString(pbVar1,abStack_50,2,(byte *)CFG_DefaultValue);
+    iVar2 = StringHelper_Compare(CFG_CompareString,(char *)abStack_50);
+    if (iVar2 == 0) {
+      pbVar1 = TagFieldFind(*(byte **)(param_1 + 0xc),(byte *)CFG_Field3);
+      TagFieldGetString(pbVar1,abStack_ac,0x40,(byte *)CFG_DefaultValue);
+      Config_ProcessFieldData((int)abStack_ac,abStack_ac,0x40);
+      pbVar1 = TagFieldFind(*(byte **)(param_1 + 0xc),(byte *)CFG_Field4);
+      iStack_b0 = TagFieldGetNumber(pbVar1,0);
+      Config_ProcessNumericValue(&iStack_b0);
+      GLOBAL_ConfigFlag = 1;
+    }
+  }
+  return;
+}
+--
+Incoming References - Config_ProcessSetupData
+MultiplayerCommand_Dispatcher

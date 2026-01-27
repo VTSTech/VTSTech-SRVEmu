@@ -1,0 +1,53 @@
+=== CORE CLIENT FUNCTIONS ===
+
+TagFieldGetString (0x0031ee40)
+------------------------------
+Primary parser for ASCII key-value pairs. 
+Behavior:
+- Handles URL encoding (e.g., %20 -> space).
+- Strips double/single quotes from values.
+- Returns length of the extracted value string.
+- If key is not found, returns -1.
+
+Lobby_UpdateUsers (0x001c63d0)
+------------------------------
+The dispatcher for all '+who' and '+usr' packets.
+Opcodes (param_1):
+- 0x80000001: Clear/Reset user list.
+- 0x80000002: Add/Update user (Calls FUN_00204158).
+- 0x80000003: Remove user from list.
+
+Lobby_SynchronizeUserList (The User Parser)
+------------------------------
+The most critical function for synchronization.
+Logic:
+1. Calls TagFieldGetString(..., "I", ...) to get the ID string.
+2. CONVERTS the ID string to an integer (using internal atoi-equivalent).
+3. Performs a lookup in the LobbyContext->user_table (0xD4).
+4. If ID is not found: Allocates new UserEntry, assigns ID, adds to list.
+5. If ID is found: Updates persona name and status flags (F=).
+Note: Sending a non-numeric ID (like "conn_123") causes the integer conversion 
+to fail/return 0, leading to duplicate users with ID 0.
+
+Game_HandleProtocolCommand (0x002080a8)
+---------------------------------------
+Routes system-level UI events.
+Case 0x80000003: Calls ChallengeSystem_DisplayNotification.
+- Triggered by: +msg packet where ATTR=3 and F=1.
+- Requirement: The 'FROM' persona must exist in the user_table.
+
+[DISPATCHER] Lobby_UpdateUsers (0x001c63d0)
+- Opcode 0x80000002 -> Triggers User Sync.
+- If ID (I=) is non-numeric, atoi fails, returns 0. 
+- Results in duplicate "Ghost" users in the lobby list.
+
+[WORKER] Lobby_SynchronizeUserList (0x00204158)
+- Updates user_table (Offset 0xD4).
+- Initiates P2P Keepalives via Network_SendKeepalive.
+- Logic: If User ID exists, update; else, allocate new slot.
+
+[UI] Challenge_Trigger (via Game_HandleProtocolCommand)
+- Requirements for 'Accept' button:
+  1. Incoming +msg must have ATTR=3.
+  2. Incoming +msg must have F=1.
+  3. Sender's ID in the user_table must have flags F=1.
