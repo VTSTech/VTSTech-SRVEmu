@@ -1,0 +1,242 @@
+
+void Lobby_SynchronizeUserList
+               (undefined4 *param_1,int *param_2,int param_3,int param_4,int param_5,int param_6,
+               int *param_7,int param_8)
+
+{
+  char cVar1;
+  int iVar2;
+  undefined4 uVar3;
+  int iVar4;
+  long lVar6;
+  undefined8 extraout_a1;
+  undefined8 extraout_a1_00;
+  undefined8 extraout_a2;
+  undefined8 extraout_a2_00;
+  undefined8 extraout_a2_01;
+  undefined8 extraout_a2_02;
+  ulong extraout_a2_03;
+  ulong extraout_a2_04;
+  ulong extraout_a2_05;
+  ulong extraout_a2_06;
+  ulong extraout_a2_07;
+  ulong extraout_a2_08;
+  ulong extraout_a2_09;
+  ulong extraout_a2_10;
+  undefined8 extraout_a3;
+  undefined8 extraout_a3_00;
+  undefined8 extraout_a3_01;
+  undefined8 extraout_a3_02;
+  undefined8 extraout_a3_03;
+  undefined8 extraout_a3_04;
+  undefined8 extraout_a3_05;
+  undefined8 extraout_a3_06;
+  undefined8 extraout_a3_07;
+  undefined8 extraout_a3_08;
+  undefined8 extraout_a3_09;
+  undefined8 extraout_a3_10;
+  undefined8 extraout_a3_11;
+  undefined8 extraout_t0;
+  undefined8 extraout_t0_00;
+  undefined8 extraout_t0_01;
+  undefined8 extraout_t0_02;
+  undefined8 extraout_t0_03;
+  undefined8 extraout_t0_04;
+  undefined8 extraout_t0_05;
+  undefined8 extraout_t0_06;
+  undefined8 extraout_t0_07;
+  undefined8 extraout_t0_08;
+  undefined8 extraout_t0_09;
+  undefined8 extraout_t0_10;
+  undefined8 extraout_t0_11;
+  undefined8 extraout_t0_12;
+  undefined8 extraout_t1;
+  undefined8 extraout_t1_00;
+  undefined8 extraout_t1_01;
+  undefined8 extraout_t1_02;
+  undefined8 extraout_t1_03;
+  undefined8 extraout_t1_04;
+  undefined8 extraout_t1_05;
+  undefined8 extraout_t1_06;
+  undefined8 extraout_t1_07;
+  undefined8 extraout_t1_08;
+  undefined8 extraout_t1_09;
+  undefined8 extraout_t1_10;
+  undefined8 extraout_t1_11;
+  undefined8 extraout_t1_12;
+  undefined8 extraout_t2;
+  undefined8 extraout_t2_00;
+  undefined8 extraout_t2_01;
+  undefined8 extraout_t2_02;
+  undefined8 extraout_t2_03;
+  undefined8 extraout_t2_04;
+  undefined8 extraout_t2_05;
+  undefined8 extraout_t2_06;
+  undefined8 extraout_t2_07;
+  undefined8 extraout_t2_08;
+  undefined8 extraout_t2_09;
+  undefined8 extraout_t2_10;
+  undefined8 extraout_t2_11;
+  undefined8 extraout_t2_12;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  undefined8 extraout_t3_01;
+  undefined8 extraout_t3_02;
+  undefined8 extraout_t3_03;
+  undefined8 extraout_t3_04;
+  undefined8 extraout_t3_05;
+  undefined8 extraout_t3_06;
+  undefined8 extraout_t3_07;
+  undefined8 extraout_t3_08;
+  undefined8 extraout_t3_09;
+  undefined8 extraout_t3_10;
+  undefined8 extraout_t3_11;
+  undefined8 extraout_t3_12;
+  int *piVar13;
+  float fVar14;
+  float fVar15;
+  float fVar16;
+  float fVar17;
+  ushort auStack_110 [8];
+  undefined1 auStack_100 [48];
+  int *piStack_d0;
+  int iStack_cc;
+  int *piStack_c8;
+  ulong uVar5;
+  ulong uVar7;
+  undefined8 uVar8;
+  undefined8 uVar9;
+  undefined8 uVar10;
+  undefined8 uVar11;
+  undefined8 uVar12;
+  
+  iVar2 = DAT_003ef210;
+  piStack_d0 = param_2;
+  iStack_cc = param_6;
+  piStack_c8 = param_7;
+  cVar1 = FUN_00142580();
+  uVar5 = (ulong)cVar1;
+  lVar6 = FUN_002663b8(uVar5,extraout_a1,extraout_a2,extraout_a3,extraout_t0,extraout_t1,extraou t_t2
+                       ,extraout_t3);
+  Database_ExecuteQuery
+            (auStack_110,0x3c0b98,(long)(int)auStack_100,uVar5,extraout_t0_00,extraout_t1_00,
+             extraout_t2_00,extraout_t3_00);
+  Util_FormatIPString(*(char **)(param_8 + 8),0x3c0bd0,(long)(int)auStack_100,extraout_a3_00,
+                      extraout_t0_01,extraout_t1_01,extraout_t2_01,extraout_t3_01);
+  fVar14 = (float)FUN_0020d210(*(int *)(iVar2 + 0xc));
+  iVar4 = (int)lVar6;
+  fVar16 = fVar14;
+  FUN_00266938(fVar14,iVar4,uVar5,extraout_a2_00,extraout_a3_01,extraout_t0_02,extraout_t1_02,
+               extraout_t2_02,extraout_t3_02);
+  iVar2 = FUN_002665b0(fVar16,iVar4,uVar5);
+  cVar1 = FUN_00266350(uVar5,extraout_a1_00,extraout_a2_01,extraout_a3_02,extraout_t0_03,
+                       extraout_t1_03,extraout_t2_03,extraout_t3_03);
+  if (iVar2 != 0) {
+    FUN_00197728(uVar5,cVar1,extraout_a2_02,extraout_a3_03,extraout_t0_04,extraout_t1_04,
+                 extraout_t2_04,extraout_t3_04);
+  }
+  if (lVar6 == 1) {
+    uVar3 = 2;
+LAB_00204294:
+    *param_1 = uVar3;
+  }
+  else if (lVar6 < 2) {
+    if (lVar6 == 0) {
+      *param_1 = 1;
+    }
+  }
+  else if (lVar6 == 2) {
+    uVar3 = 3;
+    goto LAB_00204294;
+  }
+  *piStack_d0 = iVar2;
+  FUN_002667d8(0,uVar5);
+  fVar15 = fVar14;
+  FUN_002667d8(1,uVar5);
+  fVar17 = fVar15;
+  FUN_002667d8(2,uVar5);
+  if (cVar1 == '\0') {
+    Util_FormatIPString(*(char **)(param_3 + 8),0x3c0bd8,extraout_a2_03,extraout_a3_04,
+                        extraout_t0_05,extraout_t1_05,extraout_t2_05,extraout_t3_05);
+    Network_SendKeepalive(fVar17,param_4);
+  }
+  else {
+    uVar7 = extraout_a2_03;
+    uVar8 = extraout_a3_04;
+    uVar9 = extraout_t0_05;
+    uVar10 = extraout_t1_05;
+    uVar11 = extraout_t2_05;
+    uVar12 = extraout_t3_05;
+    if (cVar1 < '\x01') {
+      if (cVar1 != -1) goto LAB_002043b0;
+      Network_SendKeepalive(fVar14,param_3);
+      Network_SendKeepalive(fVar17,param_4);
+    }
+    else {
+      if (cVar1 != '\x01') {
+        if (cVar1 == '\x02') {
+          Util_FormatIPString(*(char **)(param_3 + 8),0x3c0bd8,extraout_a2_03,extraout_a3_04,
+                              extraout_t0_05,extraout_t1_05,extraout_t2_05,extraout_t3_05);
+          Util_FormatIPString(*(char **)(param_4 + 8),0x3c0bd8,extraout_a2_06,extraout_a3_07,
+                              extraout_t0_08,extraout_t1_08,extraout_t2_08,extraout_t3_08);
+          Util_FormatIPString(*(char **)(param_5 + 8),0x3c0bd8,extraout_a2_07,extraout_a3_08,
+                              extraout_t0_09,extraout_t1_09,extraout_t2_09,extraout_t3_09);
+          uVar7 = extraout_a2_08;
+          uVar8 = extraout_a3_09;
+          uVar9 = extraout_t0_10;
+          uVar10 = extraout_t1_10;
+          uVar11 = extraout_t2_10;
+          uVar12 = extraout_t3_10;
+        }
+        goto LAB_002043b0;
+      }
+      Util_FormatIPString(*(char **)(param_3 + 8),0x3c0bd8,extraout_a2_03,extraout_a3_04,
+                          extraout_t0_05,extraout_t1_05,extraout_t2_05,extraout_t3_05);
+      Util_FormatIPString(*(char **)(param_4 + 8),0x3c0bd8,extraout_a2_04,extraout_a3_05,
+                          extraout_t0_06,extraout_t1_06,extraout_t2_06,extraout_t3_06);
+    }
+  }
+  Network_SendKeepalive(fVar15,param_5);
+  uVar7 = extraout_a2_05;
+  uVar8 = extraout_a3_06;
+  uVar9 = extraout_t0_07;
+  uVar10 = extraout_t1_07;
+  uVar11 = extraout_t2_07;
+  uVar12 = extraout_t3_07;
+LAB_002043b0:
+  fVar14 = (float)FUN_00266860(iVar4,uVar5,uVar7,uVar8,uVar9,uVar10,uVar11,uVar12);
+  if (0.0 <= fVar14) {
+    Network_SendKeepalive(fVar14,iStack_cc);
+  }
+  else if (0.0 <= fVar16) {
+    Network_SendKeepalive(fVar16,iStack_cc);
+  }
+  else {
+    Util_FormatIPString(*(char **)(iStack_cc + 8),0x3c0be8,extraout_a2_09,extraout_a3_10,
+                        extraout_t0_11,extraout_t1_11,extraout_t2_11,extraout_t3_11);
+  }
+  iVar2 = 0;
+  piVar13 = piStack_c8 + *piStack_c8 + 1;
+  do {
+    iVar4 = FUN_0016c198(iVar2);
+    if (iVar4 < 0) {
+      Util_FormatIPString(*(char **)(*piVar13 + 8),0x3c0be8,extraout_a2_10,extraout_a3_11,
+                          extraout_t0_12,extraout_t1_12,extraout_t2_12,extraout_t3_12);
+    }
+    else {
+      fVar16 = (float)FUN_0016c1b0(iVar2);
+      Network_SendKeepalive(fVar16,*piVar13);
+    }
+    iVar2 = iVar2 + 1;
+    piVar13 = piVar13 + 1;
+  } while (iVar2 < 5);
+  FUN_001ad688();
+  FUN_001ad748(4,'\0');
+  FUN_001ad748(4,'\x01');
+  FUN_001ad748(4,'\x02');
+  FUN_001ad748(4,'\x03');
+  return;
+}
+
+Incoming References - Lobby_SynchronizeUserList
+Lobby_UpdateUsers

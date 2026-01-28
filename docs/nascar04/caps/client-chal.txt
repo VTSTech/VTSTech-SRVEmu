@@ -1,0 +1,1406 @@
+No.     Time           Source                Destination           Protocol Length Info
+  20318 139.647800     192.168.2.123         192.168.2.123         TCP      131    3221 → 10600 [PSH, ACK] Seq=1 Ack=1 Win=65280 Len=87
+
+Frame 20318: Packet, 131 bytes on wire (1048 bits), 131 bytes captured (1048 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3221, Dst Port: 10600, Seq: 1, Ack: 1, Len: 87
+Data (87 bytes)
+
+0000  02 00 00 00 45 00 00 7f 0b 58 40 00 80 06 00 00   ....E....X@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 95 29 68 d2 9f d6 46   ...{...{..)h...F
+0020  4f ab 73 2f 50 18 00 ff 7f 1e 00 00 40 64 69 72   O.s/P.......@dir
+0030  00 00 00 00 00 00 00 57 50 52 4f 44 3d 4e 41 53   .......WPROD=NAS
+0040  43 41 52 2d 50 53 32 2d 32 30 30 34 0a 56 45 52   CAR-PS2-2004.VER
+0050  53 3d 22 50 53 32 2f 58 58 58 2d 4a 75 6c 20 20   S="PS2/XXX-Jul  
+0060  32 20 32 30 30 33 22 0a 4c 41 4e 47 3d 65 6e 0a   2 2003".LANG=en.
+0070  53 4c 55 53 3d 42 41 53 4c 55 53 2d 32 30 38 32   SLUS=BASLUS-2082
+0080  34 0a 00                                          4..
+
+No.     Time           Source                Destination           Protocol Length Info
+  20320 139.662283     192.168.2.123         192.168.2.123         TCP      146    10600 → 3221 [PSH, ACK] Seq=1 Ack=88 Win=65280 Len=102
+
+Frame 20320: Packet, 146 bytes on wire (1168 bits), 146 bytes captured (1168 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10600, Dst Port: 3221, Seq: 1, Ack: 88, Len: 102
+Data (102 bytes)
+
+0000  02 00 00 00 45 00 00 8e 0b 5a 40 00 80 06 00 00   ....E....Z@.....
+0010  c0 a8 02 7b c0 a8 02 7b 29 68 0c 95 4f ab 73 2f   ...{...{)h..O.s/
+0020  d2 9f d6 9d 50 18 00 ff 08 38 00 00 40 64 69 72   ....P....8..@dir
+0030  00 00 00 00 00 00 00 66 41 44 44 52 3d 31 39 32   .......fADDR=192
+0040  2e 31 36 38 2e 32 2e 31 32 33 0a 50 4f 52 54 3d   .168.2.123.PORT=
+0050  31 30 39 30 31 0a 4c 4b 45 59 3d 30 0a 53 45 53   10901.LKEY=0.SES
+0060  53 3d 39 30 32 38 35 31 33 38 38 39 0a 4d 41 53   S=9028513889.MAS
+0070  4b 3d 33 31 34 33 66 33 66 37 30 65 63 62 31 37   K=3143f3f70ecb17
+0080  35 37 63 64 37 30 30 31 62 39 61 37 61 35 38 36   57cd7001b9a7a586
+0090  31 0a                                             1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  20337 139.748708     192.168.2.123         192.168.2.123         TCP      84     3222 → 10901 [PSH, ACK] Seq=1 Ack=1 Win=65280 Len=40
+
+Frame 20337: Packet, 84 bytes on wire (672 bits), 84 bytes captured (672 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 1, Ack: 1, Len: 40
+Data (40 bytes)
+
+0000  02 00 00 00 45 00 00 50 0b 65 40 00 80 06 00 00   ....E..P.e@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 16 92   ...{...{..*.*+..
+0020  10 f9 d2 17 50 18 00 ff 2e 5e 00 00 61 64 64 72   ....P....^..addr
+0030  00 00 00 00 00 00 00 28 41 44 44 52 3d 31 39 32   .......(ADDR=192
+0040  2e 30 2e 32 2e 31 30 30 0a 50 4f 52 54 3d 39 37   .0.2.100.PORT=97
+0050  31 34 0a 00                                       14..
+
+No.     Time           Source                Destination           Protocol Length Info
+  20339 139.749703     192.168.2.123         192.168.2.123         TCP      65     10901 → 3222 [PSH, ACK] Seq=1 Ack=41 Win=65280 Len=21
+
+Frame 20339: Packet, 65 bytes on wire (520 bits), 65 bytes captured (520 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 1, Ack: 41, Len: 21
+Data (21 bytes)
+
+0000  02 00 00 00 45 00 00 3d 0b 67 40 00 80 06 00 00   ....E..=.g@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d2 17   ...{...{*.......
+0020  2a 2b 16 ba 50 18 00 ff d6 37 00 00 61 64 64 72   *+..P....7..addr
+0030  00 00 00 00 00 00 00 15 53 54 41 54 55 53 3d 31   ........STATUS=1
+0040  0a                                                .
+
+No.     Time           Source                Destination           Protocol Length Info
+  20347 139.764319     192.168.2.123         192.168.2.123         TCP      84     3222 → 10901 [PSH, ACK] Seq=41 Ack=22 Win=65280 Len=40
+
+Frame 20347: Packet, 84 bytes on wire (672 bits), 84 bytes captured (672 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 41, Ack: 22, Len: 40
+Data (40 bytes)
+
+0000  02 00 00 00 45 00 00 50 0b 69 40 00 80 06 00 00   ....E..P.i@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 16 ba   ...{...{..*.*+..
+0020  10 f9 d2 2c 50 18 00 ff fa ea 00 00 73 6b 65 79   ...,P.......skey
+0030  00 00 00 00 00 00 00 28 53 4b 45 59 3d 24 35 30   .......(SKEY=$50
+0040  37 35 36 32 36 63 36 39 36 33 32 30 34 62 36 35   75626c6963204b65
+0050  37 39 0a 00                                       79..
+
+No.     Time           Source                Destination           Protocol Length Info
+  20349 139.765156     192.168.2.123         192.168.2.123         TCP      63     10901 → 3222 [PSH, ACK] Seq=22 Ack=81 Win=65280 Len=19
+
+Frame 20349: Packet, 63 bytes on wire (504 bits), 63 bytes captured (504 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 22, Ack: 81, Len: 19
+Data (19 bytes)
+
+0000  02 00 00 00 45 00 00 3b 0b 6b 40 00 80 06 00 00   ....E..;.k@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d2 2c   ...{...{*......,
+0020  2a 2b 16 e2 50 18 00 ff 14 49 00 00 73 6b 65 79   *+..P....I..skey
+0030  00 00 00 00 00 00 00 13 53 4b 45 59 3d 30 0a      ........SKEY=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  20452 140.394120     192.168.2.123         192.168.2.123         TCP      131    3229 → 10600 [PSH, ACK] Seq=1 Ack=1 Win=65280 Len=87
+
+Frame 20452: Packet, 131 bytes on wire (1048 bits), 131 bytes captured (1048 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3229, Dst Port: 10600, Seq: 1, Ack: 1, Len: 87
+Data (87 bytes)
+
+0000  02 00 00 00 45 00 00 7f 0b 72 40 00 80 06 00 00   ....E....r@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9d 29 68 02 42 a4 5d   ...{...{..)h.B.]
+0020  ef 5b 54 0f 50 18 00 ff 00 cd 00 00 40 64 69 72   .[T.P.......@dir
+0030  00 00 00 00 00 00 00 57 50 52 4f 44 3d 4e 41 53   .......WPROD=NAS
+0040  43 41 52 2d 50 53 32 2d 32 30 30 34 0a 56 45 52   CAR-PS2-2004.VER
+0050  53 3d 22 50 53 32 2f 58 58 58 2d 4a 75 6c 20 20   S="PS2/XXX-Jul  
+0060  32 20 32 30 30 33 22 0a 4c 41 4e 47 3d 65 6e 0a   2 2003".LANG=en.
+0070  53 4c 55 53 3d 42 41 53 4c 55 53 2d 32 30 38 32   SLUS=BASLUS-2082
+0080  34 0a 00                                          4..
+
+No.     Time           Source                Destination           Protocol Length Info
+  20454 140.394893     192.168.2.123         192.168.2.123         TCP      146    10600 → 3229 [PSH, ACK] Seq=1 Ack=88 Win=65280 Len=102
+
+Frame 20454: Packet, 146 bytes on wire (1168 bits), 146 bytes captured (1168 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10600, Dst Port: 3229, Seq: 1, Ack: 88, Len: 102
+Data (102 bytes)
+
+0000  02 00 00 00 45 00 00 8e 0b 74 40 00 80 06 00 00   ....E....t@.....
+0010  c0 a8 02 7b c0 a8 02 7b 29 68 0c 9d ef 5b 54 0f   ...{...{)h...[T.
+0020  02 42 a4 b4 50 18 00 ff 96 db 00 00 40 64 69 72   .B..P.......@dir
+0030  00 00 00 00 00 00 00 66 41 44 44 52 3d 31 39 32   .......fADDR=192
+0040  2e 31 36 38 2e 32 2e 31 32 33 0a 50 4f 52 54 3d   .168.2.123.PORT=
+0050  31 30 39 30 31 0a 4c 4b 45 59 3d 30 0a 53 45 53   10901.LKEY=0.SES
+0060  53 3d 37 35 34 35 31 36 30 37 35 38 0a 4d 41 53   S=7545160758.MAS
+0070  4b 3d 33 35 32 38 66 33 66 37 30 65 63 62 31 37   K=3528f3f70ecb17
+0080  35 37 63 64 37 30 30 31 62 39 61 37 61 37 32 31   57cd7001b9a7a721
+0090  36 0a                                             6.
+
+No.     Time           Source                Destination           Protocol Length Info
+  20483 140.476089     192.168.2.123         192.168.2.123         TCP      85     3230 → 10901 [PSH, ACK] Seq=1 Ack=1 Win=65280 Len=41
+
+Frame 20483: Packet, 85 bytes on wire (680 bits), 85 bytes captured (680 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 1, Ack: 1, Len: 41
+Data (41 bytes)
+
+0000  02 00 00 00 45 00 00 51 0b 7f 40 00 80 06 00 00   ....E..Q..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 76 96   ...{...{..*...v.
+0020  a6 df 65 c2 50 18 00 ff c2 d6 00 00 61 64 64 72   ..e.P.......addr
+0030  00 00 00 00 00 00 00 29 41 44 44 52 3d 31 39 32   .......)ADDR=192
+0040  2e 30 2e 32 2e 31 30 30 0a 50 4f 52 54 3d 31 36   .0.2.100.PORT=16
+0050  33 37 35 0a 00                                    375..
+
+No.     Time           Source                Destination           Protocol Length Info
+  20485 140.476913     192.168.2.123         192.168.2.123         TCP      65     10901 → 3230 [PSH, ACK] Seq=1 Ack=42 Win=65280 Len=21
+
+Frame 20485: Packet, 65 bytes on wire (520 bits), 65 bytes captured (520 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 1, Ack: 42, Len: 21
+Data (21 bytes)
+
+0000  02 00 00 00 45 00 00 3d 0b 81 40 00 80 06 00 00   ....E..=..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 65 c2   ...{...{*.....e.
+0020  e7 06 76 bf 50 18 00 ff 8f bd 00 00 61 64 64 72   ..v.P.......addr
+0030  00 00 00 00 00 00 00 15 53 54 41 54 55 53 3d 31   ........STATUS=1
+0040  0a                                                .
+
+No.     Time           Source                Destination           Protocol Length Info
+  20495 140.493311     192.168.2.123         192.168.2.123         TCP      84     3230 → 10901 [PSH, ACK] Seq=42 Ack=22 Win=65280 Len=40
+
+Frame 20495: Packet, 84 bytes on wire (672 bits), 84 bytes captured (672 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 42, Ack: 22, Len: 40
+Data (40 bytes)
+
+0000  02 00 00 00 45 00 00 50 0b 83 40 00 80 06 00 00   ....E..P..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 76 bf   ...{...{..*...v.
+0020  a6 df 65 d7 50 18 00 ff b4 70 00 00 73 6b 65 79   ..e.P....p..skey
+0030  00 00 00 00 00 00 00 28 53 4b 45 59 3d 24 35 30   .......(SKEY=$50
+0040  37 35 36 32 36 63 36 39 36 33 32 30 34 62 36 35   75626c6963204b65
+0050  37 39 0a 00                                       79..
+
+No.     Time           Source                Destination           Protocol Length Info
+  20497 140.494417     192.168.2.123         192.168.2.123         TCP      63     10901 → 3230 [PSH, ACK] Seq=22 Ack=82 Win=65280 Len=19
+
+Frame 20497: Packet, 63 bytes on wire (504 bits), 63 bytes captured (504 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 22, Ack: 82, Len: 19
+Data (19 bytes)
+
+0000  02 00 00 00 45 00 00 3b 0b 85 40 00 80 06 00 00   ....E..;..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 65 d7   ...{...{*.....e.
+0020  e7 06 76 e7 50 18 00 ff cd ce 00 00 73 6b 65 79   ..v.P.......skey
+0030  00 00 00 00 00 00 00 13 53 4b 45 59 3d 30 0a      ........SKEY=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  21792 149.500925     192.168.2.123         192.168.2.123         TCP      223    3230 → 10901 [PSH, ACK] Seq=82 Ack=41 Win=65280 Len=179
+
+Frame 21792: Packet, 223 bytes on wire (1784 bits), 223 bytes captured (1784 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 82, Ack: 41, Len: 179
+Data (179 bytes)
+
+0000  02 00 00 00 45 00 00 db 0b 89 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 76 e7   ...{...{..*...v.
+0020  a6 df 65 ea 50 18 00 ff 0e 8e 00 00 61 75 74 68   ..e.P.......auth
+0030  00 00 00 00 00 00 00 b3 4e 41 4d 45 3d 56 54 53   ........NAME=VTS
+0040  54 65 63 68 32 0a 54 4f 53 3d 31 0a 50 41 53 53   Tech2.TOS=1.PASS
+0050  3d 24 33 39 66 36 38 66 34 65 0a 4d 49 44 3d 24   =$39f68f4e.MID=$
+0060  30 30 30 34 31 66 38 32 62 65 65 35 0a 48 57 46   00041f82bee5.HWF
+0070  4c 41 47 3d 34 0a 48 57 4d 41 53 4b 3d 36 35 38   LAG=4.HWMASK=658
+0080  32 38 0a 50 52 4f 44 3d 4e 41 53 43 41 52 2d 50   28.PROD=NASCAR-P
+0090  53 32 2d 32 30 30 34 0a 56 45 52 53 3d 22 50 53   S2-2004.VERS="PS
+00a0  32 2f 58 58 58 2d 4a 75 6c 20 20 32 20 32 30 30   2/XXX-Jul  2 200
+00b0  33 22 0a 4c 41 4e 47 3d 65 6e 0a 53 4c 55 53 3d   3".LANG=en.SLUS=
+00c0  42 41 53 4c 55 53 2d 32 30 38 32 34 0a 4d 41 53   BASLUS-20824.MAS
+00d0  4b 3d 2d 31 30 34 34 37 37 33 38 33 34 0a 00      K=-1044773834..
+
+No.     Time           Source                Destination           Protocol Length Info
+  21802 149.507047     192.168.2.123         192.168.2.123         TCP      220    3222 → 10901 [PSH, ACK] Seq=81 Ack=41 Win=65280 Len=176
+
+Frame 21802: Packet, 220 bytes on wire (1760 bits), 220 bytes captured (1760 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 81, Ack: 41, Len: 176
+Data (176 bytes)
+
+0000  02 00 00 00 45 00 00 d8 0b 8b 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 16 e2   ...{...{..*.*+..
+0020  10 f9 d2 3f 50 18 00 ff cf 4c 00 00 61 75 74 68   ...?P....L..auth
+0030  00 00 00 00 00 00 00 b0 4e 41 4d 45 3d 56 54 53   ........NAME=VTS
+0040  54 65 63 68 0a 54 4f 53 3d 31 0a 50 41 53 53 3d   Tech.TOS=1.PASS=
+0050  24 33 39 66 32 61 39 37 34 0a 4d 49 44 3d 24 30   $39f2a974.MID=$0
+0060  30 30 34 31 66 38 32 62 65 65 35 0a 48 57 46 4c   0041f82bee5.HWFL
+0070  41 47 3d 34 0a 48 57 4d 41 53 4b 3d 36 35 38 32   AG=4.HWMASK=6582
+0080  38 0a 50 52 4f 44 3d 4e 41 53 43 41 52 2d 50 53   8.PROD=NASCAR-PS
+0090  32 2d 32 30 30 34 0a 56 45 52 53 3d 22 50 53 32   2-2004.VERS="PS2
+00a0  2f 58 58 58 2d 4a 75 6c 20 20 32 20 32 30 30 33   /XXX-Jul  2 2003
+00b0  22 0a 4c 41 4e 47 3d 65 6e 0a 53 4c 55 53 3d 42   ".LANG=en.SLUS=B
+00c0  41 53 4c 55 53 2d 32 30 38 32 34 0a 4d 41 53 4b   ASLUS-20824.MASK
+00d0  3d 34 33 38 35 37 39 32 39 37 0a 00               =438579297..
+
+No.     Time           Source                Destination           Protocol Length Info
+  21808 149.534193     192.168.2.123         192.168.2.123         TCP      150    10901 → 3230 [PSH, ACK] Seq=41 Ack=261 Win=65024 Len=106
+
+Frame 21808: Packet, 150 bytes on wire (1200 bits), 150 bytes captured (1200 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 41, Ack: 261, Len: 106
+Data (106 bytes)
+
+0000  02 00 00 00 45 00 00 92 0b 8d 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 65 ea   ...{...{*.....e.
+0020  e7 06 77 9a 50 18 00 fe 23 18 00 00 61 75 74 68   ..w.P...#...auth
+0030  00 00 00 00 00 00 00 6a 54 4f 53 3d 31 0a 4e 41   .......jTOS=1.NA
+0040  4d 45 3d 56 54 53 54 65 63 68 32 0a 55 53 45 52   ME=VTSTech2.USER
+0050  3d 55 6e 6b 6e 6f 77 6e 0a 50 45 52 53 4f 4e 41   =Unknown.PERSONA
+0060  53 3d 56 54 53 54 65 63 68 32 0a 50 52 49 56 3d   S=VTSTech2.PRIV=
+0070  0a 4c 41 53 54 3d 0a 53 45 53 53 3d 33 38 39 30   .LAST=.SESS=3890
+0080  31 39 36 33 36 36 37 37 0a 53 3d 30 0a 53 54 41   19636677.S=0.STA
+0090  54 55 53 3d 30 0a                                 TUS=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  21810 149.534482     192.168.2.123         192.168.2.123         TCP      174    10901 → 3222 [PSH, ACK] Seq=41 Ack=257 Win=65024 Len=130
+
+Frame 21810: Packet, 174 bytes on wire (1392 bits), 174 bytes captured (1392 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 41, Ack: 257, Len: 130
+Data (130 bytes)
+
+0000  02 00 00 00 45 00 00 aa 0b 8f 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d2 3f   ...{...{*......?
+0020  2a 2b 17 92 50 18 00 fe 26 43 00 00 61 75 74 68   *+..P...&C..auth
+0030  00 00 00 00 00 00 00 82 54 4f 53 3d 31 0a 4e 41   ........TOS=1.NA
+0040  4d 45 3d 56 54 53 54 65 63 68 0a 55 53 45 52 3d   ME=VTSTech.USER=
+0050  55 6e 6b 6e 6f 77 6e 0a 50 45 52 53 4f 4e 41 53   Unknown.PERSONAS
+0060  3d 56 54 53 54 65 63 68 2c 7b 69 73 7d 2c 52 65   =VTSTech,{is},Re
+0070  76 69 76 69 6e 67 2c 22 50 53 32 20 47 61 6d 65   viving,"PS2 Game
+0080  73 22 0a 50 52 49 56 3d 0a 4c 41 53 54 3d 0a 53   s".PRIV=.LAST=.S
+0090  45 53 53 3d 33 38 39 30 31 39 35 32 32 33 37 39   ESS=389019522379
+00a0  0a 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a         .S=0.STATUS=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  21989 151.003143     2001:0:14c9:cd04:2054:2305:7145:ba82 ff02::1               IPv6     72     IPv6 no next header
+
+Frame 21989: Packet, 72 bytes on wire (576 bits), 72 bytes captured (576 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 224.0.0.253
+User Datagram Protocol, Src Port: 56570, Dst Port: 3544
+Teredo IPv6 over UDP tunneling
+Internet Protocol Version 6, Src: 2001:0:14c9:cd04:2054:2305:7145:ba82, Dst: ff02::1
+
+0000  02 00 00 00 45 00 00 44 31 fd 00 00 01 11 00 00   ....E..D1.......
+0010  c0 a8 02 7b e0 00 00 fd dc fa 0d d8 00 30 65 90   ...{.........0e.
+0020  60 00 00 00 00 00 3b 15 20 01 00 00 14 c9 cd 04   `.....;. .......
+0030  20 54 23 05 71 45 ba 82 ff 02 00 00 00 00 00 00    T#.qE..........
+0040  00 00 00 00 00 00 00 01                           ........
+
+No.     Time           Source                Destination           Protocol Length Info
+  22239 151.736507     192.168.2.123         192.168.2.123         TCP      71     3230 → 10901 [PSH, ACK] Seq=345 Ack=231 Win=65280 Len=27
+
+Frame 22239: Packet, 71 bytes on wire (568 bits), 71 bytes captured (568 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 345, Ack: 231, Len: 27
+Data (27 bytes)
+
+0000  02 00 00 00 45 00 00 43 0b 99 40 00 80 06 00 00   ....E..C..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 77 ee   ...{...{..*...w.
+0020  a6 df 66 a8 50 18 00 ff 83 ad 00 00 70 65 72 73   ..f.P.......pers
+0030  00 00 00 00 00 00 00 1b 50 45 52 53 3d 56 54 53   ........PERS=VTS
+0040  54 65 63 68 32 0a 00                              Tech2..
+
+No.     Time           Source                Destination           Protocol Length Info
+  22241 151.737758     192.168.2.123         192.168.2.123         TCP      116    10901 → 3230 [PSH, ACK] Seq=231 Ack=372 Win=65024 Len=72
+
+Frame 22241: Packet, 116 bytes on wire (928 bits), 116 bytes captured (928 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 231, Ack: 372, Len: 72
+Data (72 bytes)
+
+0000  02 00 00 00 45 00 00 70 0b 9b 40 00 80 06 00 00   ....E..p..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 66 a8   ...{...{*.....f.
+0020  e7 06 78 09 50 18 00 fe 3d 3f 00 00 70 65 72 73   ..x.P...=?..pers
+0030  00 00 00 00 00 00 00 48 50 45 52 53 3d 56 54 53   .......HPERS=VTS
+0040  54 65 63 68 32 0a 4c 4b 45 59 3d 24 30 0a 53 3d   Tech2.LKEY=$0.S=
+0050  30 0a 53 54 41 54 55 53 3d 30 0a 4c 41 53 54 3d   0.STATUS=0.LAST=
+0060  32 30 32 36 2e 30 31 2e 32 35 2d 31 39 3a 35 37   2026.01.25-19:57
+0070  3a 30 31 0a                                       :01.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22243 151.742518     192.168.2.123         192.168.2.123         TCP      70     3222 → 10901 [PSH, ACK] Seq=340 Ack=254 Win=65280 Len=26
+
+Frame 22243: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 340, Ack: 254, Len: 26
+Data (26 bytes)
+
+0000  02 00 00 00 45 00 00 42 0b 9d 40 00 80 06 00 00   ....E..B..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 17 e5   ...{...{..*.*+..
+0020  10 f9 d3 14 50 18 00 ff f2 20 00 00 70 65 72 73   ....P.... ..pers
+0030  00 00 00 00 00 00 00 1a 50 45 52 53 3d 56 54 53   ........PERS=VTS
+0040  54 65 63 68 0a 00                                 Tech..
+
+No.     Time           Source                Destination           Protocol Length Info
+  22245 151.743839     192.168.2.123         192.168.2.123         TCP      115    10901 → 3222 [PSH, ACK] Seq=254 Ack=366 Win=65024 Len=71
+
+Frame 22245: Packet, 115 bytes on wire (920 bits), 115 bytes captured (920 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 254, Ack: 366, Len: 71
+Data (71 bytes)
+
+0000  02 00 00 00 45 00 00 6f 0b 9f 40 00 80 06 00 00   ....E..o..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d3 14   ...{...{*.......
+0020  2a 2b 17 ff 50 18 00 fe f7 67 00 00 70 65 72 73   *+..P....g..pers
+0030  00 00 00 00 00 00 00 47 50 45 52 53 3d 56 54 53   .......GPERS=VTS
+0040  54 65 63 68 0a 4c 4b 45 59 3d 24 30 0a 53 3d 30   Tech.LKEY=$0.S=0
+0050  0a 53 54 41 54 55 53 3d 30 0a 4c 41 53 54 3d 32   .STATUS=0.LAST=2
+0060  30 32 36 2e 30 31 2e 32 35 2d 31 39 3a 35 37 3a   026.01.25-19:57:
+0070  30 31 0a                                          01.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22284 152.046209     192.168.2.123         192.168.2.123         TCP      89     10901 → 3222 [PSH, ACK] Seq=325 Ack=366 Win=65024 Len=45
+
+Frame 22284: Packet, 89 bytes on wire (712 bits), 89 bytes captured (712 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 325, Ack: 366, Len: 45
+Data (45 bytes)
+
+0000  02 00 00 00 45 00 00 55 0b a6 40 00 80 06 00 00   ....E..U..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d3 5b   ...{...{*......[
+0020  2a 2b 17 ff 50 18 00 fe 9a 30 00 00 2b 77 68 6f   *+..P....0..+who
+0030  00 00 00 00 00 00 00 2d 46 3d 55 0a 4e 3d 56 54   .......-F=U.N=VT
+0040  53 54 65 63 68 0a 52 49 3d 30 0a 52 54 3d 32 0a   STech.RI=0.RT=2.
+0050  52 3d 30 0a 52 46 3d 30 0a                        R=0.RF=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22285 152.046209     192.168.2.123         192.168.2.123         TCP      90     10901 → 3230 [PSH, ACK] Seq=303 Ack=372 Win=65024 Len=46
+
+Frame 22285: Packet, 90 bytes on wire (720 bits), 90 bytes captured (720 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 303, Ack: 372, Len: 46
+Data (46 bytes)
+
+0000  02 00 00 00 45 00 00 56 0b a5 40 00 80 06 00 00   ....E..V..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 66 f0   ...{...{*.....f.
+0020  e7 06 78 09 50 18 00 fe b4 32 00 00 2b 77 68 6f   ..x.P....2..+who
+0030  00 00 00 00 00 00 00 2e 46 3d 55 0a 4e 3d 56 54   ........F=U.N=VT
+0040  53 54 65 63 68 32 0a 52 49 3d 30 0a 52 54 3d 32   STech2.RI=0.RT=2
+0050  0a 52 3d 30 0a 52 46 3d 30 0a                     .R=0.RF=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22288 152.058280     192.168.2.123         192.168.2.123         TCP      88     3230 → 10901 [PSH, ACK] Seq=372 Ack=349 Win=65024 Len=44
+
+Frame 22288: Packet, 88 bytes on wire (704 bits), 88 bytes captured (704 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 372, Ack: 349, Len: 44
+Data (44 bytes)
+
+0000  02 00 00 00 45 00 00 54 0b a9 40 00 80 06 00 00   ....E..T..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 78 09   ...{...{..*...x.
+0020  a6 df 67 1e 50 18 00 fe 15 72 00 00 73 65 6c 65   ..g.P....r..sele
+0030  00 00 00 00 00 00 00 2c 52 4f 4f 4d 53 3d 31 20   .......,ROOMS=1 
+0040  55 53 45 52 53 3d 31 20 52 41 4e 4b 53 3d 31 20   USERS=1 RANKS=1 
+0050  4d 45 53 47 53 3d 31 00                           MESGS=1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22292 152.062682     192.168.2.123         192.168.2.123         TCP      66     3230 → 10901 [PSH, ACK] Seq=416 Ack=349 Win=65024 Len=22
+
+Frame 22292: Packet, 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 416, Ack: 349, Len: 22
+Data (22 bytes)
+
+0000  02 00 00 00 45 00 00 3e 0b ab 40 00 80 06 00 00   ....E..>..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 78 35   ...{...{..*...x5
+0020  a6 df 67 1e 50 18 00 fe 71 29 00 00 73 65 6c 65   ..g.P...q)..sele
+0030  00 00 00 00 00 00 00 16 52 41 4e 4b 53 3d 35 30   ........RANKS=50
+0040  0a 00                                             ..
+
+No.     Time           Source                Destination           Protocol Length Info
+  22294 152.063603     192.168.2.123         192.168.2.123         TCP      113    10901 → 3230 [PSH, ACK] Seq=349 Ack=438 Win=65024 Len=69
+
+Frame 22294: Packet, 113 bytes on wire (904 bits), 113 bytes captured (904 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 349, Ack: 438, Len: 69
+Data (69 bytes)
+
+0000  02 00 00 00 45 00 00 6d 0b ad 40 00 80 06 00 00   ....E..m..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 67 1e   ...{...{*.....g.
+0020  e7 06 78 4b 50 18 00 fe f7 9e 00 00 73 65 6c 65   ..xKP.......sele
+0030  00 00 00 00 00 00 00 45 52 41 4e 4b 3d 35 30 0a   .......ERANK=50.
+0040  55 53 45 52 3d 56 54 53 54 65 63 68 32 0a 52 41   USER=VTSTech2.RA
+0050  54 49 4e 47 3d 31 35 30 30 0a 57 49 4e 53 3d 30   TING=1500.WINS=0
+0060  0a 4c 4f 53 53 3d 30 0a 53 54 41 54 55 53 3d 30   .LOSS=0.STATUS=0
+0070  0a                                                .
+
+No.     Time           Source                Destination           Protocol Length Info
+  22296 152.068352     192.168.2.123         192.168.2.123         TCP      88     3222 → 10901 [PSH, ACK] Seq=366 Ack=370 Win=65024 Len=44
+
+Frame 22296: Packet, 88 bytes on wire (704 bits), 88 bytes captured (704 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 366, Ack: 370, Len: 44
+Data (44 bytes)
+
+0000  02 00 00 00 45 00 00 54 0b af 40 00 80 06 00 00   ....E..T..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 17 ff   ...{...{..*.*+..
+0020  10 f9 d3 88 50 18 00 fe 5b dc 00 00 73 65 6c 65   ....P...[...sele
+0030  00 00 00 00 00 00 00 2c 52 4f 4f 4d 53 3d 31 20   .......,ROOMS=1 
+0040  55 53 45 52 53 3d 31 20 52 41 4e 4b 53 3d 31 20   USERS=1 RANKS=1 
+0050  4d 45 53 47 53 3d 31 00                           MESGS=1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22298 152.070458     192.168.2.123         192.168.2.123         TCP      112    10901 → 3222 [PSH, ACK] Seq=370 Ack=410 Win=65024 Len=68
+
+Frame 22298: Packet, 112 bytes on wire (896 bits), 112 bytes captured (896 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 370, Ack: 410, Len: 68
+Data (68 bytes)
+
+0000  02 00 00 00 45 00 00 6c 0b b1 40 00 80 06 00 00   ....E..l..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d3 88   ...{...{*.......
+0020  2a 2b 18 2b 50 18 00 fe d0 c0 00 00 73 65 6c 65   *+.+P.......sele
+0030  00 00 00 00 00 00 00 44 52 41 4e 4b 3d 35 30 0a   .......DRANK=50.
+0040  55 53 45 52 3d 56 54 53 54 65 63 68 0a 52 41 54   USER=VTSTech.RAT
+0050  49 4e 47 3d 31 35 30 30 0a 57 49 4e 53 3d 30 0a   ING=1500.WINS=0.
+0060  4c 4f 53 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a   LOSS=0.STATUS=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22304 152.074393     192.168.2.123         192.168.2.123         TCP      66     3222 → 10901 [PSH, ACK] Seq=410 Ack=438 Win=65024 Len=22
+
+Frame 22304: Packet, 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 410, Ack: 438, Len: 22
+Data (22 bytes)
+
+0000  02 00 00 00 45 00 00 3e 0b b3 40 00 80 06 00 00   ....E..>..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 18 2b   ...{...{..*.*+.+
+0020  10 f9 d3 cc 50 18 00 fe b7 4f 00 00 73 65 6c 65   ....P....O..sele
+0030  00 00 00 00 00 00 00 16 52 41 4e 4b 53 3d 35 30   ........RANKS=50
+0040  0a 00                                             ..
+
+No.     Time           Source                Destination           Protocol Length Info
+  22308 152.082684     192.168.2.123         192.168.2.123         TCP      113    10901 → 3230 [PSH, ACK] Seq=418 Ack=438 Win=65024 Len=69
+
+Frame 22308: Packet, 113 bytes on wire (904 bits), 113 bytes captured (904 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 418, Ack: 438, Len: 69
+Data (69 bytes)
+
+0000  02 00 00 00 45 00 00 6d 0b b5 40 00 80 06 00 00   ....E..m..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 67 63   ...{...{*.....gc
+0020  e7 06 78 4b 50 18 00 fe f7 59 00 00 73 65 6c 65   ..xKP....Y..sele
+0030  00 00 00 00 00 00 00 45 52 41 4e 4b 3d 35 30 0a   .......ERANK=50.
+0040  55 53 45 52 3d 56 54 53 54 65 63 68 32 0a 52 41   USER=VTSTech2.RA
+0050  54 49 4e 47 3d 31 35 30 30 0a 57 49 4e 53 3d 30   TING=1500.WINS=0
+0060  0a 4c 4f 53 53 3d 30 0a 53 54 41 54 55 53 3d 30   .LOSS=0.STATUS=0
+0070  0a                                                .
+
+No.     Time           Source                Destination           Protocol Length Info
+  22312 152.088399     192.168.2.123         192.168.2.123         TCP      64     3230 → 10901 [PSH, ACK] Seq=438 Ack=487 Win=65024 Len=20
+
+Frame 22312: Packet, 64 bytes on wire (512 bits), 64 bytes captured (512 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 438, Ack: 487, Len: 20
+Data (20 bytes)
+
+0000  02 00 00 00 45 00 00 3c 0b b7 40 00 80 06 00 00   ....E..<..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 78 4b   ...{...{..*...xK
+0020  a6 df 67 a8 50 18 00 fe ba c2 00 00 6e 65 77 73   ..g.P.......news
+0030  00 00 00 00 00 00 00 14 4e 41 4d 45 3d 30 0a 00   ........NAME=0..
+
+No.     Time           Source                Destination           Protocol Length Info
+  22315 152.093847     192.168.2.123         192.168.2.123         TCP      112    10901 → 3222 [PSH, ACK] Seq=438 Ack=432 Win=65024 Len=68
+
+Frame 22315: Packet, 112 bytes on wire (896 bits), 112 bytes captured (896 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 438, Ack: 432, Len: 68
+Data (68 bytes)
+
+0000  02 00 00 00 45 00 00 6c 0b b9 40 00 80 06 00 00   ....E..l..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d3 cc   ...{...{*.......
+0020  2a 2b 18 41 50 18 00 fe d0 66 00 00 73 65 6c 65   *+.AP....f..sele
+0030  00 00 00 00 00 00 00 44 52 41 4e 4b 3d 35 30 0a   .......DRANK=50.
+0040  55 53 45 52 3d 56 54 53 54 65 63 68 0a 52 41 54   USER=VTSTech.RAT
+0050  49 4e 47 3d 31 35 30 30 0a 57 49 4e 53 3d 30 0a   ING=1500.WINS=0.
+0060  4c 4f 53 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a   LOSS=0.STATUS=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22317 152.094674     192.168.2.123         192.168.2.123         TCP      64     3222 → 10901 [PSH, ACK] Seq=432 Ack=506 Win=65024 Len=20
+
+Frame 22317: Packet, 64 bytes on wire (512 bits), 64 bytes captured (512 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 432, Ack: 506, Len: 20
+Data (20 bytes)
+
+0000  02 00 00 00 45 00 00 3c 0b bb 40 00 80 06 00 00   ....E..<..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 18 41   ...{...{..*.*+.A
+0020  10 f9 d4 10 50 18 00 fe 01 2f 00 00 6e 65 77 73   ....P..../..news
+0030  00 00 00 00 00 00 00 14 4e 41 4d 45 3d 30 0a 00   ........NAME=0..
+
+No.     Time           Source                Destination           Protocol Length Info
+  22328 152.110352     192.168.2.123         192.168.2.123         TCP      143    10901 → 3222 [PSH, ACK] Seq=506 Ack=452 Win=65024 Len=99
+
+Frame 22328: Packet, 143 bytes on wire (1144 bits), 143 bytes captured (1144 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 506, Ack: 452, Len: 99
+Data (99 bytes)
+
+0000  02 00 00 00 45 00 00 8b 0b bd 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d4 10   ...{...{*.......
+0020  2a 2b 18 55 50 18 00 fe fe 59 00 00 6e 65 77 73   *+.UP....Y..news
+0030  00 00 00 00 00 00 00 63 6e 65 77 30 0a 42 55 44   .......cnew0.BUD
+0040  44 59 5f 55 52 4c 3d 31 39 32 2e 31 36 38 2e 32   DY_URL=192.168.2
+0050  2e 31 32 33 0a 42 55 44 44 59 5f 50 4f 52 54 3d   .123.BUDDY_PORT=
+0060  31 30 38 39 39 0a 42 55 44 44 59 5f 4e 41 4d 45   10899.BUDDY_NAME
+0070  3d 56 54 53 54 65 63 68 5f 42 75 64 64 79 0a 4d   =VTSTech_Buddy.M
+0080  45 53 47 3d 31 0a 53 54 41 54 55 53 3d 31 0a      ESG=1.STATUS=1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22329 152.110386     192.168.2.123         192.168.2.123         TCP      143    10901 → 3230 [PSH, ACK] Seq=487 Ack=458 Win=65024 Len=99
+
+Frame 22329: Packet, 143 bytes on wire (1144 bits), 143 bytes captured (1144 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 487, Ack: 458, Len: 99
+Data (99 bytes)
+
+0000  02 00 00 00 45 00 00 8b 0b be 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 67 a8   ...{...{*.....g.
+0020  e7 06 78 5f 50 18 00 fe b7 ed 00 00 6e 65 77 73   ..x_P.......news
+0030  00 00 00 00 00 00 00 63 6e 65 77 30 0a 42 55 44   .......cnew0.BUD
+0040  44 59 5f 55 52 4c 3d 31 39 32 2e 31 36 38 2e 32   DY_URL=192.168.2
+0050  2e 31 32 33 0a 42 55 44 44 59 5f 50 4f 52 54 3d   .123.BUDDY_PORT=
+0060  31 30 38 39 39 0a 42 55 44 44 59 5f 4e 41 4d 45   10899.BUDDY_NAME
+0070  3d 56 54 53 54 65 63 68 5f 42 75 64 64 79 0a 4d   =VTSTech_Buddy.M
+0080  45 53 47 3d 31 0a 53 54 41 54 55 53 3d 31 0a      ESG=1.STATUS=1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22434 152.676201     192.168.2.123         192.168.2.123         TCP      115    10901 → 3222 [PSH, ACK] Seq=605 Ack=452 Win=65024 Len=71
+
+Frame 22434: Packet, 115 bytes on wire (920 bits), 115 bytes captured (920 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 605, Ack: 452, Len: 71
+Data (71 bytes)
+
+0000  02 00 00 00 45 00 00 6f 0b c1 40 00 80 06 00 00   ....E..o..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d4 73   ...{...{*......s
+0020  2a 2b 18 55 50 18 00 fe 33 73 00 00 2b 72 6f 6d   *+.UP...3s..+rom
+0030  00 00 00 00 00 00 00 47 49 3d 30 0a 4e 3d 4c 6f   .......GI=0.N=Lo
+0040  62 62 79 0a 48 3d 4d 61 69 6e 20 4c 6f 62 62 79   bby.H=Main Lobby
+0050  20 48 75 62 0a 41 3d 31 39 32 2e 31 36 38 2e 32    Hub.A=192.168.2
+0060  2e 31 32 33 0a 54 3d 32 0a 4c 3d 31 30 30 0a 46   .123.T=2.L=100.F
+0070  3d 30 0a                                          =0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22436 152.676521     192.168.2.123         192.168.2.123         TCP      115    10901 → 3230 [PSH, ACK] Seq=586 Ack=458 Win=65024 Len=71
+
+Frame 22436: Packet, 115 bytes on wire (920 bits), 115 bytes captured (920 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 586, Ack: 458, Len: 71
+Data (71 bytes)
+
+0000  02 00 00 00 45 00 00 6f 0b c3 40 00 80 06 00 00   ....E..o..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 68 0b   ...{...{*.....h.
+0020  e7 06 78 5f 50 18 00 fe ed 06 00 00 2b 72 6f 6d   ..x_P.......+rom
+0030  00 00 00 00 00 00 00 47 49 3d 30 0a 4e 3d 4c 6f   .......GI=0.N=Lo
+0040  62 62 79 0a 48 3d 4d 61 69 6e 20 4c 6f 62 62 79   bby.H=Main Lobby
+0050  20 48 75 62 0a 41 3d 31 39 32 2e 31 36 38 2e 32    Hub.A=192.168.2
+0060  2e 31 32 33 0a 54 3d 32 0a 4c 3d 31 30 30 0a 46   .123.T=2.L=100.F
+0070  3d 30 0a                                          =0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22440 152.735622     192.168.2.123         192.168.2.123         TCP      117    10901 → 3230 [PSH, ACK] Seq=657 Ack=458 Win=65024 Len=73
+
+Frame 22440: Packet, 117 bytes on wire (936 bits), 117 bytes captured (936 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 657, Ack: 458, Len: 73
+Data (73 bytes)
+
+0000  02 00 00 00 45 00 00 71 0b c5 40 00 80 06 00 00   ....E..q..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 68 52   ...{...{*.....hR
+0020  e7 06 78 5f 50 18 00 fe 83 45 00 00 2b 72 6f 6d   ..x_P....E..+rom
+0030  00 00 00 00 00 00 00 49 49 3d 31 0a 4e 3d 45 61   .......II=1.N=Ea
+0040  73 74 0a 48 3d 45 61 73 74 20 43 6f 61 73 74 20   st.H=East Coast 
+0050  52 61 63 65 72 73 0a 41 3d 31 39 32 2e 31 36 38   Racers.A=192.168
+0060  2e 32 2e 31 32 33 0a 54 3d 30 0a 4c 3d 31 30 30   .2.123.T=0.L=100
+0070  0a 46 3d 30 0a                                    .F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22441 152.735622     192.168.2.123         192.168.2.123         TCP      117    10901 → 3222 [PSH, ACK] Seq=676 Ack=452 Win=65024 Len=73
+
+Frame 22441: Packet, 117 bytes on wire (936 bits), 117 bytes captured (936 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 676, Ack: 452, Len: 73
+Data (73 bytes)
+
+0000  02 00 00 00 45 00 00 71 0b c6 40 00 80 06 00 00   ....E..q..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d4 ba   ...{...{*.......
+0020  2a 2b 18 55 50 18 00 fe c9 b1 00 00 2b 72 6f 6d   *+.UP.......+rom
+0030  00 00 00 00 00 00 00 49 49 3d 31 0a 4e 3d 45 61   .......II=1.N=Ea
+0040  73 74 0a 48 3d 45 61 73 74 20 43 6f 61 73 74 20   st.H=East Coast 
+0050  52 61 63 65 72 73 0a 41 3d 31 39 32 2e 31 36 38   Racers.A=192.168
+0060  2e 32 2e 31 32 33 0a 54 3d 30 0a 4c 3d 31 30 30   .2.123.T=0.L=100
+0070  0a 46 3d 30 0a                                    .F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22448 152.798535     192.168.2.123         192.168.2.123         TCP      117    10901 → 3222 [PSH, ACK] Seq=749 Ack=452 Win=65024 Len=73
+
+Frame 22448: Packet, 117 bytes on wire (936 bits), 117 bytes captured (936 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 749, Ack: 452, Len: 73
+Data (73 bytes)
+
+0000  02 00 00 00 45 00 00 71 0b c9 40 00 80 06 00 00   ....E..q..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d5 03   ...{...{*.......
+0020  2a 2b 18 55 50 18 00 fe b2 52 00 00 2b 72 6f 6d   *+.UP....R..+rom
+0030  00 00 00 00 00 00 00 49 49 3d 32 0a 4e 3d 57 65   .......II=2.N=We
+0040  73 74 0a 48 3d 57 65 73 74 20 43 6f 61 73 74 20   st.H=West Coast 
+0050  52 61 63 65 72 73 0a 41 3d 31 39 32 2e 31 36 38   Racers.A=192.168
+0060  2e 32 2e 31 32 33 0a 54 3d 30 0a 4c 3d 31 30 30   .2.123.T=0.L=100
+0070  0a 46 3d 30 0a                                    .F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22449 152.798535     192.168.2.123         192.168.2.123         TCP      117    10901 → 3230 [PSH, ACK] Seq=730 Ack=458 Win=65024 Len=73
+
+Frame 22449: Packet, 117 bytes on wire (936 bits), 117 bytes captured (936 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 730, Ack: 458, Len: 73
+Data (73 bytes)
+
+0000  02 00 00 00 45 00 00 71 0b ca 40 00 80 06 00 00   ....E..q..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 68 9b   ...{...{*.....h.
+0020  e7 06 78 5f 50 18 00 fe 6b e6 00 00 2b 72 6f 6d   ..x_P...k...+rom
+0030  00 00 00 00 00 00 00 49 49 3d 32 0a 4e 3d 57 65   .......II=2.N=We
+0040  73 74 0a 48 3d 57 65 73 74 20 43 6f 61 73 74 20   st.H=West Coast 
+0050  52 61 63 65 72 73 0a 41 3d 31 39 32 2e 31 36 38   Racers.A=192.168
+0060  2e 32 2e 31 32 33 0a 54 3d 30 0a 4c 3d 31 30 30   .2.123.T=0.L=100
+0070  0a 46 3d 30 0a                                    .F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22460 152.860958     192.168.2.123         192.168.2.123         TCP      123    10901 → 3230 [PSH, ACK] Seq=803 Ack=458 Win=65024 Len=79
+
+Frame 22460: Packet, 123 bytes on wire (984 bits), 123 bytes captured (984 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 803, Ack: 458, Len: 79
+Data (79 bytes)
+
+0000  02 00 00 00 45 00 00 77 0b ce 40 00 80 06 00 00   ....E..w..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 68 e4   ...{...{*.....h.
+0020  e7 06 78 5f 50 18 00 fe 9a ff 00 00 2b 72 6f 6d   ..x_P.......+rom
+0030  00 00 00 00 00 00 00 4f 49 3d 33 0a 4e 3d 42 65   .......OI=3.N=Be
+0040  67 69 6e 6e 65 72 0a 48 3d 4e 65 77 20 44 72 69   ginner.H=New Dri
+0050  76 65 72 73 20 57 65 6c 63 6f 6d 65 0a 41 3d 31   vers Welcome.A=1
+0060  39 32 2e 31 36 38 2e 32 2e 31 32 33 0a 54 3d 30   92.168.2.123.T=0
+0070  0a 4c 3d 31 30 30 0a 46 3d 30 0a                  .L=100.F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22461 152.860958     192.168.2.123         192.168.2.123         TCP      123    10901 → 3222 [PSH, ACK] Seq=822 Ack=452 Win=65024 Len=79
+
+Frame 22461: Packet, 123 bytes on wire (984 bits), 123 bytes captured (984 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 822, Ack: 452, Len: 79
+Data (79 bytes)
+
+0000  02 00 00 00 45 00 00 77 0b cd 40 00 80 06 00 00   ....E..w..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d5 4c   ...{...{*......L
+0020  2a 2b 18 55 50 18 00 fe e1 6b 00 00 2b 72 6f 6d   *+.UP....k..+rom
+0030  00 00 00 00 00 00 00 4f 49 3d 33 0a 4e 3d 42 65   .......OI=3.N=Be
+0040  67 69 6e 6e 65 72 0a 48 3d 4e 65 77 20 44 72 69   ginner.H=New Dri
+0050  76 65 72 73 20 57 65 6c 63 6f 6d 65 0a 41 3d 31   vers Welcome.A=1
+0060  39 32 2e 31 36 38 2e 32 2e 31 32 33 0a 54 3d 30   92.168.2.123.T=0
+0070  0a 4c 3d 31 30 30 0a 46 3d 30 0a                  .L=100.F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22470 152.924980     192.168.2.123         192.168.2.123         TCP      135    10901 → 3222 [PSH, ACK] Seq=901 Ack=452 Win=65024 Len=91
+
+Frame 22470: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 901, Ack: 452, Len: 91
+Data (91 bytes)
+
+0000  02 00 00 00 45 00 00 83 0b d1 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d5 9b   ...{...{*.......
+0020  2a 2b 18 55 50 18 00 fe 9b 8b 00 00 2b 75 73 72   *+.UP.......+usr
+0030  00 00 00 00 00 00 00 5b 49 3d 35 34 33 33 38 38   .......[I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 30 0a   .N=VTSTech2.F=0.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+0060  49 3d 38 37 31 31 37 30 0a 4e 3d 56 54 53 54 65   I=871170.N=VTSTe
+0070  63 68 0a 46 3d 31 0a 41 3d 31 39 32 2e 31 36 38   ch.F=1.A=192.168
+0080  2e 32 2e 31 32 33 0a                              .2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22472 152.925373     192.168.2.123         192.168.2.123         TCP      135    10901 → 3230 [PSH, ACK] Seq=882 Ack=458 Win=65024 Len=91
+
+Frame 22472: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 882, Ack: 458, Len: 91
+Data (91 bytes)
+
+0000  02 00 00 00 45 00 00 83 0b d3 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 69 33   ...{...{*.....i3
+0020  e7 06 78 5f 50 18 00 fe 54 20 00 00 2b 75 73 72   ..x_P...T ..+usr
+0030  00 00 00 00 00 00 00 5b 49 3d 35 34 33 33 38 38   .......[I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 31 0a   .N=VTSTech2.F=1.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+0060  49 3d 38 37 31 31 37 30 0a 4e 3d 56 54 53 54 65   I=871170.N=VTSTe
+0070  63 68 0a 46 3d 30 0a 41 3d 31 39 32 2e 31 36 38   ch.F=0.A=192.168
+0080  2e 32 2e 31 32 33 0a                              .2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22474 152.925858     192.168.2.123         192.168.2.123         TCP      74     10901 → 3222 [PSH, ACK] Seq=992 Ack=452 Win=65024 Len=30
+
+Frame 22474: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 992, Ack: 452, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0b d5 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 d5 f6   ...{...{*.......
+0020  2a 2b 18 55 50 18 00 fe 49 3f 00 00 2b 70 6f 70   *+.UP...I?..+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 32 20 31 3a   ........Z=0:2 1:
+0040  30 20 32 3a 30 20 33 3a 30 0a                     0 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  22476 152.926582     192.168.2.123         192.168.2.123         TCP      74     10901 → 3230 [PSH, ACK] Seq=973 Ack=458 Win=65024 Len=30
+
+Frame 22476: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 973, Ack: 458, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0b d7 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 69 8e   ...{...{*.....i.
+0020  e7 06 78 5f 50 18 00 fe 02 d3 00 00 2b 70 6f 70   ..x_P.......+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 32 20 31 3a   ........Z=0:2 1:
+0040  30 20 32 3a 30 20 33 3a 30 0a                     0 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  33134 228.886826     192.168.2.123         192.168.2.123         TCP      64     3222 → 10901 [PSH, ACK] Seq=1697 Ack=2267 Win=63232 Len=20
+
+Frame 33134: Packet, 64 bytes on wire (512 bits), 64 bytes captured (512 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 1697, Ack: 2267, Len: 20
+Data (20 bytes)
+
+0000  02 00 00 00 45 00 00 3c 0c 61 40 00 80 06 00 00   ....E..<.a@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 1d 32   ...{...{..*.*+.2
+0020  10 f9 da f1 50 18 00 f7 f5 62 00 00 6e 65 77 73   ....P....b..news
+0030  00 00 00 00 00 00 00 14 4e 41 4d 45 3d 31 0a 00   ........NAME=1..
+
+No.     Time           Source                Destination           Protocol Length Info
+  33136 228.887780     192.168.2.123         192.168.2.123         TCP      152    10901 → 3222 [PSH, ACK] Seq=2267 Ack=1717 Win=63744 Len=108
+
+Frame 33136: Packet, 152 bytes on wire (1216 bits), 152 bytes captured (1216 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 2267, Ack: 1717, Len: 108
+Data (108 bytes)
+
+0000  02 00 00 00 45 00 00 94 0c 63 40 00 80 06 00 00   ....E....c@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 da f1   ...{...{*.......
+0020  2a 2b 1d 46 50 18 00 f9 80 5e 00 00 6e 65 77 73   *+.FP....^..news
+0030  00 00 00 00 00 00 00 6c 6e 65 77 31 0a 54 45 58   .......lnew1.TEX
+0040  54 3d 57 65 6c 63 6f 6d 65 20 74 6f 20 56 54 53   T=Welcome to VTS
+0050  54 65 63 68 20 4e 41 53 43 41 52 20 53 65 72 76   Tech NASCAR Serv
+0060  65 72 0a 4e 45 57 53 5f 54 45 58 54 3d 4d 75 6c   er.NEWS_TEXT=Mul
+0070  74 69 70 6c 61 79 65 72 20 53 79 73 74 65 6d 20   tiplayer System 
+0080  41 63 74 69 76 65 0a 43 4f 55 4e 54 3d 31 0a 53   Active.COUNT=1.S
+0090  54 41 54 55 53 3d 31 0a                           TATUS=1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  33138 228.897722     192.168.2.123         192.168.2.123         TCP      64     3230 → 10901 [PSH, ACK] Seq=1886 Ack=2431 Win=62976 Len=20
+
+Frame 33138: Packet, 64 bytes on wire (512 bits), 64 bytes captured (512 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 1886, Ack: 2431, Len: 20
+Data (20 bytes)
+
+0000  02 00 00 00 45 00 00 3c 0c 65 40 00 80 06 00 00   ....E..<.e@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 7d f3   ...{...{..*...}.
+0020  a6 df 6f 40 50 18 00 f6 ad 89 00 00 6e 65 77 73   ..o@P.......news
+0030  00 00 00 00 00 00 00 14 4e 41 4d 45 3d 31 0a 00   ........NAME=1..
+
+No.     Time           Source                Destination           Protocol Length Info
+  33140 228.898527     192.168.2.123         192.168.2.123         TCP      152    10901 → 3230 [PSH, ACK] Seq=2431 Ack=1906 Win=63488 Len=108
+
+Frame 33140: Packet, 152 bytes on wire (1216 bits), 152 bytes captured (1216 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 2431, Ack: 1906, Len: 108
+Data (108 bytes)
+
+0000  02 00 00 00 45 00 00 94 0c 67 40 00 80 06 00 00   ....E....g@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 6f 40   ...{...{*.....o@
+0020  e7 06 7e 07 50 18 00 f8 38 85 00 00 6e 65 77 73   ..~.P...8...news
+0030  00 00 00 00 00 00 00 6c 6e 65 77 31 0a 54 45 58   .......lnew1.TEX
+0040  54 3d 57 65 6c 63 6f 6d 65 20 74 6f 20 56 54 53   T=Welcome to VTS
+0050  54 65 63 68 20 4e 41 53 43 41 52 20 53 65 72 76   Tech NASCAR Serv
+0060  65 72 0a 4e 45 57 53 5f 54 45 58 54 3d 4d 75 6c   er.NEWS_TEXT=Mul
+0070  74 69 70 6c 61 79 65 72 20 53 79 73 74 65 6d 20   tiplayer System 
+0080  41 63 74 69 76 65 0a 43 4f 55 4e 54 3d 31 0a 53   Active.COUNT=1.S
+0090  54 41 54 55 53 3d 31 0a                           TATUS=1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36096 249.334011     192.168.2.123         192.168.2.123         TCP      73     3230 → 10901 [PSH, ACK] Seq=2326 Ack=2959 Win=62464 Len=29
+
+Frame 36096: Packet, 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 2326, Ack: 2959, Len: 29
+Data (29 bytes)
+
+0000  02 00 00 00 45 00 00 45 0c 9d 40 00 80 06 00 00   ....E..E..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 7f ab   ...{...{..*.....
+0020  a6 df 71 50 50 18 00 f4 ff 84 00 00 6d 6f 76 65   ..qPP.......move
+0030  00 00 00 00 00 00 00 1d 4e 41 4d 45 3d 45 61 73   ........NAME=Eas
+0040  74 0a 50 41 53 53 3d 0a 00                        t.PASS=..
+
+No.     Time           Source                Destination           Protocol Length Info
+  36098 249.335756     192.168.2.123         192.168.2.123         TCP      71     10901 → 3230 [PSH, ACK] Seq=2959 Ack=2355 Win=62976 Len=27
+
+Frame 36098: Packet, 71 bytes on wire (568 bits), 71 bytes captured (568 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 2959, Ack: 2355, Len: 27
+Data (27 bytes)
+
+0000  02 00 00 00 45 00 00 43 0c 9f 40 00 80 06 00 00   ....E..C..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 71 50   ...{...{*.....qP
+0020  e7 06 7f c8 50 18 00 f6 bb 81 00 00 6d 6f 76 65   ....P.......move
+0030  00 00 00 00 00 00 00 1b 49 3d 31 0a 4e 3d 45 61   ........I=1.N=Ea
+0040  73 74 0a 46 3d 30 0a                              st.F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36102 249.339945     192.168.2.123         192.168.2.123         TCP      73     3222 → 10901 [PSH, ACK] Seq=2298 Ack=2956 Win=62464 Len=29
+
+Frame 36102: Packet, 73 bytes on wire (584 bits), 73 bytes captured (584 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 2298, Ack: 2956, Len: 29
+Data (29 bytes)
+
+0000  02 00 00 00 45 00 00 45 0c a1 40 00 80 06 00 00   ....E..E..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 1f 8b   ...{...{..*.*+..
+0020  10 f9 dd a2 50 18 00 f4 46 1d 00 00 6d 6f 76 65   ....P...F...move
+0030  00 00 00 00 00 00 00 1d 4e 41 4d 45 3d 45 61 73   ........NAME=Eas
+0040  74 0a 50 41 53 53 3d 0a 00                        t.PASS=..
+
+No.     Time           Source                Destination           Protocol Length Info
+  36106 249.341819     192.168.2.123         192.168.2.123         TCP      71     10901 → 3222 [PSH, ACK] Seq=2956 Ack=2327 Win=62976 Len=27
+
+Frame 36106: Packet, 71 bytes on wire (568 bits), 71 bytes captured (568 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 2956, Ack: 2327, Len: 27
+Data (27 bytes)
+
+0000  02 00 00 00 45 00 00 43 0c a3 40 00 80 06 00 00   ....E..C..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 dd a2   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 02 1a 00 00 6d 6f 76 65   *+..P.......move
+0030  00 00 00 00 00 00 00 1b 49 3d 31 0a 4e 3d 45 61   ........I=1.N=Ea
+0040  73 74 0a 46 3d 30 0a                              st.F=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36168 249.756852     192.168.2.123         192.168.2.123         TCP      74     10901 → 3230 [PSH, ACK] Seq=2986 Ack=2355 Win=62976 Len=30
+
+Frame 36168: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 2986, Ack: 2355, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0c a5 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 71 6b   ...{...{*.....qk
+0020  e7 06 7f c8 50 18 00 f6 f3 94 00 00 2b 70 6f 70   ....P.......+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 30 20 31 3a   ........Z=0:0 1:
+0040  32 20 32 3a 30 20 33 3a 30 0a                     2 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36170 249.772602     192.168.2.123         192.168.2.123         TCP      74     10901 → 3222 [PSH, ACK] Seq=2983 Ack=2327 Win=62976 Len=30
+
+Frame 36170: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 2983, Ack: 2327, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0c a7 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 dd bd   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 3a 2d 00 00 2b 70 6f 70   *+..P...:-..+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 30 20 31 3a   ........Z=0:0 1:
+0040  32 20 32 3a 30 20 33 3a 30 0a                     2 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36204 249.960692     192.168.2.123         192.168.2.123         TCP      135    10901 → 3230 [PSH, ACK] Seq=3016 Ack=2355 Win=62976 Len=91
+
+Frame 36204: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3016, Ack: 2355, Len: 91
+Data (91 bytes)
+
+0000  02 00 00 00 45 00 00 83 0c a9 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 71 89   ...{...{*.....q.
+0020  e7 06 7f c8 50 18 00 f6 44 69 00 00 2b 75 73 72   ....P...Di..+usr
+0030  00 00 00 00 00 00 00 5b 49 3d 35 34 33 33 38 38   .......[I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 31 0a   .N=VTSTech2.F=1.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+0060  49 3d 38 37 31 31 37 30 0a 4e 3d 56 54 53 54 65   I=871170.N=VTSTe
+0070  63 68 0a 46 3d 30 0a 41 3d 31 39 32 2e 31 36 38   ch.F=0.A=192.168
+0080  2e 32 2e 31 32 33 0a                              .2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36206 249.976490     192.168.2.123         192.168.2.123         TCP      135    10901 → 3222 [PSH, ACK] Seq=3013 Ack=2327 Win=62976 Len=91
+
+Frame 36206: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3013, Ack: 2327, Len: 91
+Data (91 bytes)
+
+0000  02 00 00 00 45 00 00 83 0c ab 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 dd db   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 8c 00 00 00 2b 75 73 72   *+..P.......+usr
+0030  00 00 00 00 00 00 00 5b 49 3d 35 34 33 33 38 38   .......[I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 30 0a   .N=VTSTech2.F=0.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+0060  49 3d 38 37 31 31 37 30 0a 4e 3d 56 54 53 54 65   I=871170.N=VTSTe
+0070  63 68 0a 46 3d 31 0a 41 3d 31 39 32 2e 31 36 38   ch.F=1.A=192.168
+0080  2e 32 2e 31 32 33 0a                              .2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36214 250.164883     192.168.2.123         192.168.2.123         TCP      90     10901 → 3230 [PSH, ACK] Seq=3107 Ack=2355 Win=62976 Len=46
+
+Frame 36214: Packet, 90 bytes on wire (720 bits), 90 bytes captured (720 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3107, Ack: 2355, Len: 46
+Data (46 bytes)
+
+0000  02 00 00 00 45 00 00 56 0c ad 40 00 80 06 00 00   ....E..V..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 71 e4   ...{...{*.....q.
+0020  e7 06 7f c8 50 18 00 f6 a0 87 00 00 2b 77 68 6f   ....P.......+who
+0030  00 00 00 00 00 00 00 2e 46 3d 55 0a 4e 3d 56 54   ........F=U.N=VT
+0040  53 54 65 63 68 32 0a 52 49 3d 31 0a 52 54 3d 32   STech2.RI=1.RT=2
+0050  0a 52 3d 30 0a 52 46 3d 30 0a                     .R=0.RF=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36218 250.179859     192.168.2.123         192.168.2.123         TCP      89     10901 → 3222 [PSH, ACK] Seq=3104 Ack=2327 Win=62976 Len=45
+
+Frame 36218: Packet, 89 bytes on wire (712 bits), 89 bytes captured (712 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3104, Ack: 2327, Len: 45
+Data (45 bytes)
+
+0000  02 00 00 00 45 00 00 55 0c af 40 00 80 06 00 00   ....E..U..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 de 36   ...{...{*......6
+0020  2a 2b 1f a8 50 18 00 f6 87 b3 00 00 2b 77 68 6f   *+..P.......+who
+0030  00 00 00 00 00 00 00 2d 46 3d 55 0a 4e 3d 56 54   .......-F=U.N=VT
+0040  53 54 65 63 68 0a 52 49 3d 31 0a 52 54 3d 32 0a   STech.RI=1.RT=2.
+0050  52 3d 30 0a 52 46 3d 30 0a                        R=0.RF=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36284 250.369495     192.168.2.123         192.168.2.123         TCP      74     10901 → 3222 [PSH, ACK] Seq=3149 Ack=2327 Win=62976 Len=30
+
+Frame 36284: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3149, Ack: 2327, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0c b1 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 de 63   ...{...{*......c
+0020  2a 2b 1f a8 50 18 00 f6 39 87 00 00 2b 70 6f 70   *+..P...9...+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 30 20 31 3a   ........Z=0:0 1:
+0040  32 20 32 3a 30 20 33 3a 30 0a                     2 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36286 250.370010     192.168.2.123         192.168.2.123         TCP      96     10901 → 3222 [PSH, ACK] Seq=3179 Ack=2327 Win=62976 Len=52
+
+Frame 36286: Packet, 96 bytes on wire (768 bits), 96 bytes captured (768 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3179, Ack: 2327, Len: 52
+Data (52 bytes)
+
+0000  02 00 00 00 45 00 00 5c 0c b3 40 00 80 06 00 00   ....E..\..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 de 81   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 8d 5f 00 00 2b 75 73 72   *+..P...._..+usr
+0030  00 00 00 00 00 00 00 34 49 3d 35 34 33 33 38 38   .......4I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 31 0a   .N=VTSTech2.F=1.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36288 250.385013     192.168.2.123         192.168.2.123         TCP      74     10901 → 3222 [PSH, ACK] Seq=3231 Ack=2327 Win=62976 Len=30
+
+Frame 36288: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3231, Ack: 2327, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0c b5 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 de b5   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 39 35 00 00 2b 70 6f 70   *+..P...95..+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 30 20 31 3a   ........Z=0:0 1:
+0040  32 20 32 3a 30 20 33 3a 30 0a                     2 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36290 250.385714     192.168.2.123         192.168.2.123         TCP      96     10901 → 3222 [PSH, ACK] Seq=3261 Ack=2327 Win=62976 Len=52
+
+Frame 36290: Packet, 96 bytes on wire (768 bits), 96 bytes captured (768 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3261, Ack: 2327, Len: 52
+Data (52 bytes)
+
+0000  02 00 00 00 45 00 00 5c 0c b7 40 00 80 06 00 00   ....E..\..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 de d3   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 8d 0d 00 00 2b 75 73 72   *+..P.......+usr
+0030  00 00 00 00 00 00 00 34 49 3d 35 34 33 33 38 38   .......4I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 31 0a   .N=VTSTech2.F=1.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36294 250.431197     192.168.2.123         192.168.2.123         TCP      95     10901 → 3222 [PSH, ACK] Seq=3313 Ack=2327 Win=62976 Len=51
+
+Frame 36294: Packet, 95 bytes on wire (760 bits), 95 bytes captured (760 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3313, Ack: 2327, Len: 51
+Data (51 bytes)
+
+0000  02 00 00 00 45 00 00 5b 0c b9 40 00 80 06 00 00   ....E..[..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 df 07   ...{...{*.......
+0020  2a 2b 1f a8 50 18 00 f6 15 8c 00 00 2b 75 73 72   *+..P.......+usr
+0030  00 00 00 00 00 00 00 33 49 3d 38 37 31 31 37 30   .......3I=871170
+0040  0a 4e 3d 56 54 53 54 65 63 68 0a 46 3d 31 0a 41   .N=VTSTech.F=1.A
+0050  3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a      =192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36300 250.447296     192.168.2.123         192.168.2.123         TCP      95     10901 → 3222 [PSH, ACK] Seq=3364 Ack=2327 Win=62976 Len=51
+
+Frame 36300: Packet, 95 bytes on wire (760 bits), 95 bytes captured (760 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3364, Ack: 2327, Len: 51
+Data (51 bytes)
+
+0000  02 00 00 00 45 00 00 5b 0c bb 40 00 80 06 00 00   ....E..[..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 df 3a   ...{...{*......:
+0020  2a 2b 1f a8 50 18 00 f6 15 59 00 00 2b 75 73 72   *+..P....Y..+usr
+0030  00 00 00 00 00 00 00 33 49 3d 38 37 31 31 37 30   .......3I=871170
+0040  0a 4e 3d 56 54 53 54 65 63 68 0a 46 3d 31 0a 41   .N=VTSTech.F=1.A
+0050  3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a      =192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36302 250.494655     192.168.2.123         192.168.2.123         TCP      74     10901 → 3230 [PSH, ACK] Seq=3153 Ack=2355 Win=62976 Len=30
+
+Frame 36302: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3153, Ack: 2355, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0c bd 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 72 12   ...{...{*.....r.
+0020  e7 06 7f c8 50 18 00 f6 f2 ed 00 00 2b 70 6f 70   ....P.......+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 30 20 31 3a   ........Z=0:0 1:
+0040  32 20 32 3a 30 20 33 3a 30 0a                     2 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36304 250.495203     192.168.2.123         192.168.2.123         TCP      96     10901 → 3230 [PSH, ACK] Seq=3183 Ack=2355 Win=62976 Len=52
+
+Frame 36304: Packet, 96 bytes on wire (768 bits), 96 bytes captured (768 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3183, Ack: 2355, Len: 52
+Data (52 bytes)
+
+0000  02 00 00 00 45 00 00 5c 0c bf 40 00 80 06 00 00   ....E..\..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 72 30   ...{...{*.....r0
+0020  e7 06 7f c8 50 18 00 f6 46 c6 00 00 2b 75 73 72   ....P...F...+usr
+0030  00 00 00 00 00 00 00 34 49 3d 35 34 33 33 38 38   .......4I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 31 0a   .N=VTSTech2.F=1.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36308 250.510188     192.168.2.123         192.168.2.123         TCP      74     10901 → 3230 [PSH, ACK] Seq=3235 Ack=2355 Win=62976 Len=30
+
+Frame 36308: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3235, Ack: 2355, Len: 30
+Data (30 bytes)
+
+0000  02 00 00 00 45 00 00 46 0c c1 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 72 64   ...{...{*.....rd
+0020  e7 06 7f c8 50 18 00 f6 f2 9b 00 00 2b 70 6f 70   ....P.......+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 30 20 31 3a   ........Z=0:0 1:
+0040  32 20 32 3a 30 20 33 3a 30 0a                     2 2:0 3:0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36310 250.510535     192.168.2.123         192.168.2.123         TCP      96     10901 → 3230 [PSH, ACK] Seq=3265 Ack=2355 Win=62976 Len=52
+
+Frame 36310: Packet, 96 bytes on wire (768 bits), 96 bytes captured (768 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3265, Ack: 2355, Len: 52
+Data (52 bytes)
+
+0000  02 00 00 00 45 00 00 5c 0c c3 40 00 80 06 00 00   ....E..\..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 72 82   ...{...{*.....r.
+0020  e7 06 7f c8 50 18 00 f6 46 74 00 00 2b 75 73 72   ....P...Ft..+usr
+0030  00 00 00 00 00 00 00 34 49 3d 35 34 33 33 38 38   .......4I=543388
+0040  0a 4e 3d 56 54 53 54 65 63 68 32 0a 46 3d 31 0a   .N=VTSTech2.F=1.
+0050  41 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   A=192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36316 250.558425     192.168.2.123         192.168.2.123         TCP      95     10901 → 3230 [PSH, ACK] Seq=3317 Ack=2355 Win=62976 Len=51
+
+Frame 36316: Packet, 95 bytes on wire (760 bits), 95 bytes captured (760 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3317, Ack: 2355, Len: 51
+Data (51 bytes)
+
+0000  02 00 00 00 45 00 00 5b 0c c5 40 00 80 06 00 00   ....E..[..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 72 b6   ...{...{*.....r.
+0020  e7 06 7f c8 50 18 00 f6 ce f2 00 00 2b 75 73 72   ....P.......+usr
+0030  00 00 00 00 00 00 00 33 49 3d 38 37 31 31 37 30   .......3I=871170
+0040  0a 4e 3d 56 54 53 54 65 63 68 0a 46 3d 31 0a 41   .N=VTSTech.F=1.A
+0050  3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a      =192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  36318 250.576498     192.168.2.123         192.168.2.123         TCP      95     10901 → 3230 [PSH, ACK] Seq=3368 Ack=2355 Win=62976 Len=51
+
+Frame 36318: Packet, 95 bytes on wire (760 bits), 95 bytes captured (760 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3368, Ack: 2355, Len: 51
+Data (51 bytes)
+
+0000  02 00 00 00 45 00 00 5b 0c c7 40 00 80 06 00 00   ....E..[..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 72 e9   ...{...{*.....r.
+0020  e7 06 7f c8 50 18 00 f6 ce bf 00 00 2b 75 73 72   ....P.......+usr
+0030  00 00 00 00 00 00 00 33 49 3d 38 37 31 31 37 30   .......3I=871170
+0040  0a 4e 3d 56 54 53 54 65 63 68 0a 46 3d 31 0a 41   .N=VTSTech.F=1.A
+0050  3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a      =192.168.2.123.
+
+No.     Time           Source                Destination           Protocol Length Info
+  38150 263.838407     192.168.2.123         192.168.2.123         TCP      71     3222 → 10901 [PSH, ACK] Seq=2659 Ack=3747 Win=61696 Len=27
+
+Frame 38150: Packet, 71 bytes on wire (568 bits), 71 bytes captured (568 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 2659, Ack: 3747, Len: 27
+Data (27 bytes)
+
+0000  02 00 00 00 45 00 00 43 0c e5 40 00 80 06 00 00   ....E..C..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 20 f4   ...{...{..*.*+ .
+0020  10 f9 e0 b9 50 18 00 f1 bb 61 00 00 75 73 65 72   ....P....a..user
+0030  00 00 00 00 00 00 00 1b 50 45 52 53 3d 56 54 53   ........PERS=VTS
+0040  54 65 63 68 32 0a 00                              Tech2..
+
+No.     Time           Source                Destination           Protocol Length Info
+  38152 263.839048     192.168.2.123         192.168.2.123         TCP      83     10901 → 3222 [PSH, ACK] Seq=3747 Ack=2686 Win=62720 Len=39
+
+Frame 38152: Packet, 83 bytes on wire (664 bits), 83 bytes captured (664 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3747, Ack: 2686, Len: 39
+Data (39 bytes)
+
+0000  02 00 00 00 45 00 00 4f 0c e7 40 00 80 06 00 00   ....E..O..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 e0 b9   ...{...{*.......
+0020  2a 2b 21 0f 50 18 00 f5 26 51 00 00 75 73 65 72   *+!.P...&Q..user
+0030  00 00 00 00 00 00 00 27 50 45 52 53 3d 0a 54 49   .......'PERS=.TI
+0040  54 4c 45 3d 31 0a 53 3d 30 0a 53 54 41 54 55 53   TLE=1.S=0.STATUS
+0050  3d 30 0a                                          =0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  38672 268.008731     192.168.2.123         192.168.2.123         TCP      97     3222 → 10901 [PSH, ACK] Seq=2852 Ack=3952 Win=61440 Len=53
+
+Frame 38672: Packet, 97 bytes on wire (776 bits), 97 bytes captured (776 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 2852, Ack: 3952, Len: 53
+Data (53 bytes)
+
+0000  02 00 00 00 45 00 00 5d 0c f3 40 00 80 06 00 00   ....E..]..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 21 b5   ...{...{..*.*+!.
+0020  10 f9 e1 86 50 18 00 f0 5c af 00 00 6d 65 73 67   ....P...\...mesg
+0030  00 00 00 00 00 00 00 35 50 52 49 56 3d 56 54 53   .......5PRIV=VTS
+0040  54 65 63 68 32 0a 54 45 58 54 3d 77 38 39 33 6d   Tech2.TEXT=w893m
+0050  5f 61 30 31 37 6c 5f 67 0a 41 54 54 52 3d 33 0a   _a017l_g.ATTR=3.
+0060  00                                                .
+
+No.     Time           Source                Destination           Protocol Length Info
+  38674 268.010308     192.168.2.123         192.168.2.123         TCP      118    10901 → 3230 [PSH, ACK] Seq=3755 Ack=2607 Win=62720 Len=74
+
+Frame 38674: Packet, 118 bytes on wire (944 bits), 118 bytes captured (944 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3755, Ack: 2607, Len: 74
+Data (74 bytes)
+
+0000  02 00 00 00 45 00 00 72 0c f5 40 00 80 06 00 00   ....E..r..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 74 6c   ...{...{*.....tl
+0020  e7 06 80 c4 50 18 00 f5 e5 5b 00 00 2b 6d 73 67   ....P....[..+msg
+0030  00 00 00 00 00 00 00 4a 46 52 4f 4d 3d 56 54 53   .......JFROM=VTS
+0040  54 65 63 68 0a 54 45 58 54 3d 77 38 39 33 6d 5f   Tech.TEXT=w893m_
+0050  61 30 31 37 6c 5f 67 0a 46 3d 31 0a 41 54 54 52   a017l_g.F=1.ATTR
+0060  3d 33 0a 52 49 3d 30 0a 50 52 49 56 3d 56 54 53   =3.RI=0.PRIV=VTS
+0070  54 65 63 68 32 0a                                 Tech2.
+
+No.     Time           Source                Destination           Protocol Length Info
+  38676 268.010476     192.168.2.123         192.168.2.123         TCP      88     10901 → 3222 [PSH, ACK] Seq=3952 Ack=2905 Win=62464 Len=44
+
+Frame 38676: Packet, 88 bytes on wire (704 bits), 88 bytes captured (704 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 3952, Ack: 2905, Len: 44
+Data (44 bytes)
+
+0000  02 00 00 00 45 00 00 54 0c f7 40 00 80 06 00 00   ....E..T..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 e1 86   ...{...{*.......
+0020  2a 2b 21 ea 50 18 00 f4 d7 da 00 00 6d 65 73 67   *+!.P.......mesg
+0030  00 00 00 00 00 00 00 2c 54 45 58 54 3d 77 38 39   .......,TEXT=w89
+0040  33 6d 5f 61 30 31 37 6c 5f 67 0a 53 3d 30 0a 53   3m_a017l_g.S=0.S
+0050  54 41 54 55 53 3d 30 0a                           TATUS=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  39769 275.629919     192.168.2.123         192.168.2.123         TCP      93     3230 → 10901 [PSH, ACK] Seq=2775 Ack=3913 Win=61440 Len=49
+
+Frame 39769: Packet, 93 bytes on wire (744 bits), 93 bytes captured (744 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3230, Dst Port: 10901, Seq: 2775, Ack: 3913, Len: 49
+Data (49 bytes)
+
+0000  02 00 00 00 45 00 00 59 0d 09 40 00 80 06 00 00   ....E..Y..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 9e 2a 95 e7 06 81 6c   ...{...{..*....l
+0020  a6 df 75 0a 50 18 00 f0 9a 66 00 00 73 6e 61 70   ..u.P....f..snap
+0030  00 00 00 00 00 00 00 31 49 4e 44 45 58 3d 30 0a   .......1INDEX=0.
+0040  43 48 41 4e 3d 34 0a 46 49 4e 44 3d 56 54 53 54   CHAN=4.FIND=VTST
+0050  65 63 68 0a 52 41 4e 47 45 3d 31 0a 00            ech.RANGE=1..
+
+No.     Time           Source                Destination           Protocol Length Info
+  39771 275.630705     192.168.2.123         192.168.2.123         TCP      135    10901 → 3230 [PSH, ACK] Seq=3913 Ack=2824 Win=62464 Len=91
+
+Frame 39771: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 3913, Ack: 2824, Len: 91
+Data (91 bytes)
+
+0000  02 00 00 00 45 00 00 83 0d 0b 40 00 80 06 00 00   ....E.....@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 75 0a   ...{...{*.....u.
+0020  e7 06 81 9d 50 18 00 f4 1e 9b 00 00 2b 73 6e 70   ....P.......+snp
+0030  00 00 00 00 00 00 00 5b 4e 3d 56 54 53 54 65 63   .......[N=VTSTec
+0040  68 0a 52 3d 31 0a 57 3d 35 30 0a 4c 3d 31 30 0a   h.R=1.W=50.L=10.
+0050  53 3d 36 30 0a 50 3d 35 0a 54 35 3d 32 30 0a 54   S=60.P=5.T5=20.T
+0060  31 30 3d 34 30 0a 4c 4c 3d 35 30 30 0a 4c 43 3d   10=40.LL=500.LC=
+0070  31 32 30 30 0a 53 54 52 4b 3d 32 0a 41 53 3d 31   1200.STRK=2.AS=1
+0080  30 0a 41 46 3d 35 0a                              0.AF=5.
+
+No.     Time           Source                Destination           Protocol Length Info
+  39773 275.630801     192.168.2.123         192.168.2.123         TCP      60     10901 → 3230 [PSH, ACK] Seq=4004 Ack=2824 Win=62464 Len=16
+
+Frame 39773: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 4004, Ack: 2824, Len: 16
+Data (16 bytes)
+
+0000  02 00 00 00 45 00 00 38 0d 0d 40 00 80 06 00 00   ....E..8..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 75 65   ...{...{*.....ue
+0020  e7 06 81 9d 50 18 00 f4 14 2f 00 00 73 6e 61 70   ....P..../..snap
+0030  00 00 00 00 00 00 00 10 53 3d 30 0a               ........S=0.
+
+No.     Time           Source                Destination           Protocol Length Info
+  39932 276.767491     192.168.2.123         192.168.2.123         TCP      88     3222 → 10901 [PSH, ACK] Seq=3071 Ack=4162 Win=61184 Len=44
+
+Frame 39932: Packet, 88 bytes on wire (704 bits), 88 bytes captured (704 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 3222, Dst Port: 10901, Seq: 3071, Ack: 4162, Len: 44
+Data (44 bytes)
+
+0000  02 00 00 00 45 00 00 54 0d 11 40 00 80 06 00 00   ....E..T..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 0c 96 2a 95 2a 2b 22 90   ...{...{..*.*+".
+0020  10 f9 e2 58 50 18 00 ef 63 0a 00 00 6d 65 73 67   ...XP...c...mesg
+0030  00 00 00 00 00 00 00 2c 50 52 49 56 3d 56 54 53   .......,PRIV=VTS
+0040  54 65 63 68 32 0a 54 45 58 54 3d 44 45 43 4c 0a   Tech2.TEXT=DECL.
+0050  41 54 54 52 3d 33 0a 00                           ATTR=3..
+
+No.     Time           Source                Destination           Protocol Length Info
+  39934 276.768955     192.168.2.123         192.168.2.123         TCP      83     10901 → 3230 [PSH, ACK] Seq=4020 Ack=2824 Win=62464 Len=39
+
+Frame 39934: Packet, 83 bytes on wire (664 bits), 83 bytes captured (664 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3230, Seq: 4020, Ack: 2824, Len: 39
+Data (39 bytes)
+
+0000  02 00 00 00 45 00 00 4f 0d 13 40 00 80 06 00 00   ....E..O..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 9e a6 df 75 75   ...{...{*.....uu
+0020  e7 06 81 9d 50 18 00 f4 71 39 00 00 2b 6d 73 67   ....P...q9..+msg
+0030  00 00 00 00 00 00 00 27 46 52 4f 4d 3d 56 54 53   .......'FROM=VTS
+0040  54 65 63 68 0a 54 45 58 54 3d 44 45 43 4c 0a 46   Tech.TEXT=DECL.F
+0050  3d 31 0a                                          =1.
+
+No.     Time           Source                Destination           Protocol Length Info
+  39936 276.769081     192.168.2.123         192.168.2.123         TCP      69     10901 → 3222 [PSH, ACK] Seq=4162 Ack=3115 Win=62208 Len=25
+
+Frame 39936: Packet, 69 bytes on wire (552 bits), 69 bytes captured (552 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 3222, Seq: 4162, Ack: 3115, Len: 25
+Data (25 bytes)
+
+0000  02 00 00 00 45 00 00 41 0d 15 40 00 80 06 00 00   ....E..A..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 0c 96 10 f9 e2 58   ...{...{*......X
+0020  2a 2b 22 bc 50 18 00 f3 1b bc 00 00 6d 65 73 67   *+".P.......mesg
+0030  00 00 00 00 00 00 00 19 53 3d 30 0a 53 54 41 54   ........S=0.STAT
+0040  55 53 3d 30 0a                                    US=0.
