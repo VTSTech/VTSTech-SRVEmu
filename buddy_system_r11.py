@@ -1,5 +1,5 @@
 # buddy_system_r11.py - COMPLETE BUDDY API IMPLEMENTATION
-import time
+import time, struct
 
 class BuddyUser:
     def __init__(self, username, friendly_name=None, group="Default"):
@@ -10,9 +10,9 @@ class BuddyUser:
         self.last_seen = time.time()
         
 class BuddyHandlers:
-    def __init__(self, create_packet_func, active_users_dict):
+    def __init__(self, create_packet_func, session_manager):
         self.create_packet = create_packet_func
-        self.active_users = active_users_dict
+        self.session_manager = session_manager
         self.buddy_lists = {}  # user -> list of BuddyUser objects
         self.user_profiles = {}  # user -> profile data
         
@@ -24,70 +24,106 @@ class BuddyHandlers:
             username = username.split('/')[0]
         return username
     
-    def handle_buddy_command(self, data, session):
-		        """Modified to handle headerless login blocks found in NASCAR 2004"""
-		        data_str = data.decode('latin1') if data else ""
-		        
-		        # HEADERLESS LOGIN DETECTOR
-		        # If the packet starts with PROD= or USER=, it's the NASCAR login block
-		        if data_str.startswith("PROD=") or data_str.startswith("USER="):
-		            print(f"BUDDY API: Received Headerless Login Block")
-		            params = self.parse_params(data_str)
-		            
-		            # Validate LKEY against the one stored in session from Lobby
-		            incoming_lkey = params.get("LKEY", "$0")
-		            print(f"BUDDY API: Login for {params.get('USER')} with LKEY {incoming_lkey}")
-		            
-		            # The PS2 expects a simple STATUS=0 to proceed to actual commands
-		            return b"STATUS=0\n\0"
+    def handle_buddy_command(self, command, data, session):
+        """Processes NASCAR Buddy commands using the 12-byte header logic"""
+        if len(data) < 12:
+            print(f"BUDDY: Packet too short ({len(data)} bytes)")
+            return None
 
-		        # STANDARD COMMAND DISPATCHER
-		        if len(data_str) >= 4:
-		            command = data_str[:4]
-		            params_str = data_str[4:].strip()
-		            params = self.parse_params(params_str)
-		            
-		            if command == 'RGET': return self.handle_rget(params, session)
-		            # Add other handlers as needed (RADD, RDEL, etc.)
-		            
-		        print(f"BUDDY API: Unknown format or command: {data_str[:10]}...")
-		        return b"STATUS=0\n\0"
+        # 1. Extract command from the first 4 bytes of the HEADER
+        #command = data[:4].decode('ascii', errors='ignore').strip()
+        
+        # 2. Extract the PAYLOAD (starts after the 12-byte header)
+        payload = data[12:].decode('latin1', errors='ignore')
+        
+        print(f"[BuddyApi DEBUG] Command: {command} | Payload: {payload[:30]}...")
+
+        handlers = {
+            'AUTH': self.handle_auth,
+            'RGET': self.handle_rget,
+            'ROST': self.handle_rost,
+            'PGET': self.handle_pget, 
+            'RADD': self.handle_radd,
+            'RDEL': self.handle_rdel,
+            'PSET': self.handle_pset,
+        }
+        
+        if command in handlers:
+            # We pass the payload (params) to the specific handler
+            return handlers[command](payload, session)
+        else:
+            print(f"BUDDY API: No handler for command: {command}")
+            # Fallback to prevent client hanging
+            return self.create_packet(command, '', "S=0\nSTATUS=1\n")
+
+    def handle_auth(self, payload, session):
+        """Handle the initial Buddy side-channel authentication"""
+        params = self.parse_params(payload)
+        user_raw = params.get('USER', 'VTSTech')
+        username = self.process_username(user_raw)
+        
+        # Bridge the session identity
+        self._bridge_session(username, session)
+        
+        print(f"BUDDY: Authenticated side-channel for {session.clientNAME}")
+        response = f"NAME={session.clientNAME}\nS=0\nSTATUS=1\n"
+        return self.create_packet("AUTH", "", response)
+
+    def handle_pset(self, params, session):
+        """Handle PSET - Set player status/presence"""
+        param_dict = self.parse_params(params)
+        req_id = param_dict.get('ID', '1')
+        print(f"BUDDY PSET: {session.clientNAME} (ID={req_id})")
+        
+        # NASCAR needs NAME and ID mirrored to advance the state machine
+        response = f"NAME={session.clientNAME}\nID={req_id}\nS=0\nSTATUS=1\n"
+        return self.create_packet("PSET", "", response)
+
+    def _bridge_session(self, user_name, buddy_session):
+        """Copies identity from the Main Lobby session to the Buddy session"""
+        for lobby_session in self.session_manager.client_sessions.values():
+            lobby_name = getattr(lobby_session, 'clientNAME', None)
+            if lobby_name == user_name:
+                buddy_session.clientNAME = lobby_session.clientNAME
+                return True
+        buddy_session.clientNAME = user_name
+        return False
+
+    def handle_generic_success(self, session, cmd):
+        """Acknowledges PSET/RGET to stop the retry loop"""
+        print(f"BUDDY: Acknowledging {cmd} for {session.clientNAME}")
+        # NASCAR often just needs STATUS=1 and S=0 (Sequence)
+        response = "S=0\nSTATUS=1\n"
+        return self.create_packet(cmd, '', response)
+        
+    def handle_list(self, payload, session, cmd_case):
+        """NASCAR 2004 Buddy List response"""
+        response_lines = [
+            "S=0",
+            "STATUS=1",
+            "COUNT=0"
+        ]
+        return self.create_packet(cmd_case, '', '\n'.join(response_lines) + '\n')
     
     def handle_rget(self, params, session):
-        """Handle RGET - Retrieve buddy data"""
-        print(f"BUDDY RGET: {session.clientNAME} - {params}")
-        
-        # Parse parameters
+        """Handle RGET - Retrieve buddy/ignore data"""
         param_dict = self.parse_params(params)
-        op_type = int(param_dict.get('ID', '1'))
-        request_type = int(param_dict.get('SIZE', '0'))
-        target_user = param_dict.get('USER', '')
         
-        # Initialize buddy list if needed
-        if session.clientNAME not in self.buddy_lists:
-            self.buddy_lists[session.clientNAME] = []
-            
-        buddies = self.buddy_lists[session.clientNAME]
+        # ID=1 is Buddies, ID=2 is Ignores
+        op_id = param_dict.get('ID', '1')
+        list_type = param_dict.get('T', 'B') # B=Buddy, I=Ignore
         
-        response_lines = []
+        print(f"BUDDY RGET: {session.clientNAME} requesting {list_type} (ID={op_id})")
+
+        # Mirror the NAME and ID. NASCAR's 'The Blob' requires these to match.
+        response_lines = [
+            f"NAME={session.clientNAME}",
+            f"ID={op_id}",
+            "S=0",
+            "STATUS=1",
+            "COUNT=0" # We return 0 for now to keep it simple
+        ]
         
-        if op_type == 2 and request_type == 0:
-            # Return buddy count and list
-            response_lines.extend([
-                f"ID={op_type}",
-                f"SIZE={len(buddies)}",
-                f"COUNT={len(buddies)}"
-            ])
-            
-            for i, buddy in enumerate(buddies):
-                response_lines.extend([
-                    f"USER{i}={buddy.username}",
-                    f"FUSR{i}={buddy.friendly_name}",
-                    f"GROUP{i}={buddy.group}",
-                    f"STATUS{i}={1 if buddy.online else 0}"
-                ])
-                
-        response_lines.append("STATUS=1")
         return self.create_packet('RGET', '', '\n'.join(response_lines) + '\n')
     
     def handle_rost(self, params, session):
@@ -161,10 +197,30 @@ class BuddyHandlers:
         
         return self.create_packet('PGET', '', '\n'.join(response_lines) + '\n')
     
-    def handle_radd(self, params, session):
-        """Handle RADD - Add to roster"""
-        print(f"BUDDY RADD: {session.clientNAME} - {params}")
-        return self.handle_rost(params, session)  # Same as ROST for adding
+    def handle_radd(self, payload, session):
+        """Handle RADD - Add a user/resource to the buddy list"""
+        params = self.parse_params(payload)
+        
+        # ID=101 in your log is the Transaction ID. 
+        # We MUST mirror this back.
+        req_id = params.get('ID', '100')
+        lrsc = params.get('LRSC', '') # The 'Test' persona mapped to 'cso'
+        list_type = params.get('LIST', 'B')
+        
+        print(f"BUDDY: RADD mirrored for {session.clientNAME} -> {lrsc} (ID={req_id})")
+        
+        # NASCAR 2004 check: The response should contain the mirrored fields.
+        response_lines = [
+            f"NAME={session.clientNAME}",
+            f"USER={session.clientNAME}",
+            f"LRSC={lrsc}",
+            f"ID={req_id}",
+            f"LIST={list_type}",
+            "S=0",
+            "STATUS=1"
+        ]
+        
+        return self.create_packet('RADD', '', '\n'.join(response_lines) + '\n')
     
     def handle_rdel(self, params, session):
         """Handle RDEL - Delete from roster"""

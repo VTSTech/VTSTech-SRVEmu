@@ -43,7 +43,12 @@ class ChallengeSystem:
 		        prefix = token[:5].lower()
 		        # Returns the found ID, or 11 (Daytona) if unknown
 		        return track_map.get(prefix, 11)
-
+    def find_user_session(self, persona_name):
+        for session in self.client_sessions.values():
+            if session.current_persona == persona_name:
+                return session
+        return None
+        
     def handle_mesg(self, data, session):
         data_str = data.decode('latin1') if data else ""
         lines = [line.strip() for line in data_str.split('\n') if line.strip()]
@@ -88,39 +93,63 @@ class ChallengeSystem:
         """Handles internal engine commands."""
         return self.create_packet('sysc', '', "S=0\nSTATUS=0\n")
         
-    def handle_user(self, data, session):
-		        """Fixes 'object has no attribute' - Called when selecting a player."""
-		        # PS2 sends PERS=TargetName
-		        return self.create_packet('user', '', f"PERS={session.challenge_target}\nTITLE=1\nS=0\nSTATUS=0\n")
+    def handle_user(self, data_str, session):
+		        params = self.parse_params(data_str)
+		        search_term = params.get('PERS', '').strip()
+		        
+		        print(f"[CHALLENGE] Searching for persona: {search_term}")
+		        
+		        found_session = None
+		        # Use the session_manager to find the real user
+		        for s in self.session_manager.client_sessions.values():
+		            name = getattr(s, 'clientNAME', '')
+		            if name.lower() == search_term.lower():
+		                found_session = s
+		                break
+		                
+		        if found_session:
+		            print(f"[CHALLENGE] Found user: {found_session.clientNAME}")
+		            response = (
+		                f"PERS={found_session.clientNAME}\n"
+		                f"NAME={found_session.clientNAME}\n"
+		                f"USERID={found_session.session_id}\n"
+		                f"SESS={found_session.session_id}\n"
+		                f"MASK=0\n"
+		                f"STATUS=0\n"
+		            )
+		        else:
+		            print(f"[CHALLENGE] User '{search_term}' not found.")
+		            response = f"PERS={search_term}\nSTATUS=1\n"
+
+		        # ENCODE TO BYTES HERE to prevent the "bytes-like object" error
+		        return self.create_packet("user", "", response.encode('latin1'))
 		        
     def initiate_challenge(self, session, target_user, token):
-        print(f"MESG: Challenge initiation {session.clientNAME} -> {target_user} [{token}]")
-        
         target_session = self.find_user_session(target_user)
         if not target_session:
             return self.create_packet('mesg', '', "STATUS=102\nERROR=User Offline\n")
 
-        # Set Track ID based on the token
-        session.selected_track_id = self.get_track_id_from_token(token)
-
-        # Sync States
-        for s in [session, target_session]:
-            s.challenge_state = 1
-            s.challenge_token = token
-            s.challenge_timeout = time.time() + 30
+        # Get the numeric ID bridged from room_system
+        sender_id = getattr(session, 'unique_id', 0)
         
-        session.challenge_target = target_user
-        target_session.challenger = session.current_persona
-
-        # Notify Target
+        # Build the packet that triggers the Blue Modal
         notification = (
-            f"FROM={session.current_persona}\n"
+            f"FROM={sender_id}\n"
             f"TEXT={token}\n"
-            f"F=1\nATTR=3\n"
-            f"RI={getattr(session, 'room_id', 0)}\n"
-            f"PRIV={target_user}\n"
+            f"PRIV=1\n"
+            f"ATTR=3\n"
+            f"RI={getattr(session, 'current_room_id', 0)}\n"
+            f"S=0\n"
+            f"STATUS=0\n"
         )
+        
+        # Push to the target client
         target_session.connection.sendall(self.create_packet('+msg', '', notification))
+        
+        # Update states
+        session.challenge_state = 1
+        target_session.challenge_state = 1
+        target_session.challenger = session.current_persona
         
         return self.create_packet('mesg', '', f"TEXT={token}\nS=0\nSTATUS=0\n")
 
@@ -229,4 +258,16 @@ class ChallengeSystem:
             if hasattr(session, 'challenge_timeout') and current_time > session.challenge_timeout:
                 print(f"CHALLENGE: Timeout for {session.current_persona}")
                 session.challenge_state = 9 # EXPIRED
-                self.ChallengeCallback_Cleanup(session)        
+                self.ChallengeCallback_Cleanup(session)
+                
+    def parse_params(self, param_data):
+		        """Safely parse parameters from bytes or string"""
+		        if isinstance(param_data, bytes):
+		            param_data = param_data.decode('latin1', errors='ignore')
+		            
+		        params = {}
+		        for line in param_data.split('\n'):
+		            if '=' in line:
+		                key, value = line.split('=', 1)
+		                params[key.strip()] = value.strip()
+		        return params      

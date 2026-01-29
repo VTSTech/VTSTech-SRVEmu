@@ -14,10 +14,10 @@ class RoomManager:
         self.user_hash_table = {}  # piVar24[0xc9] equivalent
         self.rank_hash_table = {}  # piVar24[0xce] equivalent
         self.active_rooms = {
-				    0: {'name': 'Lobby', 'desc': 'Main Lobby Hub', 'usercount': 0, 'maxusers': 100, 'room_id': 0, 'flags': '0', 'type': 0},
-				    1: {'name': 'East', 'desc': 'East Coast Racers', 'usercount': 0, 'maxusers': 100, 'room_id': 1, 'flags': '0', 'type': 1},
-				    2: {'name': 'West', 'desc': 'West Coast Racers', 'usercount': 0, 'maxusers': 100, 'room_id': 2, 'flags': '0', 'type': 1},
-				    3: {'name': 'Beginner', 'desc': 'New Drivers Welcome', 'usercount': 0, 'maxusers': 100, 'room_id': 3, 'flags': '0', 'type': 1}
+				    0: {'name': 'Lobby', 'desc': 'Main Lobby Hub', 'usercount': 0, 'maxusers': 50, 'room_id': 0, 'flags': '0', 'type': 0},
+				    1: {'name': 'East', 'desc': 'East Coast Racers', 'usercount': 0, 'maxusers': 50, 'room_id': 1, 'flags': '0', 'type': 1},
+				    2: {'name': 'West', 'desc': 'West Coast Racers', 'usercount': 0, 'maxusers': 50, 'room_id': 2, 'flags': '0', 'type': 1},
+				    3: {'name': 'Beginner', 'desc': 'New Drivers Welcome', 'usercount': 0, 'maxusers': 50, 'room_id': 3, 'flags': '0', 'type': 1}
 				}
         self.active_users = {}
         self.user_presence_lock = threading.Lock()
@@ -203,6 +203,18 @@ class RoomHandlers:
         self.update_user_presence = update_user_presence_func
         self.get_client_sessions = get_client_sessions_func  # Function to get client sessions
     
+    def handle_room_list(self, session):
+        room_packets = []
+        for room_id, room_data in self.room_manager.active_rooms.items():
+            room_name = room_data.get('name', 'Room')
+            desc = room_data.get('desc', '')
+            host = self.room_manager.server_ip
+            players = room_data.get('usercount', 0)
+            max_players = room_data.get('maxusers', 50)
+            room_entry = f"I={room_id}\nN={room_name}\nH={desc}\nA={host}\nT={players}\nL={max_players}\nF=0\n"
+            room_packets.append(self.create_packet('+rom', '', room_entry))
+        return b"".join(room_packets)
+        
     def handle_sele(self, data, session):
         """Handle sele command - lobby data request"""
         data_str = data.decode('latin1') if data else ""
@@ -565,20 +577,22 @@ class RoomHandlers:
 		    return room_packets
             
     def reply_usr(self, session):
-		        """Sends users in the same room. If in Lobby, sends all users."""
-		        current_room_id = getattr(session, 'current_room_id', 0)
-		        response_lines = []
-		        
-		        for conn_id, user_data in self.room_manager.active_users.items():
-		            if current_room_id == 0 or user_data.get('room_id') == current_room_id:
-		                # retrieve the PRE-GENERATED unique_id
-		                u_id = user_data.get('unique_id')
-		                is_self = (conn_id == session.connection_id)
-		                
-		                entry = (f"I={u_id}\n"
-		                         f"N={user_data['persona']}\n"
-		                         f"F={'1' if is_self else '0'}\n"
-		                         f"A={user_data.get('ip', self.room_manager.server_ip)}\n")
-		                response_lines.append(entry)
-		                    
-		        return self.create_packet('+usr', '', "".join(response_lines))
+        current_room_id = getattr(session, 'current_room_id', 0)
+        lines = []
+        # Use a copy to prevent dictionary size change errors
+        users_snapshot = dict(self.room_manager.active_users)
+        
+        for conn_id, user_data in users_snapshot.items():
+            if current_room_id == 0 or user_data.get('room_id') == current_room_id:
+                u_id = user_data.get('unique_id')
+                
+                # THE BRIDGE: Sync the numeric ID to the session
+                if conn_id == session.connection_id:
+                    session.unique_id = u_id
+                
+                persona = user_data.get('persona', 'Unknown')
+                entry = (f"I={u_id}\nN={persona}\nM={persona}\n"
+                         f"RI={user_data.get('room_id', 0)}\nST=1\nF=0\n")
+                lines.append(self.create_packet('+usr', '', entry))
+        
+        return b"".join(lines)

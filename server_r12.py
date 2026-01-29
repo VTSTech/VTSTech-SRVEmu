@@ -356,39 +356,47 @@ def get_next_data_port():
         current_data_port = PORTS['data_start'] if current_data_port > PORTS['data_start'] + 1000 else current_data_port + 1
         return port
         
-def create_packet(cmd, sub, data):
-    # 1. Force CMD and SUB to be exactly 4 bytes
-    if isinstance(cmd, str): cmd = cmd.encode('latin1')
-    if isinstance(sub, str): sub = sub.encode('latin1')
-    cmd = cmd.ljust(4, b'\x00')[:4]
-    sub = sub.ljust(4, b'\x00')[:4]
-    
-    # 2. Force DATA to bytes
+def create_packet(command, subcommand, data):
+    """STABLE Handshake/Lobby Header (Your working version)"""
     if isinstance(data, str):
-        data = data.encode('latin1')
+        data_bytes = data.encode('latin1')
+    else:
+        data_bytes = data
     
-    # 3. Append the NULL terminator (The "Ghidra Fix")
-    # Using data[-1:] ensures we are comparing bytes to bytes
-    if len(data) == 0 or data[-1:] != b'\x00':
-        data += b'\x00'
+    # 12-byte header with Total Size at the end
+    size = len(data_bytes) + 12 
+    header = struct.pack(">4s4sL", 
+                         command.encode('ascii'), 
+                         subcommand.encode('ascii'), 
+                         size)
+    return header + data_bytes
 
-    # 4. Pack the 12-byte EA Header
-    # Format: 4s (cmd), 4s (sub), 3s (padding), B (1-byte size)
-    total_size = 12 + len(data)
+def create_buddy_packet(command, subcommand, data):
+    """
+    EXACT MATCH for NASCAR 2004 BuddyAPI Hex.
+    Uses Big-Endian, 4-byte integers, and PAYLOAD-ONLY length.
+    """
+    if isinstance(data, str):
+        data_bytes = data.encode('latin1')
+    else:
+        data_bytes = data
     
-    try:
-        # Most 2004 games use a single byte for size in this position
-        header = struct.pack('4s4s3sB', 
-                             cmd, 
-                             sub, 
-                             b'\x00\x00\x00', 
-                             total_size & 0xFF) 
-    except struct.error:
-        # Fallback if size logic is slightly different for your build
-        header = cmd + sub + b'\x00\x00\x00' + bytes([total_size & 0xFF])
-
-    return header + data
-
+    # Ghidra shows BuddyApi TagField functions require the null terminator
+    if len(data_bytes) == 0 or data_bytes[-1:] != b'\x00':
+        data_bytes += b'\x00'
+        
+    # BASED ON HEX: 0x5B (91 bytes) is PAYLOAD ONLY.
+    payload_size = len(data_bytes)
+    
+    # Standardize command/sub to exactly 4 bytes
+    cmd_fixed = command.encode('ascii').ljust(4, b'\x00')[:4]
+    sub_fixed = subcommand.encode('ascii').ljust(4, b'\x00')[:4]
+    
+    # ">4s4sI" = Big Endian: 4-byte Cmd, 4-byte Sub, 4-byte PAYLOAD size
+    header = struct.pack(">4s4sI", cmd_fixed, sub_fixed, payload_size)
+    
+    return header + data_bytes
+    
 # Game-specific handler dispatcher
 def handle_game_specific_command(cmd_str, data, session):
     """Route commands to game-specific handlers"""
@@ -821,7 +829,7 @@ def threaded_client(connection, address, socket_type):
                 print(f"BUDDY RECV from {connection_id}: {cmd_str}")
                 
                 # Use buddy command handler for all buddy socket commands
-                reply = buddy_handlers.handle_buddy_command(data, session)
+                reply = buddy_handlers.handle_buddy_command(cmd_str, data, session)
                 
                 if reply:
                     try: 
@@ -1080,8 +1088,8 @@ def initialize_systems(game_mode=None):
     auth_handlers = AuthenticationHandlers(create_packet,room_manager.active_users, session_manager.client_sessions)
     print("INIT: Authentication handlers initialized")
     
-    buddy_handlers = BuddyHandlers(create_packet, room_manager.active_users)
-    print("BUDDY: Buddy system initialized")
+    buddy_handlers = BuddyHandlers(create_packet, session_manager)
+    print("BUDDY: Buddy system initialized with Session Link")
     
     # Initialize game-specific modules
     if game_mode == 'nascar' and HAS_NASCAR:
