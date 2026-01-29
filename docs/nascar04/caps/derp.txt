@@ -1,41 +1,257 @@
-Frame 24851: Packet, 56 bytes on wire (448 bits), 56 bytes captured (448 bits) on interface \Device\NPF_Loopback, id 0
+Frame 159: Packet, 131 bytes on wire (1048 bits), 131 bytes captured (1048 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 0, Len: 0
+Transmission Control Protocol, Src Port: 8160, Dst Port: 10600, Seq: 1, Ack: 1, Len: 87
+Data (87 bytes)
 
-0000  02 00 00 00 45 00 00 34 f5 0e 40 00 80 06 00 00   ....E..4..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6e 30   ...{...{.z*..Gn0
-0020  00 00 00 00 80 02 ff ff 97 20 00 00 02 04 ff d7   ......... ......
-0030  01 03 03 08 01 01 04 02                           ........
+0000  02 00 00 00 45 00 00 7f c4 40 40 00 80 06 00 00   ....E....@@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e0 29 68 54 12 52 27   ...{...{..)hT.R'
+0020  fa e2 a2 68 50 18 00 ff 94 0f 00 00 40 64 69 72   ...hP.......@dir
+0030  00 00 00 00 00 00 00 57 50 52 4f 44 3d 4e 41 53   .......WPROD=NAS
+0040  43 41 52 2d 50 53 32 2d 32 30 30 34 0a 56 45 52   CAR-PS2-2004.VER
+0050  53 3d 22 50 53 32 2f 58 58 58 2d 4a 75 6c 20 20   S="PS2/XXX-Jul  
+0060  32 20 32 30 30 33 22 0a 4c 41 4e 47 3d 65 6e 0a   2 2003".LANG=en.
+0070  53 4c 55 53 3d 42 41 53 4c 55 53 2d 32 30 38 32   SLUS=BASLUS-2082
+0080  34 0a 00                                          4..
 
-Frame 24852: Packet, 56 bytes on wire (448 bits), 56 bytes captured (448 bits) on interface \Device\NPF_Loopback, id 0
+Frame 161: Packet, 156 bytes on wire (1248 bits), 156 bytes captured (1248 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 0, Ack: 1, Len: 0
+Transmission Control Protocol, Src Port: 10600, Dst Port: 8160, Seq: 1, Ack: 88, Len: 112
+Data (112 bytes)
 
-0000  02 00 00 00 45 00 00 34 f5 0f 40 00 80 06 00 00   ....E..4..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 28   ...{...{*..z...(
-0020  0d 47 6e 31 80 12 ff ff 66 1e 00 00 02 04 ff d7   .Gn1....f.......
-0030  01 03 03 08 01 01 04 02                           ........
+0000  02 00 00 00 45 00 00 98 c4 42 40 00 80 06 00 00   ....E....B@.....
+0010  c0 a8 02 7b c0 a8 02 7b 29 68 1f e0 fa e2 a2 68   ...{...{)h.....h
+0020  54 12 52 7e 50 18 00 ff 5e b6 00 00 40 64 69 72   T.R~P...^...@dir
+0030  00 00 00 00 00 00 00 70 41 44 44 52 3d 31 39 32   .......pADDR=192
+0040  2e 31 36 38 2e 32 2e 31 32 33 0a 50 4f 52 54 3d   .168.2.123.PORT=
+0050  31 30 39 30 31 0a 4c 4b 45 59 3d 33 66 63 66 32   10901.LKEY=3fcf2
+0060  37 35 34 30 63 39 32 39 33 35 62 30 61 36 36 66   7540c92935b0a66f
+0070  64 33 62 30 30 30 30 39 34 37 63 0a 53 45 53 53   d3b0000947c.SESS
+0080  3d 31 33 38 39 38 36 32 32 36 38 0a 4d 41 53 4b   =1389862268.MASK
+0090  3d 34 32 39 34 39 36 37 32 39 35 0a               =4294967295.
 
-Frame 24853: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
+Frame 172: Packet, 85 bytes on wire (680 bits), 85 bytes captured (680 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 1, Ack: 1, Len: 0
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 1, Ack: 1, Len: 41
+Data (41 bytes)
 
-0000  02 00 00 00 45 00 00 28 f5 10 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6e 31   ...{...{.z*..Gn1
-0020  a8 c8 88 29 50 10 00 ff a0 16 00 00               ...)P.......
+0000  02 00 00 00 45 00 00 51 c4 4d 40 00 80 06 00 00   ....E..Q.M@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4b 98   ...{...{..*.d.K.
+0020  05 a2 fa c3 50 18 00 ff 67 16 00 00 61 64 64 72   ....P...g...addr
+0030  00 00 00 00 00 00 00 29 41 44 44 52 3d 31 39 32   .......)ADDR=192
+0040  2e 30 2e 32 2e 31 30 30 0a 50 4f 52 54 3d 33 38   .0.2.100.PORT=38
+0050  36 30 32 0a 00                                    602..
 
-Frame 24854: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Frame 174: Packet, 65 bytes on wire (520 bits), 65 bytes captured (520 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 1, Ack: 1, Len: 91
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 1, Ack: 42, Len: 21
+Data (21 bytes)
+
+0000  02 00 00 00 45 00 00 3d c4 4f 40 00 80 06 00 00   ....E..=.O@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fa c3   ...{...{*.......
+0020  64 c3 4b c1 50 18 00 ff 35 f8 00 00 61 64 64 72   d.K.P...5...addr
+0030  00 00 00 00 00 00 00 15 53 54 41 54 55 53 3d 31   ........STATUS=1
+0040  0a                                                .
+
+Frame 176: Packet, 84 bytes on wire (672 bits), 84 bytes captured (672 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 42, Ack: 22, Len: 40
+Data (40 bytes)
+
+0000  02 00 00 00 45 00 00 50 c4 51 40 00 80 06 00 00   ....E..P.Q@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4b c1   ...{...{..*.d.K.
+0020  05 a2 fa d8 50 18 00 ff 5a ab 00 00 73 6b 65 79   ....P...Z...skey
+0030  00 00 00 00 00 00 00 28 53 4b 45 59 3d 24 35 30   .......(SKEY=$50
+0040  37 35 36 32 36 63 36 39 36 33 32 30 34 62 36 35   75626c6963204b65
+0050  37 39 0a 00                                       79..
+
+Frame 178: Packet, 63 bytes on wire (504 bits), 63 bytes captured (504 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 22, Ack: 82, Len: 19
+Data (19 bytes)
+
+0000  02 00 00 00 45 00 00 3b c4 53 40 00 80 06 00 00   ....E..;.S@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fa d8   ...{...{*.......
+0020  64 c3 4b e9 50 18 00 ff 74 09 00 00 73 6b 65 79   d.K.P...t...skey
+0030  00 00 00 00 00 00 00 13 53 4b 45 59 3d 30 0a      ........SKEY=0.
+
+Frame 182: Packet, 221 bytes on wire (1768 bits), 221 bytes captured (1768 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 82, Ack: 41, Len: 177
+Data (177 bytes)
+
+0000  02 00 00 00 45 00 00 d9 c4 57 40 00 80 06 00 00   ....E....W@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4b e9   ...{...{..*.d.K.
+0020  05 a2 fa eb 50 18 00 ff a8 03 00 00 61 75 74 68   ....P.......auth
+0030  00 00 00 00 00 00 00 b1 4e 41 4d 45 3d 56 54 53   ........NAME=VTS
+0040  54 65 63 68 0a 54 4f 53 3d 31 0a 50 41 53 53 3d   Tech.TOS=1.PASS=
+0050  24 33 65 63 39 37 64 64 35 0a 4d 49 44 3d 24 30   $3ec97dd5.MID=$0
+0060  30 30 34 31 66 38 32 62 65 65 35 0a 48 57 46 4c   0041f82bee5.HWFL
+0070  41 47 3d 34 0a 48 57 4d 41 53 4b 3d 36 35 38 32   AG=4.HWMASK=6582
+0080  38 0a 50 52 4f 44 3d 4e 41 53 43 41 52 2d 50 53   8.PROD=NASCAR-PS
+0090  32 2d 32 30 30 34 0a 56 45 52 53 3d 22 50 53 32   2-2004.VERS="PS2
+00a0  2f 58 58 58 2d 4a 75 6c 20 20 32 20 32 30 30 33   /XXX-Jul  2 2003
+00b0  22 0a 4c 41 4e 47 3d 65 6e 0a 53 4c 55 53 3d 42   ".LANG=en.SLUS=B
+00c0  41 53 4c 55 53 2d 32 30 38 32 34 0a 4d 41 53 4b   ASLUS-20824.MASK
+00d0  3d 31 33 38 39 38 36 32 32 36 38 0a 00            =1389862268..
+
+Frame 184: Packet, 174 bytes on wire (1392 bits), 174 bytes captured (1392 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 41, Ack: 259, Len: 130
+Data (130 bytes)
+
+0000  02 00 00 00 45 00 00 aa c4 59 40 00 80 06 00 00   ....E....Y@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fa eb   ...{...{*.......
+0020  64 c3 4c 9a 50 18 00 fe 86 09 00 00 61 75 74 68   d.L.P.......auth
+0030  00 00 00 00 00 00 00 82 54 4f 53 3d 31 0a 4e 41   ........TOS=1.NA
+0040  4d 45 3d 56 54 53 54 65 63 68 0a 55 53 45 52 3d   ME=VTSTech.USER=
+0050  55 6e 6b 6e 6f 77 6e 0a 50 45 52 53 4f 4e 41 53   Unknown.PERSONAS
+0060  3d 56 54 53 54 65 63 68 2c 7b 69 73 7d 2c 52 65   =VTSTech,{is},Re
+0070  76 69 76 69 6e 67 2c 22 50 53 32 20 47 61 6d 65   viving,"PS2 Game
+0080  73 22 0a 50 52 49 56 3d 0a 4c 41 53 54 3d 0a 53   s".PRIV=.LAST=.S
+0090  45 53 53 3d 36 35 38 36 33 39 36 32 30 31 34 31   ESS=658639620141
+00a0  0a 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a         .S=0.STATUS=0.
+
+Frame 302: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 342, Ack: 254, Len: 26
+Data (26 bytes)
+
+0000  02 00 00 00 45 00 00 42 c4 5f 40 00 80 06 00 00   ....E..B._@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4c ed   ...{...{..*.d.L.
+0020  05 a2 fb c0 50 18 00 ff 51 e0 00 00 70 65 72 73   ....P...Q...pers
+0030  00 00 00 00 00 00 00 1a 50 45 52 53 3d 56 54 53   ........PERS=VTS
+0040  54 65 63 68 0a 00                                 Tech..
+
+Frame 304: Packet, 115 bytes on wire (920 bits), 115 bytes captured (920 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 254, Ack: 368, Len: 71
+Data (71 bytes)
+
+0000  02 00 00 00 45 00 00 6f c4 61 40 00 80 06 00 00   ....E..o.a@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fb c0   ...{...{*.......
+0020  64 c3 4d 07 50 18 00 fe 57 3d 00 00 70 65 72 73   d.M.P...W=..pers
+0030  00 00 00 00 00 00 00 47 50 45 52 53 3d 56 54 53   .......GPERS=VTS
+0040  54 65 63 68 0a 4c 4b 45 59 3d 24 30 0a 53 3d 30   Tech.LKEY=$0.S=0
+0050  0a 53 54 41 54 55 53 3d 30 0a 4c 41 53 54 3d 32   .STATUS=0.LAST=2
+0060  30 32 36 2d 30 31 2d 32 38 20 32 32 3a 35 30 3a   026-01-28 22:50:
+0070  34 30 0a                                          40.
+
+Frame 324: Packet, 89 bytes on wire (712 bits), 89 bytes captured (712 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 325, Ack: 368, Len: 45
+Data (45 bytes)
+
+0000  02 00 00 00 45 00 00 55 c4 65 40 00 80 06 00 00   ....E..U.e@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fc 07   ...{...{*.......
+0020  64 c3 4d 07 50 18 00 fe f7 ef 00 00 2b 77 68 6f   d.M.P.......+who
+0030  00 00 00 00 00 00 00 2d 46 3d 55 0a 4e 3d 56 54   .......-F=U.N=VT
+0040  53 54 65 63 68 0a 52 49 3d 30 0a 52 54 3d 34 0a   STech.RI=0.RT=4.
+0050  52 3d 30 0a 52 46 3d 30 0a                        R=0.RF=0.
+
+Frame 326: Packet, 88 bytes on wire (704 bits), 88 bytes captured (704 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 368, Ack: 370, Len: 44
+Data (44 bytes)
+
+0000  02 00 00 00 45 00 00 54 c4 67 40 00 80 06 00 00   ....E..T.g@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4d 07   ...{...{..*.d.M.
+0020  05 a2 fc 34 50 18 00 fe bb 9b 00 00 73 65 6c 65   ...4P.......sele
+0030  00 00 00 00 00 00 00 2c 52 4f 4f 4d 53 3d 31 20   .......,ROOMS=1 
+0040  55 53 45 52 53 3d 31 20 52 41 4e 4b 53 3d 31 20   USERS=1 RANKS=1 
+0050  4d 45 53 47 53 3d 31 00                           MESGS=1.
+
+Frame 328: Packet, 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 412, Ack: 370, Len: 22
+Data (22 bytes)
+
+0000  02 00 00 00 45 00 00 3e c4 69 40 00 80 06 00 00   ....E..>.i@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4d 33   ...{...{..*.d.M3
+0020  05 a2 fc 34 50 18 00 fe 17 53 00 00 73 65 6c 65   ...4P....S..sele
+0030  00 00 00 00 00 00 00 16 52 41 4e 4b 53 3d 35 30   ........RANKS=50
+0040  0a 00                                             ..
+
+Frame 330: Packet, 112 bytes on wire (896 bits), 112 bytes captured (896 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 370, Ack: 434, Len: 68
+Data (68 bytes)
+
+0000  02 00 00 00 45 00 00 6c c4 6b 40 00 80 06 00 00   ....E..l.k@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fc 34   ...{...{*......4
+0020  64 c3 4d 49 50 18 00 fe 30 6a 00 00 73 65 6c 65   d.MIP...0j..sele
+0030  00 00 00 00 00 00 00 44 52 41 4e 4b 3d 35 30 0a   .......DRANK=50.
+0040  55 53 45 52 3d 56 54 53 54 65 63 68 0a 52 41 54   USER=VTSTech.RAT
+0050  49 4e 47 3d 31 35 30 30 0a 57 49 4e 53 3d 30 0a   ING=1500.WINS=0.
+0060  4c 4f 53 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a   LOSS=0.STATUS=0.
+
+Frame 336: Packet, 64 bytes on wire (512 bits), 64 bytes captured (512 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8161, Dst Port: 10901, Seq: 434, Ack: 438, Len: 20
+Data (20 bytes)
+
+0000  02 00 00 00 45 00 00 3c c4 6d 40 00 80 06 00 00   ....E..<.m@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e1 2a 95 64 c3 4d 49   ...{...{..*.d.MI
+0020  05 a2 fc 78 50 18 00 fe 61 32 00 00 6e 65 77 73   ...xP...a2..news
+0030  00 00 00 00 00 00 00 14 4e 41 4d 45 3d 30 0a 00   ........NAME=0..
+
+Frame 338: Packet, 112 bytes on wire (896 bits), 112 bytes captured (896 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 438, Ack: 454, Len: 68
+Data (68 bytes)
+
+0000  02 00 00 00 45 00 00 6c c4 6f 40 00 80 06 00 00   ....E..l.o@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fc 78   ...{...{*......x
+0020  64 c3 4d 5d 50 18 00 fe 30 12 00 00 73 65 6c 65   d.M]P...0...sele
+0030  00 00 00 00 00 00 00 44 52 41 4e 4b 3d 35 30 0a   .......DRANK=50.
+0040  55 53 45 52 3d 56 54 53 54 65 63 68 0a 52 41 54   USER=VTSTech.RAT
+0050  49 4e 47 3d 31 35 30 30 0a 57 49 4e 53 3d 30 0a   ING=1500.WINS=0.
+0060  4c 4f 53 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a   LOSS=0.STATUS=0.
+
+Frame 340: Packet, 194 bytes on wire (1552 bits), 194 bytes captured (1552 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 506, Ack: 454, Len: 150
+Data (150 bytes)
+
+0000  02 00 00 00 45 00 00 be c4 71 40 00 80 06 00 00   ....E....q@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fc bc   ...{...{*.......
+0020  64 c3 4d 5d 50 18 00 fe ee 08 00 00 6e 65 77 73   d.M]P.......news
+0030  6e 65 77 30 00 00 00 96 42 55 44 44 59 5f 55 52   new0....BUDDY_UR
+0040  4c 3d 31 39 32 2e 31 36 38 2e 32 2e 31 32 33 0a   L=192.168.2.123.
+0050  42 55 44 44 59 5f 50 4f 52 54 3d 31 30 38 39 39   BUDDY_PORT=10899
+0060  0a 42 55 44 44 59 5f 53 45 52 56 45 52 3d 31 39   .BUDDY_SERVER=19
+0070  32 2e 31 36 38 2e 32 2e 31 32 33 0a 54 4f 53 5f   2.168.2.123.TOS_
+0080  54 45 58 54 3d 56 54 53 54 65 63 68 5f 54 4f 53   TEXT=VTSTech_TOS
+0090  0a 4e 45 57 53 5f 54 45 58 54 3d 56 54 53 54 65   .NEWS_TEXT=VTSTe
+00a0  63 68 5f 4e 45 57 53 0a 55 53 45 5f 45 54 4f 4b   ch_NEWS.USE_ETOK
+00b0  45 4e 3d 30 0a 53 3d 30 0a 53 54 41 54 55 53 3d   EN=0.S=0.STATUS=
+00c0  30 0a                                             0.
+
+Frame 345: Packet, 135 bytes on wire (1080 bits), 135 bytes captured (1080 bits) on interface \Device\NPF_Loopback, id 0
+Null/Loopback
+Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
+Transmission Control Protocol, Src Port: 8163, Dst Port: 10899, Seq: 1, Ack: 1, Len: 91
 Data (91 bytes)
 
-0000  02 00 00 00 45 00 00 83 f5 11 40 00 80 06 00 00   ....E.....@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6e 31   ...{...{.z*..Gn1
-0020  a8 c8 88 29 50 18 00 ff b5 10 00 00 41 55 54 48   ...)P.......AUTH
+0000  02 00 00 00 45 00 00 83 c4 76 40 00 80 06 00 00   ....E....v@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e3 2a 93 b5 95 1d fb   ...{...{..*.....
+0020  35 87 b8 3e 50 18 00 ff 31 bc 00 00 41 55 54 48   5..>P...1...AUTH
 0030  00 00 00 00 00 00 00 5b 50 52 4f 44 3d 4e 41 53   .......[PROD=NAS
 0040  43 41 52 0a 56 45 52 53 3d 58 58 58 0a 50 52 45   CAR.VERS=XXX.PRE
 0050  53 3d 4e 41 53 43 41 52 32 30 30 34 0a 55 53 45   S=NASCAR2004.USE
@@ -43,148 +259,99 @@ Data (91 bytes)
 0070  73 63 61 72 2d 70 73 32 2d 32 30 30 34 0a 4c 4b   scar-ps2-2004.LK
 0080  45 59 3d 24 30 0a 00                              EY=$0..
 
-Frame 24855: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
+Frame 347: Packet, 83 bytes on wire (664 bits), 83 bytes captured (664 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 1, Ack: 92, Len: 0
+Transmission Control Protocol, Src Port: 10899, Dst Port: 8163, Seq: 1, Ack: 92, Len: 39
+Data (39 bytes)
 
-0000  02 00 00 00 45 00 00 28 f5 12 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 29   ...{...{*..z...)
-0020  0d 47 6e 8c 50 10 00 ff 9f bb 00 00               .Gn.P.......
+0000  02 00 00 00 45 00 00 4f c4 78 40 00 80 06 00 00   ....E..O.x@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 93 1f e3 35 87 b8 3e   ...{...{*...5..>
+0020  b5 95 1e 56 50 18 00 ff 22 cd 00 00 41 55 54 48   ...VP..."...AUTH
+0030  00 00 00 00 00 00 00 1b 4e 41 4d 45 3d 56 54 53   ........NAME=VTS
+0040  54 65 63 68 0a 53 3d 30 0a 53 54 41 54 55 53 3d   Tech.S=0.STATUS=
+0050  31 0a 00                                          1..
 
-Frame 24856: Packet, 102 bytes on wire (816 bits), 102 bytes captured (816 bits) on interface \Device\NPF_Loopback, id 0
+Frame 360: Packet, 85 bytes on wire (680 bits), 85 bytes captured (680 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 1, Ack: 92, Len: 58
-Data (58 bytes)
+Transmission Control Protocol, Src Port: 8164, Dst Port: 10899, Seq: 1, Ack: 1, Len: 41
+Data (41 bytes)
 
-0000  02 00 00 00 45 00 00 62 f5 13 40 00 80 06 00 00   ....E..b..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 29   ...{...{*..z...)
-0020  0d 47 6e 8c 50 18 00 ff bf 61 00 00 41 55 54 48   .Gn.P....a..AUTH
-0030  00 00 00 00 00 00 00 3a 4e 41 4d 45 3d 56 54 53   .......:NAME=VTS
-0040  54 65 63 68 0a 50 45 52 53 3d 56 54 53 54 65 63   Tech.PERS=VTSTec
-0050  68 0a 53 3d 30 0a 53 54 41 54 55 53 3d 30 0a 54   h.S=0.STATUS=0.T
-0060  4f 53 3d 31 0a 00                                 OS=1..
-
-Frame 24857: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
-Null/Loopback
-Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 92, Ack: 59, Len: 0
-
-0000  02 00 00 00 45 00 00 28 f5 14 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6e 8c   ...{...{.z*..Gn.
-0020  a8 c8 88 63 50 10 00 ff 9f 81 00 00               ...cP.......
-
-Frame 24859: Packet, 162 bytes on wire (1296 bits), 162 bytes captured (1296 bits) on interface \Device\NPF_Loopback, id 0
-Null/Loopback
-Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 92, Ack: 59, Len: 118
-Data (118 bytes)
-
-0000  02 00 00 00 45 00 00 9e f5 15 40 00 80 06 00 00   ....E.....@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6e 8c   ...{...{.z*..Gn.
-0020  a8 c8 88 63 50 18 00 ff 0e b2 00 00 50 53 45 54   ...cP.......PSET
-0030  00 00 00 00 00 00 00 76 53 48 4f 57 3d 43 48 41   .......vSHOW=CHA
-0040  54 0a 53 54 41 54 3d 22 65 6e 25 33 64 25 32 32   T.STAT="en%3d%22
-0050  69 73 20 70 6c 61 79 69 6e 67 20 4e 41 53 43 41   is playing NASCA
-0060  52 20 54 68 75 6e 64 65 72 25 32 35 65 32 25 32   R Thunder%25e2%2
-0070  35 38 34 25 32 35 61 32 20 32 30 30 34 25 32 32   584%25a2 2004%22
-0080  25 30 61 50 25 33 64 6d 61 64 34 25 30 61 22 0a   %0aP%3dmad4%0a".
-0090  50 52 4f 44 3d 22 69 73 20 6f 6e 6c 69 6e 65 22   PROD="is online"
-00a0  0a 00                                             ..
-
-Frame 24861: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
-Null/Loopback
-Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 59, Ack: 210, Len: 0
-
-0000  02 00 00 00 45 00 00 28 f5 16 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 63   ...{...{*..z...c
-0020  0d 47 6f 02 50 10 00 ff 9f 0b 00 00               .Go.P.......
-
-Frame 24862: Packet, 70 bytes on wire (560 bits), 70 bytes captured (560 bits) on interface \Device\NPF_Loopback, id 0
-Null/Loopback
-Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 59, Ack: 210, Len: 26
-Data (26 bytes)
-
-0000  02 00 00 00 45 00 00 42 f5 17 40 00 80 06 00 00   ....E..B..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 63   ...{...{*..z...c
-0020  0d 47 6f 02 50 18 00 ff 14 73 00 00 70 73 65 74   .Go.P....s..pset
-0030  00 00 00 00 00 00 00 1a 53 3d 30 0a 53 54 41 54   ........S=0.STAT
-0040  55 53 3d 31 0a 00                                 US=1..
-
-Frame 24863: Packet, 126 bytes on wire (1008 bits), 126 bytes captured (1008 bits) on interface \Device\NPF_Loopback, id 0
-Null/Loopback
-Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 210, Ack: 59, Len: 82
-Data (82 bytes)
-
-0000  02 00 00 00 45 00 00 7a f5 18 40 00 80 06 00 00   ....E..z..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6f 02   ...{...{.z*..Go.
-0020  a8 c8 88 63 50 18 00 ff d6 e1 00 00 52 47 45 54   ...cP.......RGET
+0000  02 00 00 00 45 00 00 51 c4 81 40 00 80 06 00 00   ....E..Q..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 1f e4 2a 93 72 9e ad 79   ...{...{..*.r..y
+0020  c5 af b4 df 50 18 00 ff 16 9c 00 00 52 47 45 54   ....P.......RGET
 0030  00 00 00 00 00 00 00 29 4c 52 53 43 3d 63 73 6f   .......)LRSC=cso
-0040  0a 4c 49 53 54 3d 42 0a 50 52 45 53 3d 59 0a 49   .LIST=B.PRES=Y.I
-0050  44 3d 31 0a 00 52 47 45 54 00 00 00 00 00 00 00   D=1..RGET.......
-0060  29 4c 52 53 43 3d 63 73 6f 0a 4c 49 53 54 3d 49   )LRSC=cso.LIST=I
-0070  0a 50 52 45 53 3d 59 0a 49 44 3d 32 0a 00         .PRES=Y.ID=2..
+0040  0a 4c 49 53 54 3d 49 0a 50 52 45 53 3d 59 0a 49   .LIST=I.PRES=Y.I
+0050  44 3d 32 0a 00                                    D=2..
 
-Frame 24864: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
+Frame 372: Packet, 116 bytes on wire (928 bits), 116 bytes captured (928 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 85, Ack: 292, Len: 0
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 726, Ack: 454, Len: 72
+Data (72 bytes)
 
-0000  02 00 00 00 45 00 00 28 f5 19 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 7d   ...{...{*..z...}
-0020  0d 47 6f 54 50 10 00 fe 9e a0 00 00               .GoTP.......
+0000  02 00 00 00 45 00 00 70 c4 85 40 00 80 06 00 00   ....E..p..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fd 98   ...{...{*.......
+0020  64 c3 4d 5d 50 18 00 fe 04 92 00 00 2b 72 6f 6d   d.M]P.......+rom
+0030  00 00 00 00 00 00 00 48 49 3d 31 0a 4e 3d 45 61   .......HI=1.N=Ea
+0040  73 74 0a 48 3d 45 61 73 74 20 43 6f 61 73 74 20   st.H=East Coast 
+0050  52 61 63 65 72 73 0a 41 3d 31 39 32 2e 31 36 38   Racers.A=192.168
+0060  2e 32 2e 31 32 33 0a 54 3d 30 0a 4c 3d 35 30 0a   .2.123.T=0.L=50.
+0070  46 3d 30 0a                                       F=0.
 
-Frame 24865: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
+Frame 374: Packet, 116 bytes on wire (928 bits), 116 bytes captured (928 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 292, Ack: 85, Len: 0
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 798, Ack: 454, Len: 72
+Data (72 bytes)
 
-0000  02 00 00 00 45 00 00 28 f5 1a 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6f 54   ...{...{.z*..GoT
-0020  a8 c8 88 7d 50 10 00 ff 9e 9f 00 00               ...}P.......
+0000  02 00 00 00 45 00 00 70 c4 87 40 00 80 06 00 00   ....E..p..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fd e0   ...{...{*.......
+0020  64 c3 4d 5d 50 18 00 fe ed 33 00 00 2b 72 6f 6d   d.M]P....3..+rom
+0030  00 00 00 00 00 00 00 48 49 3d 32 0a 4e 3d 57 65   .......HI=2.N=We
+0040  73 74 0a 48 3d 57 65 73 74 20 43 6f 61 73 74 20   st.H=West Coast 
+0050  52 61 63 65 72 73 0a 41 3d 31 39 32 2e 31 36 38   Racers.A=192.168
+0060  2e 32 2e 31 32 33 0a 54 3d 30 0a 4c 3d 35 30 0a   .2.123.T=0.L=50.
+0070  46 3d 30 0a                                       F=0.
 
-Frame 24866: Packet, 76 bytes on wire (608 bits), 76 bytes captured (608 bits) on interface \Device\NPF_Loopback, id 0
+Frame 376: Packet, 122 bytes on wire (976 bits), 122 bytes captured (976 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 85, Ack: 292, Len: 32
-Data (32 bytes)
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 870, Ack: 454, Len: 78
+Data (78 bytes)
 
-0000  02 00 00 00 45 00 00 48 f5 1b 40 00 80 06 00 00   ....E..H..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 7d   ...{...{*..z...}
-0020  0d 47 6f 54 50 18 00 fe 8a b3 00 00 52 47 45 54   .GoTP.......RGET
-0030  00 00 00 00 00 00 00 20 43 4e 54 3d 30 0a 53 3d   ....... CNT=0.S=
-0040  30 0a 53 54 41 54 55 53 3d 30 0a 00               0.STATUS=0..
+0000  02 00 00 00 45 00 00 76 c4 89 40 00 80 06 00 00   ....E..v..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fe 28   ...{...{*......(
+0020  64 c3 4d 5d 50 18 00 fe 1c 4e 00 00 2b 72 6f 6d   d.M]P....N..+rom
+0030  00 00 00 00 00 00 00 4e 49 3d 33 0a 4e 3d 42 65   .......NI=3.N=Be
+0040  67 69 6e 6e 65 72 0a 48 3d 4e 65 77 20 44 72 69   ginner.H=New Dri
+0050  76 65 72 73 20 57 65 6c 63 6f 6d 65 0a 41 3d 31   vers Welcome.A=1
+0060  39 32 2e 31 36 38 2e 32 2e 31 32 33 0a 54 3d 30   92.168.2.123.T=0
+0070  0a 4c 3d 35 30 0a 46 3d 30 0a                     .L=50.F=0.
 
-Frame 24867: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
+Frame 378: Packet, 99 bytes on wire (792 bits), 99 bytes captured (792 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 292, Ack: 117, Len: 0
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 948, Ack: 454, Len: 55
+Data (55 bytes)
 
-0000  02 00 00 00 45 00 00 28 f5 1c 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6f 54   ...{...{.z*..GoT
-0020  a8 c8 88 9d 50 10 00 ff 9e 7f 00 00               ....P.......
+0000  02 00 00 00 45 00 00 5f c4 8b 40 00 80 06 00 00   ....E.._..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fe 76   ...{...{*......v
+0020  64 c3 4d 5d 50 18 00 fe 91 89 00 00 2b 75 73 72   d.M]P.......+usr
+0030  00 00 00 00 00 00 00 37 49 3d 39 35 30 35 37 32   .......7I=950572
+0040  0a 4e 3d 56 54 53 54 65 63 68 0a 4d 3d 56 54 53   .N=VTSTech.M=VTS
+0050  54 65 63 68 0a 52 49 3d 30 0a 53 54 3d 31 0a 46   Tech.RI=0.ST=1.F
+0060  3d 30 0a                                          =0.
 
-Frame 24868: Packet, 76 bytes on wire (608 bits), 76 bytes captured (608 bits) on interface \Device\NPF_Loopback, id 0
+Frame 380: Packet, 74 bytes on wire (592 bits), 74 bytes captured (592 bits) on interface \Device\NPF_Loopback, id 0
 Null/Loopback
 Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 10899, Dst Port: 45434, Seq: 117, Ack: 292, Len: 32
-Data (32 bytes)
+Transmission Control Protocol, Src Port: 10901, Dst Port: 8161, Seq: 1003, Ack: 454, Len: 30
+Data (30 bytes)
 
-0000  02 00 00 00 45 00 00 48 f5 1d 40 00 80 06 00 00   ....E..H..@.....
-0010  c0 a8 02 7b c0 a8 02 7b 2a 93 b1 7a a8 c8 88 9d   ...{...{*..z....
-0020  0d 47 6f 54 50 18 00 fe 82 99 00 00 4c 52 53 43   .GoTP.......LRSC
-0030  00 00 00 00 00 00 00 20 43 4e 54 3d 30 0a 53 3d   ....... CNT=0.S=
-0040  30 0a 53 54 41 54 55 53 3d 30 0a 00               0.STATUS=0..
-
-Frame 24869: Packet, 44 bytes on wire (352 bits), 44 bytes captured (352 bits) on interface \Device\NPF_Loopback, id 0
-Null/Loopback
-Internet Protocol Version 4, Src: 192.168.2.123, Dst: 192.168.2.123
-Transmission Control Protocol, Src Port: 45434, Dst Port: 10899, Seq: 292, Ack: 149, Len: 0
-
-0000  02 00 00 00 45 00 00 28 f5 1e 40 00 80 06 00 00   ....E..(..@.....
-0010  c0 a8 02 7b c0 a8 02 7b b1 7a 2a 93 0d 47 6f 54   ...{...{.z*..GoT
-0020  a8 c8 88 bd 50 10 00 ff 9e 5f 00 00               ....P...._..
+0000  02 00 00 00 45 00 00 46 c4 8d 40 00 80 06 00 00   ....E..F..@.....
+0010  c0 a8 02 7b c0 a8 02 7b 2a 95 1f e1 05 a2 fe ad   ...{...{*.......
+0020  64 c3 4d 5d 50 18 00 fe a9 f3 00 00 2b 70 6f 70   d.M]P.......+pop
+0030  00 00 00 00 00 00 00 1e 5a 3d 30 3a 31 20 31 3a   ........Z=0:1 1:
+0040  30 20 32 3a 30 20 33 3a 30 0a                     0 2:0 3:0.
