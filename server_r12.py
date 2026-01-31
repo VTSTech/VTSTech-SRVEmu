@@ -357,17 +357,25 @@ def get_next_data_port():
         return port
         
 def create_packet(command, subcommand, data):
-    """STABLE Handshake/Lobby Header (Your working version)"""
+    """STABLE Handshake/Lobby Header"""
     if isinstance(data, str):
         data_bytes = data.encode('latin1')
     else:
         data_bytes = data
     
-    # 12-byte header with Total Size at the end
+    # Handle subcommand if it's an int (like 0) or an empty string
+    if isinstance(subcommand, int):
+        sub_bytes = b'\x00\x00\x00\x00'
+    elif not subcommand:
+        sub_bytes = b'\x00\x00\x00\x00'
+    else:
+        # Pad or truncate to exactly 4 bytes
+        sub_bytes = subcommand.encode('ascii').ljust(4, b'\x00')[:4]
+
     size = len(data_bytes) + 12 
     header = struct.pack(">4s4sL", 
                          command.encode('ascii'), 
-                         subcommand.encode('ascii'), 
+                         sub_bytes, 
                          size)
     return header + data_bytes
 
@@ -947,6 +955,9 @@ def threaded_client(connection, address, socket_type):
                             True      # Is self
                         )
                         print(f"AUTH: Updated presence for {username} in Lobby")
+                    rooms_data = room_handlers.reply_rom(session)
+                    pop_data = room_handlers.reply_pop(session)
+                    client_socket.sendall(rooms_data + pop_data)
                     response = f"PERS={current_persona}\nS=0\nSTATUS=0\nLAST={time.strftime('%Y-%m-%d %H:%M:%S')}\n"
                     try:
                         connection.sendall(create_packet('pers', '', response))
@@ -1006,7 +1017,14 @@ def threaded_client(connection, address, socket_type):
         if username and username != 'Unknown':
             buddy_handlers.update_buddy_status(username, False)
         
-        room_manager.update_user_presence(connection_id, username, persona, room, room_id, False)
+        room_manager.update_user_presence(
+				    connection_id, 
+				    session.clientNAME, 
+				    session.clientNAME, # Use clientNAME if .persona is missing
+				    session.current_room, 
+				    session.current_room_id, 
+				    True
+				)
         
         try: 
             connection.close()
@@ -1068,7 +1086,8 @@ def initialize_systems(game_mode=None):
     session_manager = SessionManager(create_packet, room_manager.update_user_presence, 
                                      lambda conn_id: ClientSession(conn_id, game_mode))
     print("INIT: Session manager initialized")
-    
+    room_manager.session_manager = session_manager
+    print("INIT: Room manager linked to Session manager")
     def get_client_sessions():
         return session_manager.client_sessions
     

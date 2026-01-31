@@ -15,6 +15,7 @@ class BuddyHandlers:
         self.session_manager = session_manager
         self.buddy_lists = {}  # user -> list of BuddyUser objects
         self.user_profiles = {}  # user -> profile data
+        self.user_attributes = {}
         
     def process_username(self, username):
         """Normalize username - strip @ and / characters and everything after"""
@@ -29,32 +30,25 @@ class BuddyHandlers:
         if len(data) < 12:
             print(f"BUDDY: Packet too short ({len(data)} bytes)")
             return None
-
-        # 1. Extract command from the first 4 bytes of the HEADER
-        #command = data[:4].decode('ascii', errors='ignore').strip()
-        
-        # 2. Extract the PAYLOAD (starts after the 12-byte header)
+        cmd_str = command.strip()
         payload = data[12:].decode('latin1', errors='ignore')
-        
         print(f"[BuddyApi DEBUG] Command: {command} | Payload: {payload[:30]}...")
-
-        handlers = {
-            'AUTH': self.handle_auth,
-            'RGET': self.handle_rget,
-            'ROST': self.handle_rost,
-            'PGET': self.handle_pget, 
-            'RADD': self.handle_radd,
-            'RDEL': self.handle_rdel,
-            'PSET': self.handle_pset,
-        }
+        if cmd_str == 'PSET':
+            return self.handle_pset(payload, session)
+        elif cmd_str == 'PGET':
+            return self.handle_pget(payload, session)
+        elif cmd_str == 'RADD':
+            return self.handle_radd(payload, session)
+        elif cmd_str == 'RGET':
+            return self.handle_rget(payload, session)
+        elif cmd_str == 'ROST':
+            return self.handle_rost(payload, session)
+        elif cmd_str == 'SEND':
+            return self.handle_send(payload, session)
+        elif cmd_str == 'AUTH':
+            return self.handle_auth(payload, session)
         
-        if command in handlers:
-            # We pass the payload (params) to the specific handler
-            return handlers[command](payload, session)
-        else:
-            print(f"BUDDY API: No handler for command: {command}")
-            # Fallback to prevent client hanging
-            return self.create_packet(command, '', "S=0\nSTATUS=1\n")
+        return self.create_packet(cmd_str, '', "STATUS=1\n")
 
     def handle_auth(self, payload, session):
         """Handle the initial Buddy side-channel authentication"""
@@ -69,15 +63,89 @@ class BuddyHandlers:
         response = f"NAME={session.clientNAME}\nS=0\nSTATUS=1\n"
         return self.create_packet("AUTH", "", response)
 
-    def handle_pset(self, params, session):
-        """Handle PSET - Set player status/presence"""
-        param_dict = self.parse_params(params)
-        req_id = param_dict.get('ID', '1')
-        print(f"BUDDY PSET: {session.clientNAME} (ID={req_id})")
+    def handle_rget(self, payload, session):
+        """Processes RGET: Returns specific roster categories"""
+        params = self.parse_params(payload)
+        list_type = params.get('T', 'B')
         
-        # NASCAR needs NAME and ID mirrored to advance the state machine
-        response = f"NAME={session.clientNAME}\nID={req_id}\nS=0\nSTATUS=1\n"
-        return self.create_packet("PSET", "", response)
+        # Return empty list if no buddies to avoid client hang
+        response = f"T={list_type}\nCOUNT=0\nSTATUS=1\n"
+        return self.create_packet('RGET', '', response)
+
+    def handle_pset(self, payload, session):
+        """Processes PSET: Updates attributes found via TagFieldGetString in the_blob"""
+        params = self.parse_params(payload)
+        persona = session.clientNAME
+        
+        if persona not in self.user_attributes:
+            self.user_attributes[persona] = {}
+
+        for k, v in params.items():
+            # Store the attribute (e.g., AT="is playing NASCAR...")
+            self.user_attributes[persona][k] = v
+            print(f"BUDDY PSET: {persona} updated {k}")
+
+        return self.create_packet('PSET', '', "STATUS=1\n")
+
+    def handle_pget(self, payload, session):
+        """Processes PGET: Returns persona data for P2P sync"""
+        params = self.parse_params(payload)
+        target = params.get('USER', session.clientNAME)
+        
+        # Look up stored attributes
+        attrs = self.user_attributes.get(target, {})
+        response = f"USER={target}\n"
+        for k, v in attrs.items():
+            response += f"{k}={v}\n"
+        response += "STATUS=1\n"
+        
+        return self.create_packet('PGET', '', response)
+
+    def handle_radd(self, payload, session):
+        params = self.parse_params(payload)
+        buddy_name = params.get('USER')
+        list_type = params.get('LIST', 'B')
+        
+        if session.clientNAME not in self.buddy_lists:
+            self.buddy_lists[session.clientNAME] = []
+
+        if buddy_name and not any(b.username == buddy_name for b in self.buddy_lists[session.clientNAME]):
+            self.buddy_lists[session.clientNAME].append(BuddyUser(buddy_name))
+            print(f"BUDDY RADD: {session.clientNAME} added {buddy_name}")
+
+        # The Blob insight: Echo back the exact context of the add
+        response = (f"USER={buddy_name}\n"
+                    f"LIST={list_type}\n"
+                    f"STATUS=1\n")
+        
+        # We return the RADD ack, but we might need to bundle a +usr update
+        radd_ack = self.create_packet('RADD', '', response)
+        
+        # Check if the buddy is online to send a status update immediately
+        status_update = b""
+        if self.is_user_online(buddy_name):
+            # Send a +usr packet specifically for this new buddy 
+            # so the "Adding..." dialog closes and the icon lights up
+            status_update = self.create_packet('+usr', '', f"N={buddy_name}\nST=1\nF=0\n")
+            
+        return radd_ack + status_update
+
+    def handle_rost(self, payload, session):
+        my_buddies = self.buddy_lists.get(session.clientNAME, [])
+        
+        response = f"COUNT={len(my_buddies)}\n"
+        for i, buddy in enumerate(my_buddies):
+            online_status = "1" if self.is_user_online(buddy.username) else "0"
+            # Insight: Some NASCAR versions check for the RI tag in the roster
+            response += f"USER{i}={buddy.username}\nONLINE{i}={online_status}\nRI{i}=0\n"
+        
+        response += "STATUS=1\n"
+        return self.create_packet('ROST', '', response)
+
+    def is_user_online(self, username):
+        """Helper to check session manager for online status"""
+        with self.session_manager.session_lock:
+            return any(s.clientNAME == username for s in self.session_manager.client_sessions.values())
 
     def _bridge_session(self, user_name, buddy_session):
         """Copies identity from the Main Lobby session to the Buddy session"""
@@ -104,123 +172,6 @@ class BuddyHandlers:
             "COUNT=0"
         ]
         return self.create_packet(cmd_case, '', '\n'.join(response_lines) + '\n')
-    
-    def handle_rget(self, params, session):
-        """Handle RGET - Retrieve buddy/ignore data"""
-        param_dict = self.parse_params(params)
-        
-        # ID=1 is Buddies, ID=2 is Ignores
-        op_id = param_dict.get('ID', '1')
-        list_type = param_dict.get('T', 'B') # B=Buddy, I=Ignore
-        
-        print(f"BUDDY RGET: {session.clientNAME} requesting {list_type} (ID={op_id})")
-
-        # Mirror the NAME and ID. NASCAR's 'The Blob' requires these to match.
-        response_lines = [
-            f"NAME={session.clientNAME}",
-            f"ID={op_id}",
-            "S=0",
-            "STATUS=1",
-            "COUNT=0" # We return 0 for now to keep it simple
-        ]
-        
-        return self.create_packet('RGET', '', '\n'.join(response_lines) + '\n')
-    
-    def handle_rost(self, params, session):
-        """Handle ROST - Update roster/list"""
-        print(f"BUDDY ROST: {session.clientNAME} - {params}")
-        
-        param_dict = self.parse_params(params)
-        op_type = int(param_dict.get('ID', '1'))
-        target_user = self.process_username(param_dict.get('USER', ''))
-        group = param_dict.get('GROUP', 'Default')
-        friendly_name = param_dict.get('FUSR', target_user)
-        
-        if not target_user:
-            return self.create_packet('ROST', '', "STATUS=0\nERROR=No user specified\n")
-            
-        # Initialize buddy list if needed
-        if session.clientNAME not in self.buddy_lists:
-            self.buddy_lists[session.clientNAME] = []
-            
-        buddies = self.buddy_lists[session.clientNAME]
-        
-        # Check if user already in list
-        existing_buddy = None
-        for buddy in buddies:
-            if buddy.username == target_user:
-                existing_buddy = buddy
-                break
-                
-        if op_type == 0x200:  # Roster management operation
-            if existing_buddy:
-                # Update existing buddy
-                existing_buddy.friendly_name = friendly_name
-                existing_buddy.group = group
-                print(f"BUDDY: Updated {target_user} in {session.clientNAME}'s list")
-            else:
-                # Add new buddy
-                new_buddy = BuddyUser(target_user, friendly_name, group)
-                buddies.append(new_buddy)
-                print(f"BUDDY: Added {target_user} to {session.clientNAME}'s list")
-                
-        response_lines = [
-            f"ID={op_type}",
-            f"USER={target_user}",
-            f"FUSR={friendly_name}",
-            f"GROUP={group}",
-            "STATUS=1"
-        ]
-        
-        return self.create_packet('ROST', '', '\n'.join(response_lines) + '\n')
-    
-    def handle_pget(self, params, session):
-        """Handle PGET - Get player data"""
-        print(f"BUDDY PGET: {session.clientNAME} - {params}")
-        
-        param_dict = self.parse_params(params)
-        target_user = self.process_username(param_dict.get('USER', ''))
-        
-        if not target_user:
-            return self.create_packet('PGET', '', "STATUS=0\nERROR=No user specified\n")
-            
-        # Check if user exists and is online
-        is_online = target_user in [user.clientNAME for user in self.active_users.values() 
-                                  if hasattr(user, 'clientNAME')]
-        
-        response_lines = [
-            f"USER={target_user}",
-            f"STATUS={1 if is_online else 0}",
-            f"ONLINE={1 if is_online else 0}",
-            "STATUS=1"
-        ]
-        
-        return self.create_packet('PGET', '', '\n'.join(response_lines) + '\n')
-    
-    def handle_radd(self, payload, session):
-        """Handle RADD - Add a user/resource to the buddy list"""
-        params = self.parse_params(payload)
-        
-        # ID=101 in your log is the Transaction ID. 
-        # We MUST mirror this back.
-        req_id = params.get('ID', '100')
-        lrsc = params.get('LRSC', '') # The 'Test' persona mapped to 'cso'
-        list_type = params.get('LIST', 'B')
-        
-        print(f"BUDDY: RADD mirrored for {session.clientNAME} -> {lrsc} (ID={req_id})")
-        
-        # NASCAR 2004 check: The response should contain the mirrored fields.
-        response_lines = [
-            f"NAME={session.clientNAME}",
-            f"USER={session.clientNAME}",
-            f"LRSC={lrsc}",
-            f"ID={req_id}",
-            f"LIST={list_type}",
-            "S=0",
-            "STATUS=1"
-        ]
-        
-        return self.create_packet('RADD', '', '\n'.join(response_lines) + '\n')
     
     def handle_rdel(self, params, session):
         """Handle RDEL - Delete from roster"""
@@ -253,7 +204,48 @@ class BuddyHandlers:
         ]
         
         return self.create_packet('RDEL', '', '\n'.join(response_lines) + '\n')
-    
+
+    def handle_send(self, payload, session):
+        """Processes SEND: Direct Message/Invite logic from Buddy_ProcessSendCommand"""
+        params = self.parse_params(payload)
+        target_user = params.get('USER') or params.get('TO')
+        message_text = params.get('BODY', '')
+        # SECS=259200 from your log (3 days) indicates a persistent or invite message
+        expiry = params.get('SECS', '0') 
+        
+        # Determine the transaction ID to mirror (often passed in the raw header or payload)
+        # Your log showed 'RADD | Payload: 106', mirroring that ID is key to clearing hangs.
+        msg_id = params.get('ID', '0')
+
+        # Delivery logic
+        target_session = None
+        with self.session_manager.session_lock:
+            for s in self.session_manager.client_sessions.values():
+                if s.clientNAME == target_user:
+                    target_session = s
+                    break
+
+        status = "0"
+        if target_session:
+            # Mirroring the structure expected by MessageRouting_ChallengeHandler in the blob
+            incoming_msg = (f"FROM={session.clientNAME}\n"
+                            f"TEXT={message_text}\n"
+                            f"ID={msg_id}\n"
+                            f"PRIV=1\n")
+            try:
+                # Send as a notification (+not) or message (+msg)
+                # NASCAR often uses +not for system-level invites (SECS > 0)
+                cmd = '+msg'
+                target_session.connection.sendall(self.create_packet(cmd, '', incoming_msg))
+                status = "1"
+                print(f"BUDDY SEND: {session.clientNAME} -> {target_user} ({cmd})")
+            except: 
+                pass
+        
+        # Return confirmation to the sender
+        # Echoing the USER and ID back is what clears the sender's "Waiting" dialog
+        return self.create_packet('SEND', '', f"USER={target_user}\nID={msg_id}\nSTATUS={status}\n")
+        
     def parse_params(self, param_string):
         """Parse KEY=VALUE parameters into dictionary"""
         params = {}

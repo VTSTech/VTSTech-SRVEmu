@@ -22,6 +22,12 @@ class RoomManager:
         self.active_users = {}
         self.user_presence_lock = threading.Lock()
     
+    def get_int_ip(self, ip_addr):
+		    try:
+		        # Convert "192.168.2.123" to 3232236155
+		        return struct.unpack("!I", socket.inet_aton(ip_addr))[0]
+		    except:
+		        return 0
     def update_user_presence(self, connection_id, username, persona, room, room_id, connected=True, is_self=False):
 		        """FIXED population counting and stable unique_id storage"""
 		        if not username or username == 'Lobby':

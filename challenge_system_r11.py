@@ -43,44 +43,51 @@ class ChallengeSystem:
 		        prefix = token[:5].lower()
 		        # Returns the found ID, or 11 (Daytona) if unknown
 		        return track_map.get(prefix, 11)
+		        
     def find_user_session(self, persona_name):
         for session in self.client_sessions.values():
             if session.current_persona == persona_name:
                 return session
         return None
-        
-    def handle_mesg(self, data, session):
-        data_str = data.decode('latin1') if data else ""
-        lines = [line.strip() for line in data_str.split('\n') if line.strip()]
-        
-        # Parse fields into a dictionary for easier access
-        fields = {}
-        for line in lines:
-            if '=' in line:
-                k, v = line.split('=', 1)
-                fields[k] = v
 
-        target_user = fields.get('PRIV') or fields.get('N')
-        text_payload = fields.get('TEXT') or fields.get('T', "")
+    def handle_mesg(self, data_str, session):
+		        params = self.parse_params(data_str)
+		        target_name = params.get('PRIV', '')
+		        blob = params.get('TEXT', '')
+		        attr = params.get('ATTR', '3')
+		        
+		        target_sess = self.find_user_session(target_name)
+		        
+		        if target_sess and hasattr(target_sess, 'connection'):
+		            try:
+		                # Get the same ID used in the +usr broadcast
+		                s_uid = str(getattr(session, 'unique_id', '1'))
+		                
+		                # Get the sender's integer LAN IP (not the socket peername)
+		                sender_ip = getattr(session, 'client_ip', '127.0.0.1')
+		                sender_int_ip = self.room_manager.get_int_ip(sender_ip)
 
-        # 1. PREVENT LOOPBACK (Challenging self)
-        if target_user == session.current_persona:
-            print(f"MESG: Blocked self-challenge for {session.clientNAME}")
-            return self.create_packet('mesg', '', "S=0\nSTATUS=0\n")
+		                # 1. Proactive Sync to Target
+		                sync_payload = f"I={s_uid}\nN={session.clientNAME}\nA={sender_int_ip}\nF=8193\n\0"
+		                target_sess.connection.sendall(self.create_packet("+usr", "", sync_payload.encode('latin1')))
 
-        # 2. HANDLE CHALLENGE RESPONSES (ACPT/DECL/BLOC)
-        response_type = text_payload.upper()
-        if response_type in ['ACPT', 'DECL', 'BLOC']:
-            return self.handle_challenge_response(session, target_user, response_type)
+		                # 2. Push +msg
+		                push_payload = f"FROM={session.clientNAME}\nTEXT={blob}\nATTR={attr}\n\0"
+		                target_sess.connection.sendall(self.create_packet("+msg", "", push_payload.encode('latin1')))
 
-        # 3. HANDLE CHALLENGE INITIATION (Token)
-        if text_payload and fields.get('ATTR') == '3':
-            return self.initiate_challenge(session, target_user, text_payload)
+		                # 3. Response to Sender (ACK)
+		                # Ensure the ID here is also the short unique_id
+		                target_uid = str(getattr(target_sess, 'unique_id', '1'))
+		                target_ip = getattr(target_sess, 'client_ip', '0.0.0.0')
+		                target_int_ip = self.room_manager.get_int_ip(target_ip)
 
-        # 4. ROUTE TO STANDARD CHAT
-        if self.message_handlers:
-            return self.message_handlers.handle_mesg(data, session)
-        return self.create_packet('mesg', '', "S=0\nSTATUS=0\n")
+		                response_payload = f"PRIV={target_name}\nID={target_uid}\nA={target_int_ip}\nSTATUS=0\n\0"
+		                return self.create_packet("mesg", "", response_payload.encode('latin1'))
+
+		            except Exception as e:
+		                import traceback
+		                traceback.print_exc()
+		                return None
 
     def handle_auxi(self, data, session):
 		        """Step 1: Store the track settings."""
@@ -109,17 +116,18 @@ class ChallengeSystem:
 		                
 		        if found_session:
 		            print(f"[CHALLENGE] Found user: {found_session.clientNAME}")
+		            uid = getattr(found_session, 'sessionID', "0")
 		            response = (
 		                f"PERS={found_session.clientNAME}\n"
 		                f"NAME={found_session.clientNAME}\n"
-		                f"USERID={found_session.session_id}\n"
-		                f"SESS={found_session.session_id}\n"
+		                f"USERID={uid}\n"
+		                f"SESS={uid}\n"
 		                f"MASK=0\n"
-		                f"STATUS=0\n"
+		                f"STATUS=0\n\0"
 		            )
 		        else:
 		            print(f"[CHALLENGE] User '{search_term}' not found.")
-		            response = f"PERS={search_term}\nSTATUS=1\n"
+		            response = f"PERS={search_term}\nSTATUS=1\n\0"
 
 		        # ENCODE TO BYTES HERE to prevent the "bytes-like object" error
 		        return self.create_packet("user", "", response.encode('latin1'))
@@ -127,7 +135,7 @@ class ChallengeSystem:
     def initiate_challenge(self, session, target_user, token):
         target_session = self.find_user_session(target_user)
         if not target_session:
-            return self.create_packet('mesg', '', "STATUS=102\nERROR=User Offline\n")
+            return self.create_packet('mesg', '', "STATUS=102\nERROR=User Offline\n\0")
 
         # Get the numeric ID bridged from room_system
         sender_id = getattr(session, 'unique_id', 0)
@@ -140,7 +148,7 @@ class ChallengeSystem:
             f"ATTR=3\n"
             f"RI={getattr(session, 'current_room_id', 0)}\n"
             f"S=0\n"
-            f"STATUS=0\n"
+            f"STATUS=0\n\0"
         )
         
         # Push to the target client
@@ -151,7 +159,7 @@ class ChallengeSystem:
         target_session.challenge_state = 1
         target_session.challenger = session.current_persona
         
-        return self.create_packet('mesg', '', f"TEXT={token}\nS=0\nSTATUS=0\n")
+        return self.create_packet('mesg', '', f"TEXT={token}\nS=0\nSTATUS=0\n\0")
 
     def handle_challenge_response(self, session, target_user, response):
         print(f"[CHALLENGE] {session.clientNAME} responded: {response}")
