@@ -761,6 +761,35 @@ LAB_0031be98:
 Incoming References - LobbyApiUpdate
 ProtocolDispatcher_Main
 
+void Lobby_UpdateRoomPopulation(int param_1,int param_2,ulong param_3)
+
+{
+  undefined4 *puVar1;
+  int iVar2;
+  undefined8 extraout_a3;
+  undefined8 extraout_t0;
+  undefined8 extraout_t1;
+  undefined8 extraout_t2;
+  undefined8 extraout_t3;
+  
+  if (*(int *)(param_1 + 0x310) != 0) {
+    puVar1 = (undefined4 *)HashTable_Lookup(*(int *)(param_1 + 0x310),param_2);
+    if ((long)(int)puVar1 != 0) {
+      iVar2 = Buddy_GetUserData((long)*(int *)(param_1 + 0x314),(long)(int)puVar1);
+      if (((long)iVar2 != 0) && (param_3 != (long)*(int *)(iVar2 + 0x10))) {
+        *(int *)(iVar2 + 0x10) = (int)param_3;
+        Util_FormatIPString((char *)(iVar2 + 0x14),0x3e2f70,param_3,extraout_a3,extraout_t0,
+                            extraout_t1,extraout_t2,extraout_t3);
+        HashTable_UpdateEntry(*(int *)(param_1 + 0x314),puVar1,(long)iVar2);
+      }
+    }
+  }
+  return;
+}
+--
+Incoming References - Lobby_UpdateRoomPopulation
+LobbyApiUpdate
+
 undefined4 Buddy_AddUser(int *param_1,byte *param_2,int param_3)
 {
   int iVar1;
@@ -2369,6 +2398,345 @@ undefined4 ChallengeSystem_InitiateChallenge(int *param_1)
 Incoming References - ChallengeSystem_InitiateChallenge
 ChallengeSystem_CommandDispatcher
 
+undefined4 MultiplayerBuddy_FindByParam(long param_1)
+
+{
+  bool bVar1;
+  undefined4 uVar2;
+  
+  uVar2 = 0;
+  bVar1 = MultiplayerMode_Check();
+  if (bVar1) {
+    uVar2 = BuddySystem_FindUserData(DAT_0039454c,param_1);
+  }
+  return uVar2;
+}
+--
+Incoming References - MultiplayerBuddy_FindByParam
+ChallengeSystem_ValidateTarget
+ChallengeSystem_GetUserStatus
+ChallengeSystem_InitiateChallenge
+ChallengeSystem_SendRegistration
+Config_ProcessNumericValue
+undefined4
+ChallengeSystem_CommandDispatcher
+          (undefined8 param_1,undefined8 param_2,uint param_3,ushort *param_4,undefined8 param_5 ,
+          uint *param_6)
+
+{
+  bool bVar1;
+  short sVar2;
+  uint uVar3;
+  int iVar4;
+  char *pcVar5;
+  undefined8 uVar6;
+  undefined4 uVar7;
+  
+  uVar7 = 1;
+  if (param_3 == 0x173) {
+    uVar6 = ChallengeSystem_ValidateTarget((int *)param_4);
+    *param_6 = (uint)uVar6;
+  }
+  else if (param_3 < 0x174) {
+    if (param_3 == 0xd7) {
+      iVar4 = *(int *)param_4;
+      pcVar5 = ChallengeSystem_GetDefaultTarget();
+      Util_StoreData(*(char **)(iVar4 + 8),pcVar5,*(int *)(*(int *)param_4 + 4));
+      uVar7 = 1;
+    }
+    else if (param_3 < 0xd8) {
+      if (param_3 == 0xc9) {
+        bVar1 = ChallengeSystem_GetBuddyCount(*(undefined4 **)param_4);
+        *param_6 = (int)bVar1;
+      }
+      else if (param_3 < 0xca) {
+        if (param_3 == 0x1d) {
+          iVar4 = ChallengeSystem_ProcessAllTargets();
+          *param_6 = (uint)(iVar4 != 0);
+        }
+        else if (param_3 == 0xb6) {
+          *param_6 = 0x28;
+        }
+        else {
+          uVar7 = 0;
+        }
+      }
+      else if (param_3 == 0xca) {
+        bVar1 = ChallengeSystem_GetConfigValue((int *)param_4);
+        *param_6 = (int)bVar1;
+      }
+      else if (param_3 == 0xd1) {
+        uVar3 = ChallengeSystem_GetUserStatus((int *)param_4);
+        *param_6 = uVar3;
+      }
+      else {
+        uVar7 = 0;
+      }
+    }
+    else if (param_3 == 0xed) {
+      bVar1 = ChallengeSystem_GetStatusInfo((int *)param_4);
+      *param_6 = (int)bVar1;
+    }
+    else if (param_3 < 0xee) {
+      if (param_3 == 0xe3) {
+        uVar3 = ChallengeSystem_GetTimeoutValue((long)*(int *)param_4);
+        *param_6 = uVar3;
+      }
+      else if (param_3 == 0xe5) {
+        uVar3 = ChallengeSystem_FindUserByPermission((int *)param_4);
+        *param_6 = uVar3;
+      }
+      else {
+        uVar7 = 0;
+      }
+    }
+    else if (param_3 == 0x170) {
+      uVar3 = FUN_00327db0((long)*(int *)(*(int *)param_4 + 8));
+      *param_6 = uVar3;
+    }
+    else if (param_3 == 0x172) {
+      uVar3 = BuddySystem_RefreshUserStatus((long)*(int *)(*(int *)param_4 + 8));
+      *param_6 = uVar3;
+    }
+    else {
+      uVar7 = 0;
+    }
+  }
+  else if (param_3 == 0x18d) {
+    uVar3 = MultiplayerSession_GetState((undefined4 *)param_4);
+    *param_6 = uVar3;
+  }
+  else if (param_3 < 0x18e) {
+    if (param_3 == 0x187) {
+      uVar3 = FUN_00282b68(*(int *)param_4,*(uint *)(param_4 + 2),*(uint **)(param_4 + 4));
+      *param_6 = uVar3;
+    }
+    else if (param_3 < 0x188) {
+      if (param_3 == 0x175) {
+        bVar1 = ChallengeSystem_CreateChallengeData((int *)param_4);
+        *param_6 = (int)bVar1;
+      }
+      else if (param_3 == 0x177) {
+        bVar1 = PersonaValidation_CompareAndUpdate((int *)param_4);
+        *param_6 = (int)bVar1;
+      }
+      else {
+        uVar7 = 0;
+      }
+    }
+    else if (param_3 == 0x18a) {
+      uVar3 = ChallengeSystem_ClearConfigFlag();
+      *param_6 = uVar3;
+    }
+    else if (param_3 == 0x18c) {
+      uVar3 = BuddySystem_FindUserIndex(*(char **)(*(int *)param_4 + 8),*(int **)(param_4 + 2));
+      *param_6 = uVar3;
+    }
+    else {
+      uVar7 = 0;
+    }
+  }
+  else if (param_3 == 400) {
+    sVar2 = FUN_002830e0();
+    *param_6 = (int)sVar2;
+  }
+  else if (param_3 < 0x191) {
+    if (param_3 == 0x18e) {
+      FUN_00327f00();
+      uVar7 = 1;
+    }
+    else if (param_3 == 399) {
+      uVar3 = ChallengeSystem_InitiateChallenge((int *)param_4);
+      *param_6 = uVar3;
+    }
+    else {
+      uVar7 = 0;
+    }
+  }
+  else if (param_3 == 0x192) {
+    FUN_002830a0();
+    uVar7 = 1;
+  }
+  else if (param_3 < 0x192) {
+    uVar3 = Challenge_CreateQueueEntry(param_4);
+    *param_6 = uVar3;
+  }
+  else if (param_3 == 0x195) {
+    HLBListSort((char *)param_4);
+    uVar7 = 1;
+  }
+  else {
+    uVar7 = 0;
+  }
+  return uVar7;
+}
+--
+Incoming References - ChallengeSystem_CommandDispatcher
+NetworkEvent_MainDispatcher
+ChallengeCallback_Register
+
+undefined8 ChallengeSystem_ValidateTarget(int *param_1)
+
+{
+  char *pcVar1;
+  bool bVar2;
+  short sVar3;
+  int iVar4;
+  int *piVar5;
+  uint uVar6;
+  int iVar7;
+  
+  pcVar1 = *(char **)(*param_1 + 8);
+  iVar4 = MultiplayerBuddy_FindByParam((long)(int)pcVar1);
+  piVar5 = (int *)param_1[1] + *(int *)param_1[1] + 1;
+  bVar2 = FUN_00289330(pcVar1);
+  piVar5[2] = (int)bVar2;
+  bVar2 = ChallengeValidation_PlayerExists((long)(int)pcVar1);
+  piVar5[4] = (uint)!bVar2;
+  if (iVar4 == 0) {
+    iVar4 = FUN_00287f40(pcVar1);
+    if (iVar4 == 0) {
+      *piVar5 = 0;
+    }
+    else {
+      *piVar5 = 1;
+    }
+    piVar5[1] = 0;
+    uVar6 = 0;
+    piVar5[3] = 0;
+    if (iVar4 != 0) {
+      iVar4 = Challenge_GetCurrentState();
+      if (iVar4 != 0) {
+        piVar5[5] = 0;
+        return 0;
+      }
+      uVar6 = (uint)(piVar5[4] == 0);
+    }
+    piVar5[5] = uVar6;
+    return 0;
+  }
+  iVar7 = 0;
+  *piVar5 = (int)*(char *)(iVar4 + 0xa7);
+  piVar5[1] = (*(int *)(iVar4 + 0xa8) >> 0x14 ^ 1U) & 1;
+  sVar3 = FUN_003285a8(iVar4);
+  piVar5[3] = (int)sVar3;
+  if ((*(uint *)(iVar4 + 0xa8) & 0x2000) != 0) {
+    if (*(char *)(iVar4 + 0xa7) != '\x01') {
+      piVar5[5] = 0;
+      return 0;
+    }
+    iVar4 = Challenge_GetCurrentState();
+    if (iVar4 != 0) {
+      piVar5[5] = 0;
+      return 0;
+    }
+    iVar7 = 1;
+    if (piVar5[4] != 0) {
+      iVar7 = 0;
+    }
+  }
+  piVar5[5] = iVar7;
+  return 0;
+}
+--
+Incoming References - ChallengeSystem_ValidateTarget
+ChallengeSystem_CommandDispatcher
+
+
+undefined4 MultiplayerSystem_ProcessUserRequest(long param_1,uint param_2,char param_3)
+
+{
+  bool bVar1;
+  int iVar2;
+  code *pcVar3;
+  undefined4 uVar4;
+  char acStack_110 [168];
+  uint uStack_68;
+  int iStack_60;
+  
+  uVar4 = 1;
+  bVar1 = MultiplayerMode_IsLobby();
+  if (bVar1) {
+    bVar1 = BuddySystem_CheckUserPermission(param_2,param_1);
+    if (!bVar1) {
+      if ((param_2 & 0x100000) != 0) {
+        iVar2 = BuddySystem_FindUserByPriority(0x100000);
+        BuddySystem_UpdateUserStatus((long)iVar2);
+        bVar1 = BuddySystem_CheckUserPermission(param_2,param_1);
+      }
+      if (bVar1 == false) {
+        return 1;
+      }
+    }
+    iVar2 = 1;
+    if (param_3 == '\0') {
+      pcVar3 = (code *)0x0;
+    }
+    else {
+      iVar2 = MultiplayerSession_StartTimer();
+      pcVar3 = MultiplayerCommand_Dispatcher;
+    }
+    if (iVar2 != 0) {
+      uVar4 = 0;
+      memset((undefined8 *)acStack_110,0,0xb8);
+      Util_StoreData(acStack_110,(char *)param_1,0x20);
+      iStack_60 = DAT_0039456c;
+      DAT_0039456c = DAT_0039456c + 1;
+      uStack_68 = param_2;
+      BuddySystem_AddOrUpdateUser(DAT_0039454c,(long)(int)acStack_110,pcVar3,0,0);
+    }
+  }
+  return uVar4;
+}
+
+Incoming References - MultiplayerSystem_ProcessUserRequest
+FUN_00327d90
+FUN_00327db0
+
+void ChallengeCallback_Register(void)
+
+{
+  if (DAT_0038b6e8 == -1) {
+    ProtocolCallback_Register(0x283da0,&DAT_0038b6e8);
+    ChallengeCallback_Set(ChallengeCallback_HandlerMain);
+  }
+  return;
+}
+--
+Incoming References - ChallengeCallback_Register
+NetworkSystem_InitializeMultiplayer
+ChallengeSystem_InitializeNetwork
+
+
+undefined4 ChallengeCallback_HandlerMain(long param_1)
+
+{
+  ChallengeSystem_SendRegistration(param_1);
+  return 1;
+}
+--
+Incoming References - ChallengeCallback_HandlerMain
+ChallengeCallback_Register
+
+
+int ChallengeSystem_SendRegistration(long param_1)
+
+{
+  bool bVar1;
+  int iVar2;
+  
+  bVar1 = MultiplayerMode_Check();
+  iVar2 = (int)bVar1;
+  if ((bVar1) && (iVar2 = MultiplayerBuddy_FindByParam(param_1), iVar2 == 0)) {
+    iVar2 = FUN_00327d90(param_1);
+  }
+  return iVar2;
+}
+--
+Incoming References - ChallengeSystem_SendRegistration
+ChallengeCallback_HandlerMain
+ChallengeSystem_InitializeNetwork
+
 int ChallengeSystem_ProcessAllTargets(void)
 {
   int iVar1;
@@ -2542,6 +2910,111 @@ ChallengeSystem_CommandDispatcher
 --
 Incoming References - ChallengeSystem_CommandDispatcher
 NetworkEvent_MainDispatcher
+
+
+/* WARNING: Removing unreachable block (ram,0x0028a43c) */
+
+void Challenge_AdvanceState(int param_1)
+
+{
+  int iVar1;
+  char cVar2;
+  bool bVar3;
+  int iVar4;
+  undefined *puVar5;
+  ulong uVar6;
+  
+  iVar4 = Config_GetEffectiveValue(param_1);
+  DAT_0038b8b4 = DAT_0038b8b4 + 1;
+  if (iVar4 != 0x8e) {
+    InvokeProtocolCallbacks_Alt();
+  }
+  switch(iVar4) {
+  case 0x8e:
+    puVar5 = Network_GetP2PContext();
+    iVar4 = NetworkHelper_c268((int)puVar5,0);
+    if (iVar4 != 0) {
+      Config_SetWithValidation(0x427ac0,0xb,0x8f);
+      DAT_0038b8b4 = 0x10000000;
+    }
+    break;
+  case 0x8f:
+    Config_SetWithValidation(0x427ac0,0xb,0x90);
+    DAT_0038b8b4 = 0x20000000;
+    break;
+  case 0x90:
+    puVar5 = NetworkHelper_f3a8();
+    NetworkHelper_f540((int)puVar5);
+    break;
+  case 0x91:
+    puVar5 = NetworkHelper_f3a8();
+    iVar4 = NetworkHelper_f670((int)puVar5);
+    if (iVar4 == 0) {
+      Config_SetWithValidation(0x427ac0,0xb,0x92);
+    }
+    else {
+      Config_SetWithValidation(0x427ac0,0xb,0x8f);
+    }
+    break;
+  case 0x92:
+  case 0x93:
+    puVar5 = Network_GetP2PContext();
+    iVar4 = NetworkHelper_c268((int)puVar5,0);
+    if (iVar4 != 0) {
+      Config_SetWithValidation(0x427ac0,0xb,0x94);
+      DAT_0038b8b4 = 0x50000000;
+    }
+    break;
+  case 0x94:
+    NetworkHelper_e858(0x4e2618);
+    iVar4 = NetworkSession_GetStatus(0x4e2618);
+    if (iVar4 != 0) {
+      iVar4 = NetworkHelper_e9a8(0x4e2618);
+      if (DAT_004e2020 == 0) {
+        DAT_004e2020 = 1;
+        DAT_004e201c = 0xfe;
+      }
+      iVar1 = DAT_004e201c;
+      uVar6 = (ulong)DAT_004e201c;
+      FUN_00112600();
+      if (iVar4 == 1) {
+        cVar2 = Crypto_InitializeContext();
+        uVar6 = (ulong)(iVar1 * (cVar2 + 3));
+        if ((DAT_004e2758 == '\0') && (0x15e0 < uVar6)) {
+          uVar6 = 0x15e0;
+        }
+        Config_SetWithValidation(0x427ac0,0xb,0x95);
+        DAT_0038b8b4 = 0x70000000;
+      }
+      else {
+        Config_SetWithValidation(0x427ac0,0xb,0x96);
+        DAT_0038b8b4 = -0x80000000;
+      }
+      NetworkConnections_ProbeReset(0x4e2618,uVar6);
+      Network_HandleConnectionEvent(DAT_0038b970);
+    }
+    break;
+  case 0x95:
+  case 0x96:
+    cVar2 = Config_CheckExists(0x427ac0,2);
+    if (cVar2 == '\0') {
+      FUN_001169c0();
+      if (0x3c < (byte)DAT_0038b8b4) {
+        NetworkHelper_eda8(0x4e2618);
+      }
+    }
+    bVar3 = Challenge_IsVerifiedState();
+    if (((bVar3) && (cVar2 = FUN_0016da00(), cVar2 == '\0')) &&
+       (iVar4 = NetworkHelper_ea38(0x4e2618), iVar4 != 0)) {
+      FUN_0028d2f0(0x4e2580,'\0');
+    }
+    NetworkHelper_e858(0x4e2618);
+  }
+  if (DAT_0038b8b0 != '\0') {
+    NetworkSystem_InitWrapper();
+  }
+  return;
+}
 
 void ChallengeSystem_ProcessChallengeQueue(undefined4 *param_1,undefined1 param_2)
 {
@@ -4697,6 +5170,18 @@ undefined4 Race_SetupPhysicsConstants(void)
 Incoming References - Race_SetupPhysicsConstants
 None
 
+
+undefined4 FUN_00327db0(long param_1)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = MultiplayerSystem_ProcessUserRequest(param_1,4,'\x01');
+  return uVar1;
+}
+
+
+
 char * Util_StoreData(char *param_1,char *param_2,int param_3)
 {
   char cVar1;
@@ -5604,13 +6089,1456 @@ Network_HandleReceive
 Network_SendPlayerData
 Security_EncryptAndSend
 
-/* FUNCTION NOT FOUND: TagFieldDupl */
 
-/* FUNCTION NOT FOUND: TagFieldSetNumber */
+undefined8 Command_HandlePersona1(void)
 
-/* FUNCTION NOT FOUND: TagFieldSetAddress */
+{
+  int iVar1;
+  byte *pbVar2;
+  char *pcVar3;
+  uint uVar4;
+  
+  uVar4 = 0;
+  do {
+    iVar1 = uVar4 * 0x10;
+    uVar4 = uVar4 + 1 & 0xff;
+    *(undefined1 *)(iGpffff8ac0 + iVar1 + 0x40) = 0;
+  } while (uVar4 < 4);
+  uVar4 = 0;
+  while( true ) {
+    if (3 < uVar4) {
+      return 0;
+    }
+    iVar1 = uVar4 * 0x10;
+    pbVar2 = TagFieldFind((byte *)(iGpffff8ac0 + 0x114),(byte *)"PERSONAS");
+    pcVar3 = Data_ExtractIndexedField
+                       (pbVar2,(byte *)(iGpffff8ac0 + iVar1 + 0x33),0xd,&DAT_003e3278,uVar4,0x2c) ;
+    if ((int)pcVar3 < 1) break;
+    uVar4 = uVar4 + 1 & 0xff;
+    *(undefined1 *)(iGpffff8ac0 + iVar1 + 0x40) = 1;
+  }
+  return 0;
+}
+--
+Incoming References - Command_HandlePersona1
+ProtocolHandler_UserDataOps
 
-/* FUNCTION NOT FOUND: TagFieldSetString */
+uint Command_HandlePersona2(byte *param_1)
+
+{
+  uint uVar1;
+  byte abStack_120 [256];
+  
+  abStack_120[0] = 0;
+  String_FormatKeyValuePairs(abStack_120,0x100,&STR_NAME_003e3270,param_1);
+  String_FormatKeyValuePairs(abStack_120,0x100,&STR_PASS_003e32a0,param_1 + 0x11);
+  (**(code **)(iGpffff8ac0 + 0x1120))(abStack_120,0x100);
+  System_SendCommand(0x61757468,abStack_120,0,0);
+  abStack_120[0] = 0;
+  String_FormatKeyValuePairs(abStack_120,0x100,&STR_PERS_003e3258,param_1 + 0x22);
+  uVar1 = System_SendCommand(0x70657273,abStack_120,0x394518,(long)(iGpffff8ac0 + 0x1118));
+  if (uVar1 == 1) {
+    System_ShowError(4);
+  }
+  return uVar1;
+}
+--
+Incoming References - Command_HandlePersona2
+Protocol_CommandDispatcher
+
+bool Command_HandlePersona3(byte *param_1)
+
+{
+  bool bVar1;
+  bool bVar2;
+  int iVar3;
+  byte abStack_130 [256];
+  
+  bVar1 = MultiplayerMode_IsLobby();
+  bVar2 = true;
+  if (bVar1) {
+    iVar3 = MultiplayerSession_StartTimer();
+    bVar2 = iVar3 == 0;
+    if (!bVar2) {
+      abStack_130[0] = 0;
+      String_FormatKeyValuePairs(abStack_130,0x100,&STR_PERS_003e3320,param_1);
+      System_SendCommand(0x75736572,abStack_130,0x394608,0x39455c);
+    }
+  }
+  return bVar2;
+}
+--
+Incoming References - Command_HandlePersona3
+PersonaValidation_CompareAndUpdate
+
+char * Command_HandlePersona4(int param_1)
+
+{
+  int iVar1;
+  bool bVar2;
+  byte *pbVar3;
+  char *pcVar4;
+  
+  bVar2 = MultiplayerMode_Check();
+  pcVar4 = &DAT_00390000;
+  if ((bVar2) && (DAT_00394560 == 1)) {
+    iVar1 = *(int *)(param_1 + 4);
+    DAT_00394560 = 2;
+    DAT_0039455c = 0xffffffff;
+    if (iVar1 != 0) {
+      DAT_00394568 = *(undefined4 *)(iVar1 + 8);
+      pbVar3 = TagFieldFind(*(byte **)(iVar1 + 0xc),&STR_PERS_003e3320);
+      pcVar4 = TagFieldGetString(pbVar3,&DAT_003945f8,0xd,&DAT_003e3328);
+      return pcVar4;
+    }
+    pcVar4 = (char *)0x4;
+    DAT_00394568 = 4;
+  }
+  return pcVar4;
+}
+--
+Incoming References - Command_HandlePersona4
+
+
+undefined8 Command_HandlePersona5(byte param_1,byte *param_2)
+
+{
+  if (param_1 < 4) {
+    *(byte *)(iGpffff8ac0 + 0x111d) = param_1;
+    *param_2 = 0;
+    if (*(char *)(iGpffff8ac0 + (uint)param_1 * 0x10 + 0x40) == '\0') {
+      System_ShowError(0x18);
+    }
+    else {
+      String_FormatKeyValuePairs
+                (param_2,0x100,&STR_PERS_003e3258,
+                 (byte *)(iGpffff8ac0 + (uint)param_1 * 0x10 + 0x33));
+      if (*(char *)(iGpffff8ac0 + 0x1145) == '\x01') {
+        String_FormatKeyValuePairs(param_2,0x100,&STR_CDEV_003e3260,(byte *)(iGpffff8ac0 + 0x112 4));
+      }
+    }
+  }
+  else {
+    System_ShowError(0x18);
+  }
+  return 0;
+}
+--
+Incoming References - Command_HandlePersona5
+CommandHandler_CPER
+CommandHandler_PERS_REQ
+CommandHandler_DPER
+
+void Command_HandlePersona6(undefined8 param_1,int *param_2,int *param_3)
+
+{
+  int iVar1;
+  undefined1 *puVar2;
+  int iVar3;
+  int iVar4;
+  uint uVar5;
+  int iVar6;
+  ulong uVar7;
+  uint uVar8;
+  ulong extraout_a2;
+  undefined8 extraout_a2_00;
+  ulong extraout_a2_01;
+  undefined8 extraout_a3;
+  undefined8 extraout_a3_00;
+  undefined8 extraout_a3_01;
+  undefined8 extraout_a3_02;
+  undefined8 extraout_a3_03;
+  undefined8 extraout_a3_04;
+  undefined8 extraout_a3_05;
+  undefined8 extraout_t0;
+  undefined8 extraout_t0_00;
+  undefined8 extraout_t0_01;
+  undefined8 extraout_t0_02;
+  undefined8 extraout_t0_03;
+  undefined8 extraout_t0_04;
+  undefined8 extraout_t0_05;
+  undefined8 extraout_t0_06;
+  undefined8 uVar9;
+  undefined8 extraout_t0_07;
+  int *piVar10;
+  undefined8 extraout_t1;
+  undefined8 extraout_t1_00;
+  undefined8 extraout_t1_01;
+  undefined8 extraout_t1_02;
+  undefined8 extraout_t1_03;
+  undefined8 extraout_t1_04;
+  undefined8 extraout_t1_05;
+  undefined8 extraout_t1_06;
+  undefined8 uVar11;
+  undefined8 extraout_t1_07;
+  undefined8 extraout_t2;
+  undefined8 extraout_t2_00;
+  undefined8 extraout_t2_01;
+  undefined8 extraout_t2_02;
+  undefined8 uVar12;
+  undefined8 extraout_t2_03;
+  undefined8 extraout_t2_04;
+  undefined8 extraout_t2_05;
+  undefined8 extraout_t2_06;
+  undefined8 uVar13;
+  undefined8 extraout_t2_07;
+  undefined8 extraout_t3;
+  undefined8 extraout_t3_00;
+  undefined8 extraout_t3_01;
+  undefined8 extraout_t3_02;
+  undefined8 extraout_t3_03;
+  undefined8 extraout_t3_04;
+  undefined8 extraout_t3_05;
+  undefined8 extraout_t3_06;
+  undefined8 uVar14;
+  undefined8 extraout_t3_07;
+  uint uVar15;
+  uint uVar16;
+  uint auStack_f0 [8];
+  char acStack_d0 [16];
+  undefined1 auStack_c0 [16];
+  char acStack_b0 [2];
+  ushort uStack_ae;
+  ushort auStack_ac [2];
+  uint uStack_a8;
+  int iStack_a4;
+  float afStack_a0 [4];
+  
+  iVar1 = *param_2;
+  iVar4 = iVar1 + 1;
+  iStack_a4 = 0;
+  piVar10 = param_3 + *param_3 + 1;
+  auStack_ac[0] = 0;
+  uStack_ae = 0;
+  afStack_a0[0] = 0.0;
+  switch(param_1) {
+  case 0:
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+    **(char (**) [8])(*piVar10 + 8) = (char  [8])0x203a6c6c696b53;
+    **(char (**) [8])(piVar10[1] + 8) = (char  [8])0x203a6465657053;
+    puVar2 = *(undefined1 **)(piVar10[2] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[3] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[4] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    uVar16 = 2;
+    break;
+  case 7:
+    builtin_strncpy(*(char **)(*piVar10 + 8),"Pitting: ",10);
+    builtin_strncpy(*(char **)(piVar10[1] + 8),"Road Course: ",0xe);
+    builtin_strncpy(*(char **)(piVar10[2] + 8),"Superspeedway: ",0x10);
+    builtin_strncpy(*(char **)(piVar10[3] + 8),"Speedway: ",0xb);
+    builtin_strncpy(*(char **)(piVar10[4] + 8),"Short Track: ",0xe);
+    uVar16 = 5;
+    break;
+  case 8:
+    builtin_strncpy(*(char **)(*piVar10 + 8),"Durability: ",0xd);
+    **(char (**) [8])(piVar10[1] + 8) = (char  [8])0x203a7265776f50;
+    builtin_strncpy(*(char **)(piVar10[2] + 8),"Efficiency: ",0xd);
+    puVar2 = *(undefined1 **)(piVar10[3] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[4] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    uVar16 = 3;
+    break;
+  case 9:
+    builtin_strncpy(*(char **)(*piVar10 + 8),"Durability: ",0xd);
+    builtin_strncpy(*(char **)(piVar10[1] + 8),"Tire Grip: ",0xc);
+    builtin_strncpy(*(char **)(piVar10[2] + 8),"Tire Wear: ",0xc);
+    goto LAB_001f49f8;
+  case 10:
+    builtin_strncpy(*(char **)(*piVar10 + 8),"Durability: ",0xd);
+    builtin_strncpy(*(char **)(piVar10[1] + 8),"Downforce: ",0xc);
+    **(char (**) [8])(piVar10[2] + 8) = (char  [8])0x203a7466617244;
+LAB_001f49f8:
+    uVar16 = 3;
+    puVar2 = *(undefined1 **)(piVar10[3] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[4] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    break;
+  default:
+    uVar16 = 0;
+    puVar2 = *(undefined1 **)(*piVar10 + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[1] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[2] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[3] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(piVar10[4] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+  }
+  Database_ExecuteQuery
+            ((ushort *)0x0,0x3b9ea0,(long)(int)acStack_d0,(long)(int)auStack_c0,
+             (long)(int)&uStack_a8,(long)(int)acStack_b0,(long)(int)&iStack_a4,(long)(int)afStack _a0
+            );
+  uVar15 = 0;
+  if (acStack_b0[0] == '\x01') {
+    Database_ExecuteQuery
+              ((ushort *)0x0,0x3b9fa0,(long)(int)auStack_ac,extraout_a3,extraout_t0,extraout_t1,
+               extraout_t2,extraout_t3);
+    uVar15 = 0;
+    uVar5 = (uint)auStack_ac[0];
+    uVar8 = (uint)uStack_ae;
+    uVar12 = extraout_t2_00;
+    uVar9 = extraout_t3_00;
+    uVar11 = extraout_t1_00;
+    uVar13 = extraout_t0_00;
+    if (uVar16 != 0) {
+      iVar6 = 0;
+      do {
+        iVar3 = *(int *)((int)param_2 + iVar6 + iVar4 * 4);
+        uVar7 = Math_ConvertPercentage(*(uint *)((int)auStack_f0 + iVar6));
+        Util_FormatIPString(*(char **)(iVar3 + 8),0x3b9fc8,uVar7,extraout_a3_00,extraout_t0_01,
+                            extraout_t1_01,extraout_t2_01,extraout_t3_01);
+        uVar15 = uVar15 + 1 & 0xff;
+        iVar6 = uVar15 << 2;
+        uVar12 = extraout_t2_02;
+        uVar9 = extraout_t3_02;
+        uVar11 = extraout_t1_02;
+        uVar13 = extraout_t0_02;
+      } while (uVar15 < uVar16);
+    }
+    for (; uVar15 < 5; uVar15 = uVar15 + 1 & 0xff) {
+      puVar2 = *(undefined1 **)(param_2[iVar4 + uVar15] + 8);
+      uVar12 = 0x20;
+      *puVar2 = 0x20;
+      puVar2[1] = 0;
+    }
+    Util_FormatIPString(*(char **)(param_2[iVar1 + 6] + 8),0x3b9fd0,(long)acStack_d0[0],
+                        (long)(int)auStack_c0,uVar13,uVar11,uVar12,uVar9);
+    Util_FormatIPString(*(char **)(param_2[iVar1 + 7] + 8),0x3b9fd8,
+                        (long)(int)(uVar5 - uVar8) & 0xffff,extraout_a3_01,extraout_t0_03,
+                        extraout_t1_03,extraout_t2_03,extraout_t3_03);
+    Util_FormatIPString(*(char **)(param_2[iVar1 + 8] + 8),0x3b9fd8,(long)(int)afStack_a0[0],
+                        extraout_a3_02,extraout_t0_04,extraout_t1_04,extraout_t2_04,extraout_t3_0 4);
+    iVar4 = param_2[iVar1 + 9];
+    uVar7 = Math_ConvertPercentage(uStack_a8);
+    Util_FormatIPString(*(char **)(iVar4 + 8),0x3b9fc8,uVar7,extraout_a3_03,extraout_t0_05,
+                        extraout_t1_05,extraout_t2_05,extraout_t3_05);
+    FUN_001c4cf0((long)iStack_a4,(long)param_2[iVar1 + 10],extraout_a2_00,extraout_a3_04,
+                 extraout_t0_06,extraout_t1_06,extraout_t2_06,extraout_t3_06);
+    **(undefined4 **)(param_2[iVar1 + 0xb] + 8) = 0x736559;
+  }
+  else {
+    iVar6 = 0;
+    uVar7 = extraout_a2;
+    uVar12 = extraout_a3;
+    uVar9 = extraout_t0;
+    uVar11 = extraout_t1;
+    uVar13 = extraout_t2;
+    uVar14 = extraout_t3;
+    do {
+      Util_FormatIPString(*(char **)(*(int *)((int)param_2 + iVar6 + iVar4 * 4) + 8),0x3b9dd8,uVa r7,
+                          uVar12,uVar9,uVar11,uVar13,uVar14);
+      uVar15 = uVar15 + 1 & 0xff;
+      iVar6 = uVar15 << 2;
+      uVar7 = extraout_a2_01;
+      uVar12 = extraout_a3_05;
+      uVar9 = extraout_t0_07;
+      uVar11 = extraout_t1_07;
+      uVar13 = extraout_t2_07;
+      uVar14 = extraout_t3_07;
+    } while (uVar15 < 5);
+    puVar2 = *(undefined1 **)(param_2[iVar1 + 6] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(param_2[iVar1 + 7] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(param_2[iVar1 + 8] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(param_2[iVar1 + 9] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(param_2[iVar1 + 10] + 8);
+    *puVar2 = 0x20;
+    puVar2[1] = 0;
+    puVar2 = *(undefined1 **)(param_2[iVar1 + 0xb] + 8);
+    *puVar2 = 0x4e;
+    puVar2[1] = 0x6f;
+    puVar2[2] = 0;
+  }
+  return;
+}
+--
+Incoming References - Command_HandlePersona6
+FUN_001f5080
+
+undefined4
+Database_ExecuteQuery
+          (ushort *param_1,int param_2,undefined8 param_3,undefined8 param_4,undefined8 param_5,
+          undefined8 param_6,undefined8 param_7,undefined8 param_8)
+
+{
+  int iVar1;
+  int *piVar2;
+  ushort auStack_e0 [8];
+  undefined8 uStack_30;
+  undefined8 uStack_28;
+  undefined8 uStack_20;
+  undefined8 uStack_18;
+  undefined8 uStack_10;
+  undefined8 uStack_8;
+  
+  iVar1 = DAT_0050afe0 * DAT_0050afd8;
+  DAT_0050afe0 = DAT_0050afe0 + 1;
+  piVar2 = (int *)(DAT_0050afe4 + iVar1);
+  uStack_30 = param_3;
+  uStack_28 = param_4;
+  uStack_20 = param_5;
+  uStack_18 = param_6;
+  uStack_10 = param_7;
+  uStack_8 = param_8;
+  Database_AllocateContext((int)piVar2);
+  if (param_1 == (ushort *)0x0) {
+    param_1 = auStack_e0;
+  }
+  param_1[2] = 0;
+  param_1[3] = 0;
+  param_1[4] = 0;
+  param_1[5] = 0;
+  *param_1 = 0;
+  param_1[1] = 0;
+  piVar2[0x17] = param_2;
+  piVar2[0x31] = 0;
+  Database_ResetContext(piVar2 + 0xe,0);
+  *piVar2 = (int)&uStack_30;
+  Database_ExecuteWithParams((long)(int)piVar2,(long)(int)(piVar2 + 0xe),0xffffffffffffffff,para m_1)
+  ;
+  if (piVar2[2] != 2) {
+    piVar2[2] = 0;
+    DAT_0050aff0 = DAT_0050aff0 - piVar2[6];
+    if (piVar2[8] != 0) {
+      DAT_0050b000 = DAT_0050b000 - piVar2[6];
+    }
+    DAT_0050b010 = DAT_0050b010 - piVar2[9];
+    DAT_0050afe0 = DAT_0050afe0 + -1;
+    DAT_0050b020 = DAT_0050b020 - piVar2[0xc];
+  }
+  return *(undefined4 *)(param_1 + 2);
+}
+--
+Incoming References - Database_ExecuteQuery
+FUN_00101588
+FUN_00101b80
+FUN_00101e48
+FUN_00101ec8
+FUN_00101f18
+FUN_00101f98
+FUN_00102018
+FUN_00102098
+FUN_001020e8
+FUN_001022b0
+FUN_00102f38
+FUN_00109da8
+FUN_0010bf90
+FUN_001122c8
+Multiplayer_GetNetworkStatus
+FUN_00112390
+FUN_001126c0
+FUN_00112a40
+FUN_00113a88
+FUN_00113b38
+FUN_00113b70
+FUN_00113ba8
+FUN_00113c60
+FUN_00114168
+FUN_001142c8
+FUN_00114368
+FUN_001143a0
+FUN_00114400
+Challenge_StartRaceTransition
+FUN_00114668
+FUN_00114750
+FUN_001147b8
+FUN_00114828
+FUN_001148a8
+FUN_00114980
+FUN_00114b38
+FUN_00114d18
+FUN_00114e38
+FUN_00115290
+FUN_00115398
+FUN_00115898
+FUN_001158d8
+FUN_00115990
+FUN_00118838
+FUN_00118890
+FUN_00118a28
+FUN_00118a78
+FUN_00118be0
+FUN_0011b888
+FUN_0011e530
+FUN_0011e5f8
+FUN_0011e8c0
+FUN_0011eaa0
+FUN_0011efc0
+FUN_0011f430
+FUN_0011f6a8
+FUN_0011f868
+FUN_0011f908
+FUN_0013c6d0
+FUN_0013caa0
+FUN_0013cbf0
+FUN_0013d9b8
+FUN_0013dee8
+FUN_0013e128
+FUN_0013ea18
+FUN_0013ffe0
+FUN_001406f8
+FUN_00140900
+FUN_001409d8
+FUN_00140ab0
+FUN_00140b88
+FUN_00140c70
+FUN_00140d60
+FUN_001413a0
+FUN_00141ec8
+FUN_00142278
+FUN_001432b0
+FUN_001441f8
+FUN_00145e30
+FUN_00156418
+FUN_00157938
+FUN_00157f18
+FUN_001597e8
+FUN_0015c830
+FUN_0015cca0
+FUN_0015ceb0
+FUN_0015d108
+FUN_0015ef10
+FUN_00167b28
+FUN_0016ad18
+FUN_0016c3a0
+FUN_00170a28
+FUN_00170b98
+FUN_00171d08
+FUN_00172d28
+FUN_00173ee0
+FUN_00173f58
+FUN_00173f88
+FUN_00174140
+FUN_001744b0
+FUN_00174b30
+FUN_00174c28
+FUN_0017f248
+FUN_00181880
+FUN_00181c30
+FUN_001848e8
+FUN_00184c70
+FUN_0018dab8
+FUN_00195bc0
+FUN_00196298
+FUN_001962d8
+FUN_00196358
+FUN_00196430
+FUN_001964e8
+FUN_001966a0
+FUN_00196768
+FUN_00196850
+FUN_00196948
+FUN_001969f0
+FUN_00196b28
+FUN_00196c58
+FUN_00196e30
+FUN_00196e78
+FUN_00196ed8
+FUN_00196f50
+FUN_00197040
+FUN_00197138
+FUN_00197228
+FUN_00197378
+FUN_00197448
+FUN_00197620
+FUN_00197728
+FUN_00197900
+FUN_00197a20
+FUN_00197b50
+FUN_00197b88
+FUN_00197c08
+FUN_00197e18
+FUN_00197e68
+FUN_00197ea8
+FUN_00198020
+FUN_0019adb8
+FUN_0019d590
+FUN_0019d680
+FUN_001a39e8
+FUN_001aa090
+FUN_001aa318
+FUN_001aa348
+FUN_001aa380
+FUN_001aa3b8
+FUN_001aa3f0
+FUN_001aa428
+FUN_001aa530
+FUN_001aa560
+FUN_001aa598
+FUN_001aa5d0
+FUN_001aa620
+FUN_001aa880
+FUN_001aa948
+FUN_001aabb8
+FUN_001aac90
+FUN_001aade8
+FUN_001ab228
+FUN_001abc18
+FUN_001abc48
+FUN_001abfb8
+FUN_001ac120
+FUN_001b0088
+GameState_QueryCurrent
+FUN_001b1f78
+FUN_001b3988
+FUN_001b6890
+FUN_001b6990
+FUN_001ba448
+FUN_001bbae8
+FUN_001bbe30
+FUN_001bbe98
+FUN_001bbf98
+FUN_001bc8f0
+SessionCreate_UIInterface
+FUN_001bf3f0
+System_UpdateTimer
+System_ConfigureMultiParam
+Network_UpdateConnection
+Network_InitializeSession
+Network_SetConnectionParams
+System_GetTimerValue
+System_GetUptime
+System_GetResourceStatus
+System_CheckResource
+Network_GetConnectionInfo
+Network_ValidateConnection
+System_CheckIntegrity
+Network_ConfigureConnection
+Network_SetSecurityParams
+Hardware_GetDeviceStatus
+System_FinalizeNetworkSetup
+System_GetNetworkMetrics
+FUN_001c5690
+FUN_001c5788
+FUN_001c5838
+FUN_001c7260
+FUN_001c73d0
+FUN_001c7480
+FUN_001ccdf0
+FUN_001ccf78
+FUN_001cd1c0
+FUN_001cd2e0
+FUN_001cd4f8
+FUN_001cd590
+FUN_001cd750
+FUN_001ce348
+FUN_001cf278
+FUN_001cf318
+FUN_001cf490
+FUN_001cf608
+FUN_001cf6b0
+FUN_001cf708
+FUN_001cf888
+FUN_001cf8b8
+FUN_001cf908
+FUN_001cfc70
+FUN_001cfd20
+FUN_001cfdd0
+FUN_001cfe98
+FUN_001cfed0
+FUN_001cff50
+FUN_001cffc8
+FUN_001d0000
+FUN_001d0038
+FUN_001d00c8
+FUN_001d0108
+FUN_001d0200
+FUN_001d0290
+FUN_001d30c0
+FUN_001d30f0
+FUN_001d4a60
+FUN_001d4ca8
+FUN_001dc910
+FUN_001dca40
+FUN_001dcb20
+FUN_001dcbc0
+FUN_001dd200
+FUN_001dd3d8
+FUN_001dd900
+FUN_001de818
+FUN_001deb00
+FUN_001dec40
+FUN_001deea8
+FUN_001df890
+GameSystem_NetworkReadyTransition
+FUN_001dfbd0
+FUN_001dfbf8
+FUN_001dfca0
+FUN_001e18b8
+FUN_001e1908
+FUN_001e1d10
+FUN_001e1f30
+FUN_001e2168
+FUN_001e24f8
+FUN_001e2760
+FUN_001e2818
+FUN_001e28a8
+FUN_001e2bf8
+FUN_001e2c88
+FUN_001e3238
+FUN_001e3398
+FUN_001e3ad8
+FUN_001e3ee8
+FUN_001e3f88
+FUN_001e4120
+FUN_001e4918
+FUN_001e4990
+FUN_001e5080
+FUN_001e53e0
+FUN_001e5a30
+State_UpdateWithPointer
+State_ProcessShort
+State_ProcessComplex
+Config_SetValue
+Config_SetMultiple
+Config_CheckConditions
+FUN_001e6b60
+MultiplayerSystem_FinalizeReady
+FUN_001e7258
+Multiplayer_ValidateSession
+FUN_001e74d0
+Multiplayer_CreateChallenge
+Multiplayer_ProcessChallenge
+Multiplayer_ValidateConnection
+FUN_001e7b28
+Multiplayer_GetConnectionInfo
+Multiplayer_GetSessionStatus
+Multiplayer_UpdateUser
+Multiplayer_ResetState
+FUN_001e8918
+FUN_001e8948
+FUN_001e9138
+FUN_001e9248
+FUN_001e9368
+FUN_001e94c0
+System_HandleLongOperation
+System_CompareAndUpdate
+System_ConfigureMultiParams
+System_ProcessConnection
+System_ValidateAndStore
+System_SetConfigBlock
+System_HandleComplexOp
+System_ProcessPointer
+FUN_001ea370
+FUN_001ea4c0
+FUN_001ea620
+FUN_001ea708
+FUN_001ea948
+FUN_001ea990
+FUN_001eaa60
+FUN_001ead00
+FUN_001ead68
+FUN_001eb0e8
+FUN_001eb148
+FUN_001eb1f8
+FUN_001eb280
+FUN_001ebec8
+FUN_001ec008
+FUN_001ec170
+FUN_001ec9a8
+FUN_001ed0b8
+FUN_001ed330
+FUN_001ed388
+FUN_001ed450
+FUN_001ed608
+FUN_001ed640
+FUN_001ed6c0
+FUN_001ed830
+FUN_001eda78
+FUN_001edb78
+FUN_001edc00
+FUN_001edc48
+FUN_001ee548
+FUN_001ee648
+FUN_001ee7d0
+FUN_001ef238
+FUN_001ef3d0
+FUN_001ef7d8
+FUN_001efb68
+FUN_001efbf8
+FUN_001f07b0
+FUN_001f0a70
+FUN_001f0b20
+FUN_001f0dd0
+FUN_001f0ef8
+FUN_001f1000
+FUN_001f1248
+FUN_001f1380
+FUN_001f1650
+FUN_001f1900
+FUN_001f1b18
+FUN_001f1b48
+FUN_001f1ba8
+FUN_001f2300
+FUN_001f2408
+FUN_001f2560
+FUN_001f2670
+FUN_001f26f8
+FUN_001f2760
+FUN_001f2798
+FUN_001f2978
+FUN_001f2b10
+FUN_001f2d58
+FUN_001f2ed0
+FUN_001f3108
+FUN_001f3238
+FUN_001f3340
+FUN_001f33c0
+FUN_001f34c0
+FUN_001f3620
+FUN_001f3958
+FUN_001f39f8
+FUN_001f3a68
+Command_HandlePersona7
+FUN_001f41d8
+FUN_001f4230
+FUN_001f43c8
+Command_HandlePersona6
+FUN_001f4db0
+FUN_001f4e00
+FUN_001f4f38
+FUN_001f5218
+FUN_001f53e0
+FUN_001f5758
+FUN_001f57c8
+FUN_001f5bd8
+FUN_001f6388
+FUN_001f65e8
+FUN_001f6788
+FUN_001f7288
+FUN_001f77f0
+FUN_001f7d38
+FUN_001f8248
+FUN_001f8278
+FUN_001f8598
+FUN_001f8700
+FUN_001f8850
+FUN_001f88f0
+FUN_001f8a40
+FUN_001f8d40
+FUN_001f8f08
+FUN_001f8f78
+FUN_001f9058
+FUN_001f9700
+FUN_001f9828
+FUN_001f9a98
+FUN_001f9ac8
+FUN_001f9ba8
+FUN_001f9c80
+FUN_001f9cc0
+FUN_001f9e20
+FUN_001f9f18
+FUN_001f9fb0
+FUN_001fa0d8
+FUN_001fa360
+FUN_001fa3f8
+FUN_001fa668
+FUN_001fa720
+FUN_001faa78
+FUN_001faaf8
+FUN_001fad70
+FUN_001faef8
+FUN_001fb210
+FUN_001fb2d0
+FUN_001fb3a0
+FUN_001fb870
+FUN_001fb940
+FUN_001fb9a0
+FUN_001fbbe8
+FUN_001fbd98
+FUN_001fc1e8
+FUN_001fc370
+FUN_001fc6c8
+FUN_001fc780
+FUN_001fc8a8
+FUN_001fced0
+FUN_001fcfb0
+FUN_001fd260
+FUN_001fd2f0
+FUN_001fd4d0
+FUN_001fd608
+FUN_001fd9f8
+FUN_001fdad8
+FUN_001fdb48
+FUN_001fdd60
+FUN_001fdda0
+FUN_001fdeb0
+FUN_001fe1e8
+FUN_001fe3c8
+FUN_001fe538
+FUN_001fe638
+FUN_001fe718
+FUN_001fe9b0
+FUN_001febf8
+FUN_001fed38
+FUN_001fef18
+FUN_001ff2d0
+FUN_001ff390
+FUN_001ff540
+FUN_001ff6a8
+FUN_001ff7e0
+FUN_001ff850
+FUN_001ffbb8
+FUN_001ffc10
+FUN_001ffd88
+FUN_001fffc0
+FUN_00200068
+FUN_00200320
+FUN_002003d0
+FUN_002004f8
+FUN_00200650
+FUN_00200680
+FUN_002006f0
+FUN_00201b30
+Race_StartByType
+FUN_00201c48
+FUN_00201c88
+Race_ConfigureTrack
+Race_SetupPhase11
+Race_InitializeFromSession
+Race_SetupPhase4
+FUN_00202870
+FUN_00202c70
+FUN_00202df8
+FUN_00203068
+FUN_002030f0
+FUN_00203330
+FUN_002033f0
+FUN_00203498
+FUN_002036b8
+FUN_00203a20
+FUN_00203d38
+Lobby_SynchronizeUserList
+FUN_00204848
+FUN_00204ce8
+FUN_00204e28
+FUN_00205158
+FUN_002055c0
+FUN_00205f78
+FUN_00206018
+FUN_002061f0
+PersonaValidation_CheckExists
+FUN_002069b0
+FUN_00206e80
+Challenge_Decorator
+FUN_00207ce8
+FUN_00209858
+FUN_00209a00
+FUN_00209dd0
+FUN_0020a130
+FUN_0020a1c0
+FUN_0020a3a0
+FUN_0020a3f8
+FUN_0020a4b8
+FUN_0020b9e8
+FUN_0020c0a8
+FUN_0020d520
+FUN_0020d588
+FUN_0020d5d8
+FUN_0020da30
+FUN_0020dd88
+FUN_0020df00
+FUN_0020e3a8
+FUN_0020e7c8
+FUN_0020ea18
+FUN_00212c30
+FUN_00212dc0
+FUN_00212f70
+FUN_002130b0
+FUN_0021af38
+FUN_0021b0b0
+FUN_0021ce20
+FUN_0021d1a0
+FUN_0021d328
+FUN_0021d460
+FUN_0021e850
+FUN_00222288
+FUN_00222b08
+FUN_00226450
+ProtocolChannelMapping_Initialize
+ProtocolSystem_GlobalInitialize
+FUN_0022f458
+FUN_0022f590
+FUN_00231548
+FUN_00232dd0
+FUN_00233048
+FUN_0023a718
+FUN_00242bc8
+FUN_00242f88
+FUN_00243ec8
+FUN_00243f30
+FUN_00243f68
+FUN_002442c0
+FUN_00244430
+FUN_00244460
+FUN_002444a8
+FUN_002444f8
+FUN_00244710
+Graphics_GetRenderStatus
+FUN_00245250
+FUN_002452a0
+FUN_00245320
+FUN_002453a0
+FUN_00245530
+FUN_002455d8
+FUN_00245610
+FUN_00245778
+FUN_00245800
+FUN_002458a0
+FUN_00245928
+FUN_002459a0
+FUN_002459c8
+FUN_00245aa8
+FUN_00245b88
+FUN_00245c08
+FUN_00245c88
+FUN_00245d30
+FUN_00245dd8
+FUN_00245e90
+FUN_00245f48
+FUN_00245ff8
+FUN_002460b8
+FUN_00246150
+FUN_00246180
+FUN_00246270
+FUN_00246410
+FUN_00246590
+FUN_00246ac0
+FUN_00246b30
+FUN_00246da8
+FUN_00246e50
+FUN_00247030
+FUN_002471f0
+FUN_00247240
+FUN_00247270
+FUN_002473a8
+FUN_002477a0
+FUN_00248330
+FUN_00248370
+FUN_002483b0
+FUN_00248420
+FUN_00248470
+FUN_00248500
+FUN_00248590
+FUN_00248618
+FUN_00248738
+FUN_002487d0
+FUN_00248ca8
+FUN_00249390
+FUN_00249790
+FUN_00249d98
+FUN_00249f08
+FUN_0024a048
+FUN_0024a078
+FUN_0024a2b8
+FUN_0024a2f8
+FUN_0024a338
+FUN_0024a698
+FUN_0024a788
+FUN_0024a7c0
+FUN_0024a818
+FUN_0024a860
+FUN_0024a9f0
+FUN_0024aa20
+FUN_0024aa60
+FUN_0024aaa8
+FUN_0024ab70
+FUN_0024ad80
+FUN_0024afb0
+FUN_0024b108
+FUN_0024b1b8
+FUN_0024b690
+FUN_0024b750
+FUN_0024b778
+FUN_0024b820
+ProtocolHandler_NEWS2
+FUN_0024bb78
+FUN_0024bba8
+FUN_0024bbf0
+FUN_0024bc20
+FUN_0024bc48
+FUN_0024bc80
+FUN_0024bca8
+FUN_0024bcd8
+FUN_0024bd08
+FUN_0024beb0
+FUN_0024c470
+FUN_0024c4a8
+FUN_0024f6d8
+FUN_00252fd0
+FUN_0025d928
+FUN_0025e060
+FUN_0025e0f0
+FUN_0025e130
+FUN_0025e198
+FUN_0025e460
+FUN_0025e560
+FUN_0025e650
+FUN_0025e690
+FUN_0025e800
+FUN_0025e880
+FUN_0025e928
+FUN_0025e970
+FUN_0025ea00
+FUN_0025ebc8
+FUN_0025ebf8
+FUN_0025ee38
+FUN_0025eef0
+FUN_0025efb0
+FUN_0025f138
+FUN_0025f230
+FUN_0025f5e8
+FUN_0025f8e8
+FUN_0025f9e8
+FUN_0025fa78
+FUN_0025fbf8
+FUN_0025fe38
+FUN_0025fee0
+FUN_0025ffc0
+FUN_00260030
+FUN_002600a8
+FUN_002601b8
+FUN_00260248
+FUN_00260448
+FUN_00260820
+FUN_00260890
+FUN_002608d0
+FUN_002609c8
+FUN_00260a28
+FUN_00260cf8
+FUN_00260f08
+FUN_002611d0
+FUN_00261390
+FUN_002614d0
+FUN_00261658
+FUN_002617e0
+FUN_00261a90
+FUN_00261bc8
+FUN_00261c38
+FUN_00261c90
+FUN_00261d28
+Graphics_ValidateMode
+Graphics_UpdateTexture
+FUN_00262090
+FUN_002625d8
+FUN_00262b10
+FUN_00263488
+FUN_002636e0
+FUN_00263938
+FUN_00263b90
+FUN_00264060
+FUN_00264348
+FUN_00264b08
+FUN_00264c78
+FUN_00264d58
+FUN_00265020
+FUN_00265558
+FUN_00265608
+FUN_00265880
+FUN_00265bd8
+FUN_002662c8
+FUN_00266308
+FUN_00266350
+FUN_002663b8
+FUN_00266458
+FUN_002665b0
+FUN_002667d8
+FUN_00266860
+FUN_00266938
+FUN_00266a60
+FUN_00266ac0
+FUN_00267c18
+FUN_00267ce8
+FUN_00267dd8
+FUN_002681b0
+FUN_00268c38
+FUN_00268e40
+FUN_00268f48
+FUN_00269098
+FUN_00269128
+FUN_00269188
+FUN_00269210
+FUN_00269250
+FUN_00269320
+FUN_00269d38
+FUN_0026a2a8
+FUN_0026a3d8
+FUN_0026ad98
+FUN_0026ae50
+FUN_0026af20
+FUN_0026af60
+FUN_0026b048
+FUN_0026b140
+FUN_0026b1d8
+FUN_0026b718
+FUN_0026b7b8
+FUN_0026ba78
+FUN_0026bbe8
+FUN_0026bc68
+FUN_0026c6d0
+FUN_0026c8d8
+FUN_0026c948
+FUN_0026cb50
+FUN_0026cf78
+FUN_0026d0e8
+FUN_0026d5f8
+FUN_0026d648
+FUN_0026da40
+FUN_0026dc68
+FUN_0026e068
+FUN_0026e2c8
+FUN_0026e4d8
+FUN_0026e998
+FUN_0026eb08
+FUN_0026eee8
+FUN_0026f2c8
+FUN_0026fdc8
+FUN_0026ff78
+FUN_00270330
+FUN_00270498
+FUN_002706e8
+FUN_002711f8
+FUN_00271478
+FUN_00271688
+FUN_00271a38
+FUN_00271d00
+FUN_00271f48
+FUN_00272198
+FUN_00272430
+FUN_00272618
+FUN_00272800
+FUN_00272a10
+FUN_00272dc0
+FUN_00273028
+FUN_00273610
+FUN_002739a8
+FUN_00273ac8
+FUN_00273bf0
+FUN_00273cb0
+FUN_00273ce0
+FUN_00273e30
+FUN_00274220
+FUN_002745c0
+FUN_002746c8
+FUN_002794f0
+FUN_00279528
+FUN_0027a620
+FUN_0027fd60
+FUN_0027fd98
+FUN_0027fdc0
+FUN_0027ffa0
+FUN_00280348
+FUN_00280470
+FUN_00284480
+FUN_00284838
+FUN_00284a28
+FUN_0028feb0
+FUN_0028ff78
+FUN_00290000
+Data_ValidateAndExtract
+FUN_002937a0
+FUN_00293be8
+FUN_00293e40
+FUN_00295be8
+FUN_00295dc0
+Command_HandleRankings
+FUN_00298a68
+FUN_00299db0
+FUN_00299e18
+Challenge_CreateToken
+FUN_0029a920
+System_GetCryptographicSeed
+Crypto_InitializeContext
+FUN_0029a9a8
+
+
+void Database_ExecuteWithParams
+               (undefined8 param_1,undefined8 param_2,undefined8 param_3,ushort *param_4)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  int *piVar3;
+  int iVar4;
+  undefined8 uVar5;
+  int *piVar6;
+  uint *puVar7;
+  ulong uVar8;
+  long lVar9;
+  int aiStack_900 [32];
+  byte abStack_880 [16];
+  undefined8 auStack_870 [256];
+  
+  lVar9 = (long)(int)aiStack_900;
+  puVar7 = (uint *)param_2;
+  uVar8 = 0;
+  piVar6 = (int *)param_1;
+  if (*puVar7 == 0x1e) {
+    *puVar7 = puVar7[4];
+    puVar7[2] = puVar7[6];
+    puVar7[1] = puVar7[5];
+    Database_ResetContext(puVar7,1);
+    uVar8 = FUN_0033a328(piVar6,puVar7);
+    piVar6[3] = (int)uVar8;
+    *puVar7 = puVar7[4];
+    puVar7[2] = puVar7[6];
+    puVar7[1] = puVar7[5];
+    Database_ResetContext(puVar7,1);
+  }
+  iVar4 = (int)uVar8;
+  switch(*puVar7) {
+  case 0x10:
+    uVar5 = FUN_0033bb98(param_1,param_2,param_3);
+    FUN_0033c6d8((int)piVar6);
+    if (piVar6[2] == 8) {
+      FUN_0033cea8(iVar4,(int)piVar6,param_4);
+      return;
+    }
+    if (piVar6[4] != -1) {
+      FUN_0033cc78(piVar6,puVar7,uVar5,aiStack_900);
+      FUN_0033a230(iVar4,(int)piVar6,lVar9,param_4);
+      return;
+    }
+    lVar9 = FUN_003376e8(iVar4,(int *)piVar6[10],piVar6[0xb],(int *)piVar6[7]);
+    *(int *)(param_4 + 2) = (int)lVar9;
+    if (lVar9 != 0) {
+      *param_4 = 0;
+      return;
+    }
+    goto LAB_0033cc38;
+  case 0x11:
+    FUN_0033c2f0(param_1,param_2,param_3);
+    FUN_0033c6d8((int)piVar6);
+    if (piVar6[2] != 7) {
+      if (piVar6[2] != 6) {
+        iVar4 = FUN_00336ce8(iVar4,*(int *)piVar6[10],(uint *)piVar6[7],param_4,0);
+        *(int *)(param_4 + 2) = iVar4;
+        return;
+      }
+      if ((piVar6[0xb] == 0) && ((uint)piVar6[9] < 3)) {
+        iVar4 = FUN_00336dc0(iVar4,*(int *)piVar6[10],piVar6[3],piVar6[4],(short *)param_4,0);
+        *(int *)(param_4 + 2) = iVar4;
+        return;
+      }
+      FUN_0033a0f0(iVar4,(int)piVar6,auStack_870,0x800);
+    }
+    lVar9 = FUN_00336e58(uVar8,(int *)piVar6[10],piVar6[0xb],(uint *)piVar6[7],piVar6[3],piVar6[ 4],
+                         (short *)param_4,0);
+    *(int *)(param_4 + 2) = (int)lVar9;
+    break;
+  case 0x12:
+    FUN_0033c0a8(piVar6,puVar7,param_3);
+    piVar3 = (int *)piVar6[5];
+    uVar1 = *(ushort *)(piVar3 + 1);
+    *(ushort *)(piVar3 + 1) = uVar1 + 1;
+    lVar9 = FUN_00337688(*piVar3,1,(uint)uVar1,(int *)piVar6[7]);
+    *(int *)(param_4 + 2) = (int)lVar9;
+    if (lVar9 != 0) {
+      *param_4 = 0;
+      return;
+    }
+LAB_0033cc38:
+    FUN_0033c548((int)piVar6);
+    *param_4 = 1;
+    break;
+  case 0x14:
+    FUN_0033c068(param_1,param_2,param_3);
+    FUN_0033c6d8((int)piVar6);
+    lVar9 = FUN_00336f28(uVar8,(int *)piVar6[10],piVar6[0xb],(short *)param_4);
+    *(int *)(param_4 + 2) = (int)lVar9;
+    break;
+  case 0x1b:
+    FUN_0033c1d8(param_1,param_2,param_3);
+    FUN_0033c6d8((int)piVar6);
+    lVar9 = FUN_00337818(uVar8,(int *)piVar6[10],piVar6[0xb],(uint *)piVar6[7],(short *)param_4, 0);
+    *(int *)(param_4 + 2) = (int)lVar9;
+    break;
+  case 0x23:
+  case 0x24:
+    uVar5 = FUN_0033bd70(param_1,param_2,param_3,abStack_880);
+    FUN_0033cc78(piVar6,puVar7,uVar5,aiStack_900);
+    FUN_0033c6d8((int)piVar6);
+    uVar2 = piVar6[2];
+    if (uVar2 == 3) {
+      lVar9 = FUN_00337410(iVar4,*(int *)piVar6[10],piVar6[5],lVar9,(long)piVar6[0xb],
+                           (uint)abStack_880[0]);
+      *(int *)(param_4 + 2) = (int)lVar9;
+    }
+    else if (uVar2 < 4) {
+      if (uVar2 == 0) {
+        return;
+      }
+      *(undefined2 *)(piVar6[5] + 4) = 0;
+      *(undefined4 *)(piVar6[5] + 8) = *(undefined4 *)piVar6[10];
+      lVar9 = FUN_00337570(iVar4,(int *)piVar6[10],piVar6[0xb],lVar9,(int *)piVar6[5],
+                           (short *)param_4);
+      *(int *)(param_4 + 2) = (int)lVar9;
+      if (((lVar9 != 0) && (lVar9 != 0x17)) && ((lVar9 != 0x15 && (lVar9 != 0x14)))) {
+        if (piVar6[2] == 2) {
+          *(undefined4 *)(piVar6[5] + 0xc) = 0;
+          piVar6[2] = 1;
+          return;
+        }
+        return;
+      }
+    }
+    else {
+      if (uVar2 != 5) {
+        return;
+      }
+      *(undefined2 *)(piVar6[5] + 4) = 0;
+      FUN_0033a230(iVar4,(int)piVar6,lVar9,param_4);
+      iVar4 = *(int *)(param_4 + 2);
+      if ((((iVar4 != 0) && (iVar4 != 0x17)) && (iVar4 != 0x15)) && (iVar4 != 0x14)) {
+        return;
+      }
+      *(int *)piVar6[10] = piVar6[4];
+      *(undefined4 *)(piVar6[10] + 4) = 2;
+      *(undefined4 *)(piVar6[10] + 8) = 0;
+      *(undefined4 *)(piVar6[10] + 0xc) = 0xffffffff;
+      *(undefined4 *)(piVar6[10] + 0x10) = 2;
+      *(undefined4 *)(piVar6[10] + 0x14) = 0;
+      *(int *)(piVar6[5] + 8) = piVar6[4];
+      lVar9 = FUN_00337570(piVar6[3],(int *)piVar6[10],0,lVar9,(int *)piVar6[5],(short *)param_4) ;
+      *(int *)(param_4 + 2) = (int)lVar9;
+    }
+  }
+  return;
+}
+--
+Incoming References - Database_ExecuteWithParams
+Database_ExecuteQuery
 
 int TagFieldSetBinary(byte *param_1,int param_2,char *param_3,byte *param_4,int param_5)
 {
