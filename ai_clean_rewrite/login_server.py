@@ -827,21 +827,25 @@ class LoginServer:
     async def _handle_mesg(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
-        """Private message / game invitation.
+        """Private message / room chat / game invitation.
 
-        The client sends 'mesg' with PRIV, TEXT, and ATTR fields.  These
-        messages did not appear in the original PCAP captures (which only
-        had one client).  From live PS2 traffic we observe:
+        The client sends 'mesg' with PRIV, TEXT, and ATTR fields:
 
-            ATTR=3  —  game invite / invite-related
-            ATTR=3  —  DECL  (decline an invite)
-            ATTR=3  —  <room_token>  (invite with session token)
+            ATTR=0, PRIV=     — room chat (broadcast to all in same room)
+            ATTR=0, PRIV=name — private whisper to a specific user
+            ATTR=3             — game invite / invite-related
 
-        The PRIV field contains the *target* user (can be self).
-        TEXT contains the payload (invite token, 'DECL', chat text, etc.).
+        The PRIV field contains the *target* username (empty = room broadcast).
+        TEXT contains the payload (chat text, invite token, 'DECL', etc.).
 
-        Since we have no PCAP reference for the server response, we
-        acknowledge with S=0 to let the client progress.
+        Binary-verified tags (C→S send path in fcn.00288668):
+            PRIV  — 0x3d8390 (.rodata)
+            TEXT  — 0x3d8398 (.rodata)
+            ATTR  — 0x3d83a0 (.rodata)
+
+        Server relay uses '+msg' type (0x2b6d7367), NOT 'mesg'.
+        The binary has NO 'mesg' receive handler — 'mesg' is send-only.
+        '+msg' is dispatched in LobbyApiUpdate (fcn.0031bdf0) at 0x31c6f8.
         """
         priv = kv.get("PRIV", "")
         text = kv.get("TEXT", "")
@@ -856,7 +860,62 @@ class LoginServer:
         send_kv(writer, "mesg", {"S": "0"})
         await writer.drain()
 
-        LOG.info("[%s] mesg: acknowledged", conn.conn_id)
+        if not text:
+            LOG.info("[%s] mesg: empty TEXT, skip delivery", conn.conn_id)
+            return
+
+        # Build delivery payload — server relay type is '+msg', not 'mesg'.
+        # r2 confirmed: 'mesg' has no receive handler in LobbyApiUpdate.
+        # Only '+msg' (0x2b6d7367) is dispatched there (at 0x31c6f8).
+        payload = {
+            "FROM": conn.persona or conn.username,
+            "TEXT": text,
+            "PRIV": priv,
+            "ATTR": attr,
+        }
+        relay_type = "+msg"
+
+        if priv:
+            # ── Private message: deliver to specific user ────────────
+            for cid, c in self._clients.items():
+                if (c.conn_id != conn.conn_id
+                        and c.authenticated
+                        and c.username.lower() == priv.lower()
+                        and hasattr(c, '_writer')):
+                    try:
+                        send_kv(c._writer, relay_type, payload)
+                        await c._writer.drain()
+                        LOG.info(
+                            "[%s] mesg: delivered to %s (%s)",
+                            conn.conn_id, priv, cid,
+                        )
+                    except Exception:
+                        LOG.warning(
+                            "[%s] mesg: failed to deliver to %s",
+                            conn.conn_id, priv,
+                        )
+                    break
+            else:
+                LOG.info("[%s] mesg: target %s not online", conn.conn_id, priv)
+        else:
+            # ── Room chat (ATTR=0, no PRIV): broadcast to room ───────
+            room_idx = conn.current_room_idx
+            if room_idx < 0:
+                LOG.info("[%s] mesg: not in a room, skip broadcast", conn.conn_id)
+                return
+            for cid, c in self._clients.items():
+                if (c.conn_id != conn.conn_id
+                        and c.authenticated
+                        and c.current_room_idx == room_idx
+                        and hasattr(c, '_writer')):
+                    try:
+                        send_kv(c._writer, relay_type, payload)
+                        await c._writer.drain()
+                    except Exception:
+                        pass
+            LOG.info(
+                "[%s] mesg: broadcast to room %d", conn.conn_id, room_idx,
+            )
 
     async def _handle_ping(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
