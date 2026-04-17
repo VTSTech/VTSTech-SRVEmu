@@ -1,0 +1,17 @@
+{
+    "server": {
+        "identity": "NascarThunder2004",
+        "max_clients": 64
+    },
+    "reliability": {
+        "retransmit_ms": 300,
+        "max_attempts": 5
+    },
+    "database": {
+        "path": "nascar2004.db"
+    },
+    "logging": {
+        "level": "INFO"
+    },
+    "tick_rate_ms": 50
+}

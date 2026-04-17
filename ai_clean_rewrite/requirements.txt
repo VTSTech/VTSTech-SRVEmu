@@ -1,0 +1,6 @@
+# NASCAR Thunder 2004 PS2 Online Server Emulator
+#
+# Python 3.10+ (uses match statements and modern type syntax)
+# No third-party dependencies — pure stdlib asyncio + sqlite3
+
+python>=3.10

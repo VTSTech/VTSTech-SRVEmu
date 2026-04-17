@@ -1,0 +1,7 @@
+{
+    "host": "0.0.0.0",
+    "port": 10901,
+    "buddy_host": "127.0.0.1",
+    "buddy_port": 10899,
+    "debug": true
+}

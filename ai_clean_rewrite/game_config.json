@@ -1,0 +1,14 @@
+{
+    "host": "0.0.0.0",
+    "port": 1073,
+    "buddy_server_host": "127.0.0.1",
+    "buddy_server_port": 1074,
+    "debug": true,
+    "max_sessions": 50,
+    "p2p_port_start": 1075,
+    "heartbeat_interval": 10,
+    "session_timeout": 1800,
+    "qualify_timeout": 300,
+    "race_timeout": 3600,
+    "db_path": "game_server.db"
+}
