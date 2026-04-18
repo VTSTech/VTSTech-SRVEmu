@@ -1,7 +1,7 @@
 # NASCAR Thunder 2004 PS2 — Agent Handoff Document
 
 **Project:** Reverse-engineering and emulating the online server infrastructure for NASCAR Thunder 2004 (PS2, SLUS-20824).
-**Date:** 2026-04-18 (updated session 8 — r2 binary verification of all remaining commands)
+**Date:** 2026-04-18 (updated session 9 — mesg/+msg relay debugging, r2 analysis)
 **Status:** ✅ MULTI-CLIENT WORKING on real PS2 hardware. Two PS2 clients can join the same room, see each other, exchange buddy messages. Keepalive stable, no disconnects. All known binary discrepancies documented in §9.
 
 ---
@@ -431,7 +431,7 @@ pd 80 @ 0x31BEF0  # copies body, builds TIME=int, calls protocol engine
 - **Format:** MIPS R3000 32-bit LE ELF, stripped, 3.01 MB
 - **MD5:** 8ebe8d7f8157480d6a288739fa920c3a
 - **r2 version:** 6.1.5 (built from source at `/home/z/radare2/`, installed to `~/.local/bin/`)
-- **Run command:** `LD_LIBRARY_PATH=/home/z/.local/lib /home/z/.local/bin/r2 -e scr.color=0 NASCAR.ELF`
+- **Run command:** `LD_LIBRARY_PATH=/tmp/my-project/r2-install/usr/local/lib/radare2/ /home/z/my-project/radare2/binr/radare2/radare2 -e scr.color=0 -e bin.cache=true NASCAR.ELF`
 
 ### Key Function
 - **`fcn.0031bdf0`** — `LobbyApiUpdate` — 6,412 bytes, 16-state connection handler
@@ -503,9 +503,10 @@ pd 200 @ 0x31cccc   # +usr handler start
 
 | Item | Location | Purpose |
 |------|----------|---------|
-| `NASCAR.ELF` | `/home/z/my-project/upload/NASCAR.ELF/` | Target PS2 binary (3.01 MB) |
-| radare2 | `/home/z/.local/bin/r2` | v6.1.5 — reverse engineering framework |
-| r2 source | `/home/z/radare2/` | Built from source, `--prefix=/home/z/.local/` |
+| `NASCAR.ELF` | `/home/z/my-project/upload/elf-extract/NASCAR.ELF` | Target PS2 binary (3.01 MB) |
+| radare2 | `/home/z/my-project/radare2/binr/radare2/radare2` | v6.1.5 — reverse engineering framework |
+| r2 libs | `/tmp/my-project/r2-install/usr/local/lib/radare2/` | Runtime libraries |
+| r2 run cmd | `LD_LIBRARY_PATH=/tmp/my-project/r2-install/usr/local/lib/radare2/ /home/z/my-project/radare2/binr/radare2/radare2 -e scr.color=0 -e bin.cache=true NASCAR.ELF` | |
 
 ### Previous r2 Analysis Files (from earlier sessions)
 
@@ -576,10 +577,11 @@ The `LobbyApiUpdate` code also references:
 - [x] +pop uses actual `_room_population()` counts (not hardcoded)
 - [x] Room display correct on real PS2 after all above fixes
 
-### 13.5 Login Server — Untested Handlers
+### 13.5 Login Server — Partially Tested Handlers
 - [ ] `snap` (player stats/leaderboard) — handler implemented but not tested on real PS2
 - [ ] `user` (profile lookup) — handler implemented but not tested on real PS2
-- [ ] `mesg` (private message/invite in lobby) — handler implemented but not tested on real PS2
+- [⚠️] `mesg` (lobby chat) — handler sends `+msg` relay but client shows only ":" — see §16
+- [ ] ATTR=3 (game invite relay) — not yet implemented
 
 ### 13.6 Buddy Server (buddy_server.py :10899)
 - [x] Handles `AUTH` (PROD, VERS, PRES, USER, LKEY=$0)
@@ -887,9 +889,11 @@ All protocol tag string constants verified in NASCAR.ELF:
 | 0x3e3038 | `SLOTS` | connection config |
 | 0x3e3040 | `PERS` | pers, room response, +who |
 | 0x3e3080 | `AUTH` | connection config |
-| 0x3e3088 | `FROM` | SEND delivery |
+| 0x3e3088 | `FROM` | +msg relay, SEND delivery (NOTE: `iz` shows 0x3e3090 as FROM — may be dual reference) |
+| 0x3e3090 | `FROM` | +msg relay (alt reference at 0x3e3090 per iz) |
 | 0x3e3098 | `SEED` | challenge/matchmaking |
-| 0x3e30a0 | `F` | +rom, +usr, move, room |
+| 0x3e30a0 | `WHEN` | +msg handler timestamp area |
+| 0x3e30a8 | `F` | +rom, +usr, move, room |
 | 0x3e30b0 | `N` | +rom, +usr, +who |
 | 0x3e30c8 | `R` | +usr, +who |
 | 0x3e30d8 | `I` | +rom, +usr, PSET, RGET |
@@ -953,7 +957,95 @@ All three new bugs are **low severity** — the system is confirmed working on r
 
 ---
 
-## 15. Remaining Work
+## 15. Lobby Chat — `mesg` / `+msg` Relay (Session 9 — ACTIVE BUG)
+
+### Current State: Client Shows Only ":"
+
+The server correctly relays lobby messages as `+msg` type. The PS2 client processes them (the handler at `0x31c6f8` in `LobbyApiUpdate` runs) but only displays a `:` character in the chat area. This confirms:
+- The `+msg` message type IS dispatched (correct)
+- The client IS processing the relay (not dropping it)
+- The payload format is WRONG — the client can't extract sender/text
+
+### r2 Analysis of `+msg` Handler (0x31c6f8)
+
+The `+msg` handler in `LobbyApiUpdate`:
+1. Checks for callback at `*(s2+0x51c)` — if NULL, skips entirely
+2. Looks up tag `"F"` (0x3e30a8) via `TagFieldFind` to determine message type:
+   - If result has bit 4 set → type = `"cast"` (0x3e30b0 area) — broadcast
+   - If result has bit 0 set → type = `"priv"` (0x3e30e8 area) — private
+   - Default → type = `"chat"` (already in var_104h from `0x3e3088`)
+3. Calls `fcn.0031e938` (flag-checking function using lookup table at `0x3df6e8`) — uses `t5` offset `0x3df6c8` as character mapping table
+4. Calls callback at `*(s2+0x51c)` with: s2 (object), var_100h (chat type string), *(s2+0x51c) (callback function pointer), a2 (context)
+
+**Key strings in .sdata near messaging area (0x3e3080–0x3e3180):**
+
+| Address | String | Notes |
+|---------|--------|-------|
+| 0x3e3080 | `AUTH` | Connection config |
+| 0x3e3088 | `AUTH` | Connection config (alt ref?) |
+| 0x3e3090 | `FROM` | Tag for +msg relay and SEND delivery |
+| 0x3e3098 | `SEED` | Challenge/matchmaking |
+| 0x3e30a0 | `WHEN` | Used by +msg for timestamp |
+| 0x3e30a8 | `F` | Flags — message type determination |
+| 0x3e30b0 | `N` | — |
+| 0x3e30b8 | `RI` | — |
+| 0x3e30c0 | `RT` | — |
+| 0x3e30c8 | `R` | — |
+| 0x3e30d0 | `RF` | — |
+| 0x3e30d8 | `I` | — |
+| 0x3e30e0 | `H` | — |
+| 0x3e30e8 | `A` | — |
+| 0x3e30f0 | `T` | — |
+| 0x3e30f8 | `L` | — |
+| 0x3e3100 | `No` | — |
+| 0x3e3108 | `Yes` | — |
+| 0x3e3128 | `___` | +pop delimiter |
+| 0x3e3130 | `S` | — |
+| 0x3e3138 | `X` | — |
+| 0x3e3458 | `CHAT` | Chat status/presence (buddy) |
+| 0x3e3470 | `send: ` | Debug format string (in `fcn.0036163c`) |
+| 0x3e3468 | `%s\n` | Format string (in `fcn.003615dc`) |
+
+**IMPORTANT:** `WHEN` (0x3e30a0) is referenced near `FROM` in the +msg handler area. The handler may use `WHEN` instead of `TIME` for the timestamp tag.
+
+### What We've Tried
+
+| Attempt | Payload | Result |
+|---------|---------|--------|
+| 1 | `FROM=name\nTEXT=msg\nPRIV=\nATTR=0` | No display |
+| 2 | `FROM=name\nTEXT=msg\nPRIV=\nATTR=0` (with PRIV= from doc) | Client shows `:` |
+| 3 | `FROM=name\nTEXT=msg\nCHAT=public\nTIME=2026.4.17 20:12:07` | Client still shows `:` |
+
+### Hypotheses to Investigate
+
+1. **Tag name is `WHEN` not `TIME`** — `WHEN` (0x3e30a0) is in the .sdata messaging area right near `FROM`. The binary may use `WHEN` for the timestamp in +msg relay.
+
+2. **The callback at `*(s2+0x51c)` is NULL** — If the chat UI module (`FlowModuleUISChatC`) hasn't registered a callback, the handler silently drops the message. The `:` might come from a different code path (e.g., the room user list separator).
+
+3. **The `F` tag is required** — The handler looks up `F` to determine chat type. Without `F` in the relay, the default path may not properly initialize the message display.
+
+4. **`TEXT` tag is wrong** — The handler uses tag lookup from `.rodata` area. For the C→S `mesg` path, `TEXT` is at `0x3d8398` (.rodata). But the +msg receive handler may use a different tag name (e.g., `BODY` like the buddy SEND uses).
+
+5. **Tag ordering matters** — The `fcn.0031ddd0` tag search function scans sequentially. If the parser expects tags in a specific order, the current dict ordering (Python 3.7+ preserves insertion order) may not match.
+
+### Current Server Code (login_server.py)
+
+The `_handle_mesg` function now sends:
+- **Room broadcast:** `FROM=sender, TEXT=msg, CHAT=public, TIME=YYYY.M.D HH:MM:SS` via `+msg`
+- **Private message:** `FROM=sender, TEXT=msg, PRIV=target, TIME=YYYY.M.D HH:MM:SS` via `+msg`
+
+The `TIME` format uses f-string to avoid `%-m`/`%-d` GNU-only format specifiers.
+
+### Next Steps for Next Session
+1. Try `WHEN` instead of `TIME` in the relay payload
+2. Try adding `F=` tag to the relay payload
+3. Disassemble the callback target at `*(s2+0x51c)` to see what tags it reads
+4. Try `BODY` instead of `TEXT` (matching buddy SEND protocol)
+5. Check if `FlowModuleUISChatC` registers the callback — trace initialization
+
+---
+
+## 16. Remaining Work
 
 1. **P2P racing protocol** — The `strt` command triggers P2P racing over UDP port 1073. This is entirely separate from the lobby TCP protocol and needs its own investigation. The EA P2P protocol doc (`NASCAR_P2P_Protocol.md`) covers the basics.
 
