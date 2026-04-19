@@ -131,23 +131,22 @@ Tags and fields the server sends but the binary does not recognize. Client silen
 | `+snp` stats tags (W, T5, T10, LL, LC, STRK, AS, AF) — not in binary | Stats not displayed. Not blocking. |
 | MASK signed/unsigned mismatch (0xFFFFFFFF → -1650254874) | No known issues. |
 
-**Full details:** `r2_binary_verification.md` §Bug Summary
+
 
 ---
 
 ## 5. Implementation Notes (Extracted)
 
 The following completed features are documented in `implementation_notes.md`:
-- **§4 ~png Keepalive** — Server sends every 20s, silent handler, TREF removed (not in binary)
-- **§5 Room Presence & Multi-Client** — `_room_population()`, `_push_existing_room_users()`, `_broadcast_room_join/leave()`, move handler join path
-- **§6 Buddy Messaging SEND** — TYPE=C relay, FROM/TIME delivery, limitations
-- **§13 Testing Checklist** — Full checklist of all confirmed and pending tests
+- **§1 ~png Keepalive** — Server sends every 20s, silent handler, TREF removed (not in binary)
+- **§2 Room Presence & Multi-Client** — `_room_population()`, `_push_existing_room_users()`, `_broadcast_room_join/leave()`, move handler join path
+- **§3 Buddy Messaging SEND** — TYPE=C relay, FROM/TIME delivery, limitations
+- **§4 Testing Checklist** — Full checklist of all confirmed and pending tests
 
 ---
 
-## 6. Handler Analysis (Extracted)
+## 6. Handler Analysis — Key Findings (from r2 disassembly)
 
-Full r2-verified handler disassembly is in `handler_analysis.md`:
 - **TagFieldFind String Constants** — All lobby protocol tags with .sdata addresses
 - **`+rom` handler** — 13-step disassembly, Room Object memory layout (0x68 bytes)
 - **`+usr` handler** — 13-step disassembly, User Object memory layout (0x138 bytes)
@@ -162,15 +161,11 @@ Full r2-verified handler disassembly is in `handler_analysis.md`:
 
 ---
 
-## 7. r2 Binary Verification (Extracted)
+## 7. r2 Binary Verification — Summary
 
-Systematic verification of every command's tags against binary string constants is in `r2_binary_verification.md`.
+All auth/handshake tags confirmed via r2. STATUS, DRANK, ERANK, and most +snp stats tags NOT in binary (harmless — client silently ignores unknown tags). Buddy server tags all confirmed except STATUS.
 
-**Summary:** All auth/handshake tags confirmed. STATUS, DRANK, ERANK, and most +snp stats tags NOT in binary (harmless). Buddy server tags all confirmed except STATUS.
-
-**Complete String Constant Map** (all protocol tags in NASCAR.ELF) is in `r2_binary_verification.md` §Complete Binary String Constant Map.
-
-**r2 session technical details** (commands used, binary info, key function addresses) are in `r2_binary_verification.md`.
+**Complete String Constant Map** (all protocol tags in NASCAR.ELF) and detailed r2 session commands are in the r2 analysis output files (`disasm_*.txt`, `r2_*.txt`).
 
 ---
 
@@ -228,11 +223,11 @@ Also: `0x74696d65` = "time" (timeout), `0x7465726d` = "term" (terminated), `0x6f
 
 | File | Content |
 |------|---------|
-| `handler_analysis.md` | r2-verified handler disassembly, memory layouts, tag constants |
-| `r2_binary_verification.md` | All-command tag verification, string constant map, r2 commands |
 | `r2_plusmsg_analysis.md` | +msg handler deep dive, hypotheses, chat bug analysis |
 | `implementation_notes.md` | ~png keepalive, room presence, buddy messaging, testing checklist |
-| `solved_issues.md` | Historical issues and resolutions |
+| `NASCAR_Function_Map.md` | Function address map from ELF |
+| `NASCAR_EA_Lobby_Protocol.md` | EA lobby protocol overview |
+| `NASCAR_P2P_Protocol.md` | P2P racing protocol (UDP :1073) |
 
 ### Binary & Tools
 
