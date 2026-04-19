@@ -251,7 +251,7 @@ Also: `0x74696d65` = "time" (timeout), `0x7465726d` = "term" (terminated), `0x6f
 1. **P2P racing protocol** — `strt` command triggers P2P over UDP port 1073. See `NASCAR_P2P_Protocol.md`.
 2. **Custom room creation** — `room` handler implemented but untested on real PS2.
 3. **Game invitations** — Buddy SEND works for chat (TYPE=C) but invitations (SUBJ, ROOM, SEED, ACPT, DECL) not yet implemented.
-4. **Lobby chat TEXT** — +msg relay shows red `:` on PS2 — see §8.
+4. **Lobby chat +msg** — Relay shows white `:` on PS2 (both `BODY` and `TEXT` ruled out) — see §8.
 5. **Offline message store** — Buddy SEND drops messages for offline users.
 6. **Snap/stats and user lookup** — Implemented but untested on real PS2.
 7. **RADD (add buddy)** — Buddy server doesn't handle friend add/remove yet.

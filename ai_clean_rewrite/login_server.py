@@ -846,6 +846,20 @@ class LoginServer:
         Server relay uses '+msg' type (0x2b6d7367), NOT 'mesg'.
         The binary has NO 'mesg' receive handler — 'mesg' is send-only.
         '+msg' is dispatched in LobbyApiUpdate (fcn.0031bdf0) at 0x31c6f8.
+
+        Relay payload format (protocol doc §8.4 + r2 analysis):
+            Room broadcast: FROM=username, TEXT=message, CHAT=public, TIME=ts
+            Private message: FROM=username, TEXT=message, PRIV=target, TIME=ts
+
+        The +msg handler at 0x31c6f8 in LobbyApiUpdate dispatches S→C relay.
+        Protocol doc §8.4: "Server broadcasts to ALL room members" — sender
+        included.  The client uses the +msg for display, not local echo.
+
+        Key fixes:
+            Session 12: BODY→TEXT, F=B→CHAT=public, WHEN→TIME, FROM=sid→username
+            Session 14: Include SENDER in +msg broadcast (was excluded!)
+                       Sender needs +msg to display their own message.
+                       Remove mesg S=0 ack (client parsed it as empty chat → ":")
         """
         priv = kv.get("PRIV", "")
         text = kv.get("TEXT", "")
@@ -856,10 +870,11 @@ class LoginServer:
             conn.conn_id, priv, text, attr,
         )
 
-        # Acknowledge the message
-        send_kv(writer, "mesg", {"S": "0"})
-        await writer.drain()
-
+        # Do NOT send mesg S=0 ack — the client has no 'mesg' receive
+        # handler.  The binary confirms: 'mesg' is send-only; only '+msg'
+        # (0x2b6d7367) is dispatched in LobbyApiUpdate at 0x31c6f8.
+        # Sending mesg S=0 caused the client to parse it as an empty chat
+        # message, displaying a bare ":" separator.
         if not text:
             LOG.info("[%s] mesg: empty TEXT, skip delivery", conn.conn_id)
             return
@@ -867,19 +882,22 @@ class LoginServer:
         # Build delivery payload — server relay type is '+msg', not 'mesg'.
         # r2 confirmed: 'mesg' has no receive handler in LobbyApiUpdate.
         # Only '+msg' (0x2b6d7367) is dispatched there (at 0x31c6f8).
-        payload = {
-            "FROM": conn.persona or conn.username,
-            "TEXT": text,
-            "PRIV": priv,
-            "ATTR": attr,
-        }
         relay_type = "+msg"
+
+        # EA uses no-leading-zero month/day (e.g. "2003.7.2 14:30:00").
+        t = time.localtime()
+        now = f"{t.tm_year}.{t.tm_mon}.{t.tm_mday} {t.tm_hour:02d}:{t.tm_min:02d}:{t.tm_sec:02d}"
 
         if priv:
             # ── Private message: deliver to specific user ────────────
+            payload = {
+                "FROM": conn.username,
+                "TEXT": text,
+                "PRIV": priv,
+                "TIME": now,
+            }
             for cid, c in self._clients.items():
-                if (c.conn_id != conn.conn_id
-                        and c.authenticated
+                if (c.authenticated
                         and c.username.lower() == priv.lower()
                         and hasattr(c, '_writer')):
                     try:
@@ -899,22 +917,30 @@ class LoginServer:
                 LOG.info("[%s] mesg: target %s not online", conn.conn_id, priv)
         else:
             # ── Room chat (ATTR=0, no PRIV): broadcast to room ───────
+            payload = {
+                "FROM": conn.username,
+                "TEXT": text,
+                "CHAT": "public",
+                "TIME": now,
+            }
             room_idx = conn.current_room_idx
             if room_idx < 0:
                 LOG.info("[%s] mesg: not in a room, skip broadcast", conn.conn_id)
                 return
+            delivered = 0
             for cid, c in self._clients.items():
-                if (c.conn_id != conn.conn_id
-                        and c.authenticated
+                if (c.authenticated
                         and c.current_room_idx == room_idx
                         and hasattr(c, '_writer')):
                     try:
                         send_kv(c._writer, relay_type, payload)
                         await c._writer.drain()
+                        delivered += 1
                     except Exception:
                         pass
             LOG.info(
-                "[%s] mesg: broadcast to room %d", conn.conn_id, room_idx,
+                "[%s] mesg: broadcast to room %d (%d clients)",
+                conn.conn_id, room_idx, delivered,
             )
 
     async def _handle_ping(

@@ -153,7 +153,7 @@ Also in binary: `AWAY`, `DISC`, `GROUP`, `SUBJ`, `SIZE` — other message types 
 ### 4.5 Login Server — Partially Tested Handlers
 - [ ] `snap` (player stats/leaderboard) — handler implemented but not tested on real PS2
 - [ ] `user` (profile lookup) — handler implemented but not tested on real PS2
-- [⚠️] `mesg` (lobby chat) — handler sends `+msg` relay, now shows red ":" (F=B works, content still empty) — see agent-handoff.md §8
+- [⚠️] `mesg` (lobby chat) — handler sends `+msg` relay, currently shows white `:` — both `BODY` and `TEXT` ruled out, need to find correct S→C tag — see `r2_plusmsg_analysis.md` and `agent-handoff.md` §8
 - [ ] ATTR=3 (game invite relay) — not yet implemented
 
 ### 4.6 Buddy Server (buddy_server.py :10899)
