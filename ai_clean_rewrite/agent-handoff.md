@@ -1,7 +1,7 @@
 # NASCAR Thunder 2004 PS2 — Agent Handoff Document
 
 **Project:** Reverse-engineering and emulating the online server infrastructure for NASCAR Thunder 2004 (PS2, SLUS-20824).
-**Date:** 2026-04-18 (updated session 9 — mesg/+msg relay debugging, r2 analysis)
+**Date:** 2026-04-19 (updated session 10 — F flag encoding cracked, FROM=session_id change, continued +msg debugging)
 **Status:** ✅ MULTI-CLIENT WORKING on real PS2 hardware. Two PS2 clients can join the same room, see each other, exchange buddy messages. Keepalive stable, no disconnects. All known binary discrepancies documented in §9.
 
 ---
@@ -580,7 +580,7 @@ The `LobbyApiUpdate` code also references:
 ### 13.5 Login Server — Partially Tested Handlers
 - [ ] `snap` (player stats/leaderboard) — handler implemented but not tested on real PS2
 - [ ] `user` (profile lookup) — handler implemented but not tested on real PS2
-- [⚠️] `mesg` (lobby chat) — handler sends `+msg` relay but client shows only ":" — see §16
+- [⚠️] `mesg` (lobby chat) — handler sends `+msg` relay, now shows red ":" (F=B works, content still empty) — see §15
 - [ ] ATTR=3 (game invite relay) — not yet implemented
 
 ### 13.6 Buddy Server (buddy_server.py :10899)
@@ -957,13 +957,14 @@ All three new bugs are **low severity** — the system is confirmed working on r
 
 ---
 
-## 15. Lobby Chat — `mesg` / `+msg` Relay (Session 9 — ACTIVE BUG)
+## 15. Lobby Chat — `mesg` / `+msg` Relay (Sessions 9–10 — ACTIVE BUG)
 
-### Current State: Client Shows Only ":"
+### Current State: Client Shows Red ":"
 
-The server correctly relays lobby messages as `+msg` type. The PS2 client processes them (the handler at `0x31c6f8` in `LobbyApiUpdate` runs) but only displays a `:` character in the chat area. This confirms:
+The server correctly relays lobby messages as `+msg` type. The PS2 client processes them (the handler at `0x31c6f8` in `LobbyApiUpdate` runs) but only displays a **red** `:` character in the chat area. This confirms:
 - The `+msg` message type IS dispatched (correct)
 - The client IS processing the relay (not dropping it)
+- The callback at `*(s2+0x51c)` IS invoked (confirmed by red color = "cast" type routing works)
 - The payload format is WRONG — the client can't extract sender/text
 
 ### r2 Analysis of `+msg` Handler (0x31c6f8)
@@ -1045,7 +1046,7 @@ The `TIME` format uses f-string to avoid `%-m`/`%-d` GNU-only format specifiers.
 
 ---
 
-## 16. Remaining Work
+## 16. Remaining Work (Updated Session 10)
 
 1. **P2P racing protocol** — The `strt` command triggers P2P racing over UDP port 1073. This is entirely separate from the lobby TCP protocol and needs its own investigation. The EA P2P protocol doc (`NASCAR_P2P_Protocol.md`) covers the basics.
 
