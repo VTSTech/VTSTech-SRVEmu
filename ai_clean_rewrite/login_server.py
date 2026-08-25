@@ -815,21 +815,27 @@ class LoginServer:
     async def _handle_mesg(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
-        """Private message / game invitation.
+        """Private message / game invitation / challenge system.
 
-        The client sends 'mesg' with PRIV, TEXT, and ATTR fields.  These
-        messages did not appear in the original PCAP captures (which only
-        had one client).  From live PS2 traffic we observe:
+        The client sends 'mesg' with PRIV, TEXT, and ATTR fields:
+            ATTR=0, PRIV=     — room chat (broadcast to all in same room)
+            ATTR=0, PRIV=name — private whisper to a specific user
+            ATTR=3             — game invite / challenge / invite-related
+            ATTR=3, TEXT=DECL — decline an invite
+            ATTR=3, TEXT=ACPT — accept an invite
+            ATTR=3, TEXT=token — challenge token (race invitation)
 
-            ATTR=3  —  game invite / invite-related
-            ATTR=3  —  DECL  (decline an invite)
-            ATTR=3  —  <room_token>  (invite with session token)
+        The PRIV field contains the *target* username (empty = room broadcast).
+        TEXT contains the payload (chat text, invite token, 'DECL', 'ACPT', etc.).
 
-        The PRIV field contains the *target* user (can be self).
-        TEXT contains the payload (invite token, 'DECL', chat text, etc.).
+        Binary-verified tags (C→S send path in fcn.00288668):
+            PRIV  — 0x3d8390 (.rodata)
+            TEXT  — 0x3d8398 (.rodata)
+            ATTR  — 0x3d83a0 (.rodata)
 
-        Since we have no PCAP reference for the server response, we
-        acknowledge with S=0 to let the client progress.
+        Server relay uses '+msg' type (0x2b6d7367), NOT 'mesg'.
+        The binary has NO 'mesg' receive handler — 'mesg' is send-only.
+        '+msg' is dispatched in LobbyApiUpdate (fcn.0031bdf0) at 0x31c6f8.
         """
         priv = kv.get("PRIV", "")
         text = kv.get("TEXT", "")
@@ -840,11 +846,184 @@ class LoginServer:
             conn.conn_id, priv, text, attr,
         )
 
-        # Acknowledge the message
-        send_kv(writer, "mesg", {"S": "0"})
-        await writer.drain()
+        # Do NOT send mesg S=0 ack — the client has no 'mesg' receive
+        # handler.  The binary confirms: 'mesg' is send-only; only '+msg'
+        # (0x2b6d7367) is dispatched in LobbyApiUpdate at 0x31c6f8.
+        # Sending mesg S=0 caused the client to parse it as an empty chat
+        # message, displaying a bare ":" separator.
+        if not text:
+            LOG.info("[%s] mesg: empty TEXT, skip delivery", conn.conn_id)
+            return
 
-        LOG.info("[%s] mesg: acknowledged", conn.conn_id)
+        # Build delivery payload — server relay type is '+msg', not 'mesg'.
+        # r2 confirmed: 'mesg' has no receive handler in LobbyApiUpdate.
+        # Only '+msg' (0x2b6d7367) is dispatched there (at 0x31c6f8).
+        relay_type = "+msg"
+
+        # EA uses no-leading-zero month/day (e.g. "2003.7.2 14:30:00").
+        t = time.localtime()
+        now = f"{t.tm_year}.{t.tm_mon}.{t.tm_mday} {t.tm_hour:02d}:{t.tm_min:02d}:{t.tm_sec:02d}"
+
+        if attr == "3":
+            # ── Challenge protocol (ATTR=3) ───────────────────────────────
+            if text == "DECL":
+                # Decline challenge
+                LOG.info("[%s] Challenge declined by %s", conn.conn_id, conn.username)
+                # Forward the decline to the original challenger
+                if priv:
+                    await self._forward_challenge_response(conn, priv, "DECL")
+                return
+            elif text == "ACPT":
+                # Accept challenge
+                LOG.info("[%s] Challenge accepted by %s", conn.conn_id, conn.username)
+                # Forward the acceptance to the original challenger
+                if priv:
+                    await self._forward_challenge_response(conn, priv, "ACPT")
+                return
+            else:
+                # Challenge token (race invitation)
+                LOG.info("[%s] Challenge token from %s to %s: %s", 
+                         conn.conn_id, conn.username, priv, text)
+                if priv:
+                    # Forward challenge to target user
+                    await self._forward_challenge(conn, priv, text)
+                return
+        elif priv:
+            # ── Private message: deliver to specific user ──────────────────
+            payload = {
+                "FROM": conn.username,
+                "TEXT": text,
+                "PRIV": priv,
+                "TIME": now,
+            }
+            for cid, c in self._clients.items():
+                if (c.authenticated
+                        and c.username.lower() == priv.lower()
+                        and hasattr(c, '_writer')):
+                    try:
+                        send_kv(c._writer, relay_type, payload)
+                        await c._writer.drain()
+                        LOG.info(
+                            "[%s] mesg: delivered to %s (%s)",
+                            conn.conn_id, priv, cid,
+                        )
+                    except Exception:
+                        LOG.warning(
+                            "[%s] mesg: failed to deliver to %s",
+                            conn.conn_id, priv,
+                        )
+                    break
+            else:
+                LOG.info("[%s] mesg: target %s not online", conn.conn_id, priv)
+        else:
+            # ── Room chat (ATTR=0, no PRIV): broadcast to room ──────────
+            payload = {
+                "FROM": conn.username,
+                "TEXT": text,
+                "CHAT": "public",
+                "TIME": now,
+            }
+            room_idx = conn.current_room_idx
+            if room_idx < 0:
+                LOG.info("[%s] mesg: not in a room, skip broadcast", conn.conn_id)
+                return
+            delivered = 0
+            for cid, c in self._clients.items():
+                if (c.authenticated
+                        and c.current_room_idx == room_idx
+                        and hasattr(c, '_writer')):
+                    try:
+                        send_kv(c._writer, relay_type, payload)
+                        await c._writer.drain()
+                        delivered += 1
+                    except Exception:
+                        pass
+            LOG.info(
+                "[%s] mesg: broadcast to room %d (%d clients)",
+                conn.conn_id, room_idx, delivered,
+            )
+
+    def _forward_challenge(self, conn: ClientConn, target_username: str, token: str) -> None:
+        """Forward a challenge token to the target user."""
+        for target_conn_id, target_conn in self._clients.items():
+            if target_conn.username == target_username and target_conn.conn_id != conn.conn_id:
+                try:
+                    if target_conn_id in self._writers:
+                        target_writer = self._writers[target_conn_id]
+                        challenge_msg = {
+                            "PRIV": conn.username,
+                            "TEXT": token,
+                            "ATTR": "3"
+                        }
+                        send_kv(target_writer, "mesg", challenge_msg)
+                        LOG.info("[%s] Forwarded challenge from %s to %s: %s", 
+                                 conn.conn_id[:8], conn.username, target_username, token)
+                except Exception as e:
+                    LOG.error("[%s] Error forwarding challenge to %s: %s", 
+                             conn.conn_id[:8], target_username, e)
+    
+    def _forward_challenge_response(self, conn: ClientConn, target_username: str, response: str) -> None:
+        """Forward a challenge response (DECL/ACPT) to the original challenger."""
+        for target_conn_id, target_conn in self._clients.items():
+            if target_conn.username == target_username and target_conn.conn_id != conn.conn_id:
+                try:
+                    if target_conn_id in self._writers:
+                        target_writer = self._writers[target_conn_id]
+                        response_msg = {
+                            "PRIV": conn.username,
+                            "TEXT": response,
+                            "ATTR": "3"
+                        }
+                        send_kv(target_writer, "mesg", response_msg)
+                        LOG.info("[%s] Forwarded challenge %s from %s to %s", 
+                                 conn.conn_id[:8], response, conn.username, target_username)
+                except Exception as e:
+                    LOG.error("[%s] Error forwarding challenge response to %s: %s", 
+                             conn.conn_id[:8], target_username, e)
+    
+    def _parse_challenge_token(self, token: str) -> Dict[str, any]:
+        """Parse NASCAR challenge tokens into race parameters.
+        
+        Token format: w893m_a017l_g
+        - w893m -> Track ID (11 = Daytona)
+        - a017l -> AI difficulty + race parameters  
+        - g -> Game mode flag
+        """
+        result = {
+            "raw": token,
+            "track": None,
+            "ai_difficulty": None,
+            "game_mode": None,
+            "valid": False
+        }
+        
+        if not token:
+            return result
+            
+        # Parse track ID (w893m = Daytona)
+        if token.startswith('w893m'):
+            result["track"] = 11  # Daytona
+            result["track_name"] = "Daytona"
+            
+            # Parse AI difficulty (a017l)
+            if '_a017l_' in token:
+                result["ai_difficulty"] = 1  # Medium
+                result["ai_name"] = "Medium"
+            elif '_a016l_' in token:
+                result["ai_difficulty"] = 0  # Easy
+                result["ai_name"] = "Easy"
+            elif '_a018l_' in token:
+                result["ai_difficulty"] = 2  # Hard
+                result["ai_name"] = "Hard"
+            
+            # Parse game mode (g)
+            if token.endswith('_g'):
+                result["game_mode"] = "race"
+                result["game_mode_name"] = "Race"
+                
+            result["valid"] = True
+            
+        return result
 
     async def _handle_ping(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
