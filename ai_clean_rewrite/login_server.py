@@ -59,11 +59,10 @@ if _dir not in sys.path:
 
 from ea_protocol import (
     TCPStreamReader,
-    send_kv,
     send_frame,
+    send_kv,
     build_kv_body,
     DEFAULT_LOGIN_PORT,
-    setup_logging,
 )
 
 LOG = logging.getLogger("login_server")
@@ -161,8 +160,7 @@ class ClientConn:
     current_room_idx: int = -1
     room_index: int = -1     # RI field (room they're in)
     created_at: float = field(default_factory=time.time)
-    _writer: Optional[asyncio.StreamWriter] = field(default=None, repr=False)
-    _keepalive_task: Optional[asyncio.Task] = field(default=None, repr=False)
+    last_activity: float = field(default_factory=time.time)
 
 
 # ── Database ────────────────────────────────────────────────────────────────
@@ -272,6 +270,8 @@ class LoginServer:
 
         # Active connections: conn_id -> ClientConn
         self._clients: Dict[str, ClientConn] = {}
+        # Track writers per connection for broadcasting: conn_id -> writer
+        self._writers: Dict[str, asyncio.StreamWriter] = {}
 
         # Default rooms (matching PCAP captures)
         # Index 0 (Lobby) is implicit — the client assumes it exists and
@@ -297,14 +297,12 @@ class LoginServer:
         peer = writer.get_extra_info("peername")
         LOG.info("Connection from %s", peer)
         conn = ClientConn(addr=peer)
-        conn._writer = writer
         self._clients[conn.conn_id] = conn
+        self._writers[conn.conn_id] = writer
         stream = TCPStreamReader(reader)
-
-        # Start periodic keepalive to prevent client disconnect
-        conn._keepalive_task = asyncio.create_task(
-            self._keepalive_loop(conn, writer)
-        )
+        
+        # Start keepalive loop for this connection
+        asyncio.create_task(self._keepalive_loop(conn, writer))
 
         try:
             while True:
@@ -325,14 +323,9 @@ class LoginServer:
         except Exception as exc:
             LOG.error("[%s] Unhandled exception: %s: %s", conn.conn_id, type(exc).__name__, exc, exc_info=True)
         finally:
-            # Cancel keepalive task
-            if conn._keepalive_task:
-                conn._keepalive_task.cancel()
-            # Notify other clients in the same room
-            if conn.authenticated and conn.current_room_idx > 0:
-                await self._broadcast_room_leave(conn, conn.current_room_idx)
             # Clean up
             self._clients.pop(conn.conn_id, None)
+            self._writers.pop(conn.conn_id, None)
             writer.close()
             try:
                 await writer.wait_closed()
@@ -361,7 +354,6 @@ class LoginServer:
             "snap": self._handle_snap,
             "user": self._handle_user,
             "mesg": self._handle_mesg,
-            "peek": self._handle_peek,
             "~png": self._handle_ping,
         }.get(msg_type)
 
@@ -591,8 +583,7 @@ class LoginServer:
             conn.current_room_idx = 0
             conn.room_index = 0
             LOG.info("[%s] move: left room %d (back to Lobby)", conn.conn_id, old_idx)
-            # PCAP shows: move I=0 N=Lobby F=0 (NOT S=0)
-            send_kv(writer, "move", {"I": "0", "N": "Lobby", "F": "0"})
+            send_kv(writer, "move", {"S": "0"})
             await writer.drain()
             # Match PCAP move-leave pushes: +pop, +who, +usr, +pop
             await asyncio.sleep(0.05)
@@ -603,9 +594,6 @@ class LoginServer:
             await self._push_user_login(conn, writer)
             await asyncio.sleep(0.05)
             await self._push_population(conn, writer)
-            # Notify other clients in the old room
-            if old_idx > 0:
-                await self._broadcast_room_leave(conn, old_idx)
             return
 
         # Find room by name
@@ -637,12 +625,10 @@ class LoginServer:
             await self._push_population(conn, writer)
             await asyncio.sleep(0.05)
             await self._push_user_login(conn, writer)
-
-            # Push existing room occupants to the joiner
-            await self._push_existing_room_users(conn, room_idx, writer)
-
-            # Broadcast to other clients already in this room
-            await self._broadcast_room_join(conn, room_idx)
+            
+            # BROADCAST user info to all clients in the same room
+            await asyncio.sleep(0.05)
+            await self._broadcast_room_users(room_idx)
         else:
             LOG.warning("[%s] Room not found: %s", conn.conn_id, room_name)
 
@@ -788,60 +774,6 @@ class LoginServer:
         await writer.drain()
         LOG.info("[%s] snap: sent final S=0", conn.conn_id)
 
-    async def _handle_peek(
-        self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
-    ) -> None:
-        """Room peek — client requests the user list for a named room.
-
-        The PS2 sends ``peek NAME=<room_name>`` when the user highlights or
-        selects a room from the room list.  The server responds by pushing
-        ``+usr`` entries for every authenticated user currently in that room,
-        followed by a ``peek S=0`` terminator (mirrors the snap protocol).
-
-        The response lets the client display "X in room" and a username list
-        without the client having to join the room first.
-        """
-        room_name = kv.get("NAME", "")
-        LOG.info("[%s] peek: NAME=%s", conn.conn_id, room_name)
-
-        # Find the room by name
-        target_idx = -1
-        for room in self._rooms:
-            if room.name.lower() == room_name.lower():
-                target_idx = room.index
-                break
-
-        if target_idx < 0:
-            LOG.warning("[%s] peek: room not found: %s", conn.conn_id, room_name)
-            send_kv(writer, "peek", {"S": "0"})
-            await writer.drain()
-            return
-
-        # Push +usr for every user in the target room
-        count = 0
-        for cid, c in self._clients.items():
-            if c.authenticated and c.current_room_idx == target_idx:
-                user_id = abs(hash(c.username)) % 1000000
-                send_kv(writer, "+usr", {
-                    "I": str(user_id),
-                    "N": c.username,
-                    "A": ip_to_int(c.client_ip or self.buddy_host),
-                    "R": str(target_idx),
-                    "S": "Online",
-                    "F": "0",
-                    "P": "",
-                })
-                await writer.drain()
-                await asyncio.sleep(0.02)
-                count += 1
-
-        # Terminator
-        await asyncio.sleep(0.03)
-        send_kv(writer, "peek", {"S": "0"})
-        await writer.drain()
-        LOG.info("[%s] peek: sent %d users in room '%s' (idx=%d)",
-                 conn.conn_id, count, room_name, target_idx)
-
     async def _handle_user(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
@@ -883,39 +815,21 @@ class LoginServer:
     async def _handle_mesg(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
-        """Private message / room chat / game invitation.
+        """Private message / game invitation.
 
-        The client sends 'mesg' with PRIV, TEXT, and ATTR fields:
+        The client sends 'mesg' with PRIV, TEXT, and ATTR fields.  These
+        messages did not appear in the original PCAP captures (which only
+        had one client).  From live PS2 traffic we observe:
 
-            ATTR=0, PRIV=     — room chat (broadcast to all in same room)
-            ATTR=0, PRIV=name — private whisper to a specific user
-            ATTR=3             — game invite / invite-related
+            ATTR=3  —  game invite / invite-related
+            ATTR=3  —  DECL  (decline an invite)
+            ATTR=3  —  <room_token>  (invite with session token)
 
-        The PRIV field contains the *target* username (empty = room broadcast).
-        TEXT contains the payload (chat text, invite token, 'DECL', etc.).
+        The PRIV field contains the *target* user (can be self).
+        TEXT contains the payload (invite token, 'DECL', chat text, etc.).
 
-        Binary-verified tags (C→S send path in fcn.00288668):
-            PRIV  — 0x3d8390 (.rodata)
-            TEXT  — 0x3d8398 (.rodata)
-            ATTR  — 0x3d83a0 (.rodata)
-
-        Server relay uses '+msg' type (0x2b6d7367), NOT 'mesg'.
-        The binary has NO 'mesg' receive handler — 'mesg' is send-only.
-        '+msg' is dispatched in LobbyApiUpdate (fcn.0031bdf0) at 0x31c6f8.
-
-        Relay payload format (protocol doc §8.4 + r2 analysis):
-            Room broadcast: FROM=username, TEXT=message, CHAT=public, TIME=ts
-            Private message: FROM=username, TEXT=message, PRIV=target, TIME=ts
-
-        The +msg handler at 0x31c6f8 in LobbyApiUpdate dispatches S→C relay.
-        Protocol doc §8.4: "Server broadcasts to ALL room members" — sender
-        included.  The client uses the +msg for display, not local echo.
-
-        Key fixes:
-            Session 12: BODY→TEXT, F=B→CHAT=public, WHEN→TIME, FROM=sid→username
-            Session 14: Include SENDER in +msg broadcast (was excluded!)
-                       Sender needs +msg to display their own message.
-                       Remove mesg S=0 ack (client parsed it as empty chat → ":")
+        Since we have no PCAP reference for the server response, we
+        acknowledge with S=0 to let the client progress.
         """
         priv = kv.get("PRIV", "")
         text = kv.get("TEXT", "")
@@ -926,78 +840,11 @@ class LoginServer:
             conn.conn_id, priv, text, attr,
         )
 
-        # Do NOT send mesg S=0 ack — the client has no 'mesg' receive
-        # handler.  The binary confirms: 'mesg' is send-only; only '+msg'
-        # (0x2b6d7367) is dispatched in LobbyApiUpdate at 0x31c6f8.
-        # Sending mesg S=0 caused the client to parse it as an empty chat
-        # message, displaying a bare ":" separator.
-        if not text:
-            LOG.info("[%s] mesg: empty TEXT, skip delivery", conn.conn_id)
-            return
+        # Acknowledge the message
+        send_kv(writer, "mesg", {"S": "0"})
+        await writer.drain()
 
-        # Build delivery payload — server relay type is '+msg', not 'mesg'.
-        # r2 confirmed: 'mesg' has no receive handler in LobbyApiUpdate.
-        # Only '+msg' (0x2b6d7367) is dispatched there (at 0x31c6f8).
-        relay_type = "+msg"
-
-        # EA uses no-leading-zero month/day (e.g. "2003.7.2 14:30:00").
-        t = time.localtime()
-        now = f"{t.tm_year}.{t.tm_mon}.{t.tm_mday} {t.tm_hour:02d}:{t.tm_min:02d}:{t.tm_sec:02d}"
-
-        if priv:
-            # ── Private message: deliver to specific user ────────────
-            payload = {
-                "FROM": conn.username,
-                "TEXT": text,
-                "PRIV": priv,
-                "TIME": now,
-            }
-            for cid, c in self._clients.items():
-                if (c.authenticated
-                        and c.username.lower() == priv.lower()
-                        and hasattr(c, '_writer')):
-                    try:
-                        send_kv(c._writer, relay_type, payload)
-                        await c._writer.drain()
-                        LOG.info(
-                            "[%s] mesg: delivered to %s (%s)",
-                            conn.conn_id, priv, cid,
-                        )
-                    except Exception:
-                        LOG.warning(
-                            "[%s] mesg: failed to deliver to %s",
-                            conn.conn_id, priv,
-                        )
-                    break
-            else:
-                LOG.info("[%s] mesg: target %s not online", conn.conn_id, priv)
-        else:
-            # ── Room chat (ATTR=0, no PRIV): broadcast to room ───────
-            payload = {
-                "FROM": conn.username,
-                "TEXT": text,
-                "CHAT": "public",
-                "TIME": now,
-            }
-            room_idx = conn.current_room_idx
-            if room_idx < 0:
-                LOG.info("[%s] mesg: not in a room, skip broadcast", conn.conn_id)
-                return
-            delivered = 0
-            for cid, c in self._clients.items():
-                if (c.authenticated
-                        and c.current_room_idx == room_idx
-                        and hasattr(c, '_writer')):
-                    try:
-                        send_kv(c._writer, relay_type, payload)
-                        await c._writer.drain()
-                        delivered += 1
-                    except Exception:
-                        pass
-            LOG.info(
-                "[%s] mesg: broadcast to room %d (%d clients)",
-                conn.conn_id, room_idx, delivered,
-            )
+        LOG.info("[%s] mesg: acknowledged", conn.conn_id)
 
     async def _handle_ping(
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
@@ -1010,31 +857,7 @@ class LoginServer:
         """
         LOG.info("[%s] ~png: %s", conn.conn_id, dict(kv))
         conn.last_activity = time.time()
-
-    # ── Keepalive ───────────────────────────────────────────────────────
-
-    async def _keepalive_loop(
-        self, conn: ClientConn, writer: asyncio.StreamWriter
-    ) -> None:
-        """Send periodic ~png keepalive to prevent client timeout/disconnect."""
-        try:
-            while True:
-                await asyncio.sleep(20)  # every 20 seconds
-                if conn.authenticated:
-                    send_kv(writer, "~png", {
-                        "TIME": "2",
-                        "SESS": conn.session_id,
-                        "NAME": conn.username,
-                        "STATUS": "0",
-                    })
-                    try:
-                        await writer.drain()
-                    except Exception:
-                        break
-        except asyncio.CancelledError:
-            pass
-        except Exception:
-            pass
+        LOG.info("[%s] Updated activity time", conn.conn_id[:8])
 
     # ── Server push messages ────────────────────────────────────────────────
 
@@ -1059,9 +882,7 @@ class LoginServer:
         """Push +rom — room listings.
 
         Each room uses I (Room ID) per decompilation.
-        T = current player count (from room population), not room type.
         """
-        pop_counts = self._room_population()
         rooms = self._rooms
         for i, room in enumerate(rooms):
             # Skip Lobby if not requested
@@ -1073,9 +894,9 @@ class LoginServer:
                 "N": room.name,
                 "H": room.heading,
                 "A": ip_to_int(room.address),
-                "T": str(pop_counts.get(room.index, 0)),
+                "T": str(1 if room.index == 0 else 0),  # Lobby=1, other rooms=0
                 "L": str(room.limit),
-                "F": str(room.flags),
+                "F": str(room.flags)
             })
             await writer.drain()
             await asyncio.sleep(0.02)
@@ -1095,13 +916,12 @@ class LoginServer:
             return
         user_id = abs(hash(conn.username)) % 1000000
         send_kv(writer, "+usr", {
-            "I": str(user_id),
-            "N": conn.username,
-            "F": "1",
-            "A": ip_to_int(conn.client_ip or self.buddy_host),
-            "S": "Online",
-            "P": "",  # Bug #13: password field (client reads it)
-        })
+                "I": str(user_id),
+                "N": conn.username,
+                "A": ip_to_int(conn.client_ip or self.buddy_host),
+                "F": str(0),
+                "S": "Online"
+            })
         await writer.drain()
 
     async def _push_user_in_room(
@@ -1112,128 +932,96 @@ class LoginServer:
         Protocol tags (from commands.md + structure_definitions.md):
             I=user_id  N=name  A=int_ip  F=flags  S=status  RI=room_id
 
-        r2 verified: Room ID tag is R (0x3e30c8), NOT RI.
-        RI is only used by +who.  A must be integer string.
+        CRITICAL: Room ID tag is RI (not R).  R is only for +who.
+        A must be integer string (TagFieldGetAddress).
         """
         if not conn.username:
             return
         user_id = abs(hash(conn.username)) % 1000000
         send_kv(writer, "+usr", {
-            "I": str(user_id),
-            "N": conn.username,
-            "A": ip_to_int(conn.client_ip or self.buddy_host),
-            "R": str(conn.room_index),  # Bug #12: client reads "R", not "RI"
-            "S": "Online",
-            "F": "0",
-            "P": "",  # Bug #13: password field (client reads it)
-        })
+                "I": str(user_id),
+                "N": conn.username,
+                "A": ip_to_int(conn.client_ip or self.buddy_host),
+                "F": str(0),
+                "S": "Online"
+            })
         await writer.drain()
 
-    def _room_population(self) -> Dict[int, int]:
-        """Count authenticated clients per room."""
-        counts: Dict[int, int] = {r.index: 0 for r in self._rooms}
-        for c in self._clients.values():
-            if c.authenticated and c.current_room_idx in counts:
-                counts[c.current_room_idx] += 1
-        return counts
-
+    async def _broadcast_room_users(self, room_idx: int) -> None:
+        """Broadcast +usr messages for all users in a room to all clients in that room."""
+        room_users = []
+        writers = []
+        for conn_id, client_conn in self._clients.items():
+            if client_conn.current_room_idx == room_idx:
+                room_users.append(client_conn)
+                if conn_id in self._writers:
+                    writers.append(self._writers[conn_id])
+        
+        if len(room_users) > 0 and len(writers) > 0:
+            LOG.info("Broadcasting %d users to room %d with %d clients", 
+                     len(room_users), room_idx, len(writers))
+            
+            # Send each user's info to all clients in the room
+            for user in room_users:
+                if user.username:
+                    user_id = abs(hash(user.username)) % 1000000
+                    user_info = {
+                        "I": str(user_id),
+                        "N": user.username,
+                        "A": ip_to_int(user.client_ip or self.buddy_host),
+                        "F": "0",
+                        "S": "Online"
+                    }
+                    
+                    # Broadcast to all clients in the room
+                    for writer in writers:
+                        try:
+                            send_kv(writer, "+usr", user_info)
+                            LOG.info("Broadcasting user %s to room %d", user.username, room_idx)
+                        except Exception as e:
+                            LOG.error("Error broadcasting user %s: %s", user.username, e)
+                    
+                    await asyncio.sleep(0.02)
+    
+    async def _keepalive_loop(
+        self, conn: ClientConn, writer: asyncio.StreamWriter
+    ) -> None:
+        """Send periodic ~png keepalive to prevent client timeout/disconnect."""
+        try:
+            while True:
+                await asyncio.sleep(20)  # every 20 seconds
+                if conn.authenticated:
+                    send_kv(writer, "~png", {
+                        "TIME": "2",
+                        "SESS": conn.session_id,
+                        "NAME": conn.username,
+                        "STATUS": "0",
+                    })
+                    try:
+                        await writer.drain()
+                        LOG.info("[%s] Sent keepalive ~png", conn.conn_id[:8])
+                    except Exception as e:
+                        LOG.info("[%s] Keepalive failed: %s", conn.conn_id[:8], e)
+                        break
+                else:
+                    # Don't send keepalive to unauthenticated clients
+                    await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            LOG.info("[%s] Keepalive loop ended: %s", conn.conn_id[:8], e)
+    
     async def _push_population(
         self, conn: ClientConn, writer: asyncio.StreamWriter
     ) -> None:
         """Push +pop — population counts per room."""
         # Format: Z=0:1 1:0 2:0 3:0  (room_idx:user_count)
-        counts = self._room_population()
-        parts = [f"{idx}:{counts.get(idx, 0)}" for idx in counts]
+        parts = []
+        for room in self._rooms:
+            count = 1 if room.index == conn.current_room_idx else 0
+            parts.append(f"{room.index}:{count}")
         send_kv(writer, "+pop", {"Z": " ".join(parts)})
         await writer.drain()
-
-    async def _push_existing_room_users(
-        self, joiner: ClientConn, room_idx: int, writer: asyncio.StreamWriter
-    ) -> None:
-        """Push +usr for every existing user in the room to the joiner."""
-        for cid, c in self._clients.items():
-            if (c.conn_id != joiner.conn_id
-                    and c.authenticated
-                    and c.current_room_idx == room_idx):
-                user_id = abs(hash(c.username)) % 1000000
-                send_kv(writer, "+usr", {
-                    "I": str(user_id),
-                    "N": c.username,
-                    "A": ip_to_int(c.client_ip or self.buddy_host),
-                    "R": str(room_idx),
-                    "S": "Online",
-                    "F": "0",
-                    "P": "",
-                })
-                await writer.drain()
-                await asyncio.sleep(0.02)
-
-    async def _broadcast_room_join(
-        self, joiner: ClientConn, room_idx: int
-    ) -> None:
-        """Notify other clients in the same room that a user joined.
-
-        Sends +usr (room format), updated +rom (player count), and +pop
-        to every authenticated client already in room_idx (excluding the
-        joiner).
-        """
-        for cid, c in self._clients.items():
-            if (c.conn_id != joiner.conn_id
-                    and c.authenticated
-                    and c.current_room_idx == room_idx
-                    and hasattr(c, '_writer')):
-                try:
-                    user_id = abs(hash(joiner.username)) % 1000000
-                    send_kv(c._writer, "+usr", {
-                        "I": str(user_id),
-                        "N": joiner.username,
-                        "A": ip_to_int(joiner.client_ip or self.buddy_host),
-                        "R": str(room_idx),
-                        "S": "Online",
-                        "F": "0",
-                        "P": "",
-                    })
-                    await c._writer.drain()
-                    # Re-push +rom so the room list T field (player count)
-                    # updates in the client's Room Object.
-                    await self._push_room_list(c, c._writer)
-                    await self._push_population(c, c._writer)
-                except Exception as e:
-                    LOG.warning("[%s] broadcast to %s failed: %s",
-                                joiner.conn_id, c.conn_id, e)
-
-    async def _broadcast_room_leave(
-        self, leaver: ClientConn, room_idx: int
-    ) -> None:
-        """Notify other clients in the same room that a user left.
-
-        Sends +usr with I but NO N tag — the +usr handler deletes a user
-        from the HashTable when N is absent (confirmed by r2 disassembly).
-        Also sends updated +rom (player count) and +pop.
-        """
-        for cid, c in self._clients.items():
-            if (c.conn_id != leaver.conn_id
-                    and c.authenticated
-                    and c.current_room_idx == room_idx
-                    and hasattr(c, '_writer')):
-                try:
-                    user_id = abs(hash(leaver.username)) % 1000000
-                    # Critical: do NOT include N tag — handler deletes user
-                    # from HashTable when N is NULL (r2 verified).
-                    send_kv(c._writer, "+usr", {
-                        "I": str(user_id),
-                        "A": ip_to_int(leaver.client_ip or self.buddy_host),
-                        "S": "Online",
-                        "P": "",
-                    })
-                    await c._writer.drain()
-                    # Re-push +rom so the room list T field (player count)
-                    # updates in the client's Room Object.
-                    await self._push_room_list(c, c._writer)
-                    await self._push_population(c, c._writer)
-                except Exception as e:
-                    LOG.warning("[%s] broadcast to %s failed: %s",
-                                leaver.conn_id, c.conn_id, e)
 
     # ── Server runner ──────────────────────────────────────────────────────
 
@@ -1269,7 +1057,10 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    setup_logging(level=logging.DEBUG if args.debug else logging.INFO)
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+    )
 
     cfg = load_config(args.config) if args.config else {}
 
