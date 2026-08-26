@@ -26,155 +26,9 @@ from __future__ import annotations
 import asyncio
 import struct
 import logging
-import os
-import re
-import sys
 from typing import Dict, Optional, Tuple
 
 LOG = logging.getLogger("ea_protocol")
-
-# ── Color support ────────────────────────────────────────────────────────────
-
-def _supports_color() -> bool:
-    """Check if the terminal supports ANSI colors."""
-    if os.environ.get("NO_COLOR"):
-        return False
-    if not hasattr(sys.stdout, "isatty"):
-        return False
-    if os.name == "nt":
-        return os.environ.get("WT_SESSION") or os.environ.get("ANSICON") or "256color" in os.environ.get("TERM", "")
-    return sys.stdout.isatty()
-
-# Color support is always on when available; NO_COLOR=1 disables it
-
-# ANSI escape codes
-_C_RESET   = "\033[0m"
-_C_DIM     = "\033[2m"
-_C_BOLD    = "\033[1m"
-_C_RX      = "\033[36m"   # cyan   — client → server
-_C_TX      = "\033[33m"   # yellow — server → client
-_C_CMD     = "\033[1;36m" # bold cyan  (RX) or bold yellow (TX)
-_C_KEY     = "\033[32m"   # green
-_C_VAL     = "\033[0;37m" # bright white
-_C_FLAGS   = "\033[2m"    # dim
-_C_CONN    = "\033[2m"    # dim — connection ID
-_C_INFO    = "\033[0m"    # normal — for non-protocol messages
-_C_WARN    = "\033[33m"   # yellow
-_C_ERR     = "\033[31m"   # red
-_C_DBG     = "\033[2m"    # dim
-
-
-class _ColorFormatter(logging.Formatter):
-    """
-    Custom formatter that colorizes protocol (RX/TX) messages and adds
-    blank lines between each log entry for readability.
-
-    RX (client → server):  cyan arrow + green keys + white values
-    TX (server → client):  yellow arrow + green keys + white values
-    Plain messages:        dim timestamp, colored level badge
-
-    Only RX/TX lines get the blank-line separator.  All messages get a
-    blank leading line so every entry is visually distinct.
-    """
-
-    _RX_RE = re.compile(r"^\[([^\]]+)\] RX (\S+)")
-    _TX_RE = re.compile(r"^TX (\S+) \(flags=(.+?)\): (.+)$")
-
-    def format(self, record: logging.LogRecord) -> str:
-        level = record.levelname
-        name = record.name
-        ts = self.formatTime(record, self.datefmt)
-        msg = record.getMessage()
-
-        # ── RX:  [conn_id] RX cmd: {dict} ───────────────────────────
-        rx_match = self._RX_RE.match(msg)
-        if rx_match:
-            conn_id, cmd = rx_match.group(1), rx_match.group(2)
-            kv = self._extract_kv(record)
-            return self._fmt_rx(ts, name, conn_id, cmd, kv)
-
-        # ── TX:  TX cmd (flags=...): {dict} ────────────────────────
-        tx_match = self._TX_RE.match(msg)
-        if tx_match:
-            cmd = tx_match.group(1)
-            flags_str = tx_match.group(2)
-            kv = self._extract_kv(record)
-            return self._fmt_tx(ts, name, cmd, flags_str, kv)
-
-        # ── Plain log line ──────────────────────────────────────────
-        return self._fmt_plain(ts, name, level, msg)
-
-    # ── KV extraction ───────────────────────────────────────────────
-
-    @staticmethod
-    def _extract_kv(record: logging.LogRecord) -> Optional[dict]:
-        """Pull the KV dict from LogRecord args (last positional arg)."""
-        args = getattr(record, "args", None)
-        if isinstance(args, tuple) and args:
-            return args[-1] if isinstance(args[-1], dict) else None
-        return None
-
-    # ── KV formatting ───────────────────────────────────────────────
-
-    _SEP = " \xb7 "  # middle-dot separator between KV pairs
-
-    @staticmethod
-    def _fmt_kv(kv: dict) -> str:
-        """Format key=value pairs inline with color-coded keys/values."""
-        pairs = []
-        for key, value in kv.items():
-            val = value if len(value) <= 60 else value[:57] + "..."
-            pairs.append(f"{_C_KEY}{key}{_C_RESET}={_C_VAL}{val}{_C_RESET}")
-        joined = _ColorFormatter._SEP.join(pairs)
-        return "  " + joined
-
-    # ── Full-line formatters ────────────────────────────────────────
-
-    def _fmt_rx(self, ts, name, conn_id, cmd, kv):
-        header = (
-            f"{_C_DIM}{ts}{_C_RESET} "
-            f"{_C_CONN}[{name}]{_C_RESET}  "
-            f"{_C_RX}◀ RX{_C_RESET}  "
-            f"{_C_CMD}{cmd}{_C_RESET}  "
-            f"{_C_CONN}({conn_id}){_C_RESET}"
-        )
-        body = self._fmt_kv(kv) if kv else ""
-        return f"\n{header}\n{body}" if body else f"\n{header}"
-
-    def _fmt_tx(self, ts, name, cmd, flags_str, kv):
-        # Only show flags when non-zero (e.g. b'new0')
-        is_default = "\\x00" in flags_str or "b'\\x00" in flags_str
-        flag_part = "" if is_default else f"  {_C_FLAGS}flags={flags_str}{_C_RESET}"
-        header = (
-            f"{_C_DIM}{ts}{_C_RESET} "
-            f"{_C_CONN}[{name}]{_C_RESET}  "
-            f"{_C_TX}▶ TX{_C_RESET}  "
-            f"{_C_CMD}{cmd}{_C_RESET}{flag_part}"
-        )
-        body = self._fmt_kv(kv) if kv else ""
-        return f"\n{header}\n{body}" if body else f"\n{header}"
-
-    def _fmt_plain(self, ts, name, level, msg):
-        lc = {
-            "DEBUG":    _C_DBG,
-            "INFO":     _C_INFO,
-            "WARNING":  _C_WARN,
-            "WARN":     _C_WARN,
-            "ERROR":    _C_ERR,
-        }.get(level, _C_INFO)
-        return f"\n{_C_DIM}{ts}{_C_RESET} {_C_CONN}[{name}]{_C_RESET} {lc}{level:7s}{_C_RESET}  {msg}{_C_RESET}"
-
-
-def setup_logging(level: int = logging.INFO) -> None:
-    """
-    Configure the root logger with ColorFormatter for all EA servers.
-    Call this instead of logging.basicConfig().
-    """
-    handler = logging.StreamHandler()
-    handler.setFormatter(_ColorFormatter("%(asctime)s [%(name)s] %(levelname)s: %(message)s"))
-    logging.root.handlers = []
-    logging.root.addHandler(handler)
-    logging.root.setLevel(level)
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
@@ -415,14 +269,15 @@ class TCPStreamReader:
         return frames
 
 
-def send_frame(writer: asyncio.StreamWriter, msg_type: str, body: str = "", flags: bytes = b"\x00\x00\x00\x00") -> None:
+async def send_frame(writer: asyncio.StreamWriter, msg_type: str, body: str = "", flags: bytes = b"\x00\x00\x00\x00") -> None:
     """Encode and send one framed message over TCP."""
     frame = encode_frame(msg_type, body, flags=flags)
     writer.write(frame)
+    await writer.drain()
 
 
-def send_kv(writer: asyncio.StreamWriter, msg_type: str, pairs: Dict[str, str], flags: bytes = b"\x00\x00\x00\x00") -> None:
+async def send_kv(writer: asyncio.StreamWriter, msg_type: str, pairs: Dict[str, str], flags: bytes = b"\x00\x00\x00\x00") -> None:
     """Convenience: send a frame built from a KV dict."""
     body = build_kv_body(pairs)
     LOG.info("TX %s (flags=%s): %s", msg_type, flags, pairs)
-    send_frame(writer, msg_type, body, flags=flags)
+    await send_frame(writer, msg_type, body, flags=flags)

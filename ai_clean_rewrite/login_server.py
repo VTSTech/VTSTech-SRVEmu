@@ -377,7 +377,7 @@ class LoginServer:
             "[%s] addr: client at %s:%d",
             conn.conn_id, conn.client_ip, conn.client_port,
         )
-        send_kv(writer, "addr", {"STATUS": "1"})
+        await send_kv(writer, "addr", {"STATUS": "1"})
         await writer.drain()
 
     async def _handle_skey(
@@ -387,7 +387,7 @@ class LoginServer:
         skey = kv.get("SKEY", "")
         LOG.info("[%s] skey: %s...", conn.conn_id, skey[:20])
         # Accept and clear — respond with SKEY=0 (key exchange complete)
-        send_kv(writer, "skey", {"SKEY": "0"})
+        await send_kv(writer, "skey", {"SKEY": "0"})
         await writer.drain()
 
     async def _handle_auth(
@@ -418,7 +418,7 @@ class LoginServer:
         # (the buddy server will receive LKEY=$0 which maps to this session)
 
         # Respond with auth confirmation
-        send_kv(writer, "auth", user.to_auth_response(conn.session_id))
+        await send_kv(writer, "auth", user.to_auth_response(conn.session_id))
         await writer.drain()
 
         # Set room state to Lobby (room 0) — the user is conceptually
@@ -443,7 +443,7 @@ class LoginServer:
         # Confirm persona selection
         user = self.db.get_user(conn.username)
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-        send_kv(writer, "pers", {
+        await send_kv(writer, "pers", {
             "PERS": persona,
             "LKEY": "$0",
             "S": "0",
@@ -481,7 +481,7 @@ class LoginServer:
             # Client sends ROOMS=1 USERS=1 RANKS=1 MESGS=1 to request
             # room/user/rank/message counts.  Server responds with the
             # user's display rank (DRANK) and that's it.
-            send_kv(writer, "sele", {
+            await send_kv(writer, "sele", {
                 "DRANK": str(user.rating if user else 1500),
                 "USER": conn.username,
                 "RATING": str(user.rating if user else 1500),
@@ -495,7 +495,7 @@ class LoginServer:
             # ── Rank expansion: respond with ERANK only ──
             # Client sends RANKS=50 (no ROOMS/USERS/MESGS) to request
             # an expanded rank listing.  Server responds with ERANK.
-            send_kv(writer, "sele", {
+            await send_kv(writer, "sele", {
                 "ERANK": str(user.rating if user else 50),
                 "USER": conn.username,
                 "RATING": str(user.rating if user else 1500),
@@ -527,7 +527,7 @@ class LoginServer:
 
         # 1) First response — type is 'sele', not 'news'!
         #    Verified against both PCAP captures.
-        send_kv(writer, "sele", {
+        await send_kv(writer, "sele", {
             "ERANK": str(user.rating if user else 50),
             "USER": conn.username,
             "RATING": str(user.rating if user else 1500),
@@ -539,7 +539,7 @@ class LoginServer:
 
         # 2) Push newsnew0 with buddy server handoff info
         await asyncio.sleep(0.05)
-        send_kv(writer, "news", {
+        await send_kv(writer, "news", {
             "BUDDY_URL": self.buddy_host,
             "BUDDY_PORT": str(self.buddy_port),
             "BUDDY_SERVER": self.buddy_host,
@@ -583,7 +583,7 @@ class LoginServer:
             conn.current_room_idx = 0
             conn.room_index = 0
             LOG.info("[%s] move: left room %d (back to Lobby)", conn.conn_id, old_idx)
-            send_kv(writer, "move", {"S": "0"})
+            await send_kv(writer, "move", {"S": "0"})
             await writer.drain()
             # Match PCAP move-leave pushes: +pop, +who, +usr, +pop
             await asyncio.sleep(0.05)
@@ -606,7 +606,7 @@ class LoginServer:
         if room_idx >= 0:
             conn.current_room_idx = room_idx
             conn.room_index = room_idx
-            send_kv(writer, "move", {
+            await send_kv(writer, "move", {
                 "I": str(room_idx),
                 "N": room_name,
                 "F": "0",
@@ -680,7 +680,7 @@ class LoginServer:
         conn.room_index = room_idx
 
         # Respond with room confirmation (same format as 'move' response)
-        send_kv(writer, "room", {
+        await send_kv(writer, "room", {
             "I": str(room_idx),
             "N": room_name,
             "F": "0",
@@ -699,7 +699,7 @@ class LoginServer:
         self, conn: ClientConn, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
         """Status request."""
-        send_kv(writer, "STAT", {"STATUS": "0"})
+        await send_kv(writer, "STAT", {"STATUS": "0"})
         await writer.drain()
 
     async def _handle_snap(
@@ -740,7 +740,7 @@ class LoginServer:
             # ── Player lookup: return stats for the named player ──
             user = self.db.get_user(find) or self.db.get_user(conn.username)
             if user:
-                send_kv(writer, "+snp", {
+                await send_kv(writer, "+snp", {
                     "N": user.username,
                     "R": str(user.rating),
                     "W": str(user.wins),
@@ -770,7 +770,7 @@ class LoginServer:
 
         # Final frame signals end of stats batch
         await asyncio.sleep(0.05)
-        send_kv(writer, "snap", {"S": "0"})
+        await send_kv(writer, "snap", {"S": "0"})
         await writer.drain()
         LOG.info("[%s] snap: sent final S=0", conn.conn_id)
 
@@ -795,7 +795,7 @@ class LoginServer:
         target_user = self.db.get_user(pers) or self.db.get_user(conn.username)
         if target_user:
             # Return user profile info — similar fields to auth response
-            send_kv(writer, "user", {
+            await send_kv(writer, "user", {
                 "N": target_user.username,
                 "R": str(target_user.rating),
                 "W": str(target_user.wins),
@@ -808,7 +808,7 @@ class LoginServer:
             LOG.info("[%s] user: sent profile for %s", conn.conn_id, target_user.username)
         else:
             # User not found — send minimal response
-            send_kv(writer, "user", {"N": pers, "STATUS": "0"})
+            await send_kv(writer, "user", {"N": pers, "STATUS": "0"})
             await writer.drain()
             LOG.warning("[%s] user: user not found: %s", conn.conn_id, pers)
 
@@ -943,38 +943,71 @@ class LoginServer:
                 conn.conn_id, room_idx, delivered,
             )
 
-    def _forward_challenge(self, conn: ClientConn, target_username: str, token: str) -> None:
+    async def _forward_challenge(self, conn: ClientConn, target_username: str, token: str) -> None:
         """Forward a challenge token to the target user."""
+        LOG.info("[%s] Attempting to forward challenge from %s to %s", 
+                 conn.conn_id[:8], conn.username, target_username)
+        
+        found_target = False
         for target_conn_id, target_conn in self._clients.items():
-            if target_conn.username == target_username and target_conn.conn_id != conn.conn_id:
-                try:
+            LOG.info("[%s] Checking client %s: username=%s, conn_id=%s", 
+                     conn.conn_id[:8], target_conn_id, target_conn.username, target_conn.conn_id)
+            
+            if target_conn.username == target_username:
+                LOG.info("[%s] Found target user %s with conn_id %s", 
+                         conn.conn_id[:8], target_username, target_conn.conn_id)
+                
+                if target_conn_id != conn.conn_id:
+                    LOG.info("[%s] Target connection is different from sender, good", 
+                             conn.conn_id[:8])
+                    found_target = True
+                    
                     if target_conn_id in self._writers:
-                        target_writer = self._writers[target_conn_id]
+                        LOG.info("[%s] Writer found for target, sending challenge", 
+                                 conn.conn_id[:8])
+                        
+                        # Use same format as client sends: PRIV, TEXT, ATTR
                         challenge_msg = {
-                            "PRIV": conn.username,
-                            "TEXT": token,
-                            "ATTR": "3"
+                            "PRIV": target_username,  # Target username (same as received)
+                            "TEXT": token,             # Challenge token (same as received)
+                            "ATTR": "3"                # Challenge type (same as received)
                         }
-                        send_kv(target_writer, "mesg", challenge_msg)
+                        
+                        LOG.info("[%s] Challenge format: %s", 
+                                 conn.conn_id[:8], challenge_msg)
+                        
+                        target_writer = self._writers[target_conn_id]
+                        await send_kv(target_writer, "mesg", challenge_msg)
                         LOG.info("[%s] Forwarded challenge from %s to %s: %s", 
                                  conn.conn_id[:8], conn.username, target_username, token)
-                except Exception as e:
-                    LOG.error("[%s] Error forwarding challenge to %s: %s", 
-                             conn.conn_id[:8], target_username, e)
+                    else:
+                        LOG.error("[%s] No writer found for target %s (conn_id: %s)", 
+                                 conn.conn_id[:8], target_username, target_conn_id)
+                else:
+                    LOG.warning("[%s] Target connection is same as sender, skipping", 
+                               conn.conn_id[:8])
+            else:
+                LOG.info("[%s] User %s does not match target %s", 
+                         conn.conn_id[:8], target_conn.username, target_username)
+        
+        if not found_target:
+            LOG.error("[%s] No target user found with username: %s", 
+                     conn.conn_id[:8], target_username)
     
-    def _forward_challenge_response(self, conn: ClientConn, target_username: str, response: str) -> None:
+    async def _forward_challenge_response(self, conn: ClientConn, target_username: str, response: str) -> None:
         """Forward a challenge response (DECL/ACPT) to the original challenger."""
         for target_conn_id, target_conn in self._clients.items():
             if target_conn.username == target_username and target_conn.conn_id != conn.conn_id:
                 try:
                     if target_conn_id in self._writers:
                         target_writer = self._writers[target_conn_id]
+                        # Use same format as challenge: PRIV, TEXT, ATTR
                         response_msg = {
-                            "PRIV": conn.username,
-                            "TEXT": response,
-                            "ATTR": "3"
+                            "PRIV": conn.username,    # Responder username
+                            "TEXT": response,         # Response (DECL/ACPT)
+                            "ATTR": "3"              # Challenge type (same as received)
                         }
-                        send_kv(target_writer, "mesg", response_msg)
+                        await send_kv(target_writer, "mesg", response_msg)
                         LOG.info("[%s] Forwarded challenge %s from %s to %s", 
                                  conn.conn_id[:8], response, conn.username, target_username)
                 except Exception as e:
@@ -1044,7 +1077,7 @@ class LoginServer:
         self, conn: ClientConn, writer: asyncio.StreamWriter
     ) -> None:
         """Push +who — user's own presence info."""
-        send_kv(writer, "+who", {
+        await send_kv(writer, "+who", {
             "F": "U",           # friend status flag
             "N": conn.username,
             "RI": str(conn.room_index),  # room index
@@ -1068,7 +1101,7 @@ class LoginServer:
             if room.room_type == 1 and not include_lobby:
                 continue
 
-            send_kv(writer, "+rom", {
+            await send_kv(writer, "+rom", {
                 "I": str(room.index),
                 "N": room.name,
                 "H": room.heading,
@@ -1094,7 +1127,7 @@ class LoginServer:
         if not conn.username:
             return
         user_id = abs(hash(conn.username)) % 1000000
-        send_kv(writer, "+usr", {
+        await send_kv(writer, "+usr", {
                 "I": str(user_id),
                 "N": conn.username,
                 "A": ip_to_int(conn.client_ip or self.buddy_host),
@@ -1117,7 +1150,7 @@ class LoginServer:
         if not conn.username:
             return
         user_id = abs(hash(conn.username)) % 1000000
-        send_kv(writer, "+usr", {
+        await send_kv(writer, "+usr", {
                 "I": str(user_id),
                 "N": conn.username,
                 "A": ip_to_int(conn.client_ip or self.buddy_host),
@@ -1155,7 +1188,7 @@ class LoginServer:
                     # Broadcast to all clients in the room
                     for writer in writers:
                         try:
-                            send_kv(writer, "+usr", user_info)
+                            await send_kv(writer, "+usr", user_info)
                             LOG.info("Broadcasting user %s to room %d", user.username, room_idx)
                         except Exception as e:
                             LOG.error("Error broadcasting user %s: %s", user.username, e)
@@ -1170,7 +1203,7 @@ class LoginServer:
             while True:
                 await asyncio.sleep(20)  # every 20 seconds
                 if conn.authenticated:
-                    send_kv(writer, "~png", {
+                    await send_kv(writer, "~png", {
                         "TIME": "2",
                         "SESS": conn.session_id,
                         "NAME": conn.username,
@@ -1199,7 +1232,7 @@ class LoginServer:
         for room in self._rooms:
             count = 1 if room.index == conn.current_room_idx else 0
             parts.append(f"{room.index}:{count}")
-        send_kv(writer, "+pop", {"Z": " ".join(parts)})
+        await send_kv(writer, "+pop", {"Z": " ".join(parts)})
         await writer.drain()
 
     # ── Server runner ──────────────────────────────────────────────────────

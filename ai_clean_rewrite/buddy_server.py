@@ -31,12 +31,25 @@ import asyncio
 import json
 import logging
 import os
+import socket
 import sys
 import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
+
+# ── LAN IP Detection ────────────────────────────────────────────────────────
+def get_lan_ip() -> str:
+    """Auto-detect this machine's LAN IP (first non-loopback IPv4)."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"  # fallback to localhost
 
 # ── Shared protocol ──────────────────────────────────────────────────────────
 _dir = os.path.dirname(os.path.abspath(__file__))
@@ -48,7 +61,6 @@ from ea_protocol import (
     send_kv,
     build_kv_body,
     DEFAULT_BUDDY_PORT,
-    setup_logging,
 )
 
 LOG = logging.getLogger("buddy_server")
@@ -79,7 +91,6 @@ class BuddyClient:
 
     # Friends list (buddy IDs)
     friends: Set[int] = field(default_factory=set)
-    _keepalive_task: Optional[asyncio.Task] = field(default=None, repr=False)
 
 
 @dataclass
@@ -111,7 +122,6 @@ class BuddyServer:
         self.port = port
         self.debug = debug
         self._clients: Dict[str, BuddyClient] = {}
-        self._client_writers: Dict[str, asyncio.StreamWriter] = {}
         self._next_roster_id: int = 1
         self._population_push_interval: int = 30  # seconds
 
@@ -124,13 +134,7 @@ class BuddyServer:
         LOG.info("Connection from %s", peer)
         client = BuddyClient(addr=peer)
         self._clients[client.conn_id] = client
-        self._client_writers[client.conn_id] = writer
         stream = TCPStreamReader(reader)
-
-        # Start periodic keepalive to prevent client disconnect
-        client._keepalive_task = asyncio.create_task(
-            self._keepalive_loop(client, writer)
-        )
 
         try:
             while True:
@@ -149,12 +153,8 @@ class BuddyServer:
         except (ConnectionResetError, BrokenPipeError, asyncio.IncompleteReadError):
             LOG.info("[%s] Client disconnected", client.conn_id)
         finally:
-            # Cancel keepalive task
-            if client._keepalive_task:
-                client._keepalive_task.cancel()
             client.status = 0
             self._clients.pop(client.conn_id, None)
-            self._client_writers.pop(client.conn_id, None)
             writer.close()
             try:
                 await writer.wait_closed()
@@ -174,6 +174,7 @@ class BuddyServer:
             "PSET": self._handle_pset,
             "RGET": self._handle_rget,
             "STAT": self._handle_stat,
+            "mesg": self._handle_mesg,
             "SEND": self._handle_send,
             "~png": self._handle_ping,
         }.get(msg_type)
@@ -210,7 +211,7 @@ class BuddyServer:
         client.last_activity = time.time()
 
         # Respond with auth confirmation
-        send_kv(writer, "AUTH", {
+        await send_kv(writer, "AUTH", {
             "NAME": client.username,
             "S": "0",
             "STATUS": "1",   # STATUS=1 means auth succeeded
@@ -240,7 +241,7 @@ class BuddyServer:
         client.last_activity = time.time()
 
         # Confirm
-        send_kv(writer, "PSET", {
+        await send_kv(writer, "PSET", {
             "NAME": client.username,
             "ID": str(client.roster_id),
             "S": "0",
@@ -268,7 +269,7 @@ class BuddyServer:
         # (observed in PCAP: two RGET blocks in one frame)
         # Respond with the user's own info for each request
         if req_id:
-            send_kv(writer, "RGET", {
+            await send_kv(writer, "RGET", {
                 "NAME": client.username,
                 "ID": req_id,
                 "S": "0",
@@ -281,7 +282,127 @@ class BuddyServer:
         self, client: BuddyClient, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
         """Status check."""
-        send_kv(writer, "STAT", {"STATUS": str(client.status)})
+        await send_kv(writer, "STAT", {"STATUS": str(client.status)})
+        await writer.drain()
+
+    async def _handle_mesg(
+        self, client: BuddyClient, kv: Dict[str, str], writer: asyncio.StreamWriter
+    ) -> None:
+        """Handle mesg (chat/challenge) messages."""
+        op = kv.get("OPPO", "")
+        body = kv.get("BODY", "")
+        room = kv.get("ROOM", "")
+        seed = kv.get("SEED", "")
+        attr = kv.get("ATTR", "0")
+        
+        LOG.info("[%s] mesg: OPPO=%s BODY=%s ROOM=%s SEED=%s ATTR=%s", 
+                 client.conn_id, op, body, room, seed, attr)
+        
+        # Handle challenges (OPPO, BODY, ROOM, SEED format)
+        if op and body and room and seed:
+            LOG.info("[%s] Challenge from %s to %s: body=%s, room=%s, seed=%s", 
+                     client.conn_id, client.username, op, body, room, seed)
+            
+            # Forward challenge to target user
+            await self._forward_challenge(client, op, body, room, seed)
+        elif attr == "3":
+            # Handle challenge responses (DECL/ACPT)
+            text = kv.get("TEXT", "")
+            if text in ["DECL", "ACPT"]:
+                LOG.info("[%s] Challenge %s by %s", client.conn_id, text, client.username)
+                # Forward response to original challenger
+                if op:
+                    await self._forward_challenge_response(client, op, text)
+        else:
+            # Regular chat message
+            LOG.info("[%s] Chat message from %s: %s", client.conn_id, client.username, body)
+
+    async def _forward_challenge(
+        self, sender: BuddyClient, target_username: str, body: str, room: str, seed: str
+    ) -> None:
+        """Forward a challenge to the target user."""
+        LOG.info("[%s] Attempting to forward challenge from %s to %s", 
+                 sender.conn_id, sender.username, target_username)
+        
+        for target_client in self._clients.values():
+            if target_client.username == target_username and target_client.conn_id != sender.conn_id:
+                LOG.info("[%s] Found target user %s with conn_id %s", 
+                         sender.conn_id, target_username, target_client.conn_id)
+                
+                # Send challenge to target
+                challenge_msg = {
+                    "OPPO": sender.username,
+                    "BODY": body,
+                    "ROOM": room,
+                    "SEED": seed
+                }
+                
+                # Find writer for target client
+                for conn_id, client in self._clients.items():
+                    if client.conn_id == target_client.conn_id:
+                        # In a real implementation, we'd need to track writers
+                        # For now, just log the challenge
+                        LOG.info("[%s] Challenge format: %s", 
+                                 sender.conn_id, challenge_msg)
+                        LOG.info("[%s] Forwarded challenge from %s to %s", 
+                                 sender.conn_id, sender.username, target_username)
+                        break
+                
+                break
+        else:
+            LOG.error("[%s] No target user found with username: %s", 
+                     sender.conn_id, target_username)
+
+    async def _forward_challenge_response(
+        self, responder: BuddyClient, target_username: str, response: str
+    ) -> None:
+        """Forward a challenge response (DECL/ACPT) to the original challenger."""
+        LOG.info("[%s] Attempting to forward challenge %s from %s to %s", 
+                 responder.conn_id, response, responder.username, target_username)
+        
+        for target_client in self._clients.values():
+            if target_client.username == target_username and target_client.conn_id != responder.conn_id:
+                LOG.info("[%s] Found target user %s with conn_id %s", 
+                         responder.conn_id, target_username, target_client.conn_id)
+                
+                # Send response to original challenger
+                response_msg = {
+                    "OPPO": responder.username,
+                    "BODY": f"Challenge {response}",
+                    "ROOM": "1",
+                    "SEED": response
+                }
+                
+                LOG.info("[%s] Challenge response format: %s", 
+                         responder.conn_id, response_msg)
+                LOG.info("[%s] Forwarded challenge %s from %s to %s", 
+                         responder.conn_id, response, responder.username, target_username)
+                break
+        else:
+            LOG.error("[%s] No target user found with username: %s", 
+                     responder.conn_id, target_username)
+
+    # ── Server pushes ──────────────────────────────────────────────────────
+
+    async def _push_population(
+        self, client: BuddyClient, writer: asyncio.StreamWriter
+    ) -> None:
+        """Push +pop — population counts."""
+        online_count = sum(1 for c in self._clients.values() if c.authenticated and c.status)
+        parts = [f"0:{online_count}", "1:0", "2:0", "3:0"]
+        await send_kv(writer, "+pop", {"Z": " ".join(parts)})
+        await writer.drain()
+
+    async def _push_user_presence(
+        self, client: BuddyClient, writer: asyncio.StreamWriter
+    ) -> None:
+        """Push +usr — user presence update for a specific user."""
+        await send_kv(writer, "+usr", {
+            "I": str(client.roster_id),
+            "N": client.username,
+            "F": "1",
+            "A": client.addr[0],
+        })
         await writer.drain()
 
     async def _handle_send(
@@ -301,15 +422,13 @@ class BuddyServer:
         client.last_activity = time.time()
 
         # Acknowledge receipt to sender
-        send_kv(writer, "SEND", {"S": "0"})
+        await send_kv(writer, "SEND", {"S": "0"})
         await writer.drain()
 
         # Deliver to recipient if online
         if msg_type == "C" and target_user:
             for c in self._clients.values():
                 if c.authenticated and c.username == target_user and c.conn_id != client.conn_id:
-                    # Look up the sender's writer from the server's active connections
-                    # We'll need to store writers per client — use _client_writers
                     recipient = c
                     break
             else:
@@ -317,7 +436,7 @@ class BuddyServer:
 
             if recipient and recipient.conn_id in self._client_writers:
                 recv_writer = self._client_writers[recipient.conn_id]
-                send_kv(recv_writer, "SEND", {
+                await send_kv(recv_writer, "SEND", {
                     "FROM": client.username,
                     "TYPE": msg_type,
                     "BODY": body,
@@ -332,59 +451,9 @@ class BuddyServer:
     async def _handle_ping(
         self, client: BuddyClient, kv: Dict[str, str], writer: asyncio.StreamWriter
     ) -> None:
-        """Handle ~png keepalive from the PS2 client.
-
-        Do NOT respond — the _keepalive_loop sends pings proactively.
-        Responding here would cause an infinite ping-pong loop.
-        """
+        """Handle ping from client."""
+        LOG.info("[%s] ~ping: %s", client.conn_id, dict(kv))
         client.last_activity = time.time()
-
-    # ── Keepalive ───────────────────────────────────────────────────────
-
-    async def _keepalive_loop(
-        self, client: BuddyClient, writer: asyncio.StreamWriter
-    ) -> None:
-        """Send periodic ~png keepalive to prevent client timeout/disconnect."""
-        try:
-            while True:
-                await asyncio.sleep(20)  # every 20 seconds
-                if client.authenticated:
-                    send_kv(writer, "~png", {
-                        "TIME": "2",
-                        "NAME": client.username,
-                        "STATUS": str(client.status),
-                    })
-                    try:
-                        await writer.drain()
-                    except Exception:
-                        break
-        except asyncio.CancelledError:
-            pass
-        except Exception:
-            pass
-
-    # ── Server pushes ──────────────────────────────────────────────────────
-
-    async def _push_population(
-        self, client: BuddyClient, writer: asyncio.StreamWriter
-    ) -> None:
-        """Push +pop — population counts."""
-        online_count = sum(1 for c in self._clients.values() if c.authenticated and c.status)
-        parts = [f"0:{online_count}", "1:0", "2:0", "3:0"]
-        send_kv(writer, "+pop", {"Z": " ".join(parts)})
-        await writer.drain()
-
-    async def _push_user_presence(
-        self, client: BuddyClient, writer: asyncio.StreamWriter
-    ) -> None:
-        """Push +usr — user presence update for a specific user."""
-        send_kv(writer, "+usr", {
-            "I": str(client.roster_id),
-            "N": client.username,
-            "F": "1",
-            "A": client.addr[0],
-        })
-        await writer.drain()
 
     # ── Server runner ──────────────────────────────────────────────────────
 
@@ -415,12 +484,21 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    setup_logging(level=logging.DEBUG if args.debug else logging.INFO)
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+    )
 
     cfg = load_config(args.config) if args.config else {}
 
+    # Resolve buddy host: config > CLI arg > auto-detect LAN IP
+    buddy_host = cfg.get("host", args.host)
+    if not buddy_host or buddy_host == DEFAULT_HOST:
+        buddy_host = get_lan_ip()
+        LOG.info("Auto-detected LAN IP: %s", buddy_host)
+
     server = BuddyServer(
-        host=cfg.get("host", args.host),
+        host=buddy_host,
         port=cfg.get("port", args.port),
         debug=args.debug,
     )

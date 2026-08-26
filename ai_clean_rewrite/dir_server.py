@@ -44,7 +44,6 @@ from ea_protocol import (
     send_kv,
     build_kv_body,
     DEFAULT_DIR_PORT,
-    setup_logging,
 )
 
 LOG = logging.getLogger("dir_server")
@@ -179,7 +178,7 @@ class DirServer:
         session.session_id = session_id
 
         # Send response
-        send_kv(writer, "@dir", {
+        await send_kv(writer, "@dir", {
             "ADDR": self.login_host,
             "PORT": str(self.login_port),
             "LKEY": login_key,
@@ -231,7 +230,10 @@ def main() -> None:
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    setup_logging(level=logging.DEBUG if args.debug else logging.INFO)
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+    )
 
     cfg = load_config(args.config) if args.config else {}
 
